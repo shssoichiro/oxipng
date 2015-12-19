@@ -4,5 +4,5 @@ version = "2.0.0"
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 
 [dependencies]
-flate2 = "0.2"
-png = "0.4"
+byteorder = "0.4."
+crc = "^1.0.0"

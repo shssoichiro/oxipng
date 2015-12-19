@@ -8,11 +8,11 @@ fn main() {
     // TODO: Handle wildcards
     let filename = env::args().skip(1).next().unwrap();
     let infile = Path::new(&filename);
-    let mut f = HashSet::new();
-    f.insert(0);
-    f.insert(5);
-    let mut zc = HashSet::new();
-    zc.insert(9);
+    let mut filter = HashSet::new();
+    filter.insert(0);
+    filter.insert(5);
+    let mut compression = HashSet::new();
+    compression.insert(9);
     let mut zm = HashSet::new();
     zm.insert(9);
     let mut zs = HashSet::new();
@@ -29,9 +29,9 @@ fn main() {
         create: true,
         preserve_attrs: false,
         verbosity: Some(0),
-        f: f,
-        i: 0,
-        zc: zc,
+        filter: filter,
+        interlaced: 0,
+        compression: compression,
         zm: zm,
         zs: zs,
         zw: 4096,
@@ -41,5 +41,7 @@ fn main() {
         idat_recoding: true,
         idat_paranoia: false,
     };
+    // TODO: Handle command line args
+    // TODO: Handle optimization presets
     optipng::optimize(infile, default_opts);
 }
