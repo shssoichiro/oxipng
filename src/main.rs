@@ -34,7 +34,7 @@ fn main() {
         compression: compression,
         zm: zm,
         zs: zs,
-        zw: 4096,
+        zw: 15,
         bit_depth_reduction: true,
         color_type_reduction: true,
         palette_reduction: true,
@@ -43,5 +43,8 @@ fn main() {
     };
     // TODO: Handle command line args
     // TODO: Handle optimization presets
-    optipng::optimize(infile, default_opts);
+    match optipng::optimize(infile, default_opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x),
+    };
 }
