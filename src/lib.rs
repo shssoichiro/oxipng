@@ -6,11 +6,11 @@ extern crate libc;
 use std::path::Path;
 use std::collections::HashSet;
 
-pub mod png;
 pub mod deflate {
     pub mod deflate;
     pub mod stream;
 }
+pub mod png;
 
 pub struct Options<'a> {
     pub backup: bool,
@@ -22,19 +22,18 @@ pub struct Options<'a> {
     pub preserve_attrs: bool,
     pub verbosity: Option<u8>,
     pub filter: HashSet<u8>,
-    pub interlaced: u8,
+    pub interlace: Option<u8>,
     pub compression: HashSet<u8>,
-    pub zm: HashSet<u8>,
-    pub zs: HashSet<u8>,
-    pub zw: u16,
+    pub memory: HashSet<u8>,
+    pub strategies: HashSet<u8>,
+    pub window: u16,
     pub bit_depth_reduction: bool,
     pub color_type_reduction: bool,
     pub palette_reduction: bool,
     pub idat_recoding: bool,
-    pub idat_paranoia: bool,
 }
 
-pub fn optimize(filepath: &Path, opts: Options) -> Result<(), String> {
+pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // Decode PNG from file
     println!("Processing: {}", filepath.to_str().unwrap());
     let in_file = Path::new(filepath);
@@ -71,19 +70,19 @@ pub fn optimize(filepath: &Path, opts: Options) -> Result<(), String> {
     // Go through selected permutations and determine the best
     let mut best: Option<(u8, u8, u8, u8)> = None;
     if opts.idat_recoding {
-        let combinations = opts.filter.len() * opts.compression.len() * opts.zm.len() *
-                           opts.zs.len();
+        let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
+                           opts.strategies.len();
         println!("Trying: {} combinations", combinations);
         // TODO: Multithreading
         for f in &opts.filter {
             for zc in &opts.compression {
-                for zm in &opts.zm {
-                    for zs in &opts.zs {
+                for zm in &opts.memory {
+                    for zs in &opts.strategies {
                         let new_idat = match deflate::deflate::deflate(png.raw_data.as_ref(),
                                                                        *zc,
                                                                        *zm,
                                                                        *zs,
-                                                                       opts.zw) {
+                                                                       opts.window) {
                             Ok(x) => x,
                             Err(x) => return Err(x),
                         };
