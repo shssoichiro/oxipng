@@ -4,6 +4,7 @@ extern crate libz_sys;
 extern crate libc;
 
 use std::path::Path;
+use std::path::PathBuf;
 use std::collections::HashSet;
 
 pub mod deflate {
@@ -12,11 +13,13 @@ pub mod deflate {
 }
 pub mod png;
 
-pub struct Options<'a> {
+pub struct Options {
     pub backup: bool,
-    pub out_file: &'a Path,
+    pub out_file: PathBuf,
+    pub out_dir: Option<PathBuf>,
+    pub stdout: bool,
     pub fix_errors: bool,
-    pub force: bool,
+    pub pretend: bool,
     pub clobber: bool,
     pub create: bool,
     pub preserve_attrs: bool,
@@ -31,6 +34,7 @@ pub struct Options<'a> {
     pub color_type_reduction: bool,
     pub palette_reduction: bool,
     pub idat_recoding: bool,
+    pub strip: bool,
 }
 
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
@@ -65,7 +69,6 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // TODO: Bit depth/palette reduction
     //
     // TODO: Apply interlacing changes
-    // TODO: Force reencoding if interlacing was changed
     //
     // Go through selected permutations and determine the best
     let mut best: Option<(u8, u8, u8, u8)> = None;
@@ -73,6 +76,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
                            opts.strategies.len();
         println!("Trying: {} combinations", combinations);
+        // TODO: Force reencoding if interlacing was changed
         // TODO: Multithreading
         for f in &opts.filter {
             for zc in &opts.compression {
