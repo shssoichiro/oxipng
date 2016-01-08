@@ -29,7 +29,7 @@ pub struct Options {
     pub compression: HashSet<u8>,
     pub memory: HashSet<u8>,
     pub strategies: HashSet<u8>,
-    pub window: u16,
+    pub window: u8,
     pub bit_depth_reduction: bool,
     pub color_type_reduction: bool,
     pub palette_reduction: bool,

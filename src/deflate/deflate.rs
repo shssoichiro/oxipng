@@ -17,7 +17,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
     Ok(output)
 }
 
-pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u16) -> Result<Vec<u8>, String> {
+pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, String> {
     let mut input = data.to_owned();
     let mut stream = super::stream::Stream::new_compress(zc as libc::c_int,
                                                          zw as libc::c_int,

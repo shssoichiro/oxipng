@@ -62,19 +62,19 @@ impl Stream<Compress> {
 }
 
 impl<T: Direction> Stream<T> {
-    pub fn total_in(&self) -> u64 {
-        self.raw.total_in as u64
+    pub fn total_in(&self) -> usize {
+        self.raw.total_in as usize
     }
 
-    pub fn total_out(&self) -> u64 {
-        self.raw.total_out as u64
+    pub fn total_out(&self) -> usize {
+        self.raw.total_out as usize
     }
 }
 
 impl Stream<Decompress> {
     pub fn decompress_vec(&mut self, input: &mut [u8], output: &mut Vec<u8>) -> c_int {
-        self.raw.avail_in = (input.len() - self.total_in() as usize) as c_uint;
-        self.raw.avail_out = (output.capacity() - self.total_out() as usize) as c_uint;
+        self.raw.avail_in = (input.len() - self.total_in()) as c_uint;
+        self.raw.avail_out = (output.capacity() - self.total_out()) as c_uint;
 
         unsafe {
             self.raw.next_in = input.as_mut_ptr().offset(self.total_in() as isize);
