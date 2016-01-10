@@ -5,7 +5,6 @@ extern crate regex;
 use clap::{App, Arg, ArgMatches};
 use regex::Regex;
 use std::collections::HashSet;
-use std::path::Path;
 use std::path::PathBuf;
 
 fn main() {
@@ -27,6 +26,7 @@ fn main() {
         out_dir: None,
         stdout: false,
         pretend: false,
+        recursive: false,
         fix_errors: false,
         clobber: true,
         create: true,
@@ -68,7 +68,12 @@ fn main() {
                                .possible_value("6"))
                       .arg(Arg::with_name("backup")
                                .help("Back up modified files")
+                               .short("b")
                                .long("backup"))
+                      .arg(Arg::with_name("recursive")
+                               .help("Recurse into subdirectories")
+                               .short("r")
+                               .long("recursive"))
                       .arg(Arg::with_name("output_dir")
                                .help("Write output file(s) to <directory>")
                                .long("dir")
@@ -207,19 +212,46 @@ fn main() {
 
     let mut opts = default_opts;
 
-    parse_opts_into_struct(&matches, &mut opts);
+    match parse_opts_into_struct(&matches, &mut opts) {
+        Ok(_) => (),
+        Err(x) => {
+            println!("{}", x);
+            return ();
+        }
+    }
 
-    for input in matches.values_of("files").unwrap() {
-        opts.out_file = PathBuf::from(input);
-        // TODO: Handle wildcards
-        match optipng::optimize(Path::new(input), &opts) {
+    handle_optimization(matches.values_of("files")
+                               .unwrap()
+                               .iter()
+                               .map(PathBuf::from)
+                               .collect(),
+                        &mut opts);
+}
+
+fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut optipng::Options) {
+    for input in inputs {
+        if input.is_dir() {
+            if opts.recursive {
+                handle_optimization(input.read_dir().unwrap().map(|x| x.unwrap().path()).collect(),
+                                    opts)
+            } else {
+                println!("{} is a directory, skipping", input.display());
+            }
+            continue;
+        }
+        if let Some(out_dir) = opts.out_dir.clone() {
+            opts.out_file = out_dir.join(input.file_name().unwrap());
+        } else {
+            opts.out_file = input.clone();
+        }
+        match optipng::optimize(&input, opts) {
             Ok(_) => (),
             Err(x) => println!("{}", x),
         };
     }
 }
 
-fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) {
+fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) -> Result<(), String> {
     match matches.value_of("optimization") {
         Some("0") => {
             opts.idat_recoding = false;
@@ -355,7 +387,13 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) {
     }
 
     if let Some(x) = matches.value_of("output_dir") {
-        opts.out_dir = Some(PathBuf::from(x));
+        let path = PathBuf::from(x);
+        if !path.exists() {
+
+        } else if !path.is_dir() {
+            return Err(format!("{} is an existing file (not a directory), cannot create directory", x));
+        }
+        opts.out_dir = Some(path);
     }
 
     if let Some(x) = matches.value_of("output_file") {
@@ -368,6 +406,10 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) {
 
     if matches.is_present("backup") {
         opts.backup = true;
+    }
+
+    if matches.is_present("recursive") {
+        opts.recursive = true;
     }
 
     if matches.is_present("fix") {
@@ -419,6 +461,8 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) {
     if matches.is_present("strip") {
         opts.strip = true;
     }
+
+    Ok(())
 }
 
 fn parse_numeric_range_opts(input: &str,

@@ -1,5 +1,5 @@
 use std::io::Cursor;
-use byteorder::{BigEndian, ReadBytesExt};
+use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use crc::crc32;
 use std::collections::HashMap;
 use std::fmt;
@@ -30,6 +30,18 @@ impl fmt::Display for ColorType {
     }
 }
 
+impl ColorType {
+    fn png_header_code(&self) -> u8 {
+        match *self {
+            ColorType::Grayscale => 0,
+            ColorType::RGB => 2,
+            ColorType::Indexed => 3,
+            ColorType::GrayscaleAlpha => 4,
+            ColorType::RGBA => 6,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum BitDepth {
     One,
@@ -53,12 +65,25 @@ impl fmt::Display for BitDepth {
     }
 }
 
+impl BitDepth {
+    fn as_u8(&self) -> u8 {
+        match *self {
+            BitDepth::One => 1,
+            BitDepth::Two => 2,
+            BitDepth::Four => 4,
+            BitDepth::Eight => 8,
+            BitDepth::Sixteen => 16,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct PngData {
     pub idat_data: Vec<u8>,
     pub ihdr_data: IhdrData,
     pub raw_data: Vec<u8>,
     pub palette: Option<Vec<u8>>,
+    pub aux_headers: HashMap<String, Vec<u8>>,
 }
 
 #[derive(Debug)]
@@ -131,7 +156,8 @@ impl PngData {
                 Err(x) => return Err(x),
             },
             raw_data: raw_data,
-            palette: aux_headers.get("PLTE").cloned(),
+            palette: aux_headers.remove("PLTE"),
+            aux_headers: aux_headers,
         })
     }
     pub fn bits_per_pixel(&self) -> u8 {
@@ -142,6 +168,68 @@ impl PngData {
             ColorType::GrayscaleAlpha => 2,
             ColorType::RGBA => 4,
         }
+    }
+    pub fn output(&self) -> Vec<u8> {
+        // PNG header
+        let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        // IHDR
+        let mut ihdr_data = Vec::with_capacity(13);
+        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
+        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
+        ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
+        ihdr_data.write_u8(self.ihdr_data.color_type.png_header_code()).ok();
+        ihdr_data.write_u8(0).ok();
+        ihdr_data.write_u8(self.ihdr_data.filter).ok();
+        ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
+        output.reserve(ihdr_data.len() + 12);
+        output.write_u32::<BigEndian>(ihdr_data.len() as u32).ok();
+        let mut type_head = "IHDR".as_bytes().to_owned();
+        let crc = crc32::checksum_ieee(&ihdr_data);
+        output.append(&mut type_head);
+        output.append(&mut ihdr_data);
+        output.write_u32::<BigEndian>(crc).ok();
+        // Ancillary headers
+        for (key, header) in self.aux_headers.iter() {
+            let mut header_data = header.clone();
+            output.reserve(header_data.len() + 12);
+            output.write_u32::<BigEndian>(header_data.len() as u32).ok();
+            let mut type_head = key.as_bytes().to_owned();
+            let crc = crc32::checksum_ieee(&header_data);
+            output.append(&mut type_head);
+            output.append(&mut header_data);
+            output.write_u32::<BigEndian>(crc).ok();
+        }
+        // Palette
+        if let Some(palette) = self.palette.clone() {
+            let mut palette_data = palette.clone();
+            output.reserve(palette_data.len() + 12);
+            output.write_u32::<BigEndian>(palette_data.len() as u32).ok();
+            let mut type_head = "PLTE".as_bytes().to_owned();
+            let crc =crc32::checksum_ieee(&palette_data);
+            output.append(&mut type_head);
+            output.append(&mut palette_data);
+            output.write_u32::<BigEndian>(crc).ok();
+        }
+        // IDAT data
+        let mut idat_data = self.idat_data.clone();
+        output.reserve(idat_data.len() + 12);
+        output.write_u32::<BigEndian>(idat_data.len() as u32).ok();
+        let mut type_head = "IDAT".as_bytes().to_owned();
+        let crc = crc32::checksum_ieee(&idat_data);
+        output.append(&mut type_head);
+        output.append(&mut idat_data);
+        output.write_u32::<BigEndian>(crc).ok();
+        // Stream end
+        let mut iend_data = vec![];
+        output.reserve(iend_data.len() + 12);
+        output.write_u32::<BigEndian>(iend_data.len() as u32).ok();
+        let mut type_head = "IEND".as_bytes().to_owned();
+        let crc = crc32::checksum_ieee(&iend_data);
+        output.append(&mut type_head);
+        output.append(&mut iend_data);
+        output.write_u32::<BigEndian>(crc).ok();
+
+        output
     }
 }
 
