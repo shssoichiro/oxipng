@@ -133,16 +133,24 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     let output_data = png.output();
     if file_original_size <= output_data.len() {
         println!("File already optimized");
-        return Ok(())
+        return Ok(());
     }
 
     if opts.pretend {
         println!("Running in pretend mode, no output");
     } else {
         if opts.backup {
-            match fs::copy(in_file, in_file.with_extension(format!("bak.{}", in_file.extension().unwrap().to_str().unwrap()))) {
+            match fs::copy(in_file,
+                           in_file.with_extension(format!("bak.{}",
+                                                          in_file.extension()
+                                                                 .unwrap()
+                                                                 .to_str()
+                                                                 .unwrap()))) {
                 Ok(x) => x,
-                Err(_) => return Err(format!("Unable to write to backup file at {}", opts.out_file.display()))
+                Err(_) => {
+                    return Err(format!("Unable to write to backup file at {}",
+                                       opts.out_file.display()))
+                }
             };
         }
 
@@ -150,22 +158,31 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             let mut buffer = BufWriter::new(io::stdout());
             match buffer.write_all(&output_data) {
                 Ok(_) => (),
-                Err(_) => return Err(format!("Unable to write to stdout"))
+                Err(_) => return Err(format!("Unable to write to stdout")),
             }
         } else {
             let out_file = match File::create(&opts.out_file) {
                 Ok(x) => x,
-                Err(_) => return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                Err(_) => {
+                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                }
             };
             let mut buffer = BufWriter::new(out_file);
             match buffer.write_all(&output_data) {
                 Ok(_) => println!("Output: {}", opts.out_file.display()),
-                Err(_) => return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                Err(_) => {
+                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                }
             }
         }
     }
-    println!("    IDAT size = {} bytes ({} bytes decrease)", png.idat_data.len(), idat_original_size - png.idat_data.len());
-    println!("    file size = {} bytes ({} bytes = {:.2}% decrease)", output_data.len(), file_original_size - output_data.len(), (file_original_size - output_data.len()) as f64 / file_original_size as f64);
+    println!("    IDAT size = {} bytes ({} bytes decrease)",
+             png.idat_data.len(),
+             idat_original_size - png.idat_data.len());
+    println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
+             output_data.len(),
+             file_original_size - output_data.len(),
+             (file_original_size - output_data.len()) as f64 / file_original_size as f64);
 
     Ok(())
 }

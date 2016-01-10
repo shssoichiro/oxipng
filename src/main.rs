@@ -391,7 +391,8 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) -> 
         if !path.exists() {
 
         } else if !path.is_dir() {
-            return Err(format!("{} is an existing file (not a directory), cannot create directory", x));
+            return Err(format!("{} is an existing file (not a directory), cannot create directory",
+                               x));
         }
         opts.out_dir = Some(path);
     }

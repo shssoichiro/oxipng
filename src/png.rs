@@ -189,7 +189,7 @@ impl PngData {
         output.append(&mut ihdr_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Ancillary headers
-        for (key, header) in self.aux_headers.iter() {
+        for (key, header) in &self.aux_headers {
             let mut header_data = header.clone();
             output.reserve(header_data.len() + 12);
             output.write_u32::<BigEndian>(header_data.len() as u32).ok();
@@ -205,7 +205,7 @@ impl PngData {
             output.reserve(palette_data.len() + 12);
             output.write_u32::<BigEndian>(palette_data.len() as u32).ok();
             let mut type_head = "PLTE".as_bytes().to_owned();
-            let crc =crc32::checksum_ieee(&palette_data);
+            let crc = crc32::checksum_ieee(&palette_data);
             output.append(&mut type_head);
             output.append(&mut palette_data);
             output.write_u32::<BigEndian>(crc).ok();
