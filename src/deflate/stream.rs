@@ -1,7 +1,7 @@
 // Raw un-exported bindings to libz for encoding/decoding
 // Copyright (c) 2014 Alex Crichton, MIT & Apache licenses
 // Originally from flate2 crate for miniz
-// Modified for use in Optipng
+// Modified for use in oxipng
 
 use std::marker;
 use std::mem;

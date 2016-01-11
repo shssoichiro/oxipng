@@ -1,4 +1,4 @@
-extern crate optipng;
+extern crate oxipng;
 extern crate clap;
 extern crate regex;
 
@@ -20,7 +20,7 @@ fn main() {
         strategies.insert(i);
     }
 
-    let default_opts = optipng::Options {
+    let default_opts = oxipng::Options {
         backup: false,
         out_file: PathBuf::new(),
         out_dir: None,
@@ -45,8 +45,8 @@ fn main() {
         strip: false,
     };
 
-    let matches = App::new("optipng")
-                      .version("2.0.0-alpha.1")
+    let matches = App::new("oxipng")
+                      .version("1.0.0-alpha.1")
                       .author("Joshua Holmer <jholmer.in@gmail.com>")
                       .about("Losslessly improves compression of PNG files")
                       .arg(Arg::with_name("files")
@@ -194,14 +194,14 @@ fn main() {
                                .help("Strip all metadata objects")
                                .long("strip"))
                       .after_help("Optimization levels:
-    -o0		=>	-zc3 -nz			(0 or 1 trials)
-    -o1		=>	-zc9				(1 trial)
-    -o2		=>	-zc9 -zs0-3 -f0,5		(8 trials)
-    -o3		=>	-zc9 -zm8-9 -zs0-3 -f0,5	(16 trials)
-    -o4		=>	-zc9 -zm8-9 -zs0-3 -f0-5	(48 trials)
-    -o5		=>	-zc3-9 -zm8-9 -zs0-3 -f0-5	(192 trials)
-    -o6		=>	-zc1-9 -zm7-9 -zs0-3 -f0-5	(360 trials)
-    -o6 -zm1-9	=>	-zc1-9 -zm1-9 -zs0-3 -f0-5	(1080 trials)
+    -o 0		=>	--zc 3 --nz				(0 or 1 trials)
+    -o 1		=>	--zc 9					(1 trial)
+    -o 2		=>	--zc 9 --zs 0-3 --f 0,5			(8 trials)
+    -o 3		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0,5	(16 trials)
+    -o 4		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0-5	(48 trials)
+    -o 5		=>	--zc 3-9 --zm 8-9 --zs 0-3 --f 0-5	(192 trials)
+    -o 6		=>	--zc 1-9 --zm 7-9 --zs 0-3 --f 0-5	(360 trials)
+    -o 6 --zm 1-9	=>	--zc 1-9 --zm 1-9 --zs 0-3 --f 0-5	(1080 trials)
 
     Exhaustive combinations such as \"-o6 -zm1-9\" are not generally recommended.
     These are very slow and generally provide no compression gain.
@@ -228,7 +228,7 @@ fn main() {
                         &mut opts);
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut optipng::Options) {
+fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut oxipng::Options) {
     for input in inputs {
         if input.is_dir() {
             if opts.recursive {
@@ -244,14 +244,14 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut optipng::Options) {
         } else {
             opts.out_file = input.clone();
         }
-        match optipng::optimize(&input, opts) {
+        match oxipng::optimize(&input, opts) {
             Ok(_) => (),
             Err(x) => println!("{}", x),
         };
     }
 }
 
-fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut optipng::Options) -> Result<(), String> {
+fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> Result<(), String> {
     match matches.value_of("optimization") {
         Some("0") => {
             opts.idat_recoding = false;
