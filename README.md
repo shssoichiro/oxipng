@@ -6,11 +6,15 @@ OxiPng began as a completely rewrite of the OptiPNG project,
 which is assumed to be dead as no commit has been made to it since 2013.
 The name has been changed to avoid confusion and potential legal issues.
 
+The core goal of rewriting OptiPNG was to implement multithreading,
+which would be very difficult to do within the existing C codebase of OptiPNG.
+This also served as an opportunity to choose a more modern, safer language (Rust).
+
 OxiPng is a PNG compression optimizer.
 
 In the typical use case, OxiPng recompresses PNG image files
-losslessly, converts external formats (BMP, GIF, PNM and TIFF) to
-optimized PNG, and performs PNG integrity checks and corrections.
+losslessly and performs PNG integrity checks and corrections.
+Future implementation of other features is planned.
 
 ## Building
 
