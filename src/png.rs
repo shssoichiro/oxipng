@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
+use std::iter::Iterator;
 use std::path::Path;
 
 #[derive(Debug)]
@@ -77,6 +78,40 @@ impl BitDepth {
     }
 }
 
+struct ScanLines<'a> {
+    png: &'a PngData,
+    start: usize,
+    end: usize,
+    len: usize,
+}
+
+impl<'a> Iterator for ScanLines<'a> {
+    type Item = ScanLine;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.end == self.len {
+            None
+        } else {
+            let bits_per_line = self.png.ihdr_data.width as usize *
+                                self.png.ihdr_data.bit_depth.as_u8() as usize *
+                                self.png.bits_per_pixel_raw() as usize;
+            // This avoids casting to and from floats, which is expensive
+            let bytes_per_line = ((bits_per_line + bits_per_line % 8) >> 3) + 1;
+            self.start = self.end;
+            self.end = self.start + bytes_per_line;
+            Some(ScanLine {
+                filter: self.png.raw_data[self.start].clone(),
+                data: self.png.raw_data[self.start + 1..self.end].to_owned(),
+            })
+        }
+    }
+}
+
+#[derive(Debug)]
+struct ScanLine {
+    filter: u8,
+    data: Vec<u8>,
+}
+
 #[derive(Debug)]
 pub struct PngData {
     pub idat_data: Vec<u8>,
@@ -142,25 +177,26 @@ impl PngData {
         if aux_headers.get("IHDR").is_none() {
             return Err("Image header data was missing, skipping".to_owned());
         }
-        let ihdr_header = parse_ihdr_header(aux_headers.get("IHDR").unwrap().as_ref());
+        let ihdr_header = match parse_ihdr_header(aux_headers.get("IHDR").unwrap().as_ref()) {
+            Ok(x) => x,
+            Err(x) => return Err(x),
+        };
         let raw_data = match super::deflate::deflate::inflate(idat_headers.as_ref()) {
             Ok(x) => x,
             Err(x) => return Err(x),
         };
-        // TODO: Reverse filtering?
-        // Return the PngData
-        Ok(PngData {
+        let mut png_data = PngData {
             idat_data: idat_headers.clone(),
-            ihdr_data: match ihdr_header {
-                Ok(x) => x,
-                Err(x) => return Err(x),
-            },
+            ihdr_data: ihdr_header,
             raw_data: raw_data,
             palette: aux_headers.remove("PLTE"),
             aux_headers: aux_headers,
-        })
+        };
+        png_data.raw_data = png_data.unfilter_image();
+        // Return the PngData
+        Ok(png_data)
     }
-    pub fn bits_per_pixel(&self) -> u8 {
+    pub fn bits_per_pixel_raw(&self) -> u8 {
         match self.ihdr_data.color_type {
             ColorType::Grayscale => 1,
             ColorType::RGB => 3,
@@ -230,6 +266,190 @@ impl PngData {
         output.write_u32::<BigEndian>(crc).ok();
 
         output
+    }
+    fn scan_lines(&self) -> ScanLines {
+        ScanLines {
+            png: &self,
+            start: 0,
+            end: 0,
+            len: self.raw_data.len(),
+        }
+    }
+    pub fn unfilter_image(&self) -> Vec<u8> {
+        let mut unfiltered = Vec::with_capacity(self.raw_data.len());
+        // This avoids casting to and from floats, which is expensive
+        let tmp = self.ihdr_data.bit_depth.as_u8() * self.bits_per_pixel_raw();
+        let bpp = (tmp + tmp % 8) >> 3;
+        let mut last_line: Option<Vec<u8>> = None;
+        for line in self.scan_lines() {
+            unfiltered.push(line.filter);
+            match line.filter {
+                0 => {
+                    let mut data = line.data.clone();
+                    last_line = Some(data.clone());
+                    unfiltered.append(&mut data);
+                }
+                1 => {
+                    let mut data = Vec::with_capacity(line.data.len());
+                    for (i, byte) in line.data.iter().enumerate() {
+                        match i.checked_sub(bpp as usize) {
+                            Some(x) => data.push(byte.wrapping_add(line.data[x])),
+                            None => data.push(*byte),
+                        }
+                    }
+                    last_line = Some(data.clone());
+                    unfiltered.append(&mut data);
+                }
+                2 => {
+                    let mut data = Vec::with_capacity(line.data.len());
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            data.push(byte.wrapping_add(last[i]));
+                        } else {
+                            data.push(*byte);
+                        };
+                    }
+                    last_line = Some(data.clone());
+                    unfiltered.append(&mut data);
+                }
+                3 => {
+                    let mut data = Vec::with_capacity(line.data.len());
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            data.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_add((line.data[x] + last[i]) >> 1),
+                                None => byte.wrapping_add(last[i] >> 1),
+                            });
+                        } else {
+                            data.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_add(line.data[x] >> 1),
+                                None => *byte,
+                            });
+                        };
+                    }
+                    last_line = Some(data.clone());
+                    unfiltered.append(&mut data);
+                }
+                4 => {
+                    let mut data = Vec::with_capacity(line.data.len());
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            data.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    byte.wrapping_add(paeth_predictor(line.data[x],
+                                                                      last[i],
+                                                                      last[x]))
+                                }
+                                None => byte.wrapping_add(last[i]),
+                            });
+                        } else {
+                            data.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_add(line.data[x]),
+                                None => *byte,
+                            });
+                        };
+                    }
+                    last_line = Some(data.clone());
+                    unfiltered.append(&mut data);
+                }
+                _ => panic!("Unreachable"),
+            }
+        }
+        unfiltered
+    }
+    pub fn filter_image(&self, filter: u8) -> Vec<u8> {
+        let mut filtered = Vec::with_capacity(self.raw_data.len());
+        // This avoids casting to and from floats, which is expensive
+        let tmp = self.ihdr_data.bit_depth.as_u8() * self.bits_per_pixel_raw();
+        let bpp = (tmp + tmp % 8) >> 3;
+        let mut last_line: Option<Vec<u8>> = None;
+        // We could try a different filter method for each line
+        // But that would be prohibitively slow and probably not provide much benefit
+        // So we just use one filter method for the whole image
+        for line in self.scan_lines() {
+            let internal_filter = match filter {
+                5 => {
+                    // TODO: Heuristically guess best filter per line
+                    0
+                }
+                x => x,
+            };
+            filtered.push(internal_filter);
+            match internal_filter {
+                0 => {
+                    let mut data = line.data.clone();
+                    filtered.append(&mut data);
+                },
+                1 => {
+                    for (i, byte) in line.data.iter().enumerate() {
+                        filtered.push(match i.checked_sub(bpp as usize) {
+                            Some(x) => byte.wrapping_sub(line.data[x]),
+                            None => *byte,
+                        });
+                    }
+                }
+                2 => {
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            filtered.push(byte.wrapping_sub(last[i]));
+                        } else {
+                            filtered.push(*byte);
+                        };
+                    }
+                }
+                3 => {
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_sub((line.data[x] + last[i]) >> 1),
+                                None => byte.wrapping_sub(last[i] >> 1),
+                            });
+                        } else {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_sub(line.data[x] >> 1),
+                                None => *byte,
+                            });
+                        };
+                    }
+                }
+                4 => {
+                    for (i, byte) in line.data.iter().enumerate() {
+                        if let Some(last) = last_line.clone() {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    byte.wrapping_sub(paeth_predictor(line.data[x],
+                                                                      last[i],
+                                                                      last[x]))
+                                }
+                                None => byte.wrapping_sub(last[i]),
+                            });
+                        } else {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_sub(line.data[x]),
+                                None => *byte,
+                            });
+                        };
+                    }
+                }
+                _ => panic!("Unreachable"),
+            }
+            last_line = Some(line.data.clone());
+        }
+        filtered
+    }
+}
+
+fn paeth_predictor(a: u8, b: u8, c: u8) -> u8 {
+    let p = a as i32 + b as i32 - c as i32;
+    let pa = (p - a as i32).abs();
+    let pb = (p - b as i32).abs();
+    let pc = (p - c as i32).abs();
+    if pa <= pb && pa <= pc {
+        a
+    } else if pb <= pc {
+        b
+    } else {
+        c
     }
 }
 

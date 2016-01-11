@@ -65,7 +65,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      palette.len() / 3);
         } else {
             println!("    {}x{} bits/pixel, {:?}",
-                     png.bits_per_pixel(),
+                     png.bits_per_pixel_raw(),
                      png.ihdr_data.bit_depth,
                      png.ihdr_data.color_type);
         }
@@ -86,11 +86,11 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         // TODO: Force reencoding if interlacing was changed
         // TODO: Multithreading
         for f in &opts.filter {
-            // TODO: Apply filter
+            let filtered = png.filter_image(*f);
             for zc in &opts.compression {
                 for zm in &opts.memory {
                     for zs in &opts.strategies {
-                        let new_idat = match deflate::deflate::deflate(png.raw_data.as_ref(),
+                        let new_idat = match deflate::deflate::deflate(&filtered,
                                                                        *zc,
                                                                        *zm,
                                                                        *zs,
@@ -98,7 +98,6 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                             Ok(x) => x,
                             Err(x) => return Err(x),
                         };
-                        // TODO: Apply filtering
                         if new_idat.len() < png.idat_data.len() {
                             best = Some((*f, *zc, *zm, *zs));
                             png.idat_data = new_idat.clone();
@@ -124,7 +123,6 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      better.3,
                      better.0,
                      png.idat_data.len());
-            png.ihdr_data.filter = better.0;
         }
     }
 
