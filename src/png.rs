@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path::Path;
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum ColorType {
     Grayscale,
     RGB,
@@ -43,7 +43,7 @@ impl ColorType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum BitDepth {
     One,
     Two,

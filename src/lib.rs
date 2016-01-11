@@ -28,6 +28,7 @@ pub struct Options {
     pub recursive: bool,
     pub clobber: bool,
     pub create: bool,
+    pub force: bool,
     pub preserve_attrs: bool,
     pub verbosity: Option<u8>,
     pub filter: HashSet<u8>,
@@ -129,7 +130,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // TODO: Perform stripping
 
     let output_data = png.output();
-    if file_original_size <= output_data.len() {
+    if file_original_size <= output_data.len() && !opts.force {
         println!("File already optimized");
         return Ok(());
     }
@@ -174,13 +175,26 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             }
         }
     }
-    println!("    IDAT size = {} bytes ({} bytes decrease)",
-             png.idat_data.len(),
-             idat_original_size - png.idat_data.len());
-    println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
-             output_data.len(),
-             file_original_size - output_data.len(),
-             (file_original_size - output_data.len()) as f64 / file_original_size as f64);
+    if idat_original_size >= png.idat_data.len() {
+        println!("    IDAT size = {} bytes ({} bytes decrease)",
+                 png.idat_data.len(),
+                 idat_original_size - png.idat_data.len());
+    } else {
+        println!("    IDAT size = {} bytes ({} bytes increate)",
+                 png.idat_data.len(),
+                 png.idat_data.len() - idat_original_size);
+    }
+    if file_original_size >= output_data.len() {
+        println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
+                 output_data.len(),
+                 file_original_size - output_data.len(),
+                 (file_original_size - output_data.len()) as f64 / file_original_size as f64);
+    } else {
+        println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
+                 output_data.len(),
+                 output_data.len() - file_original_size,
+                 (output_data.len() - file_original_size) as f64 / file_original_size as f64);
+    }
 
     Ok(())
 }

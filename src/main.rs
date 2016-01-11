@@ -30,6 +30,7 @@ fn main() {
         fix_errors: false,
         clobber: true,
         create: true,
+        force: false,
         preserve_attrs: false,
         verbosity: Some(0),
         filter: filter,
@@ -70,6 +71,10 @@ fn main() {
                                .help("Back up modified files")
                                .short("b")
                                .long("backup"))
+                      .arg(Arg::with_name("force")
+                               .help("Write output even if larger than the original")
+                               .short("F")
+                               .long("force"))
                       .arg(Arg::with_name("recursive")
                                .help("Recurse into subdirectories")
                                .short("r")
@@ -407,6 +412,10 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
 
     if matches.is_present("backup") {
         opts.backup = true;
+    }
+
+    if matches.is_present("force") {
+        opts.force = true;
     }
 
     if matches.is_present("recursive") {
