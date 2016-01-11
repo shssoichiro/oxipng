@@ -303,7 +303,7 @@ impl PngData {
                 2 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             data.push(byte.wrapping_add(last_line[i]));
                         } else {
                             data.push(*byte);
@@ -315,9 +315,11 @@ impl PngData {
                 3 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             data.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_add(((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8),
+                                Some(x) => byte.wrapping_add(
+                                    ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
+                                ),
                                 None => byte.wrapping_add(last_line[i] >> 1),
                             });
                         } else {
@@ -333,7 +335,7 @@ impl PngData {
                 4 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             data.push(match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     byte.wrapping_add(paeth_predictor(line.data[x],
@@ -374,7 +376,7 @@ impl PngData {
                 0 => {
                     let mut data = line.data.clone();
                     filtered.append(&mut data);
-                },
+                }
                 1 => {
                     for (i, byte) in line.data.iter().enumerate() {
                         filtered.push(match i.checked_sub(bpp as usize) {
@@ -385,7 +387,7 @@ impl PngData {
                 }
                 2 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             filtered.push(byte.wrapping_sub(last_line[i]));
                         } else {
                             filtered.push(*byte);
@@ -394,9 +396,11 @@ impl PngData {
                 }
                 3 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             filtered.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_sub(((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8),
+                                Some(x) => byte.wrapping_sub(
+                                    ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
+                                ),
                                 None => byte.wrapping_sub(last_line[i] >> 1),
                             });
                         } else {
@@ -409,7 +413,7 @@ impl PngData {
                 }
                 4 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             filtered.push(match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     byte.wrapping_sub(paeth_predictor(line.data[x],
@@ -440,22 +444,24 @@ impl PngData {
                     let mut line_3 = Vec::with_capacity(line.data.len());
                     let mut line_4 = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.len() > 0 {
+                        if !last_line.is_empty() {
                             match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     line_1.push(byte.wrapping_sub(line.data[x]));
                                     line_2.push(byte.wrapping_sub(last_line[i]));
-                                    line_3.push(byte.wrapping_sub(((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8));
+                                    line_3.push(byte.wrapping_sub(
+                                        ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8)
+                                    );
                                     line_4.push(byte.wrapping_sub(paeth_predictor(line.data[x],
-                                                                      last_line[i],
-                                                                      last_line[x])));
-                                },
+                                                                                  last_line[i],
+                                                                                  last_line[x])));
+                                }
                                 None => {
                                     line_1.push(*byte);
                                     line_2.push(byte.wrapping_sub(last_line[i]));
                                     line_3.push(byte.wrapping_sub(last_line[i] >> 1));
                                     line_4.push(byte.wrapping_sub(last_line[i]));
-                                },
+                                }
                             }
                         } else {
                             match i.checked_sub(bpp as usize) {
@@ -464,13 +470,13 @@ impl PngData {
                                     line_2.push(*byte);
                                     line_3.push(byte.wrapping_sub(line.data[x] >> 1));
                                     line_4.push(byte.wrapping_sub(line.data[x]));
-                                },
+                                }
                                 None => {
                                     line_1.push(*byte);
                                     line_2.push(*byte);
                                     line_3.push(*byte);
                                     line_4.push(*byte);
-                                },
+                                }
                             }
                         };
                     }
