@@ -2,7 +2,7 @@
 
 ## Overview
 
-OxiPng began as a completely rewrite of the OxiPng project,
+OxiPng began as a completely rewrite of the OptiPNG project,
 which is assumed to be dead as no commit has been made to it since 2013.
 The name has been changed to avoid confusion and potential legal issues.
 
