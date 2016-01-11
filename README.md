@@ -2,6 +2,14 @@
 
 ## Overview
 
+OxiPng is a PNG compression optimizer.
+
+In the typical use case, OxiPng recompresses PNG image files
+losslessly and performs PNG integrity checks and corrections.
+Future implementation of other features is planned.
+
+## History
+
 OxiPng began as a completely rewrite of the OptiPNG project,
 which is assumed to be dead as no commit has been made to it since 2013.
 The name has been changed to avoid confusion and potential legal issues.
@@ -9,12 +17,6 @@ The name has been changed to avoid confusion and potential legal issues.
 The core goal of rewriting OptiPNG was to implement multithreading,
 which would be very difficult to do within the existing C codebase of OptiPNG.
 This also served as an opportunity to choose a more modern, safer language (Rust).
-
-OxiPng is a PNG compression optimizer.
-
-In the typical use case, OxiPng recompresses PNG image files
-losslessly and performs PNG integrity checks and corrections.
-Future implementation of other features is planned.
 
 ## Building
 
@@ -27,6 +29,8 @@ cp target/release/oxipng /usr/local/bin
 ```
 Please note that zlib is a required build dependency. OxiPng should work with any 1.x version of zlib,
 but you are advised to use the latest version (currently 1.2.8) for security and bug fixes.
+
+OxiPng follows Semantic Versioning.
 
 ## Usage
 
@@ -51,14 +55,6 @@ it if you have a good reason.
 Can save a few kilobytes if you don't need the metadata.
 
 More advanced options can be found by running `oxipng -h`.
-
-## Changes
-
-OxiPng attempts to maintain functionality of the original OxiPng as much as possible,
-although command line usage may have changed (OxiPng follows semantic versioning).
-
-As OxiPng is in alpha, there are still some features that are missing. All intended features
-will be implemented in OxiPng before it moves into beta.
 
 ## Contributing
 
