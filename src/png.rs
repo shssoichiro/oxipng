@@ -518,6 +518,47 @@ impl PngData {
         }
         filtered
     }
+    pub fn reduce_bit_depth(&self) -> Option<Vec<u8>> {
+        // TODO: Implement
+        if self.ihdr_data.bit_depth != BitDepth::Sixteen {
+            // Can't reduce here--palette reduction is handled elsewhere
+            return None;
+        }
+
+        // It's difficult to estimate without knowing the number of ScanLines
+        // So we overallocate to prioritize speed over memory efficiency
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            for (i, byte) in line.data.iter().enumerate() {
+                if i % 2 == 0 {
+                    // High byte
+                    if *byte != 0 {
+                        // Can't reduce, exit early
+                        return None;
+                    }
+                } else {
+                    // Low byte
+                    reduced.push(*byte);
+                }
+            }
+        }
+
+        Some(reduced)
+    }
+    pub fn reduce_palette(&self) -> Option<Vec<u8>> {
+        // TODO: Implement
+        None
+    }
+    pub fn reduce_color_type(&self) -> Option<Vec<u8>> {
+        // TODO: Implement
+        None
+    }
+    pub fn change_interlacing(&self, interlace: u8) -> Option<Vec<u8>> {
+        // TODO: Implement
+        None
+    }
 }
 
 fn paeth_predictor(a: u8, b: u8, c: u8) -> u8 {

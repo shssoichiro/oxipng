@@ -74,20 +74,43 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         println!("    IDAT size = {} bytes", idat_original_size);
         println!("    File size = {} bytes", file_original_size);
     }
-    // TODO: Color space reduction
-    // TODO: 16-bit Bit depth reduction
-    // TODO: Palette bit depth reduction
-    //
-    // TODO: Apply interlacing changes
-    //
-    // TODO: Force reencoding if interlacing was changed
-    if opts.idat_recoding {
+
+    let mut something_changed = false;
+
+    if opts.color_type_reduction {
+        if let Some(data) = png.reduce_color_type() {
+            png.raw_data = data;
+            something_changed = true;
+        };
+    }
+
+    if opts.bit_depth_reduction {
+        if let Some(data) = png.reduce_bit_depth() {
+            png.raw_data = data;
+            something_changed = true;
+        };
+    }
+
+    if opts.palette_reduction {
+        if let Some(data) = png.reduce_palette() {
+            png.raw_data = data;
+            something_changed = true;
+        };
+    }
+
+    if let Some(interlacing) = opts.interlace {
+        if let Some(data) = png.change_interlacing(interlacing) {
+            png.raw_data = data;
+            something_changed = true;
+        };
+    }
+
+    if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
         let mut best: Option<(u8, u8, u8, u8)> = None;
         let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
                            opts.strategies.len();
         println!("Trying: {} combinations", combinations);
-        // TODO: Force reencoding if interlacing was changed
         // TODO: Multithreading
         for f in &opts.filter {
             let filtered = png.filter_image(*f);
@@ -102,7 +125,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                             Ok(x) => x,
                             Err(x) => return Err(x),
                         };
-                        if new_idat.len() < png.idat_data.len() {
+                        if new_idat.len() < png.idat_data.len() ||
+                           (best.is_none() && something_changed) {
                             best = Some((*f, *zc, *zm, *zs));
                             png.idat_data = new_idat.clone();
                         }
@@ -136,7 +160,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     }
 
     let output_data = png.output();
-    if file_original_size <= output_data.len() && !opts.force {
+    if file_original_size <= output_data.len() && !opts.force && opts.interlace.is_none() {
         println!("File already optimized");
         return Ok(());
     }
