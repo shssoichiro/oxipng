@@ -209,7 +209,8 @@ impl PngData {
         // PNG header
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
-        let mut ihdr_data = Vec::with_capacity(13);
+        let mut ihdr_data = Vec::with_capacity(17);
+        ihdr_data.extend("IHDR".as_bytes());
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
@@ -217,51 +218,47 @@ impl PngData {
         ihdr_data.write_u8(0).ok();
         ihdr_data.write_u8(self.ihdr_data.filter).ok();
         ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
-        output.reserve(ihdr_data.len() + 12);
-        output.write_u32::<BigEndian>(ihdr_data.len() as u32).ok();
-        let mut type_head = "IHDR".as_bytes().to_owned();
+        output.reserve(ihdr_data.len() + 8);
+        output.write_u32::<BigEndian>(ihdr_data.len() as u32 - 4).ok();
         let crc = crc32::checksum_ieee(&ihdr_data);
-        output.append(&mut type_head);
         output.append(&mut ihdr_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Ancillary headers
         for (key, header) in &self.aux_headers {
-            let mut header_data = header.clone();
-            output.reserve(header_data.len() + 12);
-            output.write_u32::<BigEndian>(header_data.len() as u32).ok();
-            let mut type_head = key.as_bytes().to_owned();
+            let mut header_data = Vec::with_capacity(header.len() + 4);
+            header_data.extend(key.as_bytes());
+            header_data.extend(header);
+            output.reserve(header_data.len() + 8);
+            output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
             let crc = crc32::checksum_ieee(&header_data);
-            output.append(&mut type_head);
             output.append(&mut header_data);
             output.write_u32::<BigEndian>(crc).ok();
         }
         // Palette
         if let Some(palette) = self.palette.clone() {
-            let mut palette_data = palette.clone();
-            output.reserve(palette_data.len() + 12);
-            output.write_u32::<BigEndian>(palette_data.len() as u32).ok();
-            let mut type_head = "PLTE".as_bytes().to_owned();
+            let mut palette_data = Vec::with_capacity(palette.len() + 4);
+            palette_data.extend("PLTE".as_bytes());
+            palette_data.extend(palette);
+            output.reserve(palette_data.len() + 8);
+            output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
             let crc = crc32::checksum_ieee(&palette_data);
-            output.append(&mut type_head);
             output.append(&mut palette_data);
             output.write_u32::<BigEndian>(crc).ok();
         }
         // IDAT data
-        let mut idat_data = self.idat_data.clone();
-        output.reserve(idat_data.len() + 12);
-        output.write_u32::<BigEndian>(idat_data.len() as u32).ok();
-        let mut type_head = "IDAT".as_bytes().to_owned();
+        let mut idat_data = Vec::with_capacity(self.idat_data.len() + 4);
+        idat_data.extend("IDAT".as_bytes());
+        idat_data.extend(self.idat_data.clone());
+        output.reserve(idat_data.len() + 8);
+        output.write_u32::<BigEndian>(idat_data.len() as u32 - 4).ok();
         let crc = crc32::checksum_ieee(&idat_data);
-        output.append(&mut type_head);
         output.append(&mut idat_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Stream end
-        let mut iend_data = vec![];
-        output.reserve(iend_data.len() + 12);
-        output.write_u32::<BigEndian>(iend_data.len() as u32).ok();
-        let mut type_head = "IEND".as_bytes().to_owned();
+        let mut iend_data = "IEND".as_bytes().to_owned();
+        output.reserve(iend_data.len() + 8);
+        output.write_u32::<BigEndian>(0).ok();
         let crc = crc32::checksum_ieee(&iend_data);
-        output.append(&mut type_head);
         output.append(&mut iend_data);
         output.write_u32::<BigEndian>(crc).ok();
 

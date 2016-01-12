@@ -246,7 +246,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut oxipng::Options) {
         }
         if let Some(out_dir) = opts.out_dir.clone() {
             opts.out_file = out_dir.join(input.file_name().unwrap());
-        } else {
+        } else if opts.out_file.components().count() == 0 {
             opts.out_file = input.clone();
         }
         match oxipng::optimize(&input, opts) {
