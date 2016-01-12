@@ -129,3 +129,30 @@ fn reduce_palette_png() {
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
     assert!(png.palette.unwrap().len() == 43 * 3);
 }
+
+#[test]
+fn strip_headers() {
+    let input = PathBuf::from("tests/files/test_rgb.png");
+    let mut opts = get_opts(&input);
+    opts.strip = true;
+    let output = opts.out_file.clone();
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned())
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => {
+            remove_file(output).ok();
+            x
+        },
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        },
+    };
+
+    assert!(!png.aux_headers.contains_key("tEXt"));
+}

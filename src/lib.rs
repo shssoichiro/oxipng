@@ -3,6 +3,7 @@ extern crate crc;
 extern crate libc;
 extern crate libz_sys;
 
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
@@ -73,7 +74,9 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         println!("    IDAT size = {} bytes", idat_original_size);
         println!("    File size = {} bytes", file_original_size);
     }
-    // TODO: Bit depth/palette reduction
+    // TODO: Color space reduction
+    // TODO: 16-bit Bit depth reduction
+    // TODO: Palette bit depth reduction
     //
     // TODO: Apply interlacing changes
     //
@@ -127,7 +130,10 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
     }
 
-    // TODO: Perform stripping
+    if opts.strip {
+        // Strip headers
+        png.aux_headers = HashMap::new();
+    }
 
     let output_data = png.output();
     if file_original_size <= output_data.len() && !opts.force {
