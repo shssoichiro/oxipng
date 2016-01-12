@@ -1,5 +1,7 @@
 # OxiPng
 
+[![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg)](https://travis-ci.org/shssoichiro/oxipng)
+
 ## Overview
 
 OxiPng is a PNG compression optimizer.
