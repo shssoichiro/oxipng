@@ -228,6 +228,7 @@ impl PngData {
         }
     }
     pub fn output(&self) -> Vec<u8> {
+        // FIXME: This code can all be refactored
         // PNG header
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
@@ -265,6 +266,27 @@ impl PngData {
             output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
             let crc = crc32::checksum_ieee(&palette_data);
             output.append(&mut palette_data);
+            output.write_u32::<BigEndian>(crc).ok();
+            if let Some(transparency_palette) = self.transparency_palette.clone() {
+                // Transparency pixel
+                let mut palette_data = Vec::with_capacity(transparency_palette.len() + 4);
+                palette_data.extend("tRNS".as_bytes());
+                palette_data.extend(transparency_palette);
+                output.reserve(palette_data.len() + 8);
+                output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
+                let crc = crc32::checksum_ieee(&palette_data);
+                output.append(&mut palette_data);
+                output.write_u32::<BigEndian>(crc).ok();
+            }
+        } else if let Some(transparency_pixel) = self.transparency_pixel.clone() {
+            // Transparency pixel
+            let mut pixel_data = Vec::with_capacity(transparency_pixel.len() + 4);
+            pixel_data.extend("tRNS".as_bytes());
+            pixel_data.extend(transparency_pixel);
+            output.reserve(pixel_data.len() + 8);
+            output.write_u32::<BigEndian>(pixel_data.len() as u32 - 4).ok();
+            let crc = crc32::checksum_ieee(&pixel_data);
+            output.append(&mut pixel_data);
             output.write_u32::<BigEndian>(crc).ok();
         }
         // IDAT data
