@@ -118,6 +118,8 @@ pub struct PngData {
     pub ihdr_data: IhdrData,
     pub raw_data: Vec<u8>,
     pub palette: Option<Vec<u8>>,
+    pub transparency_pixel: Option<Vec<u8>>,
+    pub transparency_palette: Option<Vec<u8>>,
     pub aux_headers: HashMap<String, Vec<u8>>,
 }
 
@@ -185,11 +187,31 @@ impl PngData {
             Ok(x) => x,
             Err(x) => return Err(x),
         };
+        // Handle transparency header
+        let mut has_transparency_pixel = false;
+        let mut has_transparency_palette = false;
+        if aux_headers.contains_key("tRNS") {
+            if ihdr_header.color_type == ColorType::Indexed {
+                has_transparency_palette = true;
+            } else {
+                has_transparency_pixel = true;
+            }
+        }
         let mut png_data = PngData {
             idat_data: idat_headers.clone(),
             ihdr_data: ihdr_header,
             raw_data: raw_data,
             palette: aux_headers.remove("PLTE"),
+            transparency_pixel: if has_transparency_pixel {
+                aux_headers.remove("tRNS")
+            } else {
+                None
+            },
+            transparency_palette: if has_transparency_palette {
+                aux_headers.remove("tRNS")
+            } else {
+                None
+            },
             aux_headers: aux_headers,
         };
         png_data.raw_data = png_data.unfilter_image();
@@ -518,11 +540,10 @@ impl PngData {
         }
         filtered
     }
-    pub fn reduce_bit_depth(&self) -> Option<Vec<u8>> {
-        // TODO: Implement
+    pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
-            // Can't reduce here--palette reduction is handled elsewhere
-            return None;
+            // TODO: Handle 8-bit to lower reduction
+            return false;
         }
 
         // It's difficult to estimate without knowing the number of ScanLines
@@ -536,7 +557,7 @@ impl PngData {
                     // High byte
                     if *byte != 0 {
                         // Can't reduce, exit early
-                        return None;
+                        return false;
                     }
                 } else {
                     // Low byte
@@ -545,20 +566,172 @@ impl PngData {
             }
         }
 
-        Some(reduced)
+        self.raw_data = reduced;
+        true
     }
-    pub fn reduce_palette(&self) -> Option<Vec<u8>> {
+    pub fn reduce_palette(&mut self) -> bool {
         // TODO: Implement
-        None
+        false
     }
-    pub fn reduce_color_type(&self) -> Option<Vec<u8>> {
+    pub fn reduce_color_type(&mut self) -> bool {
+        let mut changed = false;
+
+        // Go down one step at a time
+        // Maybe not the most efficient, but it's safe
+        if self.ihdr_data.color_type == ColorType::RGBA {
+            // Do this first, it's more likely to exit early
+            if let Some(data) = reduce_rgba_to_grayscale_alpha(self) {
+                self.raw_data = data;
+                self.ihdr_data.color_type = ColorType::GrayscaleAlpha;
+                changed = true;
+            }
+            if let Some(data) = reduce_rgba_to_rgb(self) {
+                self.raw_data = data;
+                self.ihdr_data.color_type = ColorType::RGB;
+                changed = true;
+            }
+        }
+
+        if self.ihdr_data.color_type == ColorType::RGB {
+            if let Some((data, palette)) = reduce_rgb_to_palette(self) {
+                self.raw_data = data;
+                self.palette = Some(palette);
+                self.ihdr_data.color_type = ColorType::Indexed;
+                changed = true;
+            }
+        }
+
+        if self.ihdr_data.color_type == ColorType::Indexed {
+            if let Some((data, alpha)) = reduce_palette_to_grayscale(self) {
+                self.raw_data = data;
+                self.palette = None;
+                if alpha {
+                    self.ihdr_data.color_type = ColorType::GrayscaleAlpha;
+                } else {
+                    self.ihdr_data.color_type = ColorType::Grayscale;
+                }
+                changed = true;
+            }
+        }
+
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
+            if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
+                self.raw_data = data;
+                changed = true;
+            }
+        }
+
+        changed
+    }
+    pub fn change_interlacing(&mut self, interlace: u8) -> bool {
         // TODO: Implement
-        None
+        false
     }
-    pub fn change_interlacing(&self, interlace: u8) -> Option<Vec<u8>> {
-        // TODO: Implement
-        None
+}
+
+fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp: usize = 4 * byte_depth as usize;
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        for (i, byte) in line.data.iter().enumerate() {
+            if i % bpp >= (bpp - byte_depth as usize) {
+                if *byte != 255 {
+                    return None;
+                }
+                reduced.push(*byte);
+            }
+        }
     }
+
+    Some(reduced)
+}
+
+fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp: usize = 4 * byte_depth as usize;
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        let mut low_bytes = Vec::with_capacity(4);
+        let mut high_bytes = Vec::with_capacity(4);
+        for (i, byte) in line.data.iter().enumerate() {
+            if i % bpp < (bpp - byte_depth as usize) {
+                if byte_depth == 1 || i % 2 == 1 {
+                    low_bytes.push(*byte);
+                } else {
+                    high_bytes.push(*byte);
+                }
+            } else if i % bpp == bpp - 1 {
+                low_bytes.sort();
+                low_bytes.dedup();
+                if low_bytes.len() > 1 {
+                    return None;
+                }
+                // FIXME: Ugly, is there a better way of making this dynamic for 16-bit content?
+                if byte_depth == 2 {
+                    high_bytes.sort();
+                    high_bytes.dedup();
+                    if high_bytes.len() > 1 {
+                        return None;
+                    }
+                    reduced.push(high_bytes[0]);
+                    high_bytes.clear();
+                }
+                reduced.push(low_bytes[0]);
+                low_bytes.clear();
+            }
+        }
+    }
+
+    Some(reduced)
+}
+
+fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp: usize = 3 * byte_depth as usize;
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        for (i, byte) in line.data.iter().enumerate() {
+            // TODO: Implement
+        }
+    }
+
+    None
+}
+
+fn reduce_palette_to_grayscale(png: &PngData) -> Option<(Vec<u8>, bool)> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let bit_depth = png.ihdr_data.bit_depth.as_u8();
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        for (i, byte) in line.data.iter().enumerate() {
+            // TODO: Implement
+        }
+    }
+
+    None
+}
+
+fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp: usize = 2 * byte_depth as usize;
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        for (i, byte) in line.data.iter().enumerate() {
+            if i % bpp >= (bpp - byte_depth as usize) {
+                if *byte != 255 {
+                    return None;
+                }
+                reduced.push(*byte);
+            }
+        }
+    }
+
+    Some(reduced)
 }
 
 fn paeth_predictor(a: u8, b: u8, c: u8) -> u8 {

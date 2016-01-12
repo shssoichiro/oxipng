@@ -78,30 +78,30 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     let mut something_changed = false;
 
     if opts.color_type_reduction {
-        if let Some(data) = png.reduce_color_type() {
-            png.raw_data = data;
+        if png.reduce_color_type() {
             something_changed = true;
+            // TODO: Print message to terminal
         };
     }
 
     if opts.bit_depth_reduction {
-        if let Some(data) = png.reduce_bit_depth() {
-            png.raw_data = data;
+        if png.reduce_bit_depth() {
             something_changed = true;
+            // TODO: Print message to terminal
         };
     }
 
     if opts.palette_reduction {
-        if let Some(data) = png.reduce_palette() {
-            png.raw_data = data;
+        if png.reduce_palette() {
             something_changed = true;
+            // TODO: Print message to terminal
         };
     }
 
     if let Some(interlacing) = opts.interlace {
-        if let Some(data) = png.change_interlacing(interlacing) {
-            png.raw_data = data;
+        if png.change_interlacing(interlacing) {
             something_changed = true;
+            // TODO: Print message to terminal
         };
     }
 
