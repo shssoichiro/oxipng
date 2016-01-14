@@ -4,6 +4,7 @@ version = "1.0.0-alpha.1"
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 
 [dependencies]
+bit-vec = "^0.4.2"
 byteorder = "^0.4.0"
 clap = "^1.5.4"
 crc = "^1.0.0"

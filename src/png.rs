@@ -1,10 +1,10 @@
-use std::io::Cursor;
+use bit_vec::BitVec;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use crc::crc32;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::fmt;
 use std::fs::File;
+use std::io::Cursor;
 use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path::Path;
@@ -75,6 +75,16 @@ impl BitDepth {
             BitDepth::Four => 4,
             BitDepth::Eight => 8,
             BitDepth::Sixteen => 16,
+        }
+    }
+    fn from_u8(depth: u8) -> BitDepth {
+        match depth {
+            1 => BitDepth::One,
+            2 => BitDepth::Two,
+            4 => BitDepth::Four,
+            8 => BitDepth::Eight,
+            16 => BitDepth::Sixteen,
+            _ => panic!("Unsupported bit depth")
         }
     }
 }
@@ -598,6 +608,7 @@ impl PngData {
     }
     pub fn reduce_color_type(&mut self) -> bool {
         let mut changed = false;
+        let mut should_reduce_bit_depth = false;
 
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
@@ -617,6 +628,7 @@ impl PngData {
                 self.transparency_palette = Some(trans);
                 self.ihdr_data.color_type = ColorType::Indexed;
                 changed = true;
+                should_reduce_bit_depth = true;
             }
         }
 
@@ -626,18 +638,15 @@ impl PngData {
                 self.palette = Some(palette);
                 self.ihdr_data.color_type = ColorType::Indexed;
                 changed = true;
+                should_reduce_bit_depth = true;
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::Indexed {
-            if let Some((data, alpha)) = reduce_palette_to_grayscale(self) {
+        if self.ihdr_data.color_type == ColorType::Indexed && self.transparency_palette.is_none() {
+            if let Some(data) = reduce_palette_to_grayscale(self) {
                 self.raw_data = data;
                 self.palette = None;
-                if alpha {
-                    self.ihdr_data.color_type = ColorType::GrayscaleAlpha;
-                } else {
-                    self.ihdr_data.color_type = ColorType::Grayscale;
-                }
+                self.ihdr_data.color_type = ColorType::Grayscale;
                 changed = true;
             }
         }
@@ -646,7 +655,16 @@ impl PngData {
             if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
                 self.raw_data = data;
                 changed = true;
+                should_reduce_bit_depth = true;
             }
+        }
+
+        if should_reduce_bit_depth {
+            if let Some((data, depth)) = reduce_bit_depth_8_or_less(self) {
+                self.raw_data = data;
+                self.ihdr_data.bit_depth = BitDepth::from_u8(depth);
+            }
+
         }
 
         changed
@@ -655,6 +673,39 @@ impl PngData {
         // TODO: Implement
         false
     }
+}
+
+fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
+    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
+    let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
+    let mut allowed_bits = 1;
+    for line in png.scan_lines() {
+        let bit_vec = BitVec::from_bytes(&line.data);
+        for (i, bit) in bit_vec.iter().enumerate() {
+            let bit_index = bit_depth - (i % bit_depth);
+            if bit && bit_index > allowed_bits {
+                allowed_bits = bit_index.next_power_of_two();
+                if allowed_bits == bit_depth {
+                    // Not reducable
+                    return None;
+                }
+            }
+        }
+    }
+
+    for line in png.scan_lines() {
+        // I hate having to iterate twice...
+        reduced.extend(BitVec::from_bytes(&[line.filter]));
+        let bit_vec = BitVec::from_bytes(&line.data);
+        for (i, bit) in bit_vec.iter().enumerate() {
+            let bit_index = bit_depth - (i % bit_depth);
+            if bit_index <= allowed_bits {
+                reduced.push(bit);
+            }
+        }
+    }
+
+    Some((reduced.to_bytes(), allowed_bits as u8))
 }
 
 fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
@@ -755,31 +806,62 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
 }
 
 fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
-    // TODO: Implement
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
-    let bpp: usize = 3 * byte_depth as usize;
+    let mut palette = Vec::with_capacity(256);
+    let byte_depth: usize = (png.ihdr_data.bit_depth.as_u8() >> 3) as usize;
+    let bpp: usize = 3 * byte_depth;
     for line in png.scan_lines() {
         reduced.push(line.filter);
+        let mut cur_pixel = Vec::with_capacity(bpp);
         for (i, byte) in line.data.iter().enumerate() {
-
+            cur_pixel.push(*byte);
+            if i % bpp == bpp - 1 {
+                if !palette.contains(&cur_pixel) {
+                    palette.push(cur_pixel.clone());
+                }
+                if palette.len() > 255 {
+                    return None;
+                }
+                reduced.push(palette.binary_search(&cur_pixel).unwrap() as u8);
+                cur_pixel.clear();
+            }
         }
     }
 
-    None
+    let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
+    for color in palette {
+        color_palette.extend(&color);
+    }
+
+    Some((reduced, color_palette))
 }
 
-fn reduce_palette_to_grayscale(png: &PngData) -> Option<(Vec<u8>, bool)> {
-    // TODO: Implement
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let bit_depth = png.ihdr_data.bit_depth.as_u8();
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
-        for (i, byte) in line.data.iter().enumerate() {
-            let mut cur_bit = 0;
-            while cur_bit < 8 {
+fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
+    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
+    let mut cur_pixel = Vec::with_capacity(3);
+    let palette = png.palette.clone().unwrap();
+    for byte in &palette {
+        cur_pixel.push(*byte);
+        if cur_pixel.len() == 3 {
+            cur_pixel.sort();
+            cur_pixel.dedup();
+            if cur_pixel.len() > 1 {
+                return None;
+            }
+            cur_pixel.clear();
+        }
+    }
 
-                cur_bit += bit_depth;
+    let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
+    for line in png.scan_lines() {
+        reduced.extend(BitVec::from_bytes(&[line.filter]));
+        let bit_vec = BitVec::from_bytes(&line.data);
+        let mut cur_pixel = BitVec::with_capacity(bit_depth);
+        for bit in bit_vec {
+            cur_pixel.push(bit);
+            if cur_pixel.len() == bit_depth {
+                let palette_idx: usize = ((cur_pixel.to_bytes()[0] - 1) * 3) as usize;
+                reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
             }
         }
     }

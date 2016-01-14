@@ -1,3 +1,4 @@
+extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
 extern crate libc;
