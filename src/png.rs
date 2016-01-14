@@ -84,7 +84,7 @@ impl BitDepth {
             4 => BitDepth::Four,
             8 => BitDepth::Eight,
             16 => BitDepth::Sixteen,
-            _ => panic!("Unsupported bit depth")
+            _ => panic!("Unsupported bit depth"),
         }
     }
 }
@@ -660,11 +660,12 @@ impl PngData {
         }
 
         if should_reduce_bit_depth {
+            // Some conversions will allow us to perform bit depth reduction that
+            // wasn't possible before
             if let Some((data, depth)) = reduce_bit_depth_8_or_less(self) {
                 self.raw_data = data;
                 self.ihdr_data.bit_depth = BitDepth::from_u8(depth);
             }
-
         }
 
         changed
