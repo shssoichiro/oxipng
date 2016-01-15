@@ -100,10 +100,12 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     }
 
     if let Some(interlacing) = opts.interlace {
-        if png.change_interlacing(interlacing) {
-            something_changed = true;
-            // TODO: Print message to terminal
-        };
+        if interlacing != png.ihdr_data.interlaced {
+            if png.change_interlacing(interlacing) {
+                something_changed = true;
+                // TODO: Print message to terminal
+            }
+        }
     }
 
     if opts.idat_recoding || something_changed {
