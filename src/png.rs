@@ -9,7 +9,7 @@ use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path::Path;
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum ColorType {
     Grayscale,
     RGB,
@@ -44,7 +44,7 @@ impl ColorType {
     }
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum BitDepth {
     One,
     Two,
@@ -104,7 +104,7 @@ impl<'a> Iterator for ScanLines<'a> {
         } else {
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
-                                self.png.bits_per_pixel_raw() as usize;
+                                self.png.channels_per_pixel() as usize;
             // This avoids casting to and from floats, which is expensive
             let bytes_per_line = ((bits_per_line + bits_per_line % 8) >> 3) + 1;
             self.start = self.end;
@@ -190,7 +190,7 @@ impl PngData {
         if aux_headers.get("IHDR").is_none() {
             return Err("Image header data was missing, skipping".to_owned());
         }
-        let ihdr_header = match parse_ihdr_header(aux_headers.get("IHDR").unwrap().as_ref()) {
+        let ihdr_header = match parse_ihdr_header(aux_headers.remove("IHDR").unwrap().as_ref()) {
             Ok(x) => x,
             Err(x) => return Err(x),
         };
@@ -229,7 +229,7 @@ impl PngData {
         // Return the PngData
         Ok(png_data)
     }
-    pub fn bits_per_pixel_raw(&self) -> u8 {
+    pub fn channels_per_pixel(&self) -> u8 {
         match self.ihdr_data.color_type {
             ColorType::Grayscale => 1,
             ColorType::RGB => 3,
@@ -249,8 +249,8 @@ impl PngData {
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
         ihdr_data.write_u8(self.ihdr_data.color_type.png_header_code()).ok();
-        ihdr_data.write_u8(0).ok();
-        ihdr_data.write_u8(self.ihdr_data.filter).ok();
+        ihdr_data.write_u8(0).ok(); // Compression -- deflate
+        ihdr_data.write_u8(0).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
         output.reserve(ihdr_data.len() + 8);
         output.write_u32::<BigEndian>(ihdr_data.len() as u32 - 4).ok();
@@ -330,11 +330,11 @@ impl PngData {
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         // This avoids casting to and from floats, which is expensive
-        let tmp = self.ihdr_data.bit_depth.as_u8() * self.bits_per_pixel_raw();
+        let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
         let bpp = (tmp + tmp % 8) >> 3;
         let mut last_line: Vec<u8> = vec![];
         for line in self.scan_lines() {
-            unfiltered.push(line.filter);
+            unfiltered.push(0);
             match line.filter {
                 0 => {
                     let mut data = line.data.clone();
@@ -414,7 +414,7 @@ impl PngData {
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         // This avoids casting to and from floats, which is expensive
-        let tmp = self.ihdr_data.bit_depth.as_u8() * self.bits_per_pixel_raw();
+        let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
         let bpp = (tmp + tmp % 8) >> 3;
         let mut last_line: Vec<u8> = vec![];
         // We could try a different filter method for each line
@@ -426,8 +426,7 @@ impl PngData {
             }
             match filter {
                 0 => {
-                    let mut data = line.data.clone();
-                    filtered.append(&mut data);
+                    filtered.extend(&line.data);
                 }
                 1 => {
                     for (i, byte) in line.data.iter().enumerate() {
@@ -564,8 +563,7 @@ impl PngData {
                     }
 
                     filtered.push(best.0);
-                    let mut data = best.1.to_owned();
-                    filtered.append(&mut data);
+                    filtered.extend(best.1);
                 }
                 _ => panic!("Unreachable"),
             }
@@ -575,7 +573,13 @@ impl PngData {
     }
     pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
-            // TODO: Handle 8-bit to lower reduction
+            if self.ihdr_data.color_type == ColorType::Indexed ||
+                self.ihdr_data.color_type == ColorType::Grayscale {
+                return match reduce_bit_depth_8_or_less(self) {
+                    Some(_) => true,
+                    None => false
+                };
+            }
             return false;
         }
 
@@ -672,6 +676,10 @@ impl PngData {
     }
     pub fn change_interlacing(&mut self, interlace: u8) -> bool {
         // TODO: Implement
+        if interlace != self.ihdr_data.interlaced {
+            return false;
+        }
+
         false
     }
 }
@@ -770,7 +778,7 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
 
 fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = Vec::with_capacity(256);
+    let mut palette = HashMap::with_capacity(255);
     let byte_depth: usize = (png.ihdr_data.bit_depth.as_u8() >> 3) as usize;
     let bpp: usize = 4 * byte_depth;
     for line in png.scan_lines() {
@@ -779,13 +787,14 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains(&cur_pixel) {
-                    palette.push(cur_pixel.clone());
+                if !palette.contains_key(&cur_pixel) {
+                    let len = palette.len();
+                    if len >= 255 {
+                        return None;
+                    }
+                    palette.insert(cur_pixel.clone(), len as u8);
                 }
-                if palette.len() > 255 {
-                    return None;
-                }
-                reduced.push(palette.binary_search(&cur_pixel).unwrap() as u8);
+                reduced.push(palette.get(&cur_pixel).unwrap().clone());
                 cur_pixel.clear();
             }
         }
@@ -793,7 +802,7 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
 
     let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
     let mut trans_palette = Vec::with_capacity(palette.len() * byte_depth);
-    for color in palette {
+    for (color, _) in palette {
         for (i, byte) in color.iter().enumerate() {
             if i < byte_depth * 3 {
                 color_palette.push(*byte);
@@ -808,7 +817,7 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
 
 fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = Vec::with_capacity(256);
+    let mut palette = HashMap::with_capacity(255);
     let byte_depth: usize = (png.ihdr_data.bit_depth.as_u8() >> 3) as usize;
     let bpp: usize = 3 * byte_depth;
     for line in png.scan_lines() {
@@ -817,20 +826,21 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains(&cur_pixel) {
-                    palette.push(cur_pixel.clone());
+                if !palette.contains_key(&cur_pixel) {
+                    let len = palette.len();
+                    if len >= 255 {
+                        return None;
+                    }
+                    palette.insert(cur_pixel.clone(), len as u8);
                 }
-                if palette.len() > 255 {
-                    return None;
-                }
-                reduced.push(palette.binary_search(&cur_pixel).unwrap() as u8);
+                reduced.push(palette.get(&cur_pixel).unwrap().clone());
                 cur_pixel.clear();
             }
         }
     }
 
     let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
-    for color in palette {
+    for (color, _) in palette {
         color_palette.extend(&color);
     }
 

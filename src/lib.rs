@@ -68,7 +68,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      palette.len() / 3);
         } else {
             println!("    {}x{} bits/pixel, {:?}",
-                     png.bits_per_pixel_raw(),
+                     png.channels_per_pixel(),
                      png.ihdr_data.bit_depth,
                      png.ihdr_data.color_type);
         }
@@ -81,30 +81,37 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     if opts.color_type_reduction {
         if png.reduce_color_type() {
             something_changed = true;
-            // TODO: Print message to terminal
         };
     }
 
     if opts.bit_depth_reduction {
         if png.reduce_bit_depth() {
             something_changed = true;
-            // TODO: Print message to terminal
         };
     }
 
     if opts.palette_reduction {
         if png.reduce_palette() {
             something_changed = true;
-            // TODO: Print message to terminal
         };
     }
 
+    if something_changed {
+        if let Some(palette) = png.palette.clone() {
+            println!("Reducing image to {} bits/pixel, {} colors in palette",
+                     png.ihdr_data.bit_depth,
+                     palette.len() / 3);
+        } else {
+            println!("Reducing image to {}x{} bits/pixel, {:?}",
+                     png.channels_per_pixel(),
+                     png.ihdr_data.bit_depth,
+                     png.ihdr_data.color_type);
+        }
+    }
+
     if let Some(interlacing) = opts.interlace {
-        if interlacing != png.ihdr_data.interlaced {
-            if png.change_interlacing(interlacing) {
-                something_changed = true;
-                // TODO: Print message to terminal
-            }
+        if png.change_interlacing(interlacing) {
+            something_changed = true;
         }
     }
 
