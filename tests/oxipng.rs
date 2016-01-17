@@ -71,7 +71,6 @@ fn reduce_rgba_png() {
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 43 * 3);
 }
 
 #[test]
@@ -99,7 +98,6 @@ fn reduce_rgb_png() {
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 43 * 3);
 }
 
 #[test]
@@ -127,7 +125,6 @@ fn reduce_palette_png() {
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 43 * 3);
 }
 
 #[test]
