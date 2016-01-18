@@ -4,7 +4,7 @@
 
 ## Overview
 
-OxiPng is a PNG compression optimizer.
+OxiPng is a PNG compression optimizer. **Note:** This package is not yet complete. DO NOT use on any files without backing them up first.
 
 In the typical use case, OxiPng recompresses PNG image files
 losslessly and performs PNG integrity checks and corrections.
