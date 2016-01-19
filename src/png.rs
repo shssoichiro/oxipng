@@ -574,10 +574,10 @@ impl PngData {
     pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed ||
-                self.ihdr_data.color_type == ColorType::Grayscale {
+               self.ihdr_data.color_type == ColorType::Grayscale {
                 return match reduce_bit_depth_8_or_less(self) {
                     Some(_) => true,
-                    None => false
+                    None => false,
                 };
             }
             return false;
