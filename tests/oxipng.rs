@@ -358,7 +358,7 @@ fn palette_should_be_grayscale() {
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
