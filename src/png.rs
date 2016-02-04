@@ -123,7 +123,7 @@ struct ScanLine {
     data: Vec<u8>,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct PngData {
     pub idat_data: Vec<u8>,
     pub ihdr_data: IhdrData,
@@ -134,7 +134,7 @@ pub struct PngData {
     pub aux_headers: HashMap<String, Vec<u8>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct IhdrData {
     pub width: u32,
     pub height: u32,

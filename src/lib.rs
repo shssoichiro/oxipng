@@ -1,6 +1,7 @@
 extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
+extern crate crossbeam;
 extern crate libc;
 extern crate libz_sys;
 
@@ -13,6 +14,7 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 pub mod deflate {
     pub mod deflate;
@@ -118,42 +120,51 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
         let mut best: Option<(u8, u8, u8, u8)> = None;
+        let scoped_idat = Arc::new(png.idat_data.clone());
         let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
                            opts.strategies.len();
         println!("Trying: {} combinations", combinations);
-        // TODO: Multithreading
-        for f in &opts.filter {
-            let filtered = png.filter_image(*f);
-            for zc in &opts.compression {
-                for zm in &opts.memory {
-                    for zs in &opts.strategies {
-                        let new_idat = match deflate::deflate::deflate(&filtered,
-                                                                       *zc,
-                                                                       *zm,
-                                                                       *zs,
-                                                                       opts.window) {
-                            Ok(x) => x,
-                            Err(x) => return Err(x),
-                        };
-                        if new_idat.len() < png.idat_data.len() ||
-                           (best.is_none() && something_changed) {
-                            best = Some((*f, *zc, *zm, *zs));
-                            png.idat_data = new_idat.clone();
-                        }
-                        if opts.verbosity == Some(1) {
-                            println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                                     *zc,
-                                     *zm,
-                                     *zs,
-                                     *f,
-                                     new_idat.len());
+        crossbeam::scope(|scope| {
+            for f in &opts.filter {
+                let filtered = png.filter_image(*f);
+                for zc in &opts.compression {
+                    for zm in &opts.memory {
+                        for zs in &opts.strategies {
+                            let moved_png = png.clone();
+                            let mut moved_idat = scoped_idat.clone();
+                            let moved_filtered = filtered.clone();
+                            scope.spawn(move || {
+                                let new_idat = match deflate::deflate::deflate(&moved_filtered,
+                                                                               *zc,
+                                                                               *zm,
+                                                                               *zs,
+                                                                               opts.window) {
+                                    Ok(x) => x,
+                                    Err(x) => return Err(x),
+                                };
+                                if new_idat.len() < moved_png.idat_data.len() ||
+                                   (best.is_none() && something_changed) {
+                                    best = Some((*f, *zc, *zm, *zs));
+                                    *Arc::make_mut(&mut moved_idat) = new_idat.clone();
+                                }
+                                if opts.verbosity == Some(1) {
+                                    println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                                             *zc,
+                                             *zm,
+                                             *zs,
+                                             *f,
+                                             new_idat.len());
+                                }
+                                Ok(())
+                            });
                         }
                     }
                 }
             }
-        }
+        });
 
         if let Some(better) = best {
+            png.idat_data = Arc::try_unwrap(scoped_idat).unwrap().clone();
             println!("Found better combination:");
             println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
                      better.1,

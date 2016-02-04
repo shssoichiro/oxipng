@@ -371,7 +371,7 @@ fn palette_should_be_grayscale() {
 
 #[test]
 fn strip_headers() {
-    let input = PathBuf::from("tests/files/rgb_should_be_palette.png");
+    let input = PathBuf::from("tests/files/rgb_should_be_rgb.png");
     let mut opts = get_opts(&input);
     opts.strip = true;
     let output = opts.out_file.clone();
