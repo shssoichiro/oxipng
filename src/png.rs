@@ -9,7 +9,7 @@ use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path::Path;
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Copy)]
 pub enum ColorType {
     Grayscale,
     RGB,
@@ -44,7 +44,7 @@ impl ColorType {
     }
 }
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Copy)]
 pub enum BitDepth {
     One,
     Two,
@@ -89,6 +89,7 @@ impl BitDepth {
     }
 }
 
+#[derive(Debug,Clone)]
 struct ScanLines<'a> {
     png: &'a PngData,
     start: usize,
@@ -110,14 +111,14 @@ impl<'a> Iterator for ScanLines<'a> {
             self.start = self.end;
             self.end = self.start + bytes_per_line;
             Some(ScanLine {
-                filter: self.png.raw_data[self.start].clone(),
+                filter: self.png.raw_data[self.start],
                 data: self.png.raw_data[self.start + 1..self.end].to_owned(),
             })
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 struct ScanLine {
     filter: u8,
     data: Vec<u8>,
@@ -134,7 +135,7 @@ pub struct PngData {
     pub aux_headers: HashMap<String, Vec<u8>>,
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,Copy)]
 pub struct IhdrData {
     pub width: u32,
     pub height: u32,
@@ -231,10 +232,9 @@ impl PngData {
     }
     pub fn channels_per_pixel(&self) -> u8 {
         match self.ihdr_data.color_type {
-            ColorType::Grayscale => 1,
-            ColorType::RGB => 3,
-            ColorType::Indexed => 1,
+            ColorType::Grayscale | ColorType::Indexed => 1,
             ColorType::GrayscaleAlpha => 2,
+            ColorType::RGB => 3,
             ColorType::RGBA => 4,
         }
     }
@@ -244,7 +244,7 @@ impl PngData {
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
         let mut ihdr_data = Vec::with_capacity(17);
-        ihdr_data.extend("IHDR".as_bytes());
+        ihdr_data.extend_from_slice(b"IHDR");
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
@@ -261,7 +261,7 @@ impl PngData {
         for (key, header) in &self.aux_headers {
             let mut header_data = Vec::with_capacity(header.len() + 4);
             header_data.extend(key.as_bytes());
-            header_data.extend(header);
+            header_data.extend_from_slice(header);
             output.reserve(header_data.len() + 8);
             output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
             let crc = crc32::checksum_ieee(&header_data);
@@ -271,7 +271,7 @@ impl PngData {
         // Palette
         if let Some(palette) = self.palette.clone() {
             let mut palette_data = Vec::with_capacity(palette.len() + 4);
-            palette_data.extend("PLTE".as_bytes());
+            palette_data.extend_from_slice(b"PLTE");
             palette_data.extend(palette);
             output.reserve(palette_data.len() + 8);
             output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
@@ -281,7 +281,7 @@ impl PngData {
             if let Some(transparency_palette) = self.transparency_palette.clone() {
                 // Transparency pixel
                 let mut palette_data = Vec::with_capacity(transparency_palette.len() + 4);
-                palette_data.extend("tRNS".as_bytes());
+                palette_data.extend_from_slice(b"tRNS");
                 palette_data.extend(transparency_palette);
                 output.reserve(palette_data.len() + 8);
                 output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
@@ -292,7 +292,7 @@ impl PngData {
         } else if let Some(transparency_pixel) = self.transparency_pixel.clone() {
             // Transparency pixel
             let mut pixel_data = Vec::with_capacity(transparency_pixel.len() + 4);
-            pixel_data.extend("tRNS".as_bytes());
+            pixel_data.extend_from_slice(b"tRNS");
             pixel_data.extend(transparency_pixel);
             output.reserve(pixel_data.len() + 8);
             output.write_u32::<BigEndian>(pixel_data.len() as u32 - 4).ok();
@@ -302,7 +302,7 @@ impl PngData {
         }
         // IDAT data
         let mut idat_data = Vec::with_capacity(self.idat_data.len() + 4);
-        idat_data.extend("IDAT".as_bytes());
+        idat_data.extend_from_slice(b"IDAT");
         idat_data.extend(self.idat_data.clone());
         output.reserve(idat_data.len() + 8);
         output.write_u32::<BigEndian>(idat_data.len() as u32 - 4).ok();
@@ -310,11 +310,11 @@ impl PngData {
         output.append(&mut idat_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Stream end
-        let mut iend_data = "IEND".as_bytes().to_owned();
+        let iend_data = b"IEND";
         output.reserve(iend_data.len() + 8);
         output.write_u32::<BigEndian>(0).ok();
-        let crc = crc32::checksum_ieee(&iend_data);
-        output.append(&mut iend_data);
+        let crc = crc32::checksum_ieee(iend_data);
+        output.extend_from_slice(iend_data);
         output.write_u32::<BigEndian>(crc).ok();
 
         output
@@ -426,7 +426,7 @@ impl PngData {
             }
             match filter {
                 0 => {
-                    filtered.extend(&line.data);
+                    filtered.extend_from_slice(&line.data);
                 }
                 1 => {
                     for (i, byte) in line.data.iter().enumerate() {
@@ -563,7 +563,7 @@ impl PngData {
                     }
 
                     filtered.push(best.0);
-                    filtered.extend(best.1);
+                    filtered.extend_from_slice(best.1);
                 }
                 _ => panic!("Unreachable"),
             }
@@ -794,7 +794,7 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
                     }
                     palette.insert(cur_pixel.clone(), len as u8);
                 }
-                reduced.push(palette.get(&cur_pixel).unwrap().clone());
+                reduced.push(*palette.get(&cur_pixel).unwrap());
                 cur_pixel.clear();
             }
         }
@@ -802,7 +802,7 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
 
     let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
     let mut trans_palette = Vec::with_capacity(palette.len() * byte_depth);
-    for (color, _) in palette {
+    for color in palette.keys() {
         for (i, byte) in color.iter().enumerate() {
             if i < byte_depth * 3 {
                 color_palette.push(*byte);
@@ -833,15 +833,15 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
                     }
                     palette.insert(cur_pixel.clone(), len as u8);
                 }
-                reduced.push(palette.get(&cur_pixel).unwrap().clone());
+                reduced.push(*palette.get(&cur_pixel).unwrap());
                 cur_pixel.clear();
             }
         }
     }
 
     let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
-    for (color, _) in palette {
-        color_palette.extend(&color);
+    for color in palette.keys() {
+        color_palette.extend_from_slice(&color);
     }
 
     Some((reduced, color_palette))
