@@ -75,10 +75,10 @@ fn rgba_should_be_rgba() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -107,10 +107,10 @@ fn rgba_should_be_rgb() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -139,10 +139,10 @@ fn rgba_should_be_palette() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -171,10 +171,10 @@ fn rgba_should_be_grayscale_alpha() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -203,10 +203,10 @@ fn rgba_should_be_grayscale() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -235,10 +235,10 @@ fn rgb_should_be_rgb() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -267,10 +267,10 @@ fn rgb_should_be_palette() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -299,10 +299,10 @@ fn rgb_should_be_grayscale() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -331,10 +331,10 @@ fn palette_should_be_palette() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]
@@ -363,10 +363,10 @@ fn palette_should_be_grayscale() {
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
-    remove_file(output).ok();
-
     // Conversion should be lossless
     assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]

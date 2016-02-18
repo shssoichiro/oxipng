@@ -94,25 +94,30 @@ struct ScanLines<'a> {
     png: &'a PngData,
     start: usize,
     end: usize,
-    len: usize,
+}
+
+impl<'a> ScanLines<'a> {
+    fn len(&mut self) -> usize {
+        self.png.raw_data.len()
+    }
 }
 
 impl<'a> Iterator for ScanLines<'a> {
     type Item = ScanLine;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.end == self.len {
+        if self.end == self.len() {
             None
         } else {
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
             // This avoids casting to and from floats, which is expensive
-            let bytes_per_line = ((bits_per_line + bits_per_line % 8) >> 3) + 1;
+            let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
             self.start = self.end;
-            self.end = self.start + bytes_per_line;
+            self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
                 filter: self.png.raw_data[self.start],
-                data: self.png.raw_data[self.start + 1..self.end].to_owned(),
+                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
             })
         }
     }
@@ -324,7 +329,6 @@ impl PngData {
             png: &self,
             start: 0,
             end: 0,
-            len: self.raw_data.len(),
         }
     }
     pub fn unfilter_image(&self) -> Vec<u8> {
@@ -658,6 +662,7 @@ impl PngData {
         if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
             if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
                 self.raw_data = data;
+                self.ihdr_data.color_type = ColorType::Grayscale;
                 changed = true;
                 should_reduce_bit_depth = true;
             }
@@ -744,6 +749,7 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
         reduced.push(line.filter);
         let mut low_bytes = Vec::with_capacity(4);
         let mut high_bytes = Vec::with_capacity(4);
+        let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
         for (i, byte) in line.data.iter().enumerate() {
             if i % bpp < (bpp - byte_depth as usize) {
                 if byte_depth == 1 || i % 2 == 1 {
@@ -751,13 +757,16 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
                 } else {
                     high_bytes.push(*byte);
                 }
-            } else if i % bpp == bpp - 1 {
+            } else {
+                trans_bytes.push(*byte);
+            }
+
+            if i % bpp == bpp - 1 {
                 low_bytes.sort();
                 low_bytes.dedup();
                 if low_bytes.len() > 1 {
                     return None;
                 }
-                // FIXME: Ugly, is there a better way of making this dynamic for 16-bit content?
                 if byte_depth == 2 {
                     high_bytes.sort();
                     high_bytes.dedup();
@@ -769,6 +778,8 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
                 }
                 reduced.push(low_bytes[0]);
                 low_bytes.clear();
+                reduced.extend_from_slice(&trans_bytes);
+                trans_bytes.clear();
             }
         }
     }

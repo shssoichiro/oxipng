@@ -14,7 +14,6 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::Arc;
 
 pub mod deflate {
     pub mod deflate;
@@ -104,7 +103,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      png.ihdr_data.bit_depth,
                      palette.len() / 3);
         } else {
-            println!("Reducing image to {}x{} bits/pixel, {:?}",
+            println!("Reducing image to {}x{} bits/pixel, {}",
                      png.channels_per_pixel(),
                      png.ihdr_data.bit_depth,
                      png.ihdr_data.color_type);
@@ -119,10 +118,10 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
-        let mut best: Option<(u8, u8, u8, u8)> = None;
-        let scoped_idat = Arc::new(png.idat_data.clone());
+        let mut best: Option<(u8, u8, u8, u8, Vec<u8>)> = None;
         let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
                            opts.strategies.len();
+        let mut results = Vec::with_capacity(combinations);
         println!("Trying: {} combinations", combinations);
         crossbeam::scope(|scope| {
             for f in &opts.filter {
@@ -130,10 +129,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                 for zc in &opts.compression {
                     for zm in &opts.memory {
                         for zs in &opts.strategies {
-                            let moved_png = png.clone();
-                            let mut moved_idat = scoped_idat.clone();
                             let moved_filtered = filtered.clone();
-                            scope.spawn(move || {
+                            results.push(scope.spawn(move || {
                                 let new_idat = match deflate::deflate::deflate(&moved_filtered,
                                                                                *zc,
                                                                                *zm,
@@ -142,11 +139,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                                     Ok(x) => x,
                                     Err(x) => return Err(x),
                                 };
-                                if new_idat.len() < moved_png.idat_data.len() ||
-                                   (best.is_none() && something_changed) {
-                                    best = Some((*f, *zc, *zm, *zs));
-                                    *Arc::make_mut(&mut moved_idat) = new_idat.clone();
-                                }
+
                                 if opts.verbosity == Some(1) {
                                     println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
                                              *zc,
@@ -155,16 +148,26 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                                              *f,
                                              new_idat.len());
                                 }
-                                Ok(())
-                            });
+
+                                Ok((*f, *zc, *zm, *zs, new_idat.clone()))
+                            }));
                         }
                     }
                 }
             }
         });
 
+        for result in results {
+            if let Ok(ok_result) = result.join() {
+                if ok_result.4.len() < png.idat_data.len() ||
+                    (best.is_none() && something_changed) {
+                    best = Some(ok_result);
+                }
+            }
+        }
+
         if let Some(better) = best {
-            png.idat_data = Arc::try_unwrap(scoped_idat).unwrap().clone();
+            png.idat_data = better.4.clone();
             println!("Found better combination:");
             println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
                      better.1,
@@ -231,7 +234,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                  png.idat_data.len(),
                  idat_original_size - png.idat_data.len());
     } else {
-        println!("    IDAT size = {} bytes ({} bytes increate)",
+        println!("    IDAT size = {} bytes ({} bytes increase)",
                  png.idat_data.len(),
                  png.idat_data.len() - idat_original_size);
     }
@@ -239,12 +242,12 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
                  output_data.len(),
                  file_original_size - output_data.len(),
-                 (file_original_size - output_data.len()) as f64 / file_original_size as f64);
+                 (file_original_size - output_data.len()) as f64 / file_original_size as f64 * 100f64);
     } else {
         println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
                  output_data.len(),
                  output_data.len() - file_original_size,
-                 (output_data.len() - file_original_size) as f64 / file_original_size as f64);
+                 (output_data.len() - file_original_size) as f64 / file_original_size as f64 * 100f64);
     }
 
     Ok(())
