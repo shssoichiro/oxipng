@@ -886,7 +886,7 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             // At the end of each pixel, push its grayscale value onto the reduced image
             cur_pixel.push(bit);
             if cur_pixel.len() == bit_depth {
-                let palette_idx: usize = ((cur_pixel.to_bytes()[0]) * 3) as usize;
+                let palette_idx: usize = cur_pixel.to_bytes()[0] as usize * 3;
                 reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
                 // BitVec's clear function doesn't set len to 0
                 cur_pixel = BitVec::with_capacity(bit_depth);
