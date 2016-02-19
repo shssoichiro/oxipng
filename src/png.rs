@@ -708,7 +708,7 @@ fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
     }
 
     for line in png.scan_lines() {
-        // I hate having to iterate twice...
+        // FIXME: I hate having to iterate twice...
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
@@ -862,6 +862,7 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
     let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
     let mut cur_pixel = Vec::with_capacity(3);
     let palette = png.palette.clone().unwrap();
+    // Iterate through palette and determine if all colors are grayscale
     for byte in &palette {
         cur_pixel.push(*byte);
         if cur_pixel.len() == 3 {
@@ -874,21 +875,26 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
         }
     }
 
+    // Iterate through scanlines and assign grayscale value to each pixel
     let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
     for line in png.scan_lines() {
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
         let mut cur_pixel = BitVec::with_capacity(bit_depth);
         for bit in bit_vec {
+            // Handle bit depths less than 8-bits
+            // At the end of each pixel, push its grayscale value onto the reduced image
             cur_pixel.push(bit);
             if cur_pixel.len() == bit_depth {
-                let palette_idx: usize = ((cur_pixel.to_bytes()[0] - 1) * 3) as usize;
+                let palette_idx: usize = ((cur_pixel.to_bytes()[0]) * 3) as usize;
                 reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
+                // BitVec's clear function doesn't set len to 0
+                cur_pixel = BitVec::with_capacity(bit_depth);
             }
         }
     }
 
-    None
+    Some(reduced.to_bytes())
 }
 
 fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
