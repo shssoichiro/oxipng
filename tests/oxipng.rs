@@ -383,10 +383,7 @@ fn strip_headers() {
     assert!(output.exists());
 
     let png = match png::PngData::new(&output) {
-        Ok(x) => {
-            remove_file(output).ok();
-            x
-        },
+        Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
@@ -394,6 +391,14 @@ fn strip_headers() {
     };
 
     assert!(!png.aux_headers.contains_key("tEXt"));
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
 }
 
 #[test]

@@ -263,7 +263,7 @@ impl PngData {
         output.append(&mut ihdr_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Ancillary headers
-        for (key, header) in &self.aux_headers {
+        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")) {
             let mut header_data = Vec::with_capacity(header.len() + 4);
             header_data.extend(key.as_bytes());
             header_data.extend_from_slice(header);
@@ -303,6 +303,17 @@ impl PngData {
             output.write_u32::<BigEndian>(pixel_data.len() as u32 - 4).ok();
             let crc = crc32::checksum_ieee(&pixel_data);
             output.append(&mut pixel_data);
+            output.write_u32::<BigEndian>(crc).ok();
+        }
+        // Special ancillary headers that need to come after PLTE but before IDAT
+        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| **key == "bKGD" || **key == "hIST" || **key == "tRNS") {
+            let mut header_data = Vec::with_capacity(header.len() + 4);
+            header_data.extend(key.as_bytes());
+            header_data.extend_from_slice(header);
+            output.reserve(header_data.len() + 8);
+            output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
+            let crc = crc32::checksum_ieee(&header_data);
+            output.append(&mut header_data);
             output.write_u32::<BigEndian>(crc).ok();
         }
         // IDAT data
@@ -788,34 +799,39 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
 }
 
 fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> {
+    if png.ihdr_data.bit_depth != BitDepth::Eight {
+        return None;
+    }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = HashMap::with_capacity(255);
-    let byte_depth: usize = (png.ihdr_data.bit_depth.as_u8() >> 3) as usize;
-    let bpp: usize = 4 * byte_depth;
+    let mut palette = Vec::with_capacity(256);
+    let bpp: usize = 4;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut cur_pixel = Vec::with_capacity(bpp);
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains_key(&cur_pixel) {
+                if !palette.contains(&cur_pixel) {
                     let len = palette.len();
-                    if len >= 255 {
+                    if len == 256 {
                         return None;
                     }
-                    palette.insert(cur_pixel.clone(), len as u8);
+                    palette.push(cur_pixel.clone());
+                    reduced.push(len as u8);
+                } else {
+                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                    reduced.push(idx as u8);
                 }
-                reduced.push(*palette.get(&cur_pixel).unwrap());
                 cur_pixel.clear();
             }
         }
     }
 
-    let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
-    let mut trans_palette = Vec::with_capacity(palette.len() * byte_depth);
-    for color in palette.keys() {
+    let mut color_palette = Vec::with_capacity(palette.len() * 3);
+    let mut trans_palette = Vec::with_capacity(palette.len());
+    for color in &palette {
         for (i, byte) in color.iter().enumerate() {
-            if i < byte_depth * 3 {
+            if i < 3 {
                 color_palette.push(*byte);
             } else {
                 trans_palette.push(*byte);
@@ -827,31 +843,36 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
 }
 
 fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
+    if png.ihdr_data.bit_depth != BitDepth::Eight {
+        return None;
+    }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = HashMap::with_capacity(255);
-    let byte_depth: usize = (png.ihdr_data.bit_depth.as_u8() >> 3) as usize;
-    let bpp: usize = 3 * byte_depth;
+    let mut palette = Vec::with_capacity(256);
+    let bpp: usize = 3;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut cur_pixel = Vec::with_capacity(bpp);
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains_key(&cur_pixel) {
+                if !palette.contains(&cur_pixel) {
                     let len = palette.len();
-                    if len >= 255 {
+                    if len == 256 {
                         return None;
                     }
-                    palette.insert(cur_pixel.clone(), len as u8);
+                    palette.push(cur_pixel.clone());
+                    reduced.push(len as u8);
+                } else {
+                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                    reduced.push(idx as u8);
                 }
-                reduced.push(*palette.get(&cur_pixel).unwrap());
                 cur_pixel.clear();
             }
         }
     }
 
-    let mut color_palette = Vec::with_capacity(palette.len() * byte_depth * 3);
-    for color in palette.keys() {
+    let mut color_palette = Vec::with_capacity(palette.len() * 3);
+    for color in &palette {
         color_palette.extend_from_slice(&color);
     }
 
