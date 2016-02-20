@@ -12,7 +12,6 @@ use std::path::PathBuf;
 fn get_opts(input: &Path) -> oxipng::Options {
     let mut filter = HashSet::new();
     filter.insert(0);
-    filter.insert(5);
     let mut compression = HashSet::new();
     compression.insert(9);
     let mut memory = HashSet::new();

@@ -159,8 +159,11 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
         for result in results {
             if let Ok(ok_result) = result.join() {
-                if ok_result.4.len() < png.idat_data.len() ||
-                    (best.is_none() && something_changed) {
+                if (best.is_some() && ok_result.4.len() < best.clone().unwrap().4.len()) ||
+                   (best.is_none() &&
+                    (ok_result.4.len() < png.idat_data.len() ||
+                     opts.interlace != Some(png.ihdr_data.interlaced) ||
+                     opts.force)) {
                     best = Some(ok_result);
                 }
             }
@@ -242,12 +245,14 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
                  output_data.len(),
                  file_original_size - output_data.len(),
-                 (file_original_size - output_data.len()) as f64 / file_original_size as f64 * 100f64);
+                 (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
+                 100f64);
     } else {
         println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
                  output_data.len(),
                  output_data.len() - file_original_size,
-                 (output_data.len() - file_original_size) as f64 / file_original_size as f64 * 100f64);
+                 (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
+                 100f64);
     }
 
     Ok(())

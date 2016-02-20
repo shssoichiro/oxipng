@@ -263,7 +263,9 @@ impl PngData {
         output.append(&mut ihdr_data);
         output.write_u32::<BigEndian>(crc).ok();
         // Ancillary headers
-        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")) {
+        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
+            !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")
+        }) {
             let mut header_data = Vec::with_capacity(header.len() + 4);
             header_data.extend(key.as_bytes());
             header_data.extend_from_slice(header);
@@ -306,7 +308,9 @@ impl PngData {
             output.write_u32::<BigEndian>(crc).ok();
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| **key == "bKGD" || **key == "hIST" || **key == "tRNS") {
+        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
+            **key == "bKGD" || **key == "hIST" || **key == "tRNS"
+        }) {
             let mut header_data = Vec::with_capacity(header.len() + 4);
             header_data.extend(key.as_bytes());
             header_data.extend_from_slice(header);
