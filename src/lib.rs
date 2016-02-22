@@ -162,7 +162,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                 if (best.is_some() && ok_result.4.len() < best.clone().unwrap().4.len()) ||
                    (best.is_none() &&
                     (ok_result.4.len() < png.idat_data.len() ||
-                     opts.interlace != Some(png.ihdr_data.interlaced) ||
+                     (opts.interlace.is_some() &&
+                      opts.interlace != Some(png.ihdr_data.interlaced)) ||
                      opts.force)) {
                     best = Some(ok_result);
                 }

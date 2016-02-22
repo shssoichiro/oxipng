@@ -356,15 +356,16 @@ impl PngData {
             unfiltered.push(0);
             match line.filter {
                 0 => {
-                    let mut data = line.data.clone();
-                    last_line = data.clone();
-                    unfiltered.append(&mut data);
+                    unfiltered.extend_from_slice(&line.data);
                 }
                 1 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         match i.checked_sub(bpp as usize) {
-                            Some(x) => data.push(byte.wrapping_add(line.data[x])),
+                            Some(x) => {
+                                let b = data[x];
+                                data.push(byte.wrapping_add(b))
+                            }
                             None => data.push(*byte),
                         }
                     }
@@ -387,17 +388,23 @@ impl PngData {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         if !last_line.is_empty() {
-                            data.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_add(
-                                    ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
-                                ),
-                                None => byte.wrapping_add(last_line[i] >> 1),
-                            });
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(
+                                        ((b as u16 + last_line[i] as u16) >> 1) as u8
+                                    ))
+                                }
+                                None => data.push(byte.wrapping_add(last_line[i] >> 1)),
+                            };
                         } else {
-                            data.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_add(line.data[x] >> 1),
-                                None => *byte,
-                            });
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(b >> 1))
+                                }
+                                None => data.push(*byte),
+                            };
                         };
                     }
                     last_line = data.clone();
@@ -407,19 +414,23 @@ impl PngData {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         if !last_line.is_empty() {
-                            data.push(match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp as usize) {
                                 Some(x) => {
-                                    byte.wrapping_add(paeth_predictor(line.data[x],
-                                                                      last_line[i],
-                                                                      last_line[x]))
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(paeth_predictor(b,
+                                                                                last_line[i],
+                                                                                last_line[x])))
                                 }
-                                None => byte.wrapping_add(last_line[i]),
-                            });
+                                None => data.push(byte.wrapping_add(last_line[i])),
+                            };
                         } else {
-                            data.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_add(line.data[x]),
-                                None => *byte,
-                            });
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(b))
+                                }
+                                None => data.push(*byte),
+                            };
                         };
                     }
                     last_line = data.clone();
