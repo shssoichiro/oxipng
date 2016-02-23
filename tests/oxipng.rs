@@ -56,7 +56,7 @@ fn rgba_should_be_rgba() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -65,7 +65,7 @@ fn rgba_should_be_rgba() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
@@ -75,7 +75,8 @@ fn rgba_should_be_rgba() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -88,7 +89,7 @@ fn rgba_should_be_rgb() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -97,7 +98,7 @@ fn rgba_should_be_rgb() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::RGB);
@@ -107,7 +108,8 @@ fn rgba_should_be_rgb() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -120,7 +122,7 @@ fn rgba_should_be_palette() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -129,7 +131,7 @@ fn rgba_should_be_palette() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
@@ -139,7 +141,8 @@ fn rgba_should_be_palette() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -152,7 +155,7 @@ fn rgba_should_be_grayscale_alpha() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -161,7 +164,7 @@ fn rgba_should_be_grayscale_alpha() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
@@ -171,7 +174,8 @@ fn rgba_should_be_grayscale_alpha() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -184,7 +188,7 @@ fn rgba_should_be_grayscale() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -193,7 +197,7 @@ fn rgba_should_be_grayscale() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
@@ -203,7 +207,8 @@ fn rgba_should_be_grayscale() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -216,7 +221,7 @@ fn rgb_should_be_rgb() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -225,7 +230,7 @@ fn rgb_should_be_rgb() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::RGB);
@@ -235,7 +240,8 @@ fn rgb_should_be_rgb() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -248,7 +254,7 @@ fn rgb_should_be_palette() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -257,7 +263,7 @@ fn rgb_should_be_palette() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
@@ -267,7 +273,8 @@ fn rgb_should_be_palette() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -280,7 +287,7 @@ fn rgb_should_be_grayscale() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -289,7 +296,7 @@ fn rgb_should_be_grayscale() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
@@ -299,7 +306,8 @@ fn rgb_should_be_grayscale() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -312,7 +320,7 @@ fn palette_should_be_palette() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -321,7 +329,7 @@ fn palette_should_be_palette() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
@@ -331,7 +339,8 @@ fn palette_should_be_palette() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -344,7 +353,7 @@ fn palette_should_be_grayscale() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -353,7 +362,7 @@ fn palette_should_be_grayscale() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
@@ -363,7 +372,41 @@ fn palette_should_be_grayscale() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_should_be_grayscale() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_should_be_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -377,7 +420,7 @@ fn strip_headers() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned())
+        Err(x) => panic!(x.to_owned()),
     };
     assert!(output.exists());
 
@@ -386,7 +429,7 @@ fn strip_headers() {
         Err(x) => {
             remove_file(output).ok();
             panic!(x.to_owned())
-        },
+        }
     };
 
     assert!(!png.aux_headers.contains_key("tEXt"));
@@ -395,7 +438,8 @@ fn strip_headers() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() == new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
