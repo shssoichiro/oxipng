@@ -97,7 +97,7 @@ struct ScanLines<'a> {
 }
 
 impl<'a> ScanLines<'a> {
-    fn len(&mut self) -> usize {
+    fn len(&self) -> usize {
         self.png.raw_data.len()
     }
 }
@@ -759,6 +759,7 @@ fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
                 if *byte != 255 {
                     return None;
                 }
+            } else {
                 reduced.push(*byte);
             }
         }

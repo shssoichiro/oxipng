@@ -215,7 +215,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             let mut buffer = BufWriter::new(io::stdout());
             match buffer.write_all(&output_data) {
                 Ok(_) => (),
-                Err(_) => return Err(format!("Unable to write to stdout")),
+                Err(_) => return Err("Unable to write to stdout".to_owned()),
             }
         } else {
             let out_file = match File::create(&opts.out_file) {
