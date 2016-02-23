@@ -945,6 +945,7 @@ fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
                 if *byte != 255 {
                     return None;
                 }
+            } else {
                 reduced.push(*byte);
             }
         }
