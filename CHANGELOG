@@ -1,0 +1,8 @@
+v 0.0.1 (unreleased)
+ - Initial alpha release
+ - Reduce color type
+ - Recompress with zlib
+ - Multithreading
+ - Strip headers
+ - Backup file before writing
+ - Write to stdout

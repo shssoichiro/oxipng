@@ -1,6 +1,6 @@
 [package]
 name = "oxipng"
-version = "1.0.0-alpha.1"
+version = "0.0.1"
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 
 [dependencies]
