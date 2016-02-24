@@ -90,28 +90,22 @@ impl BitDepth {
 }
 
 #[derive(Debug,Clone)]
-struct ScanLines<'a> {
-    png: &'a PngData,
+pub struct ScanLines<'a> {
+    pub png: &'a PngData,
     start: usize,
     end: usize,
-}
-
-impl<'a> ScanLines<'a> {
-    fn len(&self) -> usize {
-        self.png.raw_data.len()
-    }
 }
 
 impl<'a> Iterator for ScanLines<'a> {
     type Item = ScanLine;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.end == self.len() {
+        if self.end == self.png.raw_data.len() {
             None
         } else {
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
-            // This avoids casting to and from floats, which is expensive
+            // Round up without converting to float
             let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
@@ -124,9 +118,9 @@ impl<'a> Iterator for ScanLines<'a> {
 }
 
 #[derive(Debug,Clone)]
-struct ScanLine {
-    filter: u8,
-    data: Vec<u8>,
+pub struct ScanLine {
+    pub filter: u8,
+    pub data: Vec<u8>,
 }
 
 #[derive(Debug,Clone)]
@@ -339,7 +333,7 @@ impl PngData {
 
         output
     }
-    fn scan_lines(&self) -> ScanLines {
+    pub fn scan_lines(&self) -> ScanLines {
         ScanLines {
             png: &self,
             start: 0,
@@ -348,8 +342,8 @@ impl PngData {
     }
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        // This avoids casting to and from floats, which is expensive
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
+        // Round up without converting to float
         let bpp = (tmp + tmp % 8) >> 3;
         let mut last_line: Vec<u8> = vec![];
         for line in self.scan_lines() {
@@ -375,10 +369,10 @@ impl PngData {
                 2 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
-                            data.push(byte.wrapping_add(last_line[i]));
-                        } else {
+                        if last_line.is_empty() {
                             data.push(*byte);
+                        } else {
+                            data.push(byte.wrapping_add(last_line[i]));
                         };
                     }
                     last_line = data.clone();
@@ -387,7 +381,15 @@ impl PngData {
                 3 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
+                        if last_line.is_empty() {
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(b >> 1))
+                                }
+                                None => data.push(*byte),
+                            };
+                        } else {
                             match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     let b = data[x];
@@ -397,14 +399,6 @@ impl PngData {
                                 }
                                 None => data.push(byte.wrapping_add(last_line[i] >> 1)),
                             };
-                        } else {
-                            match i.checked_sub(bpp as usize) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(b >> 1))
-                                }
-                                None => data.push(*byte),
-                            };
                         };
                     }
                     last_line = data.clone();
@@ -413,7 +407,15 @@ impl PngData {
                 4 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
+                        if last_line.is_empty() {
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    let b = data[x];
+                                    data.push(byte.wrapping_add(b))
+                                }
+                                None => data.push(*byte),
+                            };
+                        } else {
                             match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     let b = data[x];
@@ -422,14 +424,6 @@ impl PngData {
                                                                                 last_line[x])))
                                 }
                                 None => data.push(byte.wrapping_add(last_line[i])),
-                            };
-                        } else {
-                            match i.checked_sub(bpp as usize) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(b))
-                                }
-                                None => data.push(*byte),
                             };
                         };
                     }
@@ -443,8 +437,8 @@ impl PngData {
     }
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        // This avoids casting to and from floats, which is expensive
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
+        // Round up without converting to float
         let bpp = (tmp + tmp % 8) >> 3;
         let mut last_line: Vec<u8> = vec![];
         // We could try a different filter method for each line
@@ -468,33 +462,38 @@ impl PngData {
                 }
                 2 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
-                            filtered.push(byte.wrapping_sub(last_line[i]));
-                        } else {
+                        if last_line.is_empty() {
                             filtered.push(*byte);
+                        } else {
+                            filtered.push(byte.wrapping_sub(last_line[i]));
                         };
                     }
                 }
                 3 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
+                        if last_line.is_empty() {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_sub(line.data[x] >> 1),
+                                None => *byte,
+                            });
+                        } else {
                             filtered.push(match i.checked_sub(bpp as usize) {
                                 Some(x) => byte.wrapping_sub(
                                     ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
                                 ),
                                 None => byte.wrapping_sub(last_line[i] >> 1),
                             });
-                        } else {
-                            filtered.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_sub(line.data[x] >> 1),
-                                None => *byte,
-                            });
                         };
                     }
                 }
                 4 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
+                        if last_line.is_empty() {
+                            filtered.push(match i.checked_sub(bpp as usize) {
+                                Some(x) => byte.wrapping_sub(line.data[x]),
+                                None => *byte,
+                            });
+                        } else {
                             filtered.push(match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     byte.wrapping_sub(paeth_predictor(line.data[x],
@@ -502,11 +501,6 @@ impl PngData {
                                                                       last_line[x]))
                                 }
                                 None => byte.wrapping_sub(last_line[i]),
-                            });
-                        } else {
-                            filtered.push(match i.checked_sub(bpp as usize) {
-                                Some(x) => byte.wrapping_sub(line.data[x]),
-                                None => *byte,
                             });
                         };
                     }
@@ -525,7 +519,22 @@ impl PngData {
                     let mut line_3 = Vec::with_capacity(line.data.len());
                     let mut line_4 = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        if !last_line.is_empty() {
+                        if last_line.is_empty() {
+                            match i.checked_sub(bpp as usize) {
+                                Some(x) => {
+                                    line_1.push(byte.wrapping_sub(line.data[x]));
+                                    line_2.push(*byte);
+                                    line_3.push(byte.wrapping_sub(line.data[x] >> 1));
+                                    line_4.push(byte.wrapping_sub(line.data[x]));
+                                }
+                                None => {
+                                    line_1.push(*byte);
+                                    line_2.push(*byte);
+                                    line_3.push(*byte);
+                                    line_4.push(*byte);
+                                }
+                            }
+                        } else {
                             match i.checked_sub(bpp as usize) {
                                 Some(x) => {
                                     line_1.push(byte.wrapping_sub(line.data[x]));
@@ -542,21 +551,6 @@ impl PngData {
                                     line_2.push(byte.wrapping_sub(last_line[i]));
                                     line_3.push(byte.wrapping_sub(last_line[i] >> 1));
                                     line_4.push(byte.wrapping_sub(last_line[i]));
-                                }
-                            }
-                        } else {
-                            match i.checked_sub(bpp as usize) {
-                                Some(x) => {
-                                    line_1.push(byte.wrapping_sub(line.data[x]));
-                                    line_2.push(*byte);
-                                    line_3.push(byte.wrapping_sub(line.data[x] >> 1));
-                                    line_4.push(byte.wrapping_sub(line.data[x]));
-                                }
-                                None => {
-                                    line_1.push(*byte);
-                                    line_2.push(*byte);
-                                    line_3.push(*byte);
-                                    line_4.push(*byte);
                                 }
                             }
                         };
@@ -606,33 +600,42 @@ impl PngData {
             if self.ihdr_data.color_type == ColorType::Indexed ||
                self.ihdr_data.color_type == ColorType::Grayscale {
                 return match reduce_bit_depth_8_or_less(self) {
-                    Some(_) => true,
+                    Some((data, depth)) => {
+                        self.raw_data = data;
+                        self.ihdr_data.bit_depth = BitDepth::from_u8(depth);
+                        true
+                    }
                     None => false,
                 };
             }
             return false;
         }
 
-        // It's difficult to estimate without knowing the number of ScanLines
-        // So we overallocate to prioritize speed over memory efficiency
-        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        // Reduce from 16 to 8 bits per channel per pixel
+        let mut reduced =
+            Vec::with_capacity((self.ihdr_data.width * self.ihdr_data.height *
+                                self.channels_per_pixel() as u32 +
+                                self.ihdr_data.height) as usize);
+        let mut high_byte = 0;
 
         for line in self.scan_lines() {
             reduced.push(line.filter);
             for (i, byte) in line.data.iter().enumerate() {
                 if i % 2 == 0 {
                     // High byte
-                    if *byte != 0 {
+                    high_byte = *byte;
+                } else {
+                    // Low byte
+                    if high_byte != *byte {
                         // Can't reduce, exit early
                         return false;
                     }
-                } else {
-                    // Low byte
                     reduced.push(*byte);
                 }
             }
         }
 
+        self.ihdr_data.bit_depth = BitDepth::Eight;
         self.raw_data = reduced;
         true
     }
@@ -647,7 +650,6 @@ impl PngData {
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
         if self.ihdr_data.color_type == ColorType::RGBA {
-            // Do this first, it's more likely to exit early
             if let Some(data) = reduce_rgba_to_grayscale_alpha(self) {
                 self.raw_data = data;
                 self.ihdr_data.color_type = ColorType::GrayscaleAlpha;
@@ -659,15 +661,33 @@ impl PngData {
             } else if let Some((data, palette, trans)) = reduce_rgba_to_palette(self) {
                 self.raw_data = data;
                 self.palette = Some(palette);
-                self.transparency_palette = Some(trans);
+                if trans.iter().any(|x| *x != 255) {
+                    self.transparency_palette = Some(trans);
+                } else {
+                    self.transparency_palette = None;
+                }
                 self.ihdr_data.color_type = ColorType::Indexed;
                 changed = true;
                 should_reduce_bit_depth = true;
             }
         }
 
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
+            if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
+                self.raw_data = data;
+                self.ihdr_data.color_type = ColorType::Grayscale;
+                changed = true;
+                should_reduce_bit_depth = true;
+            }
+        }
+
         if self.ihdr_data.color_type == ColorType::RGB {
-            if let Some((data, palette)) = reduce_rgb_to_palette(self) {
+            if let Some(data) = reduce_rgb_to_grayscale(self) {
+                self.raw_data = data;
+                self.ihdr_data.color_type = ColorType::Grayscale;
+                changed = true;
+                should_reduce_bit_depth = true;
+            } else if let Some((data, palette)) = reduce_rgb_to_palette(self) {
                 self.raw_data = data;
                 self.palette = Some(palette);
                 self.ihdr_data.color_type = ColorType::Indexed;
@@ -676,19 +696,20 @@ impl PngData {
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::Indexed && self.transparency_palette.is_none() {
+        if self.ihdr_data.color_type == ColorType::Indexed && self.transparency_palette.is_none() &&
+           self.palette.as_ref().map(|x| x.len()).unwrap() > 128 {
             if let Some(data) = reduce_palette_to_grayscale(self) {
                 self.raw_data = data;
                 self.palette = None;
                 self.ihdr_data.color_type = ColorType::Grayscale;
                 changed = true;
+                should_reduce_bit_depth = false;
             }
-        }
-
-        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
-            if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
+        } else if self.ihdr_data.color_type == ColorType::Grayscale {
+            if let Some((data, palette)) = reduce_grayscale_to_palette(self) {
                 self.raw_data = data;
-                self.ihdr_data.color_type = ColorType::Grayscale;
+                self.palette = Some(palette);
+                self.ihdr_data.color_type = ColorType::Indexed;
                 changed = true;
                 should_reduce_bit_depth = true;
             }
@@ -742,6 +763,10 @@ fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
             if bit_index <= allowed_bits {
                 reduced.push(bit);
             }
+        }
+        // Pad end of line to get 8 bits per byte
+        while reduced.len() % 8 != 0 {
+            reduced.push(false);
         }
     }
 
@@ -820,23 +845,23 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = Vec::with_capacity(256);
-    let bpp: usize = 4;
+    let bpp: usize = (4 * png.ihdr_data.bit_depth.as_u8() as usize) >> 3;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut cur_pixel = Vec::with_capacity(bpp);
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains(&cur_pixel) {
+                if palette.contains(&cur_pixel) {
+                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                    reduced.push(idx as u8);
+                } else {
                     let len = palette.len();
                     if len == 256 {
                         return None;
                     }
                     palette.push(cur_pixel.clone());
                     reduced.push(len as u8);
-                } else {
-                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
-                    reduced.push(idx as u8);
                 }
                 cur_pixel.clear();
             }
@@ -864,23 +889,23 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = Vec::with_capacity(256);
-    let bpp: usize = 3;
+    let bpp: usize = (3 * png.ihdr_data.bit_depth.as_u8() as usize) >> 3;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut cur_pixel = Vec::with_capacity(bpp);
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if !palette.contains(&cur_pixel) {
+                if palette.contains(&cur_pixel) {
+                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                    reduced.push(idx as u8);
+                } else {
                     let len = palette.len();
                     if len == 256 {
                         return None;
                     }
                     palette.push(cur_pixel.clone());
                     reduced.push(len as u8);
-                } else {
-                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
-                    reduced.push(idx as u8);
                 }
                 cur_pixel.clear();
             }
@@ -893,6 +918,57 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
     }
 
     Some((reduced, color_palette))
+}
+
+fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
+    if png.ihdr_data.bit_depth == BitDepth::Sixteen {
+        return None;
+    }
+    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
+    // Only perform reduction if we can get to 4-bits or less
+    let mut palette = Vec::with_capacity(16);
+    let bpp: usize = png.ihdr_data.bit_depth.as_u8() as usize;
+    for line in png.scan_lines() {
+        reduced.extend(BitVec::from_bytes(&[line.filter]));
+        let bit_vec = BitVec::from_bytes(&line.data);
+        let mut cur_pixel = BitVec::with_capacity(bpp);
+        for (i, bit) in bit_vec.iter().enumerate() {
+            cur_pixel.push(bit);
+            if i % bpp == bpp - 1 {
+                let pix_value = cur_pixel.to_bytes()[0] >> (8 - bpp);
+                let pix_slice = vec![pix_value, pix_value, pix_value];
+                if palette.contains(&pix_slice) {
+                    let index = palette.iter().enumerate().find(|&x| x.1 == &pix_slice).unwrap().0;
+                    let idx = BitVec::from_bytes(&[(index as u8) << (8 - bpp)]);
+                    for b in idx.iter().take(bpp) {
+                        reduced.push(b);
+                    }
+                } else {
+                    let len = palette.len();
+                    if len == 16 {
+                        return None;
+                    }
+                    palette.push(pix_slice.clone());
+                    let idx = BitVec::from_bytes(&[(len as u8) << (8 - bpp)]);
+                    for b in idx.iter().take(bpp) {
+                        reduced.push(b);
+                    }
+                }
+                cur_pixel = BitVec::with_capacity(bpp);
+            }
+        }
+        // Pad end of line to get 8 bits per byte
+        while reduced.len() % 8 != 0 {
+            reduced.push(false);
+        }
+    }
+
+    let mut color_palette = Vec::with_capacity(palette.len() * 3);
+    for color in &palette {
+        color_palette.extend_from_slice(&color);
+    }
+
+    Some((reduced.to_bytes(), color_palette))
 }
 
 fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
@@ -923,15 +999,64 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             // At the end of each pixel, push its grayscale value onto the reduced image
             cur_pixel.push(bit);
             if cur_pixel.len() == bit_depth {
-                let palette_idx: usize = cur_pixel.to_bytes()[0] as usize * 3;
+                // `to_bytes` gives us e.g. 10000000 for a 1-bit pixel, when we would want 00000001
+                let padded_pixel = cur_pixel.to_bytes()[0] >> (8 - bit_depth);
+                let palette_idx: usize = padded_pixel as usize * 3;
                 reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
                 // BitVec's clear function doesn't set len to 0
                 cur_pixel = BitVec::with_capacity(bit_depth);
             }
         }
+        // Pad end of line to get 8 bits per byte
+        while reduced.len() % 8 != 0 {
+            reduced.push(false);
+        }
     }
 
     Some(reduced.to_bytes())
+}
+
+fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
+    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp: usize = 3 * byte_depth as usize;
+    let mut cur_pixel = Vec::with_capacity(bpp);
+    for line in png.scan_lines() {
+        reduced.push(line.filter);
+        for (i, byte) in line.data.iter().enumerate() {
+            cur_pixel.push(*byte);
+            if i % bpp == bpp - 1 {
+                if bpp == 3 {
+                    cur_pixel.sort();
+                    cur_pixel.dedup();
+                    if cur_pixel.len() > 1 {
+                        return None;
+                    }
+                    reduced.push(cur_pixel[0]);
+                } else {
+                    let mut pixel_zip = cur_pixel.iter()
+                                                 .enumerate()
+                                                 .filter(|&(i, _)| i % 2 == 0)
+                                                 .map(|(_, x)| *x)
+                                                 .zip(cur_pixel.iter()
+                                                               .enumerate()
+                                                               .filter(|&(i, _)| i % 2 == 1)
+                                                               .map(|(_, x)| *x))
+                                                 .collect::<Vec<(u8, u8)>>();
+                    pixel_zip.sort();
+                    pixel_zip.dedup();
+                    if pixel_zip.len() > 1 {
+                        return None;
+                    }
+                    reduced.push(pixel_zip[0].0);
+                    reduced.push(pixel_zip[0].1);
+                }
+                cur_pixel.clear();
+            }
+        }
+    }
+
+    Some(reduced)
 }
 
 fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {

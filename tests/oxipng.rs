@@ -49,10 +49,53 @@ fn get_opts(input: &Path) -> oxipng::Options {
 }
 
 #[test]
-fn rgba_should_be_rgba() {
-    let input = PathBuf::from("tests/files/rgba_should_be_rgba.png");
+fn rgba_16_should_be_rgba_16() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_rgba_16.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_rgba_8() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_rgba_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -82,10 +125,91 @@ fn rgba_should_be_rgba() {
 }
 
 #[test]
-fn rgba_should_be_rgb() {
-    let input = PathBuf::from("tests/files/rgba_should_be_rgb.png");
+fn rgba_8_should_be_rgba_8() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_rgba_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_rgb_16() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_rgb_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_rgb_8() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_rgb_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -115,10 +239,53 @@ fn rgba_should_be_rgb() {
 }
 
 #[test]
-fn rgba_should_be_palette() {
-    let input = PathBuf::from("tests/files/rgba_should_be_palette.png");
+fn rgba_8_should_be_rgb_8() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_rgb_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_8() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -148,10 +315,319 @@ fn rgba_should_be_palette() {
 }
 
 #[test]
-fn rgba_should_be_grayscale_alpha() {
-    let input = PathBuf::from("tests/files/rgba_should_be_grayscale_alpha.png");
+fn rgba_8_should_be_palette_8() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_grayscale_alpha_16() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_alpha_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_grayscale_alpha_8() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_alpha_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -181,10 +657,91 @@ fn rgba_should_be_grayscale_alpha() {
 }
 
 #[test]
-fn rgba_should_be_grayscale() {
-    let input = PathBuf::from("tests/files/rgba_should_be_grayscale.png");
+fn rgba_8_should_be_grayscale_alpha_8() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_grayscale_alpha_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_grayscale_16() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -214,10 +771,319 @@ fn rgba_should_be_grayscale() {
 }
 
 #[test]
-fn rgb_should_be_rgb() {
-    let input = PathBuf::from("tests/files/rgb_should_be_rgb.png");
+fn rgba_8_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_grayscale_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_4_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_4_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_4_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_4_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_2_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_2_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_2_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_2_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_16_should_be_palette_1_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_1_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgba_8_should_be_palette_1_grayscale() {
+    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_1_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_rgb_16() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_rgb_8() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -247,10 +1113,53 @@ fn rgb_should_be_rgb() {
 }
 
 #[test]
-fn rgb_should_be_palette() {
-    let input = PathBuf::from("tests/files/rgb_should_be_palette.png");
+fn rgb_8_should_be_rgb_8() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_8() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -280,43 +1189,15 @@ fn rgb_should_be_palette() {
 }
 
 #[test]
-fn rgb_should_be_grayscale() {
-    let input = PathBuf::from("tests/files/rgb_should_be_grayscale.png");
+fn rgb_8_should_be_palette_8() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    match oxipng::optimize(&input, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
-    };
-    assert!(output.exists());
+    let png = png::PngData::new(&input).unwrap();
 
-    let png = match png::PngData::new(&output) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!(x.to_owned())
-        }
-    };
-
-    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-
-    let old_png = image::open(&input).unwrap();
-    let new_png = image::open(&output).unwrap();
-
-    // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn palette_should_be_palette() {
-    let input = PathBuf::from("tests/files/palette_should_be_palette.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone();
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -346,10 +1227,281 @@ fn palette_should_be_palette() {
 }
 
 #[test]
-fn palette_should_be_grayscale() {
-    let input = PathBuf::from("tests/files/palette_should_be_grayscale.png");
+fn rgb_16_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_4.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_grayscale_16() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_grayscale_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -379,10 +1531,15 @@ fn palette_should_be_grayscale() {
 }
 
 #[test]
-fn grayscale_alpha_should_be_grayscale() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_should_be_grayscale.png");
+fn rgb_8_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -400,6 +1557,1412 @@ fn grayscale_alpha_should_be_grayscale() {
 
     assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_4_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_4_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_4_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_4_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_2_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_2_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_2_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_2_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_16_should_be_palette_1_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_1_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn rgb_8_should_be_palette_1_grayscale() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_1_grayscale.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGB);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_8_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_8_should_be_palette_8() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_palette_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_8_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_4_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/palette_4_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_8_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_4_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/palette_4_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_2_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/palette_2_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_8_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_4_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/palette_4_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_2_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/palette_2_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_1_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/palette_1_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_grayscale_16() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_16.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_8_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_8_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_8_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_16_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_alpha_8_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::GrayscaleAlpha);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_16_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/grayscale_16_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_16_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/grayscale_16_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_16_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/grayscale_16_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_16_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/grayscale_16_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Sixteen);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_8_should_be_grayscale_8() {
+    let input = PathBuf::from("tests/files/grayscale_8_should_be_grayscale_8.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_8_should_be_palette_4() {
+    let input = PathBuf::from("tests/files/grayscale_8_should_be_palette_4.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Four);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_8_should_be_palette_2() {
+    let input = PathBuf::from("tests/files/grayscale_8_should_be_palette_2.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Two);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn grayscale_8_should_be_palette_1() {
+    let input = PathBuf::from("tests/files/grayscale_8_should_be_palette_1.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
@@ -413,10 +2976,14 @@ fn grayscale_alpha_should_be_grayscale() {
 
 #[test]
 fn strip_headers() {
-    let input = PathBuf::from("tests/files/rgb_should_be_rgb.png");
+    let input = PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png");
     let mut opts = get_opts(&input);
     opts.strip = true;
     let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.aux_headers.contains_key("tEXt"));
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -442,46 +3009,4 @@ fn strip_headers() {
             new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
-}
-
-#[test]
-#[ignore]
-fn downgrade_16_to_8() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_8_to_4() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_8_to_2() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_8_to_1() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_4_to_2() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_4_to_1() {
-    unimplemented!();
-}
-
-#[test]
-#[ignore]
-fn downgrade_2_to_1() {
-    unimplemented!();
 }

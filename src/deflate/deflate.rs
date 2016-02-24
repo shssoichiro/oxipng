@@ -1,5 +1,5 @@
 use libz_sys;
-use libc;
+use libc::c_int;
 
 pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
     let mut input = data.to_owned();
@@ -19,10 +19,10 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
 
 pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, String> {
     let mut input = data.to_owned();
-    let mut stream = super::stream::Stream::new_compress(zc as libc::c_int,
-                                                         zw as libc::c_int,
-                                                         zm as libc::c_int,
-                                                         zs as libc::c_int);
+    let mut stream = super::stream::Stream::new_compress(zc as c_int,
+                                                         zw as c_int,
+                                                         zm as c_int,
+                                                         zs as c_int);
     let mut output = Vec::with_capacity(data.len() / 20);
     loop {
         match stream.compress_vec(input.as_mut(), output.as_mut()) {
