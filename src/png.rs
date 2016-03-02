@@ -430,7 +430,7 @@ impl PngData {
                     last_line = data.clone();
                     unfiltered.append(&mut data);
                 }
-                _ => panic!("Unreachable"),
+                _ => unreachable!(),
             }
         }
         unfiltered
@@ -589,7 +589,7 @@ impl PngData {
                     filtered.push(best.0);
                     filtered.extend_from_slice(best.1);
                 }
-                _ => panic!("Unreachable"),
+                _ => unreachable!(),
             }
             last_line = line.data.clone();
         }

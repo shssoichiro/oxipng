@@ -513,7 +513,7 @@ fn parse_numeric_range_opts(input: &str,
                 }
                 return Ok(items);
             }
-            _ => panic!("Unreachable"),
+            _ => unreachable!(),
         });
     }
 
