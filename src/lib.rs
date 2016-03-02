@@ -5,15 +5,10 @@ extern crate crossbeam;
 extern crate libc;
 extern crate libz_sys;
 
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::fs;
-use std::fs::File;
-use std::io;
-use std::io::BufWriter;
-use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
+use std::collections::{HashMap, HashSet};
+use std::fs::{File, copy};
+use std::io::{BufWriter, Write, stdout};
+use std::path::{Path, PathBuf};
 
 pub mod deflate {
     pub mod deflate;
@@ -79,40 +74,43 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     let mut something_changed = false;
 
-    if opts.color_type_reduction {
-        if png.reduce_color_type() {
-            something_changed = true;
-        };
-    }
-
     if opts.bit_depth_reduction {
         if png.reduce_bit_depth() {
             something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        };
+    }
+
+    if opts.color_type_reduction {
+        if png.reduce_color_type() {
+            something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
         };
     }
 
     if opts.palette_reduction {
         if png.reduce_palette() {
             something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
         };
     }
 
-    if something_changed {
-        if let Some(palette) = png.palette.clone() {
-            println!("Reducing image to {} bits/pixel, {} colors in palette",
-                     png.ihdr_data.bit_depth,
-                     palette.len() / 3);
-        } else {
-            println!("Reducing image to {}x{} bits/pixel, {}",
-                     png.channels_per_pixel(),
-                     png.ihdr_data.bit_depth,
-                     png.ihdr_data.color_type);
-        }
+    if something_changed && opts.verbosity.is_some() {
+        report_reduction(&png);
     }
 
     if let Some(interlacing) = opts.interlace {
         if png.change_interlacing(interlacing) {
             something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
         }
     }
 
@@ -159,7 +157,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
         for result in results {
             if let Ok(ok_result) = result.join() {
-                if (best.is_some() && ok_result.4.len() < best.clone().unwrap().4.len()) ||
+                if (best.is_some() &&
+                    ok_result.4.len() < best.as_ref().map(|x| x.4.len()).unwrap()) ||
                    (best.is_none() &&
                     (ok_result.4.len() < png.idat_data.len() ||
                      (opts.interlace.is_some() &&
@@ -197,12 +196,12 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         println!("Running in pretend mode, no output");
     } else {
         if opts.backup {
-            match fs::copy(in_file,
-                           in_file.with_extension(format!("bak.{}",
-                                                          in_file.extension()
-                                                                 .unwrap()
-                                                                 .to_str()
-                                                                 .unwrap()))) {
+            match copy(in_file,
+                       in_file.with_extension(format!("bak.{}",
+                                                      in_file.extension()
+                                                             .unwrap()
+                                                             .to_str()
+                                                             .unwrap()))) {
                 Ok(x) => x,
                 Err(_) => {
                     return Err(format!("Unable to write to backup file at {}",
@@ -212,7 +211,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
 
         if opts.stdout {
-            let mut buffer = BufWriter::new(io::stdout());
+            let mut buffer = BufWriter::new(stdout());
             match buffer.write_all(&output_data) {
                 Ok(_) => (),
                 Err(_) => return Err("Unable to write to stdout".to_owned()),
@@ -257,4 +256,17 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn report_reduction(png: &png::PngData) {
+    if let Some(palette) = png.palette.clone() {
+        println!("Reducing image to {} bits/pixel, {} colors in palette",
+                 png.ihdr_data.bit_depth,
+                 palette.len() / 3);
+    } else {
+        println!("Reducing image to {}x{} bits/pixel, {}",
+                 png.channels_per_pixel(),
+                 png.ihdr_data.bit_depth,
+                 png.ihdr_data.color_type);
+    }
 }
