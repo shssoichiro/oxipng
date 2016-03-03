@@ -343,8 +343,7 @@ impl PngData {
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
-        // Round up without converting to float
-        let bpp = (tmp + tmp % 8) >> 3;
+        let bpp = ((tmp as f32) / 8f32).ceil() as usize;
         let mut last_line: Vec<u8> = vec![];
         for line in self.scan_lines() {
             unfiltered.push(0);
@@ -355,7 +354,7 @@ impl PngData {
                 1 => {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
-                        match i.checked_sub(bpp as usize) {
+                        match i.checked_sub(bpp) {
                             Some(x) => {
                                 let b = data[x];
                                 data.push(byte.wrapping_add(b))
@@ -382,7 +381,7 @@ impl PngData {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         if last_line.is_empty() {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     let b = data[x];
                                     data.push(byte.wrapping_add(b >> 1))
@@ -390,7 +389,7 @@ impl PngData {
                                 None => data.push(*byte),
                             };
                         } else {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     let b = data[x];
                                     data.push(byte.wrapping_add(
@@ -408,7 +407,7 @@ impl PngData {
                     let mut data = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         if last_line.is_empty() {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     let b = data[x];
                                     data.push(byte.wrapping_add(b))
@@ -416,7 +415,7 @@ impl PngData {
                                 None => data.push(*byte),
                             };
                         } else {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     let b = data[x];
                                     data.push(byte.wrapping_add(paeth_predictor(b,
@@ -438,8 +437,7 @@ impl PngData {
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
-        // Round up without converting to float
-        let bpp = (tmp + tmp % 8) >> 3;
+        let bpp = ((tmp as f32) / 8f32).ceil() as usize;
         let mut last_line: Vec<u8> = vec![];
         // We could try a different filter method for each line
         // But that would be prohibitively slow and probably not provide much benefit
@@ -454,7 +452,7 @@ impl PngData {
                 }
                 1 => {
                     for (i, byte) in line.data.iter().enumerate() {
-                        filtered.push(match i.checked_sub(bpp as usize) {
+                        filtered.push(match i.checked_sub(bpp) {
                             Some(x) => byte.wrapping_sub(line.data[x]),
                             None => *byte,
                         });
@@ -472,12 +470,12 @@ impl PngData {
                 3 => {
                     for (i, byte) in line.data.iter().enumerate() {
                         if last_line.is_empty() {
-                            filtered.push(match i.checked_sub(bpp as usize) {
+                            filtered.push(match i.checked_sub(bpp) {
                                 Some(x) => byte.wrapping_sub(line.data[x] >> 1),
                                 None => *byte,
                             });
                         } else {
-                            filtered.push(match i.checked_sub(bpp as usize) {
+                            filtered.push(match i.checked_sub(bpp) {
                                 Some(x) => byte.wrapping_sub(
                                     ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
                                 ),
@@ -489,12 +487,12 @@ impl PngData {
                 4 => {
                     for (i, byte) in line.data.iter().enumerate() {
                         if last_line.is_empty() {
-                            filtered.push(match i.checked_sub(bpp as usize) {
+                            filtered.push(match i.checked_sub(bpp) {
                                 Some(x) => byte.wrapping_sub(line.data[x]),
                                 None => *byte,
                             });
                         } else {
-                            filtered.push(match i.checked_sub(bpp as usize) {
+                            filtered.push(match i.checked_sub(bpp) {
                                 Some(x) => {
                                     byte.wrapping_sub(paeth_predictor(line.data[x],
                                                                       last_line[i],
@@ -520,7 +518,7 @@ impl PngData {
                     let mut line_4 = Vec::with_capacity(line.data.len());
                     for (i, byte) in line.data.iter().enumerate() {
                         if last_line.is_empty() {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     line_1.push(byte.wrapping_sub(line.data[x]));
                                     line_2.push(*byte);
@@ -535,7 +533,7 @@ impl PngData {
                                 }
                             }
                         } else {
-                            match i.checked_sub(bpp as usize) {
+                            match i.checked_sub(bpp) {
                                 Some(x) => {
                                     line_1.push(byte.wrapping_sub(line.data[x]));
                                     line_2.push(byte.wrapping_sub(last_line[i]));
