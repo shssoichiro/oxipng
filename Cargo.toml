@@ -7,6 +7,9 @@ license = "MIT"
 documentation = "https://github.com/shssoichiro/oxipng"
 homepage = "https://github.com/shssoichiro/oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
+exclude = [
+  "tests/*",
+]
 
 [dependencies]
 bit-vec = "^0.4.2"
