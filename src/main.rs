@@ -230,26 +230,27 @@ fn main() {
                                .iter()
                                .map(PathBuf::from)
                                .collect(),
-                        &mut opts);
+                        opts);
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: &mut oxipng::Options) {
+fn handle_optimization(inputs: Vec<PathBuf>, opts: oxipng::Options) {
     for input in inputs {
+        let mut current_opts = opts.clone();
         if input.is_dir() {
-            if opts.recursive {
+            if current_opts.recursive {
                 handle_optimization(input.read_dir().unwrap().map(|x| x.unwrap().path()).collect(),
-                                    opts)
+                                    current_opts)
             } else {
                 println!("{} is a directory, skipping", input.display());
             }
             continue;
         }
-        if let Some(out_dir) = opts.out_dir.clone() {
-            opts.out_file = out_dir.join(input.file_name().unwrap());
-        } else if opts.out_file.components().count() == 0 {
-            opts.out_file = input.clone();
+        if let Some(out_dir) = current_opts.out_dir.clone() {
+            current_opts.out_file = out_dir.join(input.file_name().unwrap());
+        } else if current_opts.out_file.components().count() == 0 {
+            current_opts.out_file = input.clone();
         }
-        match oxipng::optimize(&input, opts) {
+        match oxipng::optimize(&input, &current_opts) {
             Ok(_) => (),
             Err(x) => println!("{}", x),
         };

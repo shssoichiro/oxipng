@@ -16,6 +16,7 @@ pub mod deflate {
 }
 pub mod png;
 
+#[derive(Clone,Debug)]
 pub struct Options {
     pub backup: bool,
     pub out_file: PathBuf,
