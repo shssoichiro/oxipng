@@ -48,7 +48,13 @@ fn get_opts(input: &Path) -> oxipng::Options {
     }
 }
 
-fn test_it_converts(input: &Path, output: &Path, opts: &oxipng::Options, color_type_in: png::ColorType, bit_depth_in: png::BitDepth, color_type_out: png::ColorType, bit_depth_out: png::BitDepth) {
+fn test_it_converts(input: &Path,
+                    output: &Path,
+                    opts: &oxipng::Options,
+                    color_type_in: png::ColorType,
+                    bit_depth_in: png::BitDepth,
+                    color_type_out: png::ColorType,
+                    bit_depth_out: png::BitDepth) {
     let png = png::PngData::new(input).unwrap();
 
     assert!(png.ihdr_data.color_type == color_type_in);
@@ -88,7 +94,13 @@ fn rgba_16_should_be_rgba_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::RGBA, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -97,7 +109,13 @@ fn rgba_16_should_be_rgba_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::RGBA, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -106,7 +124,13 @@ fn rgba_8_should_be_rgba_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::RGBA, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -115,7 +139,13 @@ fn rgba_16_should_be_rgb_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::RGB, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -124,7 +154,13 @@ fn rgba_16_should_be_rgb_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::RGB, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -133,7 +169,13 @@ fn rgba_8_should_be_rgb_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::RGB, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -142,7 +184,13 @@ fn rgba_16_should_be_palette_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -151,7 +199,13 @@ fn rgba_8_should_be_palette_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -160,7 +214,13 @@ fn rgba_16_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -169,7 +229,13 @@ fn rgba_8_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -178,7 +244,13 @@ fn rgba_16_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -187,7 +259,13 @@ fn rgba_8_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -196,7 +274,13 @@ fn rgba_16_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -205,7 +289,13 @@ fn rgba_8_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -214,7 +304,13 @@ fn rgba_16_should_be_grayscale_alpha_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -223,7 +319,13 @@ fn rgba_16_should_be_grayscale_alpha_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -232,7 +334,13 @@ fn rgba_8_should_be_grayscale_alpha_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -241,7 +349,13 @@ fn rgba_16_should_be_grayscale_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -250,7 +364,13 @@ fn rgba_16_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -259,7 +379,13 @@ fn rgba_8_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -268,7 +394,13 @@ fn rgba_16_should_be_palette_4_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -277,7 +409,13 @@ fn rgba_8_should_be_palette_4_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -286,7 +424,13 @@ fn rgba_16_should_be_palette_2_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -295,7 +439,13 @@ fn rgba_8_should_be_palette_2_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -304,7 +454,13 @@ fn rgba_16_should_be_palette_1_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -313,7 +469,13 @@ fn rgba_8_should_be_palette_1_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGBA, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGBA,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -322,7 +484,13 @@ fn rgb_16_should_be_rgb_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::RGB, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -331,7 +499,13 @@ fn rgb_16_should_be_rgb_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::RGB, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -340,7 +514,13 @@ fn rgb_8_should_be_rgb_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::RGB, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -349,7 +529,13 @@ fn rgb_16_should_be_palette_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -358,7 +544,13 @@ fn rgb_8_should_be_palette_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -367,7 +559,13 @@ fn rgb_16_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -376,7 +574,13 @@ fn rgb_8_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -385,7 +589,13 @@ fn rgb_16_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -394,7 +604,13 @@ fn rgb_8_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -403,7 +619,13 @@ fn rgb_16_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -412,7 +634,13 @@ fn rgb_8_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -421,7 +649,13 @@ fn rgb_16_should_be_grayscale_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -430,7 +664,13 @@ fn rgb_16_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -439,7 +679,13 @@ fn rgb_8_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -448,7 +694,13 @@ fn rgb_16_should_be_palette_4_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -457,7 +709,13 @@ fn rgb_8_should_be_palette_4_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -466,7 +724,13 @@ fn rgb_16_should_be_palette_2_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -475,7 +739,13 @@ fn rgb_8_should_be_palette_2_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -484,7 +754,13 @@ fn rgb_16_should_be_palette_1_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -493,7 +769,13 @@ fn rgb_8_should_be_palette_1_grayscale() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::RGB, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -502,7 +784,13 @@ fn palette_8_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Eight, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -511,7 +799,13 @@ fn palette_8_should_be_palette_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -520,7 +814,13 @@ fn palette_8_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -529,7 +829,13 @@ fn palette_4_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Four, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -538,7 +844,13 @@ fn palette_8_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -547,7 +859,13 @@ fn palette_4_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Four, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -556,7 +874,13 @@ fn palette_2_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Two, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -565,7 +889,13 @@ fn palette_8_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -574,7 +904,13 @@ fn palette_4_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Four, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -583,7 +919,13 @@ fn palette_2_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::Two, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -592,7 +934,13 @@ fn palette_1_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Indexed, png::BitDepth::One, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -601,7 +949,13 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -610,7 +964,13 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -619,7 +979,13 @@ fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -628,7 +994,13 @@ fn grayscale_alpha_16_should_be_grayscale_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -637,7 +1009,13 @@ fn grayscale_alpha_16_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -646,7 +1024,13 @@ fn grayscale_alpha_8_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -655,7 +1039,13 @@ fn grayscale_alpha_16_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -664,7 +1054,13 @@ fn grayscale_alpha_8_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -673,7 +1069,13 @@ fn grayscale_alpha_16_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -682,7 +1084,13 @@ fn grayscale_alpha_8_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -691,7 +1099,13 @@ fn grayscale_alpha_16_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -700,7 +1114,13 @@ fn grayscale_alpha_8_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::GrayscaleAlpha,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -709,7 +1129,13 @@ fn grayscale_16_should_be_grayscale_16() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Sixteen);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen);
 }
 
 #[test]
@@ -718,7 +1144,13 @@ fn grayscale_16_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Sixteen, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -727,7 +1159,13 @@ fn grayscale_16_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -736,7 +1174,13 @@ fn grayscale_16_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -745,7 +1189,13 @@ fn grayscale_16_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Sixteen, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Sixteen,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
 
 #[test]
@@ -754,7 +1204,13 @@ fn grayscale_8_should_be_grayscale_8() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Eight, png::ColorType::Grayscale, png::BitDepth::Eight);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight);
 }
 
 #[test]
@@ -763,7 +1219,13 @@ fn grayscale_8_should_be_palette_4() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Four);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Four);
 }
 
 #[test]
@@ -772,7 +1234,13 @@ fn grayscale_8_should_be_palette_2() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::Two);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Two);
 }
 
 #[test]
@@ -781,5 +1249,11 @@ fn grayscale_8_should_be_palette_1() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input, &output, &opts, png::ColorType::Grayscale, png::BitDepth::Eight, png::ColorType::Indexed, png::BitDepth::One);
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Grayscale,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
 }
