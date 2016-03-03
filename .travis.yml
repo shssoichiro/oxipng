@@ -1,8 +1,6 @@
 language: rust
 rust:
+  - 1.6.0
   - stable
   - beta
   - nightly
-matrix:
-  allow_failures:
-    - rust: nightly
