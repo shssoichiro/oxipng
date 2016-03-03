@@ -2,6 +2,11 @@
 name = "oxipng"
 version = "0.1.0"
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
+description = "A lossless PNG compression optimizer"
+license = "MIT"
+documentation = "https://github.com/shssoichiro/oxipng"
+homepage = "https://github.com/shssoichiro/oxipng"
+repository = "https://github.com/shssoichiro/oxipng"
 
 [dependencies]
 bit-vec = "^0.4.2"
