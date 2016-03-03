@@ -1,7 +1,6 @@
 # OxiPng
 
 [![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg)](https://travis-ci.org/shssoichiro/oxipng)
-[![Coverage Status](https://coveralls.io/repos/github/shssoichiro/oxipng/badge.svg?branch=master)](https://coveralls.io/github/shssoichiro/oxipng?branch=master)
 
 ## Overview
 
