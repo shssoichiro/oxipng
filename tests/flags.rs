@@ -50,7 +50,7 @@ fn get_opts(input: &Path) -> oxipng::Options {
 
 #[test]
 fn strip_headers() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png");
+    let input = PathBuf::from("tests/files/strip_headers.png");
     let mut opts = get_opts(&input);
     opts.strip = true;
     let output = opts.out_file.clone();
