@@ -7,6 +7,8 @@ use regex::Regex;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+const VERSION_STRING: &'static str = "0.1.1";
+
 fn main() {
     let mut filter = HashSet::new();
     filter.insert(0);
@@ -47,7 +49,7 @@ fn main() {
     };
 
     let matches = App::new("oxipng")
-                      .version("1.0.0-alpha.1")
+                      .version(VERSION_STRING)
                       .author("Joshua Holmer <jholmer.in@gmail.com>")
                       .about("Losslessly improves compression of PNG files")
                       .arg(Arg::with_name("files")
