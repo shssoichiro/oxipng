@@ -45,6 +45,7 @@ fn get_opts(input: &Path) -> oxipng::Options {
         palette_reduction: true,
         idat_recoding: true,
         strip: false,
+        use_heuristics: false,
     }
 }
 

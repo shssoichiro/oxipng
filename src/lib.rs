@@ -41,11 +41,14 @@ pub struct Options {
     pub palette_reduction: bool,
     pub idat_recoding: bool,
     pub strip: bool,
+    pub use_heuristics: bool,
 }
 
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // Decode PNG from file
-    if opts.verbosity.is_some() { println!("Processing: {}", filepath.to_str().unwrap()) };
+    if opts.verbosity.is_some() {
+        println!("Processing: {}", filepath.to_str().unwrap())
+    };
     let in_file = Path::new(filepath);
     let mut png = match png::PngData::new(&in_file) {
         Ok(x) => x,
@@ -71,6 +74,31 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
         println!("    IDAT size = {} bytes", idat_original_size);
         println!("    File size = {} bytes", file_original_size);
+    }
+
+    let mut filter = opts.filter.clone();
+    let compression = opts.compression.clone();
+    let memory = opts.memory.clone();
+    let mut strategies = opts.strategies.clone();
+
+    if opts.use_heuristics {
+        // Heuristically determine which set of options to use
+        if png.ihdr_data.bit_depth.as_u8() >= 8 &&
+           png.ihdr_data.color_type != png::ColorType::Indexed {
+            if filter.is_empty() {
+                filter.insert(5);
+            }
+            if strategies.is_empty() {
+                strategies.insert(1);
+            }
+        } else {
+            if filter.is_empty() {
+                filter.insert(0);
+            }
+            if strategies.is_empty() {
+                strategies.insert(0);
+            }
+        }
     }
 
     let mut something_changed = false;
@@ -118,16 +146,17 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
         let mut best: Option<(u8, u8, u8, u8, Vec<u8>)> = None;
-        let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
-                           opts.strategies.len();
+        let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
         let mut results = Vec::with_capacity(combinations);
-        if opts.verbosity.is_some() { println!("Trying: {} combinations", combinations) };
+        if opts.verbosity.is_some() {
+            println!("Trying: {} combinations", combinations)
+        };
         crossbeam::scope(|scope| {
-            for f in &opts.filter {
+            for f in &filter {
                 let filtered = png.filter_image(*f);
-                for zc in &opts.compression {
-                    for zm in &opts.memory {
-                        for zs in &opts.strategies {
+                for zc in &compression {
+                    for zm in &memory {
+                        for zs in &strategies {
                             let moved_filtered = filtered.clone();
                             results.push(scope.spawn(move || {
                                 let new_idat = match deflate::deflate::deflate(&moved_filtered,
@@ -173,13 +202,13 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         if let Some(better) = best {
             png.idat_data = better.4.clone();
             if opts.verbosity.is_some() {
-            println!("Found better combination:");
-            println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                     better.1,
-                     better.2,
-                     better.3,
-                     better.0,
-                     png.idat_data.len());
+                println!("Found better combination:");
+                println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                         better.1,
+                         better.2,
+                         better.3,
+                         better.0,
+                         png.idat_data.len());
             }
         }
     }
@@ -240,25 +269,25 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     if opts.verbosity.is_some() {
         if idat_original_size >= png.idat_data.len() {
             println!("    IDAT size = {} bytes ({} bytes decrease)",
-                    png.idat_data.len(),
-                    idat_original_size - png.idat_data.len());
+                     png.idat_data.len(),
+                     idat_original_size - png.idat_data.len());
         } else {
             println!("    IDAT size = {} bytes ({} bytes increase)",
-                    png.idat_data.len(),
-                    png.idat_data.len() - idat_original_size);
+                     png.idat_data.len(),
+                     png.idat_data.len() - idat_original_size);
         }
         if file_original_size >= output_data.len() {
             println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                    output_data.len(),
-                    file_original_size - output_data.len(),
-                    (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
-                    100f64);
+                     output_data.len(),
+                     file_original_size - output_data.len(),
+                     (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
+                     100f64);
         } else {
             println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
-                    output_data.len(),
-                    output_data.len() - file_original_size,
-                    (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
-                    100f64);
+                     output_data.len(),
+                     output_data.len() - file_original_size,
+                     (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
+                     100f64);
         }
     }
     Ok(())

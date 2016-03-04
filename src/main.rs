@@ -46,6 +46,7 @@ fn main() {
         palette_reduction: true,
         idat_recoding: true,
         strip: false,
+        use_heuristics: false,
     };
 
     let matches = App::new("oxipng")
@@ -202,7 +203,7 @@ fn main() {
                                .long("strip"))
                       .after_help("Optimization levels:
     -o 0		=>	--zc 3 --nz				(0 or 1 trials)
-    -o 1		=>	--zc 9					(1 trial)
+    -o 1		=>	--zc 9					(1 trial, determined heuristically)
     -o 2		=>	--zc 9 --zs 0-3 --f 0,5			(8 trials)
     -o 3		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0,5	(16 trials)
     -o 4		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0-5	(48 trials)
@@ -268,12 +269,11 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
             opts.compression = compression;
         }
         Some("1") => {
-            let mut filter = HashSet::new();
-            filter.insert(0);
+            let filter = HashSet::new();
             opts.filter = filter;
-            let mut strategies = HashSet::new();
-            strategies.insert(0);
+            let strategies = HashSet::new();
             opts.strategies = strategies;
+            opts.use_heuristics = true;
         }
         // 2 is the default
         Some("3") => {
