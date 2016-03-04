@@ -94,7 +94,7 @@ fn main() {
                                .conflicts_with("output_dir")
                                .conflicts_with("stdout"))
                       .arg(Arg::with_name("stdout")
-                               .help("Write output to stdout")
+                               .help("Write output to stdout (implies 'quiet')")
                                .long("stdout")
                                .conflicts_with("output_dir")
                                .conflicts_with("output_file"))
@@ -409,10 +409,6 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
         opts.out_file = PathBuf::from(x);
     }
 
-    if matches.is_present("stdout") {
-        opts.stdout = true;
-    }
-
     if matches.is_present("backup") {
         opts.backup = true;
     }
@@ -447,6 +443,11 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
 
     if matches.is_present("verbose") {
         opts.verbosity = Some(1);
+    }
+
+    if matches.is_present("stdout") {
+        opts.stdout = true;
+        opts.verbosity = None;
     }
 
     if matches.is_present("no-bit-reduction") {
