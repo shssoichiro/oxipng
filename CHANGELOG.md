@@ -1,5 +1,6 @@
 **Version 0.1.2** (unreleased)
  - Fix program version that is displayed when running `oxipng -V`
+ - Ensure `--quiet` mode is actually quiet (@SethDusek #20)
 
 **Version 0.1.1**
  - Fix `oxipng *` writing all input files to one output file (#15)
