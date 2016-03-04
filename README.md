@@ -1,10 +1,10 @@
-# OxiPng
+# Oxipng
 
 [![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg)](https://travis-ci.org/shssoichiro/oxipng)
 
 ## Overview
 
-OxiPng is a lossless PNG compression optimizer.
+Oxipng is a lossless PNG compression optimizer.
 
 **Note:** This package should be considered a beta. Although there are many tests in place,
 there is still a chance of data loss or corruption. You should backup your files before
@@ -15,12 +15,12 @@ as possible.
 
 ## Installing
 
-OxiPng can be installed from Cargo, via the following command:
+Oxipng can be installed from Cargo, via the following command:
 ```
 cargo install oxipng
 ```
 
-Alternatively, OxiPng can be built from source using the latest stable or nightly Rust:
+Alternatively, oxipng can be built from source using the latest stable or nightly Rust:
 ```
 git clone https://github.com/shssoichiro/oxipng.git
 cd oxipng
@@ -28,14 +28,17 @@ cargo build --release
 cp target/release/oxipng /usr/local/bin
 ```
 
-Please note that zlib is a required build dependency. OxiPng should work with any 1.x version of zlib,
+Please note that zlib is a required build dependency. Oxipng should work with any 1.x version of zlib,
 but you are advised to use the latest version (currently 1.2.8) for security and bug fixes.
 
-OxiPng follows Semantic Versioning.
+The current minimum supported Rust version is **1.6.0**. Oxipng may compile on earlier versions of Rust,
+but there is no guarantee.
+
+Oxipng follows Semantic Versioning.
 
 ## Usage
 
-OxiPng is a command-line utility. Basic usage looks similar to the following:
+Oxipng is a command-line utility. Basic usage looks similar to the following:
 
 ```
 oxipng -o 4 -i 1 --strip *.png
@@ -59,7 +62,7 @@ More advanced options can be found by running `oxipng -h`.
 
 ## History
 
-OxiPng began as a completely rewrite of the OptiPNG project,
+Oxipng began as a completely rewrite of the OptiPNG project,
 which is assumed to be dead as no commit has been made to it since 2013.
 The name has been changed to avoid confusion and potential legal issues.
 
@@ -77,4 +80,4 @@ welcome via GitHub.
 
 ## License
 
-OxiPng is open-source software, distributed under the MIT license.
+Oxipng is open-source software, distributed under the MIT license.
