@@ -45,7 +45,7 @@ pub struct Options {
 
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // Decode PNG from file
-    println!("Processing: {}", filepath.to_str().unwrap());
+    if opts.verbosity.is_some() { println!("Processing: {}", filepath.to_str().unwrap()) };
     let in_file = Path::new(filepath);
     let mut png = match png::PngData::new(&in_file) {
         Ok(x) => x,
@@ -121,7 +121,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
                            opts.strategies.len();
         let mut results = Vec::with_capacity(combinations);
-        println!("Trying: {} combinations", combinations);
+        if opts.verbosity.is_some() { println!("Trying: {} combinations", combinations) };
         crossbeam::scope(|scope| {
             for f in &opts.filter {
                 let filtered = png.filter_image(*f);
@@ -172,6 +172,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
         if let Some(better) = best {
             png.idat_data = better.4.clone();
+            if opts.verbosity.is_some() {
             println!("Found better combination:");
             println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
                      better.1,
@@ -179,6 +180,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      better.3,
                      better.0,
                      png.idat_data.len());
+            }
         }
     }
 
@@ -225,37 +227,40 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                 }
             };
             let mut buffer = BufWriter::new(out_file);
-            match buffer.write_all(&output_data) {
-                Ok(_) => println!("Output: {}", opts.out_file.display()),
-                Err(_) => {
-                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+            if opts.verbosity.is_some() {
+                match buffer.write_all(&output_data) {
+                    Ok(_) => println!("Output: {}", opts.out_file.display()),
+                    Err(_) => {
+                        return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                    }
                 }
             }
         }
     }
-    if idat_original_size >= png.idat_data.len() {
-        println!("    IDAT size = {} bytes ({} bytes decrease)",
-                 png.idat_data.len(),
-                 idat_original_size - png.idat_data.len());
-    } else {
-        println!("    IDAT size = {} bytes ({} bytes increase)",
-                 png.idat_data.len(),
-                 png.idat_data.len() - idat_original_size);
+    if opts.verbosity.is_some() {
+        if idat_original_size >= png.idat_data.len() {
+            println!("    IDAT size = {} bytes ({} bytes decrease)",
+                    png.idat_data.len(),
+                    idat_original_size - png.idat_data.len());
+        } else {
+            println!("    IDAT size = {} bytes ({} bytes increase)",
+                    png.idat_data.len(),
+                    png.idat_data.len() - idat_original_size);
+        }
+        if file_original_size >= output_data.len() {
+            println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
+                    output_data.len(),
+                    file_original_size - output_data.len(),
+                    (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
+                    100f64);
+        } else {
+            println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
+                    output_data.len(),
+                    output_data.len() - file_original_size,
+                    (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
+                    100f64);
+        }
     }
-    if file_original_size >= output_data.len() {
-        println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                 output_data.len(),
-                 file_original_size - output_data.len(),
-                 (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
-                 100f64);
-    } else {
-        println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
-                 output_data.len(),
-                 output_data.len() - file_original_size,
-                 (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
-                 100f64);
-    }
-
     Ok(())
 }
 
