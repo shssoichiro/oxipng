@@ -5,6 +5,7 @@ extern crate regex;
 use clap::{App, Arg, ArgMatches};
 use regex::Regex;
 use std::collections::HashSet;
+use std::io::{Write, stderr};
 use std::path::PathBuf;
 
 const VERSION_STRING: &'static str = "0.1.1";
@@ -223,7 +224,7 @@ fn main() {
     match parse_opts_into_struct(&matches, &mut opts) {
         Ok(_) => (),
         Err(x) => {
-            println!("{}", x);
+            writeln!(&mut stderr(), "{}", x).ok();
             return ();
         }
     }
@@ -244,7 +245,10 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: oxipng::Options) {
                 handle_optimization(input.read_dir().unwrap().map(|x| x.unwrap().path()).collect(),
                                     current_opts)
             } else {
-                println!("{} is a directory, skipping", input.display());
+                writeln!(&mut stderr(),
+                         "{} is a directory, skipping",
+                         input.display())
+                    .ok();
             }
             continue;
         }
@@ -255,7 +259,9 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: oxipng::Options) {
         }
         match oxipng::optimize(&input, &current_opts) {
             Ok(_) => (),
-            Err(x) => println!("{}", x),
+            Err(x) => {
+                writeln!(&mut stderr(), "{}", x).ok();
+            }
         };
     }
 }

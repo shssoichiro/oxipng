@@ -33,7 +33,7 @@ fn get_opts(input: &Path) -> oxipng::Options {
         clobber: true,
         create: true,
         preserve_attrs: false,
-        verbosity: Some(0),
+        verbosity: None,
         filter: filter,
         interlace: None,
         compression: compression,
