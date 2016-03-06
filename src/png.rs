@@ -89,6 +89,14 @@ impl BitDepth {
     }
 }
 
+#[derive(Debug,PartialEq,Clone)]
+pub enum Headers {
+    None,
+    Some(Vec<String>),
+    Safe,
+    All,
+}
+
 #[derive(Debug,Clone)]
 pub struct ScanLines<'a> {
     pub png: &'a PngData,
