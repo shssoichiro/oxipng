@@ -33,7 +33,7 @@ fn get_opts(input: &Path) -> oxipng::Options {
         clobber: true,
         create: true,
         preserve_attrs: false,
-        verbosity: Some(0),
+        verbosity: None,
         filter: filter,
         interlace: None,
         compression: compression,
@@ -44,20 +44,78 @@ fn get_opts(input: &Path) -> oxipng::Options {
         color_type_reduction: true,
         palette_reduction: true,
         idat_recoding: true,
-        strip: false,
+        strip: png::Headers::None,
+        use_heuristics: false,
     }
 }
 
+fn test_it_converts(input: &Path,
+                    output: &Path,
+                    opts: &oxipng::Options,
+                    color_type_in: png::ColorType,
+                    bit_depth_in: png::BitDepth,
+                    color_type_out: png::ColorType,
+                    bit_depth_out: png::BitDepth) {
+    let png = png::PngData::new(input).unwrap();
+
+    assert!(png.ihdr_data.color_type == color_type_in);
+    assert!(png.ihdr_data.bit_depth == bit_depth_in);
+
+    match oxipng::optimize(input, opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == color_type_out);
+    assert!(png.ihdr_data.bit_depth == bit_depth_out);
+
+    let old_png = image::open(input).unwrap();
+    let new_png = image::open(output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
 #[test]
-fn strip_headers() {
-    let input = PathBuf::from("tests/files/strip_headers.png");
+fn verbose_mode() {
+    let input = PathBuf::from("tests/files/verbose_mode.png");
     let mut opts = get_opts(&input);
-    opts.strip = true;
+    opts.verbosity = Some(1);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
+}
+
+#[test]
+fn strip_headers_list() {
+    let input = PathBuf::from("tests/files/strip_headers_list.png");
+    let mut opts = get_opts(&input);
+    opts.strip = png::Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
     let output = opts.out_file.clone();
 
     let png = png::PngData::new(&input).unwrap();
 
     assert!(png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -74,6 +132,131 @@ fn strip_headers() {
     };
 
     assert!(!png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(!png.aux_headers.contains_key("iCCP"));
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn strip_headers_safe() {
+    let input = PathBuf::from("tests/files/strip_headers_safe.png");
+    let mut opts = get_opts(&input);
+    opts.strip = png::Headers::Safe;
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(!png.aux_headers.contains_key("tEXt"));
+    assert!(!png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn strip_headers_all() {
+    let input = PathBuf::from("tests/files/strip_headers_all.png");
+    let mut opts = get_opts(&input);
+    opts.strip = png::Headers::All;
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(!png.aux_headers.contains_key("tEXt"));
+    assert!(!png.aux_headers.contains_key("iTXt"));
+    assert!(!png.aux_headers.contains_key("iCCP"));
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn strip_headers_none() {
+    let input = PathBuf::from("tests/files/strip_headers_none.png");
+    let mut opts = get_opts(&input);
+    opts.strip = png::Headers::None;
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.aux_headers.contains_key("tEXt"));
+    assert!(png.aux_headers.contains_key("iTXt"));
+    assert!(png.aux_headers.contains_key("iCCP"));
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();

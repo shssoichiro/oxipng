@@ -68,7 +68,7 @@ impl fmt::Display for BitDepth {
 }
 
 impl BitDepth {
-    fn as_u8(&self) -> u8 {
+    pub fn as_u8(&self) -> u8 {
         match *self {
             BitDepth::One => 1,
             BitDepth::Two => 2,
@@ -77,7 +77,7 @@ impl BitDepth {
             BitDepth::Sixteen => 16,
         }
     }
-    fn from_u8(depth: u8) -> BitDepth {
+    pub fn from_u8(depth: u8) -> BitDepth {
         match depth {
             1 => BitDepth::One,
             2 => BitDepth::Two,
@@ -87,6 +87,14 @@ impl BitDepth {
             _ => panic!("Unsupported bit depth"),
         }
     }
+}
+
+#[derive(Debug,PartialEq,Clone)]
+pub enum Headers {
+    None,
+    Some(Vec<String>),
+    Safe,
+    All,
 }
 
 #[derive(Debug,Clone)]

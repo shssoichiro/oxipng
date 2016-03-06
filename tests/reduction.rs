@@ -33,7 +33,7 @@ fn get_opts(input: &Path) -> oxipng::Options {
         clobber: true,
         create: true,
         preserve_attrs: false,
-        verbosity: Some(0),
+        verbosity: None,
         filter: filter,
         interlace: None,
         compression: compression,
@@ -44,7 +44,8 @@ fn get_opts(input: &Path) -> oxipng::Options {
         color_type_reduction: true,
         palette_reduction: true,
         idat_recoding: true,
-        strip: false,
+        strip: png::Headers::None,
+        use_heuristics: false,
     }
 }
 

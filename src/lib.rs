@@ -7,7 +7,7 @@ extern crate libz_sys;
 
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
-use std::io::{BufWriter, Write, stdout};
+use std::io::{BufWriter, Write, stderr, stdout};
 use std::path::{Path, PathBuf};
 
 pub mod deflate {
@@ -40,12 +40,15 @@ pub struct Options {
     pub color_type_reduction: bool,
     pub palette_reduction: bool,
     pub idat_recoding: bool,
-    pub strip: bool,
+    pub strip: png::Headers,
+    pub use_heuristics: bool,
 }
 
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     // Decode PNG from file
-    if opts.verbosity.is_some() { println!("Processing: {}", filepath.to_str().unwrap()) };
+    if opts.verbosity.is_some() {
+        writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
+    }
     let in_file = Path::new(filepath);
     let mut png = match png::PngData::new(&in_file) {
         Ok(x) => x,
@@ -56,21 +59,58 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     let idat_original_size = png.idat_data.len();
     let file_original_size = filepath.metadata().unwrap().len() as usize;
     if opts.verbosity.is_some() {
-        println!("    {}x{} pixels, PNG format",
+        writeln!(&mut stderr(),
+                 "    {}x{} pixels, PNG format",
                  png.ihdr_data.width,
-                 png.ihdr_data.height);
+                 png.ihdr_data.height)
+            .ok();
         if let Some(palette) = png.palette.clone() {
-            println!("    {} bits/pixel, {} colors in palette",
+            writeln!(&mut stderr(),
+                     "    {} bits/pixel, {} colors in palette",
                      png.ihdr_data.bit_depth,
-                     palette.len() / 3);
+                     palette.len() / 3)
+                .ok();
         } else {
-            println!("    {}x{} bits/pixel, {:?}",
+            writeln!(&mut stderr(),
+                     "    {}x{} bits/pixel, {:?}",
                      png.channels_per_pixel(),
                      png.ihdr_data.bit_depth,
-                     png.ihdr_data.color_type);
+                     png.ihdr_data.color_type)
+                .ok();
         }
-        println!("    IDAT size = {} bytes", idat_original_size);
-        println!("    File size = {} bytes", file_original_size);
+        writeln!(&mut stderr(),
+                 "    IDAT size = {} bytes",
+                 idat_original_size)
+            .ok();
+        writeln!(&mut stderr(),
+                 "    File size = {} bytes",
+                 file_original_size)
+            .ok();
+    }
+
+    let mut filter = opts.filter.clone();
+    let compression = opts.compression.clone();
+    let memory = opts.memory.clone();
+    let mut strategies = opts.strategies.clone();
+
+    if opts.use_heuristics {
+        // Heuristically determine which set of options to use
+        if png.ihdr_data.bit_depth.as_u8() >= 8 &&
+           png.ihdr_data.color_type != png::ColorType::Indexed {
+            if filter.is_empty() {
+                filter.insert(5);
+            }
+            if strategies.is_empty() {
+                strategies.insert(1);
+            }
+        } else {
+            if filter.is_empty() {
+                filter.insert(0);
+            }
+            if strategies.is_empty() {
+                strategies.insert(0);
+            }
+        }
     }
 
     let mut something_changed = false;
@@ -118,16 +158,17 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
         let mut best: Option<(u8, u8, u8, u8, Vec<u8>)> = None;
-        let combinations = opts.filter.len() * opts.compression.len() * opts.memory.len() *
-                           opts.strategies.len();
+        let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
         let mut results = Vec::with_capacity(combinations);
-        if opts.verbosity.is_some() { println!("Trying: {} combinations", combinations) };
+        if opts.verbosity.is_some() {
+            writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
+        }
         crossbeam::scope(|scope| {
-            for f in &opts.filter {
+            for f in &filter {
                 let filtered = png.filter_image(*f);
-                for zc in &opts.compression {
-                    for zm in &opts.memory {
-                        for zs in &opts.strategies {
+                for zc in &compression {
+                    for zm in &memory {
+                        for zs in &strategies {
                             let moved_filtered = filtered.clone();
                             results.push(scope.spawn(move || {
                                 let new_idat = match deflate::deflate::deflate(&moved_filtered,
@@ -140,12 +181,12 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                                 };
 
                                 if opts.verbosity == Some(1) {
-                                    println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                                    writeln!(&mut stderr(), "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
                                              *zc,
                                              *zm,
                                              *zs,
                                              *f,
-                                             new_idat.len());
+                                             new_idat.len()).ok();
                                 }
 
                                 Ok((*f, *zc, *zm, *zs, new_idat.clone()))
@@ -173,30 +214,51 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         if let Some(better) = best {
             png.idat_data = better.4.clone();
             if opts.verbosity.is_some() {
-            println!("Found better combination:");
-            println!("    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                     better.1,
-                     better.2,
-                     better.3,
-                     better.0,
-                     png.idat_data.len());
+                writeln!(&mut stderr(), "Found better combination:").ok();
+                writeln!(&mut stderr(),
+                         "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                         better.1,
+                         better.2,
+                         better.3,
+                         better.0,
+                         png.idat_data.len())
+                    .ok();
             }
         }
     }
 
-    if opts.strip {
+    match opts.strip.clone() {
         // Strip headers
-        png.aux_headers = HashMap::new();
+        png::Headers::None => (),
+        png::Headers::Some(hdrs) => {
+            for hdr in &hdrs {
+                png.aux_headers.remove(hdr);
+            }
+        }
+        png::Headers::Safe => {
+            const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
+                                                          "bKGD", "hIST", "pHYs", "sPLT"];
+            let mut preserved = HashMap::new();
+            for (hdr, contents) in png.aux_headers.iter() {
+                if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
+                    preserved.insert(hdr.clone(), contents.clone());
+                }
+            }
+            png.aux_headers = preserved;
+        }
+        png::Headers::All => {
+            png.aux_headers = HashMap::new();
+        }
     }
 
     let output_data = png.output();
     if file_original_size <= output_data.len() && !opts.force && opts.interlace.is_none() {
-        println!("File already optimized");
+        writeln!(&mut stderr(), "File already optimized").ok();
         return Ok(());
     }
 
     if opts.pretend {
-        println!("Running in pretend mode, no output");
+        writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
     } else {
         if opts.backup {
             match copy(in_file,
@@ -227,38 +289,48 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                 }
             };
             let mut buffer = BufWriter::new(out_file);
-            if opts.verbosity.is_some() {
-                match buffer.write_all(&output_data) {
-                    Ok(_) => println!("Output: {}", opts.out_file.display()),
-                    Err(_) => {
-                        return Err(format!("Unable to write to file {}", opts.out_file.display()))
+            match buffer.write_all(&output_data) {
+                Ok(_) => {
+                    if opts.verbosity.is_some() {
+                        writeln!(&mut stderr(), "Output: {}", opts.out_file.display()).ok();
                     }
+                }
+                Err(_) => {
+                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
                 }
             }
         }
     }
     if opts.verbosity.is_some() {
         if idat_original_size >= png.idat_data.len() {
-            println!("    IDAT size = {} bytes ({} bytes decrease)",
-                    png.idat_data.len(),
-                    idat_original_size - png.idat_data.len());
+            writeln!(&mut stderr(),
+                     "    IDAT size = {} bytes ({} bytes decrease)",
+                     png.idat_data.len(),
+                     idat_original_size - png.idat_data.len())
+                .ok();
         } else {
-            println!("    IDAT size = {} bytes ({} bytes increase)",
-                    png.idat_data.len(),
-                    png.idat_data.len() - idat_original_size);
+            writeln!(&mut stderr(),
+                     "    IDAT size = {} bytes ({} bytes increase)",
+                     png.idat_data.len(),
+                     png.idat_data.len() - idat_original_size)
+                .ok();
         }
         if file_original_size >= output_data.len() {
-            println!("    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                    output_data.len(),
-                    file_original_size - output_data.len(),
-                    (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
-                    100f64);
+            writeln!(&mut stderr(),
+                     "    file size = {} bytes ({} bytes = {:.2}% decrease)",
+                     output_data.len(),
+                     file_original_size - output_data.len(),
+                     (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
+                     100f64)
+                .ok();
         } else {
-            println!("    file size = {} bytes ({} bytes = {:.2}% increase)",
-                    output_data.len(),
-                    output_data.len() - file_original_size,
-                    (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
-                    100f64);
+            writeln!(&mut stderr(),
+                     "    file size = {} bytes ({} bytes = {:.2}% increase)",
+                     output_data.len(),
+                     output_data.len() - file_original_size,
+                     (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
+                     100f64)
+                .ok();
         }
     }
     Ok(())
@@ -266,13 +338,17 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
 fn report_reduction(png: &png::PngData) {
     if let Some(palette) = png.palette.clone() {
-        println!("Reducing image to {} bits/pixel, {} colors in palette",
+        writeln!(&mut stderr(),
+                 "Reducing image to {} bits/pixel, {} colors in palette",
                  png.ihdr_data.bit_depth,
-                 palette.len() / 3);
+                 palette.len() / 3)
+            .ok();
     } else {
-        println!("Reducing image to {}x{} bits/pixel, {}",
+        writeln!(&mut stderr(),
+                 "Reducing image to {}x{} bits/pixel, {}",
                  png.channels_per_pixel(),
                  png.ihdr_data.bit_depth,
-                 png.ihdr_data.color_type);
+                 png.ihdr_data.color_type)
+            .ok();
     }
 }
