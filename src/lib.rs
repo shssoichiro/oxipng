@@ -40,7 +40,7 @@ pub struct Options {
     pub color_type_reduction: bool,
     pub palette_reduction: bool,
     pub idat_recoding: bool,
-    pub strip: bool,
+    pub strip: png::Headers,
     pub use_heuristics: bool,
 }
 
@@ -227,9 +227,28 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
     }
 
-    if opts.strip {
+    match opts.strip.clone() {
         // Strip headers
-        png.aux_headers = HashMap::new();
+        png::Headers::None => (),
+        png::Headers::Some(hdrs) => {
+            for hdr in &hdrs {
+                png.aux_headers.remove(hdr);
+            }
+        }
+        png::Headers::Safe => {
+            const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
+                                                          "bKGD", "hIST", "pHYs", "sPLT"];
+            let mut preserved = HashMap::new();
+            for (hdr, contents) in png.aux_headers.iter() {
+                if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
+                    preserved.insert(hdr.clone(), contents.clone());
+                }
+            }
+            png.aux_headers = preserved;
+        }
+        png::Headers::All => {
+            png.aux_headers = HashMap::new();
+        }
     }
 
     let output_data = png.output();
