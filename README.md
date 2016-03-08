@@ -1,6 +1,8 @@
 # Oxipng
 
 [![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg)](https://travis-ci.org/shssoichiro/oxipng)
+[![Version](https://img.shields.io/crates/v/oxipng.svg)](https://crates.io/crates/oxipng)
+[![License](https://img.shields.io/crates/l/oxipng.svg)](https://github.com/shssoichiro/oxipng/blob/master/LICENSE)
 
 ## Overview
 
