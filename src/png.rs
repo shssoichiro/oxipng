@@ -10,11 +10,17 @@ use std::iter::Iterator;
 use std::path::Path;
 
 #[derive(Debug,PartialEq,Clone,Copy)]
+/// The color type used to represent this image
 pub enum ColorType {
+    /// Grayscale, with one color channel
     Grayscale,
+    /// RGB, with three color channels
     RGB,
+    /// Indexed, with one byte per pixel representing one of up to 256 colors in the image
     Indexed,
+    /// Grayscale + Alpha, with two color channels
     GrayscaleAlpha,
+    /// RGBA, with four color channels
     RGBA,
 }
 
@@ -45,11 +51,17 @@ impl ColorType {
 }
 
 #[derive(Debug,PartialEq,Clone,Copy)]
+/// The number of bits to be used per channel per pixel
 pub enum BitDepth {
+    /// One bit per channel per pixel
     One,
+    /// Two bits per channel per pixel
     Two,
+    /// Four bits per channel per pixel
     Four,
+    /// Eight bits per channel per pixel
     Eight,
+    /// Sixteen bits per channel per pixel
     Sixteen,
 }
 
@@ -68,6 +80,7 @@ impl fmt::Display for BitDepth {
 }
 
 impl BitDepth {
+    /// Retrieve the number of bits per channel per pixel as a `u8`
     pub fn as_u8(&self) -> u8 {
         match *self {
             BitDepth::One => 1,
@@ -77,6 +90,7 @@ impl BitDepth {
             BitDepth::Sixteen => 16,
         }
     }
+    /// Parse a number of bits per channel per pixel into a `BitDepth`
     pub fn from_u8(depth: u8) -> BitDepth {
         match depth {
             1 => BitDepth::One,
@@ -90,15 +104,22 @@ impl BitDepth {
 }
 
 #[derive(Debug,PartialEq,Clone)]
+/// Options to use for performing operations on headers (such as stripping)
 pub enum Headers {
+    /// None
     None,
+    /// Some, with a list of 4-character chunk codes
     Some(Vec<String>),
+    /// Headers that won't affect rendering (all but cHRM, gAMA, iCCP, sBIT, sRGB, bKGD, hIST, pHYs, sPLT)
     Safe,
+    /// All non-critical headers
     All,
 }
 
 #[derive(Debug,Clone)]
+/// An iterator over the scan lines of a PNG image
 pub struct ScanLines<'a> {
+    /// A reference to the PNG image being iterated upon
     pub png: &'a PngData,
     start: usize,
     end: usize,
@@ -126,34 +147,55 @@ impl<'a> Iterator for ScanLines<'a> {
 }
 
 #[derive(Debug,Clone)]
+/// A scan line in a PNG image
 pub struct ScanLine {
+    /// The filter type used to encode the current scan line (0-4)
     pub filter: u8,
+    /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
     pub data: Vec<u8>,
 }
 
 #[derive(Debug,Clone)]
+/// Contains all data relevant to a PNG image
 pub struct PngData {
+    /// The filtered and compressed data of the IDAT chunk
     pub idat_data: Vec<u8>,
+    /// The headers stored in the IHDR chunk
     pub ihdr_data: IhdrData,
+    /// The uncompressed, optionally filtered data from the IDAT chunk
     pub raw_data: Vec<u8>,
+    /// The palette containing colors used in an Indexed image
+    /// Contains 3 bytes per color (R+G+B), up to 768
     pub palette: Option<Vec<u8>>,
+    /// The pixel value that should be rendered as transparent
     pub transparency_pixel: Option<Vec<u8>>,
+    /// A map of how transparent each color in the palette should be
     pub transparency_palette: Option<Vec<u8>>,
+    /// All non-critical headers from the PNG are stored here
     pub aux_headers: HashMap<String, Vec<u8>>,
 }
 
 #[derive(Debug,Clone,Copy)]
+/// Headers from the IHDR chunk of the image
 pub struct IhdrData {
+    /// The width of the image in pixels
     pub width: u32,
+    /// The height of the image in pixels
     pub height: u32,
+    /// The color type of the image
     pub color_type: ColorType,
+    /// The bit depth of the image
     pub bit_depth: BitDepth,
+    /// The compression method used for this image (0 for DEFLATE)
     pub compression: u8,
+    /// The filter mode used for this image (currently only 0 is valid)
     pub filter: u8,
+    /// The interlacing mode of the image (0 = None, 1 = Adam7)
     pub interlaced: u8,
 }
 
 impl PngData {
+    /// Create a new `PngData` struct by opening a file
     pub fn new(filepath: &Path) -> Result<PngData, String> {
         let mut file = match File::open(filepath) {
             Ok(f) => f,
@@ -237,6 +279,7 @@ impl PngData {
         // Return the PngData
         Ok(png_data)
     }
+    /// Return the number of channels in the image, based on color type
     pub fn channels_per_pixel(&self) -> u8 {
         match self.ihdr_data.color_type {
             ColorType::Grayscale | ColorType::Indexed => 1,
@@ -245,6 +288,7 @@ impl PngData {
             ColorType::RGBA => 4,
         }
     }
+    /// Format the `PngData` struct into a valid PNG bytestream
     pub fn output(&self) -> Vec<u8> {
         // FIXME: This code can all be refactored
         // PNG header
@@ -341,6 +385,7 @@ impl PngData {
 
         output
     }
+    /// Return an iterator over the scanlines of the image
     pub fn scan_lines(&self) -> ScanLines {
         ScanLines {
             png: &self,
@@ -348,6 +393,7 @@ impl PngData {
             end: 0,
         }
     }
+    /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
@@ -442,6 +488,13 @@ impl PngData {
         }
         unfiltered
     }
+    /// Apply the specified filter type to all rows in the image
+    /// 0: None
+    /// 1: Sub
+    /// 2: Up
+    /// 3: Average
+    /// 4: Paeth
+    /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
@@ -601,6 +654,8 @@ impl PngData {
         }
         filtered
     }
+    /// Attempt to reduce the bit depth of the image
+    /// Returns true if the bit depth was reduced, false otherwise
     pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed ||
@@ -645,10 +700,14 @@ impl PngData {
         self.raw_data = reduced;
         true
     }
+    /// Attempt to reduce the number of colors in the palette
+    /// Returns true if the palette was reduced, false otherwise
     pub fn reduce_palette(&mut self) -> bool {
         // TODO: Implement
         false
     }
+    /// Attempt to reduce the color type of the image
+    /// Returns true if the color type was reduced, false otherwise
     pub fn reduce_color_type(&mut self) -> bool {
         let mut changed = false;
         let mut should_reduce_bit_depth = false;
@@ -732,6 +791,8 @@ impl PngData {
 
         changed
     }
+    /// Convert the image to the specified interlacing type
+    /// Returns true if the interlacing was changed, false otherwise
     pub fn change_interlacing(&mut self, interlace: u8) -> bool {
         // TODO: Implement
         if interlace != self.ihdr_data.interlaced {

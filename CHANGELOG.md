@@ -1,3 +1,6 @@
+**Version 0.2.1**
+ - Add rustdoc for public methods and structs
+
 **Version 0.2.0**
  - Fix program version that is displayed when running `oxipng -V`
  - Ensure `--quiet` mode is actually quiet (@SethDusek [#20](https://github.com/shssoichiro/oxipng/pull/20))

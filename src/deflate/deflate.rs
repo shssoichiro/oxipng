@@ -1,6 +1,7 @@
 use libz_sys;
 use libc::c_int;
 
+/// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
     let mut input = data.to_owned();
     let mut stream = super::stream::Stream::new_decompress();
@@ -17,6 +18,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
     Ok(output)
 }
 
+/// Compress a data stream using the zlib implementation of the DEFLATE algorithm
 pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, String> {
     let mut input = data.to_owned();
     let mut stream = super::stream::Stream::new_compress(zc as c_int,
