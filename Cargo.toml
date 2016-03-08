@@ -11,6 +11,15 @@ exclude = [
   "tests/*",
 ]
 
+[lib]
+name = "oxipng"
+path = "src/lib.rs"
+
+[[bin]]
+name = "oxipng"
+path = "src/main.rs"
+doc = false
+
 [dependencies]
 bit-vec = "^0.4.2"
 byteorder = "^0.4.0"
