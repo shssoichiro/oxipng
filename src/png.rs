@@ -396,95 +396,15 @@ impl PngData {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
-        let bpp = ((tmp as f32) / 8f32).ceil() as usize;
-        let mut last_line: Vec<u8> = vec![];
+        let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
+                   8f32)
+                      .ceil() as usize;
+        let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
+            let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
             unfiltered.push(0);
-            match line.filter {
-                0 => {
-                    unfiltered.extend_from_slice(&line.data);
-                }
-                1 => {
-                    let mut data = Vec::with_capacity(line.data.len());
-                    for (i, byte) in line.data.iter().enumerate() {
-                        match i.checked_sub(bpp) {
-                            Some(x) => {
-                                let b = data[x];
-                                data.push(byte.wrapping_add(b))
-                            }
-                            None => data.push(*byte),
-                        }
-                    }
-                    last_line = data.clone();
-                    unfiltered.append(&mut data);
-                }
-                2 => {
-                    let mut data = Vec::with_capacity(line.data.len());
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            data.push(*byte);
-                        } else {
-                            data.push(byte.wrapping_add(last_line[i]));
-                        };
-                    }
-                    last_line = data.clone();
-                    unfiltered.append(&mut data);
-                }
-                3 => {
-                    let mut data = Vec::with_capacity(line.data.len());
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(b >> 1))
-                                }
-                                None => data.push(*byte),
-                            };
-                        } else {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(
-                                        ((b as u16 + last_line[i] as u16) >> 1) as u8
-                                    ))
-                                }
-                                None => data.push(byte.wrapping_add(last_line[i] >> 1)),
-                            };
-                        };
-                    }
-                    last_line = data.clone();
-                    unfiltered.append(&mut data);
-                }
-                4 => {
-                    let mut data = Vec::with_capacity(line.data.len());
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(b))
-                                }
-                                None => data.push(*byte),
-                            };
-                        } else {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    let b = data[x];
-                                    data.push(byte.wrapping_add(paeth_predictor(b,
-                                                                                last_line[i],
-                                                                                last_line[x])))
-                                }
-                                None => data.push(byte.wrapping_add(last_line[i])),
-                            };
-                        };
-                    }
-                    last_line = data.clone();
-                    unfiltered.append(&mut data);
-                }
-                _ => unreachable!(),
-            }
+            unfiltered.extend_from_slice(&unfiltered_line);
+            last_line = unfiltered_line;
         }
         unfiltered
     }
@@ -497,156 +417,38 @@ impl PngData {
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        let tmp = self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel();
-        let bpp = ((tmp as f32) / 8f32).ceil() as usize;
-        let mut last_line: Vec<u8> = vec![];
-        // We could try a different filter method for each line
-        // But that would be prohibitively slow and probably not provide much benefit
-        // So we just use one filter method for the whole image
+        let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
+                   8f32)
+                      .ceil() as usize;
+        let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
-            if filter != 5 {
-                filtered.push(filter);
-            }
             match filter {
-                0 => {
-                    filtered.extend_from_slice(&line.data);
-                }
-                1 => {
-                    for (i, byte) in line.data.iter().enumerate() {
-                        filtered.push(match i.checked_sub(bpp) {
-                            Some(x) => byte.wrapping_sub(line.data[x]),
-                            None => *byte,
-                        });
-                    }
-                }
-                2 => {
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            filtered.push(*byte);
-                        } else {
-                            filtered.push(byte.wrapping_sub(last_line[i]));
-                        };
-                    }
-                }
-                3 => {
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            filtered.push(match i.checked_sub(bpp) {
-                                Some(x) => byte.wrapping_sub(line.data[x] >> 1),
-                                None => *byte,
-                            });
-                        } else {
-                            filtered.push(match i.checked_sub(bpp) {
-                                Some(x) => byte.wrapping_sub(
-                                    ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8
-                                ),
-                                None => byte.wrapping_sub(last_line[i] >> 1),
-                            });
-                        };
-                    }
-                }
-                4 => {
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            filtered.push(match i.checked_sub(bpp) {
-                                Some(x) => byte.wrapping_sub(line.data[x]),
-                                None => *byte,
-                            });
-                        } else {
-                            filtered.push(match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    byte.wrapping_sub(paeth_predictor(line.data[x],
-                                                                      last_line[i],
-                                                                      last_line[x]))
-                                }
-                                None => byte.wrapping_sub(last_line[i]),
-                            });
-                        };
-                    }
+                0 | 1 | 2 | 3 | 4 => {
+                    filtered.push(filter);
+                    filtered.extend(filter_line(filter, bpp, &line.data, &last_line));
                 }
                 5 => {
                     // Heuristically guess best filter per line
-                    // Really simple algorithm, maybe we could replace this with something better
-                    // libpng's heuristic no longer exists so I can't reference it
-                    // Yes I know this code is ugly, but I didn't want to mess with mutable
-                    // references from a HashMap that return options
-                    // FIXME: Regardless of that, this is not very memory efficient
-                    // Someone who's better at Rust can clean this up if they want
-                    let line_0 = line.data.clone();
-                    let mut line_1 = Vec::with_capacity(line.data.len());
-                    let mut line_2 = Vec::with_capacity(line.data.len());
-                    let mut line_3 = Vec::with_capacity(line.data.len());
-                    let mut line_4 = Vec::with_capacity(line.data.len());
-                    for (i, byte) in line.data.iter().enumerate() {
-                        if last_line.is_empty() {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    line_1.push(byte.wrapping_sub(line.data[x]));
-                                    line_2.push(*byte);
-                                    line_3.push(byte.wrapping_sub(line.data[x] >> 1));
-                                    line_4.push(byte.wrapping_sub(line.data[x]));
-                                }
-                                None => {
-                                    line_1.push(*byte);
-                                    line_2.push(*byte);
-                                    line_3.push(*byte);
-                                    line_4.push(*byte);
-                                }
-                            }
-                        } else {
-                            match i.checked_sub(bpp) {
-                                Some(x) => {
-                                    line_1.push(byte.wrapping_sub(line.data[x]));
-                                    line_2.push(byte.wrapping_sub(last_line[i]));
-                                    line_3.push(byte.wrapping_sub(
-                                        ((line.data[x] as u16 + last_line[i] as u16) >> 1) as u8)
-                                    );
-                                    line_4.push(byte.wrapping_sub(paeth_predictor(line.data[x],
-                                                                                  last_line[i],
-                                                                                  last_line[x])));
-                                }
-                                None => {
-                                    line_1.push(*byte);
-                                    line_2.push(byte.wrapping_sub(last_line[i]));
-                                    line_3.push(byte.wrapping_sub(last_line[i] >> 1));
-                                    line_4.push(byte.wrapping_sub(last_line[i]));
-                                }
-                            }
-                        };
+                    // Uses MSAD algorithm mentioned in libpng reference docs
+                    // http://www.libpng.org/pub/png/book/chapter09.html
+                    let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
+                    for filter in 0..5 {
+                        trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
                     }
-
-                    // Count the number of unique bytes and take the lowest
-                    let mut uniq_0 = line_0.clone();
-                    uniq_0.sort();
-                    uniq_0.dedup();
-                    let mut uniq_1 = line_1.clone();
-                    uniq_1.sort();
-                    uniq_1.dedup();
-                    let mut uniq_2 = line_2.clone();
-                    uniq_2.sort();
-                    uniq_2.dedup();
-                    let mut uniq_3 = line_3.clone();
-                    uniq_3.sort();
-                    uniq_3.dedup();
-                    let mut uniq_4 = line_4.clone();
-                    uniq_4.sort();
-                    uniq_4.dedup();
-                    let mut best: (u8, &[u8], usize) = (0, &line_0, uniq_0.len());
-                    if uniq_1.len() < best.2 {
-                        best = (1, &line_1, uniq_1.len());
-                    }
-                    if uniq_2.len() < best.2 {
-                        best = (2, &line_2, uniq_2.len());
-                    }
-                    if uniq_3.len() < best.2 {
-                        best = (3, &line_3, uniq_3.len());
-                    }
-                    if uniq_4.len() < best.2 {
-                        best = (4, &line_4, uniq_4.len());
-                    }
-
-                    filtered.push(best.0);
-                    filtered.extend_from_slice(best.1);
+                    let (best_filter, best_line) = trials.iter()
+                                                         .min_by_key(|x| {
+                                                             x.1.iter().fold(0u64, |acc, &x| {
+                                                                 let signed: i16 = if x > 127 {
+                                                                     (x as i16) - 256
+                                                                 } else {
+                                                                     x as i16
+                                                                 };
+                                                                 acc + signed.abs() as u64
+                                                             })
+                                                         })
+                                                         .unwrap();
+                    filtered.push(*best_filter);
+                    filtered.extend_from_slice(best_line);
                 }
                 _ => unreachable!(),
             }
@@ -801,6 +603,153 @@ impl PngData {
 
         false
     }
+}
+
+fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8> {
+    let mut filtered = Vec::with_capacity(data.len());
+    match filter {
+        0 => {
+            filtered.extend_from_slice(data);
+        }
+        1 => {
+            for (i, byte) in data.iter().enumerate() {
+                filtered.push(match i.checked_sub(bpp) {
+                    Some(x) => byte.wrapping_sub(data[x]),
+                    None => *byte,
+                });
+            }
+        }
+        2 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    filtered.push(*byte);
+                } else {
+                    filtered.push(byte.wrapping_sub(last_line[i]));
+                };
+            }
+        }
+        3 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    filtered.push(match i.checked_sub(bpp) {
+                        Some(x) => byte.wrapping_sub(data[x] >> 1),
+                        None => *byte,
+                    });
+                } else {
+                    filtered.push(match i.checked_sub(bpp) {
+                        Some(x) => {
+                            byte.wrapping_sub(((data[x] as u16 + last_line[i] as u16) >> 1) as u8)
+                        }
+                        None => byte.wrapping_sub(last_line[i] >> 1),
+                    });
+                };
+            }
+        }
+        4 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    filtered.push(match i.checked_sub(bpp) {
+                        Some(x) => byte.wrapping_sub(data[x]),
+                        None => *byte,
+                    });
+                } else {
+                    filtered.push(match i.checked_sub(bpp) {
+                        Some(x) => {
+                            byte.wrapping_sub(paeth_predictor(data[x], last_line[i], last_line[x]))
+                        }
+                        None => byte.wrapping_sub(last_line[i]),
+                    });
+                };
+            }
+        }
+        _ => unreachable!(),
+    }
+    filtered
+}
+
+fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8> {
+    let mut unfiltered = Vec::with_capacity(data.len());
+    match filter {
+        0 => {
+            unfiltered.extend_from_slice(data);
+        }
+        1 => {
+            for (i, byte) in data.iter().enumerate() {
+                match i.checked_sub(bpp) {
+                    Some(x) => {
+                        let b = unfiltered[x];
+                        unfiltered.push(byte.wrapping_add(b));
+                    }
+                    None => {
+                        unfiltered.push(*byte);
+                    }
+                };
+            }
+        }
+        2 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    unfiltered.push(*byte);
+                } else {
+                    unfiltered.push(byte.wrapping_add(last_line[i]));
+                };
+            }
+        }
+        3 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    match i.checked_sub(bpp) {
+                        Some(x) => {
+                            let b = unfiltered[x];
+                            unfiltered.push(byte.wrapping_add(b >> 1));
+                        }
+                        None => {
+                            unfiltered.push(*byte);
+                        }
+                    };
+                } else {
+                    match i.checked_sub(bpp) {
+                        Some(x) => {
+                            let b = unfiltered[x];
+                            unfiltered.push(byte.wrapping_add(((b as u16 + last_line[i] as u16) >> 1) as u8));
+                        }
+                        None => {
+                            unfiltered.push(byte.wrapping_add(last_line[i] >> 1));
+                        }
+                    };
+                };
+            }
+        }
+        4 => {
+            for (i, byte) in data.iter().enumerate() {
+                if last_line.is_empty() {
+                    match i.checked_sub(bpp) {
+                        Some(x) => {
+                            let b = unfiltered[x];
+                            unfiltered.push(byte.wrapping_add(b));
+                        }
+                        None => {
+                            unfiltered.push(*byte);
+                        }
+                    };
+                } else {
+                    match i.checked_sub(bpp) {
+                        Some(x) => {
+                            let b = unfiltered[x];
+                            unfiltered.push(byte.wrapping_add(paeth_predictor(b,
+                                                                              last_line[i],
+                                                                              last_line[x])));
+                        }
+                        None => {
+                            unfiltered.push(byte.wrapping_add(last_line[i]));
+                        }
+                    };
+                };
+            }
+        }
+        _ => unreachable!(),
+    }
+    unfiltered
 }
 
 fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {

@@ -272,7 +272,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
                                                           "bKGD", "hIST", "pHYs", "sPLT"];
             let mut preserved = HashMap::new();
-            for (hdr, contents) in png.aux_headers.iter() {
+            for (hdr, contents) in &png.aux_headers {
                 if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
                     preserved.insert(hdr.clone(), contents.clone());
                 }
