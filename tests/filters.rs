@@ -1209,3 +1209,20 @@ fn filter_5_for_palette_1() {
                      png::ColorType::Indexed,
                      png::BitDepth::One);
 }
+
+#[test]
+fn issue_29() {
+    let input = PathBuf::from("tests/files/issue-29.png");
+    let mut opts = get_opts(&input);
+    opts.filter = HashSet::new();
+    opts.filter.insert(0);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
+}

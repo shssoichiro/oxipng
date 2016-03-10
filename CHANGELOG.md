@@ -1,6 +1,7 @@
 **Version 0.2.1**
  - Add rustdoc for public methods and structs
  - Improve filter mode 5 heuristic ([#16](https://github.com/shssoichiro/oxipng/issues/16))
+ - Add tests for edge-case images with subtitles ([#29](https://github.com/shssoichiro/oxipng/issues/29))
 
 **Version 0.2.0**
  - Fix program version that is displayed when running `oxipng -V`
