@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Stealer` struct in crate `crossbeam`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Stealer">
+
+    <title>crossbeam::sync::chase_lev::Stealer - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>sync</a>::<wbr><a href='index.html'>chase_lev</a></p><script>window.sidebarCurrent = {name: 'Stealer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>sync</a>::<wbr><a href='index.html'>chase_lev</a>::<wbr><a class='struct' href=''>Stealer</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-700' class='srclink' href='../../../src/crossbeam/sync/chase_lev.rs.html.html#84-86' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Stealer&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>The stealing half of the work-stealing deque. Stealers have access to the
+opposite end of the deque from the worker, and they only have access to the
+<code>steal</code> method.</p>
+
+<p>Stealers can be cloned to have more than one handle active at a time.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.steal' class='method'><code>fn <a href='#method.steal' class='fnname'>steal</a>(&amp;self) -&gt; <a class='enum' href='../../../crossbeam/sync/chase_lev/enum.Steal.html' title='crossbeam::sync::chase_lev::Steal'>Steal</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Steals work off the end of the queue (opposite of the worker&#39;s end)</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "crossbeam";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

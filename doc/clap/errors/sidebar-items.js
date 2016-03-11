@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ClapErrorType","Command line argument parser error types"]],"struct":[["ClapError","Command line argument parser error"]]});

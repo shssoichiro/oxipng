@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `clap_app!` macro in crate `clap`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, clap_app!">
+
+    <title>clap::clap_app! - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>clap</a></p><script>window.sidebarCurrent = {name: 'clap_app!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content macro">
+<h1 class='fqn'><span class='in-band'><a href='index.html'>clap</a>::<wbr><a class='macro' href=''>clap_app!</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-4579' class='srclink' href='../src/clap/macros.rs.html.html#624-742' title='goto source code'>[src]</a></span></h1>
+<pre class='rust macro'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>clap_app</span> {
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>)) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>arg</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>: $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>setting</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>setting</span>:<span class='ident'>ident</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>attributes</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>group</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span> <span class='op'>=&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>subcommand</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span> <span class='op'>=&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>app</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>) (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ident</span>:<span class='ident'>ident</span>: $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span>),<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>group</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>group</span>:<span class='ident'>expr</span>)) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>group</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>group</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>attributes</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>group</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>builder</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>group</span>:<span class='ident'>expr</span>) (<span class='kw-2'>@</span><span class='ident'>arg</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>: $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tt</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='op'>-</span><span class='op'>-</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>long</span>:<span class='ident'>ident</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='op'>-</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>short</span>:<span class='ident'>ident</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) (<span class='op'>-</span>) <span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>var</span>:<span class='ident'>ident</span><span class='op'>&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) (<span class='op'>+</span>) <span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>var</span>:<span class='ident'>ident</span><span class='op'>&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) (<span class='op'>-</span>) [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>var</span>:<span class='ident'>ident</span>] $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) (<span class='op'>+</span>) [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>var</span>:<span class='ident'>ident</span>] $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> ... $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='attribute'>#{<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span>:<span class='ident'>expr</span>} $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='op'>*</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='op'>!</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ident</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='op'>+</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ident</span>:<span class='ident'>ident</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> {<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fn_</span>:<span class='ident'>expr</span>} $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>as_expr</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>expr</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>desc</span>:<span class='ident'>tt</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ident</span>:<span class='ident'>ident</span>[$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>ident</span>)<span class='op'>*</span>]</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>arg</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>modes</span>:<span class='ident'>tt</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ident</span>:<span class='ident'>ident</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>expr</span>:<span class='ident'>expr</span>)<span class='op'>*</span>) $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>subcommand</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span> <span class='op'>=&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span> <span class='op'>=&gt;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+}</pre>
+<div class='docblock'><p>App, Arg, SubCommand and Group builder macro (Usage-string like input)</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "clap";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

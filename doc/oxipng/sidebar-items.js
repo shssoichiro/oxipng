@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["optimize","Perform optimization on the input file using the options provided"]],"mod":[["deflate",""],["png",""]],"struct":[["Options","Options controlling the output of the `optimize` function"]]});

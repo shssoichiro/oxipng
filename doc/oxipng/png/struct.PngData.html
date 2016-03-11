@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `PngData` struct in crate `oxipng`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, PngData">
+
+    <title>oxipng::png::PngData - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>oxipng</a>::<wbr><a href='index.html'>png</a></p><script>window.sidebarCurrent = {name: 'PngData', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>oxipng</a>::<wbr><a href='index.html'>png</a>::<wbr><a class='struct' href=''>PngData</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-278' class='srclink' href='../../src/oxipng/src/png.rs.html.html#160-176' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct PngData {
+    pub idat_data: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;,
+    pub ihdr_data: <a class='struct' href='../../oxipng/png/struct.IhdrData.html' title='oxipng::png::IhdrData'>IhdrData</a>,
+    pub raw_data: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;,
+    pub palette: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;,
+    pub transparency_pixel: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;,
+    pub transparency_palette: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;,
+    pub aux_headers: <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;,
+}</pre><div class='docblock'><p>Contains all data relevant to a PNG image</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.idat_data'><code>idat_data</code></td><td><div class='docblock'><p>The filtered and compressed data of the IDAT chunk</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.ihdr_data'><code>ihdr_data</code></td><td><div class='docblock'><p>The headers stored in the IHDR chunk</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.raw_data'><code>raw_data</code></td><td><div class='docblock'><p>The uncompressed, optionally filtered data from the IDAT chunk</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.palette'><code>palette</code></td><td><div class='docblock'><p>The palette containing colors used in an Indexed image
+Contains 3 bytes per color (R+G+B), up to 768</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.transparency_pixel'><code>transparency_pixel</code></td><td><div class='docblock'><p>The pixel value that should be rendered as transparent</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.transparency_palette'><code>transparency_palette</code></td><td><div class='docblock'><p>A map of how transparent each color in the palette should be</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.aux_headers'><code>aux_headers</code></td><td><div class='docblock'><p>All non-critical headers from the PNG are stored here</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../oxipng/png/struct.PngData.html' title='oxipng::png::PngData'>PngData</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(filepath: &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../oxipng/png/struct.PngData.html' title='oxipng::png::PngData'>PngData</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
+<div class='docblock'><p>Create a new <code>PngData</code> struct by opening a file</p>
+</div><h4 id='method.channels_per_pixel' class='method'><code>fn <a href='#method.channels_per_pixel' class='fnname'>channels_per_pixel</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a></code></h4>
+<div class='docblock'><p>Return the number of channels in the image, based on color type</p>
+</div><h4 id='method.output' class='method'><code>fn <a href='#method.output' class='fnname'>output</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
+<div class='docblock'><p>Format the <code>PngData</code> struct into a valid PNG bytestream</p>
+</div><h4 id='method.scan_lines' class='method'><code>fn <a href='#method.scan_lines' class='fnname'>scan_lines</a>(&amp;self) -&gt; <a class='struct' href='../../oxipng/png/struct.ScanLines.html' title='oxipng::png::ScanLines'>ScanLines</a></code></h4>
+<div class='docblock'><p>Return an iterator over the scanlines of the image</p>
+</div><h4 id='method.unfilter_image' class='method'><code>fn <a href='#method.unfilter_image' class='fnname'>unfilter_image</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
+<div class='docblock'><p>Reverse all filters applied on the image, returning an unfiltered IDAT bytestream</p>
+</div><h4 id='method.filter_image' class='method'><code>fn <a href='#method.filter_image' class='fnname'>filter_image</a>(&amp;self, filter: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
+<div class='docblock'><p>Apply the specified filter type to all rows in the image
+0: None
+1: Sub
+2: Up
+3: Average
+4: Paeth
+5: All (heuristically pick the best filter for each line)</p>
+</div><h4 id='method.reduce_bit_depth' class='method'><code>fn <a href='#method.reduce_bit_depth' class='fnname'>reduce_bit_depth</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Attempt to reduce the bit depth of the image
+Returns true if the bit depth was reduced, false otherwise</p>
+</div><h4 id='method.reduce_palette' class='method'><code>fn <a href='#method.reduce_palette' class='fnname'>reduce_palette</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Attempt to reduce the number of colors in the palette
+Returns true if the palette was reduced, false otherwise</p>
+</div><h4 id='method.reduce_color_type' class='method'><code>fn <a href='#method.reduce_color_type' class='fnname'>reduce_color_type</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Attempt to reduce the color type of the image
+Returns true if the color type was reduced, false otherwise</p>
+</div><h4 id='method.change_interlacing' class='method'><code>fn <a href='#method.change_interlacing' class='fnname'>change_interlacing</a>(&amp;mut self, interlace: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Convert the image to the specified interlacing type
+Returns true if the interlacing was changed, false otherwise</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../oxipng/png/struct.PngData.html' title='oxipng::png::PngData'>PngData</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../oxipng/png/struct.PngData.html' title='oxipng::png::PngData'>PngData</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../oxipng/png/struct.PngData.html' title='oxipng::png::PngData'>PngData</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "oxipng";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

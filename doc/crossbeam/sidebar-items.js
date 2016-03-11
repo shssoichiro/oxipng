@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["scope","Create a new `scope`, for deferred destructors."],["spawn_unsafe","Like `std::thread::spawn`, but without the closure bounds."]],"mod":[["mem","Memory management for concurrent data structures"],["sync","Synchronization primitives."]],"struct":[["Scope",""],["ScopedJoinHandle","A handle to a scoped thread"]]});

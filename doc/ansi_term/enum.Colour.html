@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Colour` enum in crate `ansi_term`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Colour">
+
+    <title>ansi_term::Colour - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>ansi_term</a></p><script>window.sidebarCurrent = {name: 'Colour', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>ansi_term</a>::<wbr><a class='enum' href=''>Colour</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-65' class='srclink' href='../src/ansi_term/lib.rs.html.html#212-260' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Colour {
+    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Purple,
+    Cyan,
+    White,
+    Fixed(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>),
+}</pre><div class='docblock'><p>A colour is one specific type of ANSI escape code, and can refer
+to either the foreground or background colour.</p>
+
+<p>These use the standard numeric sequences.
+See <a href="http://invisible-island.net/xterm/ctlseqs/ctlseqs.html">http://invisible-island.net/xterm/ctlseqs/ctlseqs.html</a></p>
+</div><h2 class='variants'>Variants</h2>
+<table class='variants_table'><tr><td id='variant.Black'><code>Black</code></td><td><div class='docblock'><p>Colour #0 (foreground code <code>30</code>, background code <code>40</code>).</p>
+
+<p>This is not necessarily the background colour, and using it as one may
+render the text hard to read on terminals with dark backgrounds.</p>
+</div></td><td></td></tr><tr><td id='variant.Red'><code>Red</code></td><td><div class='docblock'><p>Colour #1 (foreground code <code>31</code>, background code <code>41</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.Green'><code>Green</code></td><td><div class='docblock'><p>Colour #2 (foreground code <code>32</code>, background code <code>42</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.Yellow'><code>Yellow</code></td><td><div class='docblock'><p>Colour #3 (foreground code <code>33</code>, background code <code>43</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.Blue'><code>Blue</code></td><td><div class='docblock'><p>Colour #4 (foreground code <code>34</code>, background code <code>44</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.Purple'><code>Purple</code></td><td><div class='docblock'><p>Colour #5 (foreground code <code>35</code>, background code <code>45</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.Cyan'><code>Cyan</code></td><td><div class='docblock'><p>Colour #6 (foreground code <code>36</code>, background code <code>46</code>).</p>
+</div></td><td></td></tr><tr><td id='variant.White'><code>White</code></td><td><div class='docblock'><p>Colour #7 (foreground code <code>37</code>, background code <code>47</code>).</p>
+
+<p>As above, this is not necessarily the foreground colour, and may be
+hard to read on terminals with light backgrounds.</p>
+</div></td><td></td></tr><tr><td id='variant.Fixed'><code>Fixed</code></td><td><div class='docblock'><p>A colour number from 0 to 255, for use in 256-colour terminal
+environments.</p>
+
+<ul>
+<li>Colours 0 to 7 are the <code>Black</code> to <code>White</code> variants respectively.
+These colours can usually be changed in the terminal emulator.</li>
+<li>Colours 8 to 15 are brighter versions of the eight colours above.
+These can also usually be changed in the terminal emulator, or it
+could be configured to use the original colours and show the text in
+bold instead. It varies depending on the program.</li>
+<li>Colours 16 to 231 contain several palettes of bright colours,
+arranged in six squares measuring six by six each.</li>
+<li>Colours 232 to 255 are shades of grey from black to white.</li>
+</ul>
+
+<p>It might make more sense to look at a <a href="%5Ecc">colour chart</a>.</p>
+</div></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h3><div class='impl-items'><h4 id='method.normal' class='method'><code>fn <a href='#method.normal' class='fnname'>normal</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Return a Style with the foreground colour set to this colour.</p>
+</div><h4 id='method.paint' class='method'><code>fn <a href='#method.paint' class='fnname'>paint</a>&lt;'a, S&gt;(self, input: S) -&gt; <a class='struct' href='../ansi_term/struct.ANSIString.html' title='ansi_term::ANSIString'>ANSIString</a>&lt;'a&gt; <span class='where'>where S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'a, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</span></code></h4>
+<div class='docblock'><p>Paints the given text with this colour, returning an ANSI string.
+This is a short-cut so you don&#39;t have to use Blue.normal() just
+to get blue text.</p>
+</div><h4 id='method.bold' class='method'><code>fn <a href='#method.bold' class='fnname'>bold</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the bold property set.</p>
+</div><h4 id='method.dimmed' class='method'><code>fn <a href='#method.dimmed' class='fnname'>dimmed</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the dimmed property set.</p>
+</div><h4 id='method.italic' class='method'><code>fn <a href='#method.italic' class='fnname'>italic</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the italic property set.</p>
+</div><h4 id='method.underline' class='method'><code>fn <a href='#method.underline' class='fnname'>underline</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the underline property set.</p>
+</div><h4 id='method.blink' class='method'><code>fn <a href='#method.blink' class='fnname'>blink</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the blink property set.</p>
+</div><h4 id='method.reverse' class='method'><code>fn <a href='#method.reverse' class='fnname'>reverse</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the reverse property set.</p>
+</div><h4 id='method.hidden' class='method'><code>fn <a href='#method.hidden' class='fnname'>hidden</a>(self) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the hidden property set.</p>
+</div><h4 id='method.on' class='method'><code>fn <a href='#method.on' class='fnname'>on</a>(self, background: <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a>) -&gt; <a class='struct' href='../ansi_term/struct.Style.html' title='ansi_term::Style'>Style</a></code></h4>
+<div class='docblock'><p>Returns a Style with the background colour property set.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../ansi_term/enum.Colour.html' title='ansi_term::Colour'>Colour</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "ansi_term";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

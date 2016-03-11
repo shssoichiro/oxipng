@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Exec","Exec manages the execution of a regular expression."],["ExecBuilder","Facilitates the construction of an executor by exposing various knobs to control how a regex is executed and what kinds of resources it's permitted to use."]]});

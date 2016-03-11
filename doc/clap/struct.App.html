@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `App` struct in crate `clap`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, App">
+
+    <title>clap::App - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>clap</a></p><script>window.sidebarCurrent = {name: 'App', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>clap</a>::<wbr><a class='struct' href=''>App</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-356' class='srclink' href='../src/clap/app/mod.rs.html.html#61-97' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct App&lt;'a, 'v, 'ab, 'u, 'h, 'ar&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>Used to create a representation of a command line program and all possible command line
+arguments.</p>
+
+<p>Application settings are set using the &quot;builder pattern&quot; with <code>.get_matches()</code> being the
+terminal method that starts the runtime-parsing process and returns information about
+the user supplied arguments (or lack there of).</p>
+
+<p>There aren&#39;t any mandatory &quot;options&quot; that one must set. The &quot;options&quot; may also appear in any
+order (so long as <code>.get_matches()</code> is the last method called).</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+                  .<span class='ident'>author</span>(<span class='string'>&quot;Me, me@mail.com&quot;</span>)
+                  .<span class='ident'>version</span>(<span class='string'>&quot;1.0.2&quot;</span>)
+                  .<span class='ident'>about</span>(<span class='string'>&quot;Explains in brief what the program does&quot;</span>)
+                  .<span class='ident'>arg</span>(
+                           <span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;in_file&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+                   )
+                  .<span class='ident'>after_help</span>(<span class='string'>&quot;Longer explaination to appear after the options when \
+                               displaying the help information from --help or -h&quot;</span>)
+                  .<span class='ident'>get_matches</span>();
+
+<span class='comment'>// Your program logic starts here...</span></pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a, 'v, 'ab, 'u, 'h, 'ar&gt; <a class='struct' href='../clap/struct.App.html' title='clap::App'>App</a>&lt;'a, 'v, 'ab, 'u, 'h, 'ar&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(n: &amp;'ar <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Creates a new instance of an application requiring a name (such as the binary). The name
+will be displayed to the user when they request to print version or help and usage
+information. The name should not contain spaces (hyphens &#39;-&#39; are ok).</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>prog</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)</pre>
+</div><h4 id='method.author' class='method'><code>fn <a href='#method.author' class='fnname'>author</a>(self, a: &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets a string of author(s) and will be displayed to the user when they request the help
+information with <code>--help</code> or <code>-h</code>.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+     .<span class='ident'>author</span>(<span class='string'>&quot;Me, me@mymain.com&quot;</span>)</pre>
+</div><h4 id='method.bin_name' class='method'><code>fn <a href='#method.bin_name' class='fnname'>bin_name</a>(self, a: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Overrides the system-determined binary name. This should only be used when absolutely
+neccessary, such as the binary name for your application is misleading, or perhaps <em>not</em>
+how the user should invoke your program.</p>
+
+<p><strong>NOTE:</strong> This command <strong>should not</strong> be used for SubCommands.</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+     .<span class='ident'>bin_name</span>(<span class='string'>&quot;my_binary&quot;</span>)</pre>
+</div><h4 id='method.about' class='method'><code>fn <a href='#method.about' class='fnname'>about</a>(self, a: &amp;'ab <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets a string briefly describing what the program does and will be displayed when
+displaying help information.</p>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>about</span>(<span class='string'>&quot;Does really amazing things to great people&quot;</span>)</pre>
+</div><h4 id='method.after_help' class='method'><code>fn <a href='#method.after_help' class='fnname'>after_help</a>(self, h: &amp;'h <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds additional help information to be displayed in addition to and directly after
+auto-generated help. This information is displayed <strong>after</strong> the auto-generated help
+information. This additional help is often used to describe how to use the arguments,
+or caveats to be noted.</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>after_help</span>(<span class='string'>&quot;Does really amazing things to great people&quot;</span>)</pre>
+</div><h4 id='method.subcommands_negate_reqs' class='method'><code>fn <a href='#method.subcommands_negate_reqs' class='fnname'>subcommands_negate_reqs</a>(self, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Allows subcommands to override all requirements of the parent (this command). For example
+if you had a subcommand or even top level application which had a required arguments that
+are only required as long as there is no subcommand present.</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::SubcommandsNegateReqs</code> instead.
+This method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This defaults to false (using subcommand does <em>not</em> negate requirements)</p>
+
+<h1 id='examples-6' class='section-header'><a href='#examples-6'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>subcommands_negate_reqs</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.subcommand_required' class='method'><code>fn <a href='#method.subcommand_required' class='fnname'>subcommand_required</a>(self, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Allows specifying that if no subcommand is present at runtime, error and exit gracefully</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::SubcommandRequired</code> instead. This
+method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This defaults to false (subcommands do <em>not</em> need to be present)</p>
+
+<h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>subcommand_required</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.version' class='method'><code>fn <a href='#method.version' class='fnname'>version</a>(self, v: &amp;'v <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets a string of the version number to be displayed when displaying version or help
+information.</p>
+
+<h1 id='examples-8' class='section-header'><a href='#examples-8'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>version</span>(<span class='string'>&quot;v0.1.24&quot;</span>)</pre>
+</div><h4 id='method.usage' class='method'><code>fn <a href='#method.usage' class='fnname'>usage</a>(self, u: &amp;'u <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets a custom usage string to override the auto-generated usage string.</p>
+
+<p>This will be displayed to the user when errors are found in argument parsing, or when you
+call <code>ArgMatcher::usage()</code></p>
+
+<p><strong>NOTE:</strong> You do not need to specify the &quot;USAGE: \n\t&quot; portion, as that will
+still be applied by <code>clap</code>, you only need to specify the portion starting
+with the binary name.</p>
+
+<p><strong>NOTE:</strong> This will not replace the entire help message, <em>only</em> the portion
+showing the usage.</p>
+
+<h1 id='examples-9' class='section-header'><a href='#examples-9'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>usage</span>(<span class='string'>&quot;myapp [-clDas] &lt;some_file&gt;&quot;</span>)</pre>
+</div><h4 id='method.help' class='method'><code>fn <a href='#method.help' class='fnname'>help</a>(self, h: &amp;'u <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets a custom help message and overrides the auto-generated one. This should only be used
+when the auto-generated message does not suffice.</p>
+
+<p>This will be displayed to the user when they use the default <code>--help</code> or <code>-h</code></p>
+
+<p><strong>NOTE:</strong> This replaces the <strong>entire</strong> help message, so nothing will be auto-generated.</p>
+
+<p><strong>NOTE:</strong> This <strong>only</strong> replaces the help message for the current command, meaning if you
+are using subcommands, those help messages will still be auto-generated unless you
+specify a <code>.help()</code> for them as well.</p>
+
+<h1 id='examples-10' class='section-header'><a href='#examples-10'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myapp&quot;</span>)
+    .<span class='ident'>help</span>(<span class='string'>&quot;myapp v1.0\n\
+           Does awesome things\n\
+           (C) me@mail.com\n\n\
+
+           USAGE: myapp &lt;opts&gt; &lt;comamnd&gt;\n\n\
+
+           Options:\n\
+           -h, --helpe      Dispay this message\n\
+           -V, --version    Display version info\n\
+           -s &lt;stuff&gt;       Do something with stuff\n\
+           -v               Be verbose\n\n\
+
+           Commmands:\n\
+           help             Prints this message\n\
+           work             Do some work&quot;</span>)</pre>
+</div><h4 id='method.help_short' class='method'><code>fn <a href='#method.help_short' class='fnname'>help_short</a>(self, s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets the short version of the <code>help</code> argument without the preceding <code>-</code>.</p>
+
+<p>By default <code>clap</code> automatically assigns <code>h</code>, but this can be overridden</p>
+
+<p><strong>NOTE:</strong> Any leading <code>-</code> characters will be stripped, and only the first
+non <code>-</code> chacter will be used as the <code>short</code> version</p>
+
+<h1 id='examples-11' class='section-header'><a href='#examples-11'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Using an uppercase `H` instead of the default lowercase `h`</span>
+    .<span class='ident'>help_short</span>(<span class='string'>&quot;H&quot;</span>)</pre>
+</div><h4 id='method.version_short' class='method'><code>fn <a href='#method.version_short' class='fnname'>version_short</a>(self, s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Sets the short version of the <code>version</code> argument without the preceding <code>-</code>.</p>
+
+<p>By default <code>clap</code> automatically assigns <code>V</code>, but this can be overridden</p>
+
+<p><strong>NOTE:</strong> Any leading <code>-</code> characters will be stripped, and only the first
+non <code>-</code> chacter will be used as the <code>short</code> version</p>
+
+<h1 id='examples-12' class='section-header'><a href='#examples-12'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Using a lowercase `v` instead of the default capital `V`</span>
+    .<span class='ident'>version_short</span>(<span class='string'>&quot;v&quot;</span>)</pre>
+</div><h4 id='method.arg_required_else_help' class='method'><code>fn <a href='#method.arg_required_else_help' class='fnname'>arg_required_else_help</a>(self, tf: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Specifies that the help text sould be displayed (and then exit gracefully), if no
+arguments are present at runtime (i.e. an empty run such as, <code>$ myprog</code>.</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::ArgRequiredElseHelp</code> instead. This
+method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> Subcommands count as arguments</p>
+
+<h1 id='examples-13' class='section-header'><a href='#examples-13'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg_required_else_help</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.hidden' class='method'><code>fn <a href='#method.hidden' class='fnname'>hidden</a>(self, h: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Hides a subcommand from help message output.</p>
+
+<p><strong>NOTE:</strong> This does <strong>not</strong> hide the subcommand from usage strings on error</p>
+
+<h1 id='examples-14' class='section-header'><a href='#examples-14'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+.<span class='ident'>hidden</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.global_version' class='method'><code>fn <a href='#method.global_version' class='fnname'>global_version</a>(self, gv: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Uses version of the current command for all subcommands. (Defaults to false; subcommands
+have independant version strings)</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::GlobalVersion</code> instead. This
+method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> The version for the current command and this setting must be set <strong>prior</strong> to
+adding any subcommands</p>
+
+<h1 id='examples-15' class='section-header'><a href='#examples-15'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>version</span>(<span class='string'>&quot;v1.1&quot;</span>)
+    .<span class='ident'>global_version</span>(<span class='boolval'>true</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
+    .<span class='ident'>get_matches</span>();
+<span class='comment'>// running `myprog test --version` will display</span>
+<span class='comment'>// &quot;myprog-test v1.1&quot;</span></pre>
+</div><h4 id='method.versionless_subcommands' class='method'><code>fn <a href='#method.versionless_subcommands' class='fnname'>versionless_subcommands</a>(self, vers: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Disables <code>-V</code> and <code>--version</code> for all subcommands (Defaults to false; subcommands have
+version flags)</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::VersionlessSubcommands</code> instead.
+This method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This setting must be set <strong>prior</strong> adding any subcommands</p>
+
+<p><strong>NOTE:</strong> Do not set this value to false, it will have undesired results!</p>
+
+<h1 id='examples-16' class='section-header'><a href='#examples-16'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>version</span>(<span class='string'>&quot;v1.1&quot;</span>)
+    .<span class='ident'>versionless_subcommands</span>(<span class='boolval'>true</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
+    .<span class='ident'>get_matches</span>();
+<span class='comment'>// running `myprog test --version` will display unknown argument error</span></pre>
+</div><h4 id='method.unified_help_message' class='method'><code>fn <a href='#method.unified_help_message' class='fnname'>unified_help_message</a>(self, uni_help: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>By default the auto-generated help message groups flags, options, and positional arguments
+separately. This setting disable that and groups flags and options together presenting a
+more unified help message (a la getopts or docopt style).</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::UnifiedHelpMessage</code> instead. This
+method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This setting is cosmetic only and does not affect any functionality.</p>
+
+<h1 id='examples-17' class='section-header'><a href='#examples-17'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>unified_help_message</span>(<span class='boolval'>true</span>)
+    .<span class='ident'>get_matches</span>();
+<span class='comment'>// running `myprog --help` will display a unified &quot;docopt&quot; or &quot;getopts&quot; style help message</span></pre>
+</div><h4 id='method.wait_on_error' class='method'><code>fn <a href='#method.wait_on_error' class='fnname'>wait_on_error</a>(self, w: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Will display a message &quot;Press [ENTER]/[RETURN] to continue...&quot; and wait user before
+exiting</p>
+
+<p>This is most useful when writing an application which is run from a GUI shortcut, or on
+Windows where a user tries to open the binary by double-clicking instead of using the
+command line (i.e. set <code>.arg_required_else_help(true)</code> and <code>.wait_on_error(true)</code> to
+display the help in such a case).</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::WaitOnError</code> instead. This
+method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This setting is <strong>not</strong> recursive with subcommands, meaning if you wish this
+behavior for all subcommands, you must set this on each command (needing this is extremely
+rare)</p>
+
+<h1 id='examples-18' class='section-header'><a href='#examples-18'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg_required_else_help</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.subcommand_required_else_help' class='method'><code>fn <a href='#method.subcommand_required_else_help' class='fnname'>subcommand_required_else_help</a>(self, tf: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Specifies that the help text sould be displayed (and then exit gracefully), if no
+subcommands are present at runtime (i.e. an empty run such as, <code>$ myprog</code>.</p>
+
+<p><strong>Deprecated:</strong> Use <code>App::setting()</code> with <code>AppSettings::SubcommandRequiredElseHelp</code>
+instead. This method will be removed at 2.x</p>
+
+<p><strong>NOTE:</strong> This should <em>not</em> be used with <code>.subcommand_required()</code> as they do the same
+thing, except one prints the help text, and one prints an error.</p>
+
+<p><strong>NOTE:</strong> If the user specifies arguments at runtime, but no subcommand the help text will
+still be displayed and exit. If this is <em>not</em> the desired result, consider using
+<code>.arg_required_else_help()</code></p>
+
+<h1 id='examples-19' class='section-header'><a href='#examples-19'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>subcommand_required_else_help</span>(<span class='boolval'>true</span>)</pre>
+</div><h4 id='method.setting' class='method'><code>fn <a href='#method.setting' class='fnname'>setting</a>(self, setting: <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Enables Application level settings, passed as argument</p>
+
+<h1 id='examples-20' class='section-header'><a href='#examples-20'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandRequired</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>WaitOnError</span>)</pre>
+</div><h4 id='method.settings' class='method'><code>fn <a href='#method.settings' class='fnname'>settings</a>(self, settings: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Enables multiple Application level settings, passed as argument</p>
+
+<h1 id='examples-21' class='section-header'><a href='#examples-21'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>settings</span>( <span class='kw-2'>&amp;</span>[<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandRequired</span>,
+                 <span class='ident'>AppSettings</span>::<span class='ident'>WaitOnError</span>])</pre>
+</div><h4 id='method.arg' class='method'><code>fn <a href='#method.arg' class='fnname'>arg</a>(self, a: <a class='struct' href='../clap/struct.Arg.html' title='clap::Arg'>Arg</a>&lt;'ar, 'ar, 'ar, 'ar, 'ar, 'ar&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds an argument to the list of valid possibilties manually. This method allows you full
+control over the arguments settings and options (as well as dynamic generation). It also
+allows you specify several more advanced configuration options such as relational rules
+(exclusions and requirements).</p>
+
+<p>The only disadvantage to this method is that it&#39;s more verbose, and arguments must be added
+one at a time. Using <code>Arg::from_usage</code> helps with the verbosity, and still allows full
+control over the advanced configuration options.</p>
+
+<h1 id='examples-22' class='section-header'><a href='#examples-22'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Adding a single &quot;flag&quot; argument with a short and help text, using Arg::with_name()</span>
+    .<span class='ident'>arg</span>(
+        <span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+           .<span class='ident'>short</span>(<span class='string'>&quot;d&quot;</span>)
+           .<span class='ident'>help</span>(<span class='string'>&quot;turns on debugging mode&quot;</span>)
+    )
+    <span class='comment'>// Adding a single &quot;option&quot; argument with a short, a long, and help text using the less</span>
+    <span class='comment'>// verbose Arg::from_usage()</span>
+    .<span class='ident'>arg</span>(
+        <span class='ident'>Arg</span>::<span class='ident'>from_usage</span>(<span class='string'>&quot;-c --config=[CONFIG] &#39;Optionally sets a config file to use&#39;&quot;</span>)
+    )</pre>
+</div><h4 id='method.args' class='method'><code>fn <a href='#method.args' class='fnname'>args</a>(self, args: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../clap/struct.Arg.html' title='clap::Arg'>Arg</a>&lt;'ar, 'ar, 'ar, 'ar, 'ar, 'ar&gt;&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds multiple arguments to the list of valid possibilties by iterating over a Vec of Args</p>
+
+<h1 id='examples-23' class='section-header'><a href='#examples-23'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>args</span>(
+        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Arg</span>::<span class='ident'>from_usage</span>(<span class='string'>&quot;[debug] -d &#39;turns on debugging info&quot;</span>),
+             <span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;input&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>).<span class='ident'>help</span>(<span class='string'>&quot;the input file to use&quot;</span>)]
+    )</pre>
+</div><h4 id='method.arg_from_usage' class='method'><code>fn <a href='#method.arg_from_usage' class='fnname'>arg_from_usage</a>(self, usage: &amp;'ar <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>A convienience method for adding a single basic argument (one without advanced
+relational rules) from a usage type string. The string used follows the same rules and
+syntax as <code>Arg::from_usage()</code></p>
+
+<p>The downside to using this method is that you can not set any additional properties of the
+<code>Arg</code> other than what <code>Arg::from_usage()</code> supports.</p>
+
+<h1 id='examples-24' class='section-header'><a href='#examples-24'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg_from_usage</span>(<span class='string'>&quot;-c --conf=&lt;config&gt; &#39;Sets a configuration file to use&#39;&quot;</span>)</pre>
+</div><h4 id='method.args_from_usage' class='method'><code>fn <a href='#method.args_from_usage' class='fnname'>args_from_usage</a>(self, usage: &amp;'ar <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds multiple arguments at once from a usage string, one per line. See <code>Arg::from_usage()</code>
+for details on the syntax and rules supported.</p>
+
+<p>Like <code>App::arg_from_usage()</code> the downside is you only set properties for the <code>Arg</code>s which
+<code>Arg::from_usage()</code> supports. But here the benefit is pretty strong, as the readability is
+greatly enhanced, especially if you don&#39;t need any of the more advanced configuration
+options.</p>
+
+<h1 id='examples-25' class='section-header'><a href='#examples-25'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>args_from_usage</span>(
+        <span class='string'>&quot;-c --conf=[config] &#39;Sets a configuration file to use&#39;
+         [debug]... -d &#39;Sets the debugging level&#39;
+         &lt;input&gt; &#39;The input file to use&#39;&quot;</span>
+    )</pre>
+</div><h4 id='method.arg_group' class='method'><code>fn <a href='#method.arg_group' class='fnname'>arg_group</a>(self, group: <a class='struct' href='../clap/struct.ArgGroup.html' title='clap::ArgGroup'>ArgGroup</a>&lt;'ar, 'ar&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds an ArgGroup to the application. ArgGroups are a family of related arguments. By
+placing them in a logical group, you make easier requirement and exclusion rules. For
+instance, you can make an ArgGroup required, this means that one (and <em>only</em> one) argument
+from that group must be present. Using more than one argument from an ArgGroup causes a
+failure (graceful exit).</p>
+
+<p>You can also do things such as name an ArgGroup as a confliction, meaning any of the
+arguments that belong to that group will cause a failure if present.</p>
+
+<p>Perhaps the most common use of ArgGroups is to require one and <em>only</em> one argument to be
+present out of a given set. For example, lets say that you were building an application
+where one could set a given version number by supplying a string using an option argument,
+such as <code>--set-ver v1.2.3</code>, you also wanted to support automatically using a previous
+version numer and simply incrementing one of the three numbers, so you create three flags
+<code>--major</code>, <code>--minor</code>, and <code>--patch</code>. All of these arguments shouldn&#39;t be used at one time
+but perhaps you want to specify that <em>at least one</em> of them is used. You can create a
+group</p>
+
+<h1 id='examples-26' class='section-header'><a href='#examples-26'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+.<span class='ident'>args_from_usage</span>(<span class='string'>&quot;--set-ver [ver] &#39;set the version manually&#39;
+                  --major         &#39;auto increase major&#39;
+                  --minor         &#39;auto increase minor&#39;
+                  --patch         &#39;auto increase patch&quot;</span>)
+.<span class='ident'>arg_group</span>(<span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;vers&quot;</span>)
+                    .<span class='ident'>add_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;ver&quot;</span>, <span class='string'>&quot;major&quot;</span>, <span class='string'>&quot;minor&quot;</span>,<span class='string'>&quot;patch&quot;</span>])
+                    .<span class='ident'>required</span>(<span class='boolval'>true</span>))</pre>
+</div><h4 id='method.arg_groups' class='method'><code>fn <a href='#method.arg_groups' class='fnname'>arg_groups</a>(self, groups: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../clap/struct.ArgGroup.html' title='clap::ArgGroup'>ArgGroup</a>&lt;'ar, 'ar&gt;&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds a ArgGroups to the application. ArgGroups are a family of related arguments. By
+placing them in a logical group, you make easier requirement and exclusion rules. For
+instance, you can make an ArgGroup required, this means that one (and <em>only</em> one) argument
+from that group must be present. Using more than one argument from an ArgGroup causes a
+failure (graceful exit).</p>
+
+<p>You can also do things such as name an ArgGroup as a confliction, meaning any of the
+arguments that belong to that group will cause a failure if present.</p>
+
+<p>Perhaps the most common use of ArgGroups is to require one and <em>only</em> one argument to be
+present out of a given set. For example, lets say that you were building an application
+where one could set a given version number by supplying a string using an option argument,
+such as <code>--set-ver v1.2.3</code>, you also wanted to support automatically using a previous
+version numer and simply incrementing one of the three numbers, so you create three flags
+<code>--major</code>, <code>--minor</code>, and <code>--patch</code>. All of these arguments shouldn&#39;t be used at one time
+but perhaps you want to specify that <em>at least one</em> of them is used. You can create a
+group</p>
+
+<h1 id='examples-27' class='section-header'><a href='#examples-27'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+.<span class='ident'>args_from_usage</span>(<span class='string'>&quot;--set-ver [ver] &#39;set the version manually&#39;
+                  --major         &#39;auto increase major&#39;
+                  --minor         &#39;auto increase minor&#39;
+                  --patch         &#39;auto increase patch&quot;</span>)
+.<span class='ident'>arg_group</span>(<span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;vers&quot;</span>)
+                    .<span class='ident'>add_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;ver&quot;</span>, <span class='string'>&quot;major&quot;</span>, <span class='string'>&quot;minor&quot;</span>,<span class='string'>&quot;patch&quot;</span>])
+                    .<span class='ident'>required</span>(<span class='boolval'>true</span>))</pre>
+</div><h4 id='method.subcommand' class='method'><code>fn <a href='#method.subcommand' class='fnname'>subcommand</a>(self, subcmd: <a class='struct' href='../clap/struct.App.html' title='clap::App'>App</a>&lt;'a, 'v, 'ab, 'u, 'h, 'ar&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds a subcommand to the list of valid possibilties. Subcommands are effectively sub apps,
+because they can contain their own arguments, subcommands, version, usage, etc. They also
+function just like apps, in that they get their own auto generated help, version, and
+usage.</p>
+
+<h1 id='examples-28' class='section-header'><a href='#examples-28'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+.<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config&quot;</span>)
+               .<span class='ident'>about</span>(<span class='string'>&quot;Controls configuration features&quot;</span>)
+               .<span class='ident'>arg_from_usage</span>(<span class='string'>&quot;&lt;config&gt; &#39;Required configuration file to use&#39;&quot;</span>))
+            <span class='comment'>// Additional subcommand configuration goes here, such as other arguments...</span></pre>
+</div><h4 id='method.subcommands' class='method'><code>fn <a href='#method.subcommands' class='fnname'>subcommands</a>(self, subcmds: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../clap/struct.App.html' title='clap::App'>App</a>&lt;'a, 'v, 'ab, 'u, 'h, 'ar&gt;&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Adds multiple subcommands to the list of valid possibilties by iterating over a Vec of
+<code>SubCommand</code>s</p>
+
+<h1 id='examples-29' class='section-header'><a href='#examples-29'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+.<span class='ident'>subcommands</span>( <span class='macro'>vec</span><span class='macro'>!</span>[
+       <span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config&quot;</span>).<span class='ident'>about</span>(<span class='string'>&quot;Controls configuration functionality&quot;</span>)
+                                .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config_file&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)),
+       <span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>about</span>(<span class='string'>&quot;Controls debug functionality&quot;</span>)])</pre>
+</div><h4 id='method.print_help' class='method'><code>fn <a href='#method.print_help' class='fnname'>print_help</a>(&amp;self) -&gt; ClapResult&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Prints the full help message to <code>io::stdout()</code> using a <code>BufWriter</code></p>
+
+<h1 id='examples-30' class='section-header'><a href='#examples-30'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>app</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>io</span>::<span class='ident'>stdout</span>();
+<span class='ident'>app</span>.<span class='ident'>write_help</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>out</span>).<span class='ident'>ok</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to write to stdout&quot;</span>);</pre>
+</div><h4 id='method.write_help' class='method'><code>fn <a href='#method.write_help' class='fnname'>write_help</a>&lt;W: <a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt;(&amp;self, w: &amp;mut W) -&gt; ClapResult&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Writes the full help message to the user to a <code>io::Write</code> object</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>app</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>io</span>::<span class='ident'>stdout</span>();
+<span class='ident'>app</span>.<span class='ident'>write_help</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>out</span>).<span class='ident'>ok</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to write to stdout&quot;</span>);</pre>
+</div><h4 id='method.get_matches' class='method'><code>fn <a href='#method.get_matches' class='fnname'>get_matches</a>(self) -&gt; <a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;</code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands</p>
+
+<h1 id='panics' class='section-header'><a href='#panics'>Panics</a></h1>
+<p>If any arguments contain invalid unicode characters. If this is not desired it is
+recommended to use the <code>*_safe()</code> or <code>*_lossy()</code> versions of this method.</p>
+
+<h1 id='examples-31' class='section-header'><a href='#examples-31'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches</span>();</pre>
+</div><h4 id='method.get_matches_lossy' class='method'><code>fn <a href='#method.get_matches_lossy' class='fnname'>get_matches_lossy</a>(self) -&gt; <a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;</code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands. Invalid unicode characters are replaced with
+<code>U+FFFD REPLACEMENT CHARACTER</code></p>
+
+<h1 id='examples-32' class='section-header'><a href='#examples-32'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches</span>();</pre>
+</div><h4 id='method.get_matches_safe' class='method'><code>fn <a href='#method.get_matches_safe' class='fnname'>get_matches_safe</a>(self) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt;</code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands</p>
+
+<p><strong>NOTE:</strong> This method WILL NOT exit when <code>--help</code> or <code>--version</code> (or short versions) are
+used. It will return an error, where the <code>error_type</code> is a <code>ClapErrorType::HelpDisplayed</code>
+or <code>ClapErrorType::VersionDisplayed</code> respectively. You must call <code>error.exit()</code> or
+perform a <code>std::process::exit</code> yourself.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<h1 id='examples-33' class='section-header'><a href='#examples-33'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_safe</span>()
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div><h4 id='method.get_matches_safe_lossy' class='method'><code>fn <a href='#method.get_matches_safe_lossy' class='fnname'>get_matches_safe_lossy</a>(self) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt;</code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands. Invalid unicode characters are replaced with
+<code>U+FFFD REPLACEMENT CHARACTER</code></p>
+
+<p><strong>NOTE:</strong> This method WILL NOT exit when <code>--help</code> or <code>--version</code> (or short versions) are
+used. It will return an error, where the <code>error_type</code> is a <code>ClapErrorType::HelpDisplayed</code>
+or <code>ClapErrorType::VersionDisplayed</code> respectively. You must call <code>error.exit()</code> or
+perform a <code>std::process::exit</code> yourself.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<h1 id='examples-34' class='section-header'><a href='#examples-34'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_safe</span>()
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div><h4 id='method.get_matches_from' class='method'><code>fn <a href='#method.get_matches_from' class='fnname'>get_matches_from</a>&lt;I, T&gt;(self, itr: I) -&gt; <a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands</p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches()</code></p>
+
+<h1 id='examples-35' class='section-header'><a href='#examples-35'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_from</span>(<span class='ident'>arg_vec</span>);</pre>
+</div><h4 id='method.get_matches_from_lossy' class='method'><code>fn <a href='#method.get_matches_from_lossy' class='fnname'>get_matches_from_lossy</a>&lt;I, T&gt;(self, itr: I) -&gt; <a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands. Invalid unicode characters are replaced with
+<code>U+FFFD REPLACEMENT CHARACTER</code></p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches()</code></p>
+
+<h1 id='examples-36' class='section-header'><a href='#examples-36'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_from</span>(<span class='ident'>arg_vec</span>);</pre>
+</div><h4 id='method.get_matches_from_safe' class='method'><code>fn <a href='#method.get_matches_from_safe' class='fnname'>get_matches_from_safe</a>&lt;I, T&gt;(self, itr: I) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands</p>
+
+<p><strong>NOTE:</strong> This method WILL NOT exit when <code>--help</code> or <code>--version</code> (or short versions) are
+used. It will return an error, where the <code>error_type</code> is a <code>ClapErrorType::HelpDisplayed</code>
+or <code>ClapErrorType::VersionDisplayed</code> respectively. You must call <code>error.exit()</code> or
+perform a <code>std::process::exit</code> yourself.</p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches_safe()</code></p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<p><strong>NOTE:</strong> Invalid unicode characters will result in an <code>Err</code> with type
+<code>ClapErrorType::InvalidUnicode</code></p>
+
+<h1 id='examples-37' class='section-header'><a href='#examples-37'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_from_safe</span>(<span class='ident'>arg_vec</span>)
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div><h4 id='method.get_matches_from_safe_lossy' class='method'><code>fn <a href='#method.get_matches_from_safe_lossy' class='fnname'>get_matches_from_safe_lossy</a>&lt;I, T&gt;(self, itr: I) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process. Called on top level parent app <strong>ONLY</strong> then recursively calls
+the real parsing function for all subcommands. Invalid unicode characters are replaced with
+<code>U+FFFD REPLACEMENT CHARACTER</code></p>
+
+<p><strong>NOTE:</strong> This method WILL NOT exit when <code>--help</code> or <code>--version</code> (or short versions) are
+used. It will return an error, where the <code>error_type</code> is a <code>ClapErrorType::HelpDisplayed</code>
+or <code>ClapErrorType::VersionDisplayed</code> respectively. You must call <code>error.exit()</code> or
+perform a <code>std::process::exit</code> yourself.</p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches_safe()</code></p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<h1 id='examples-38' class='section-header'><a href='#examples-38'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    <span class='comment'>// Args and options go here...</span>
+    .<span class='ident'>get_matches_from_safe</span>(<span class='ident'>arg_vec</span>)
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div><h4 id='method.get_matches_from_safe_borrow' class='method'><code>fn <a href='#method.get_matches_from_safe_borrow' class='fnname'>get_matches_from_safe_borrow</a>&lt;I, T&gt;(&amp;mut self, itr: I) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process without consuming the <code>App</code> struct <code>self</code>. This is normally not
+the desired functionality, instead prefer <code>App::get_matches_from_safe</code> which <em>does</em>
+consume <code>self</code>.</p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches_safe()</code></p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<p><strong>NOTE:</strong> Invalid unicode characters will result in an <code>Err</code> with type
+<code>ClapErrorType::InvalidUnicode</code></p>
+
+<h1 id='examples-39' class='section-header'><a href='#examples-39'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>app</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>);
+    <span class='comment'>// Args and options go here...</span>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>app</span>.<span class='ident'>get_matches_from_safe_borrow</span>(<span class='ident'>arg_vec</span>)
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div><h4 id='method.get_matches_from_safe_borrow_lossy' class='method'><code>fn <a href='#method.get_matches_from_safe_borrow_lossy' class='fnname'>get_matches_from_safe_borrow_lossy</a>&lt;I, T&gt;(&amp;mut self, itr: I) -&gt; ClapResult&lt;<a class='struct' href='../clap/struct.ArgMatches.html' title='clap::ArgMatches'>ArgMatches</a>&lt;'ar, 'ar&gt;&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt;</span></code></h4>
+<div class='docblock'><p>Starts the parsing process without consuming the <code>App</code> struct <code>self</code>. This is normally not
+the desired functionality, instead prefer <code>App::get_matches_from_safe</code> which <em>does</em>
+consume <code>self</code>. Invalid unicode characters are replaced with <code>U+FFFD REPLACEMENT CHARACTER</code></p>
+
+<p><strong>NOTE:</strong> The first argument will be parsed as the binary name.</p>
+
+<p><strong>NOTE:</strong> This method should only be used when absolutely necessary, such as needing to
+parse arguments from something other than <code>std::env::args()</code>. If you are unsure, use
+<code>App::get_matches_safe()</code></p>
+
+<p><strong>NOTE:</strong> This method should only be used when is absolutely necessary to handle errors
+manually.</p>
+
+<p><strong>NOTE:</strong> Invalid unicode characters will result in an <code>Err</code> with type
+<code>ClapErrorType::InvalidUnicode</code></p>
+
+<h1 id='examples-40' class='section-header'><a href='#examples-40'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>arg_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;my_prog&quot;</span>, <span class='string'>&quot;some&quot;</span>, <span class='string'>&quot;args&quot;</span>, <span class='string'>&quot;to&quot;</span>, <span class='string'>&quot;parse&quot;</span>];
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>app</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>);
+    <span class='comment'>// Args and options go here...</span>
+<span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='ident'>app</span>.<span class='ident'>get_matches_from_safe_borrow</span>(<span class='ident'>arg_vec</span>)
+    .<span class='ident'>unwrap_or_else</span>( <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurs: {}&quot;</span>, <span class='ident'>e</span>) });</pre>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "clap";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ClapErrorType` enum in crate `clap`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ClapErrorType">
+
+    <title>clap::ClapErrorType - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>clap</a></p><script>window.sidebarCurrent = {name: 'ClapErrorType', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>clap</a>::<wbr><a class='enum' href=''>ClapErrorType</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-4466' class='srclink' href='../src/clap/errors.rs.html.html#300-554' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum ClapErrorType {
+    InvalidValue,
+    InvalidArgument,
+    InvalidSubcommand,
+    EmptyValue,
+    ValueValidationError,
+    ArgumentError,
+    TooManyArgs,
+    TooManyValues,
+    TooFewValues,
+    WrongNumValues,
+    ArgumentConflict,
+    MissingRequiredArgument,
+    MissingSubcommand,
+    MissingArgumentOrSubcommand,
+    UnexpectedArgument,
+    UnexpectedMultipleUsage,
+    InvalidUnicode,
+    HelpDisplayed,
+    VersionDisplayed,
+    InternalError,
+    Io,
+    Format,
+}</pre><div class='docblock'><p>Command line argument parser error types</p>
+</div><h2 class='variants'>Variants</h2>
+<table class='variants_table'><tr><td id='variant.InvalidValue'><code>InvalidValue</code></td><td><div class='docblock'><p>Error occurs when some possible values were set, but clap found unexpected value</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+        .<span class='ident'>possible_value</span>(<span class='string'>&quot;fast&quot;</span>)
+        .<span class='ident'>possible_value</span>(<span class='string'>&quot;slow&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;other&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.InvalidArgument'><code>InvalidArgument</code></td><td><div class='docblock'><p>Error occurs when clap found unexpected flag or option</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>from_usage</span>(<span class='string'>&quot;-f, --flag &#39;some flag&#39;&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--other&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.InvalidSubcommand'><code>InvalidSubcommand</code></td><td><div class='docblock'><p>Error occurs when clap found unexpected subcommand</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config&quot;</span>)
+        .<span class='ident'>about</span>(<span class='string'>&quot;Used for configuration&quot;</span>)
+        .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config_file&quot;</span>)
+            .<span class='ident'>help</span>(<span class='string'>&quot;The configuration file to use&quot;</span>)
+            .<span class='ident'>index</span>(<span class='number'>1</span>)))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;other&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.EmptyValue'><code>EmptyValue</code></td><td><div class='docblock'><p>Error occurs when option does not allow empty values but some was found</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+         .<span class='ident'>empty_values</span>(<span class='boolval'>false</span>))
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;color&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--debug&quot;</span>, <span class='string'>&quot;--color&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.ValueValidationError'><code>ValueValidationError</code></td><td><div class='docblock'><p>Option fails validation of a custom validator</p>
+</div></td><td></td></tr><tr><td id='variant.ArgumentError'><code>ArgumentError</code></td><td><div class='docblock'><p>Parser inner error</p>
+</div></td><td></td></tr><tr><td id='variant.TooManyArgs'><code>TooManyArgs</code></td><td><div class='docblock'><p>Error occurs when an application got more arguments then were expected</p>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+        .<span class='ident'>max_values</span>(<span class='number'>2</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;too&quot;</span>, <span class='string'>&quot;much&quot;</span>, <span class='string'>&quot;values&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.TooManyValues'><code>TooManyValues</code></td><td><div class='docblock'><p>Error occurs when argument got more values then were expected</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+        .<span class='ident'>max_values</span>(<span class='number'>2</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;too&quot;</span>, <span class='string'>&quot;much&quot;</span>, <span class='string'>&quot;values&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.TooFewValues'><code>TooFewValues</code></td><td><div class='docblock'><p>Error occurs when argument got less values then were expected</p>
+
+<h1 id='examples-6' class='section-header'><a href='#examples-6'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+        .<span class='ident'>min_values</span>(<span class='number'>3</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;too&quot;</span>, <span class='string'>&quot;few&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.WrongNumValues'><code>WrongNumValues</code></td><td><div class='docblock'><p>Error occurs when argument got a different number of values then were expected</p>
+
+<h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>)
+        .<span class='ident'>max_values</span>(<span class='number'>2</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;too&quot;</span>, <span class='string'>&quot;much&quot;</span>, <span class='string'>&quot;values&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.ArgumentConflict'><code>ArgumentConflict</code></td><td><div class='docblock'><p>Error occurs when clap find two ore more conflicting arguments</p>
+
+<h1 id='examples-8' class='section-header'><a href='#examples-8'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+        .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;color&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--debug&quot;</span>, <span class='string'>&quot;--color&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.MissingRequiredArgument'><code>MissingRequiredArgument</code></td><td><div class='docblock'><p>Error occurs when one or more required arguments missing</p>
+
+<h1 id='examples-9' class='section-header'><a href='#examples-9'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+        .<span class='ident'>required</span>(<span class='boolval'>true</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.MissingSubcommand'><code>MissingSubcommand</code></td><td><div class='docblock'><p>Error occurs when required subcommand missing</p>
+
+<h1 id='examples-10' class='section-header'><a href='#examples-10'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandRequired</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config&quot;</span>)
+        .<span class='ident'>about</span>(<span class='string'>&quot;Used for configuration&quot;</span>)
+        .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config_file&quot;</span>)
+            .<span class='ident'>help</span>(<span class='string'>&quot;The configuration file to use&quot;</span>)
+            .<span class='ident'>index</span>(<span class='number'>1</span>)))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.MissingArgumentOrSubcommand'><code>MissingArgumentOrSubcommand</code></td><td><div class='docblock'><p>Occurs when no argument or subcommand has been supplied and
+<code>AppSettings::ArgRequiredElseHelp</code> was used</p>
+
+<h1 id='examples-11' class='section-header'><a href='#examples-11'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>ArgRequiredElseHelp</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config&quot;</span>)
+        .<span class='ident'>about</span>(<span class='string'>&quot;Used for configuration&quot;</span>)
+        .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;config_file&quot;</span>)
+            .<span class='ident'>help</span>(<span class='string'>&quot;The configuration file to use&quot;</span>)
+            .<span class='ident'>index</span>(<span class='number'>1</span>)))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.UnexpectedArgument'><code>UnexpectedArgument</code></td><td><div class='docblock'><p>Error occurs when clap find argument while is was not expecting any</p>
+
+<h1 id='examples-12' class='section-header'><a href='#examples-12'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--arg&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.UnexpectedMultipleUsage'><code>UnexpectedMultipleUsage</code></td><td><div class='docblock'><p>Error occurs when argument was used multiple times and was not set as multiple.</p>
+
+<h1 id='examples-13' class='section-header'><a href='#examples-13'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+        .<span class='ident'>multiple</span>(<span class='boolval'>false</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--debug&quot;</span>, <span class='string'>&quot;--debug&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.InvalidUnicode'><code>InvalidUnicode</code></td><td><div class='docblock'><p>Error occurs when argument contains invalid unicode characters</p>
+
+<p><strong>Note:</strong> Non-Windows OS only</p>
+
+<h1 id='examples-14' class='section-header'><a href='#examples-14'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;debug&quot;</span>)
+        .<span class='ident'>short</span>(<span class='string'>&quot;u&quot;</span>)
+        .<span class='ident'>takes_value</span>(<span class='boolval'>true</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>OsString</span>::<span class='ident'>from_vec</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0x20</span>]),
+                                <span class='ident'>OsString</span>::<span class='ident'>from_vec</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xE9</span>])]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());</pre>
+</div></td><td></td></tr><tr><td id='variant.HelpDisplayed'><code>HelpDisplayed</code></td><td><div class='docblock'><p>Not a true &#39;error&#39; as it means <code>--help</code> or similar was used. The help message will be sent
+to <code>stdout</code> unless the help is displayed due to an error (such as missing subcommands) at
+which point it will be sent to <code>stderr</code></p>
+
+<h1 id='examples-15' class='section-header'><a href='#examples-15'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--help&quot;</span>]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>error_type</span>, <span class='ident'>ClapErrorType</span>::<span class='ident'>HelpDisplayed</span>);</pre>
+</div></td><td></td></tr><tr><td id='variant.VersionDisplayed'><code>VersionDisplayed</code></td><td><div class='docblock'><p>Not a true &#39;error&#39; as it means <code>--version</code> or similar was used. The message will be sent
+to <code>stdout</code></p>
+
+<h1 id='examples-16' class='section-header'><a href='#examples-16'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;--version&quot;</span>]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>error_type</span>, <span class='ident'>ClapErrorType</span>::<span class='ident'>VersionDisplayed</span>);</pre>
+</div></td><td></td></tr><tr><td id='variant.InternalError'><code>InternalError</code></td><td><div class='docblock'><p>Represents an internal error, please consider filing a bug report if this happens!</p>
+</div></td><td></td></tr><tr><td id='variant.Io'><code>Io</code></td><td><div class='docblock'><p>Represents an I/O error, typically white writing to stderr or stdout</p>
+</div></td><td></td></tr><tr><td id='variant.Format'><code>Format</code></td><td><div class='docblock'><p>Represents an Rust Display Format error, typically white writing to stderr or stdout</p>
+</div></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../clap/enum.ClapErrorType.html' title='clap::ClapErrorType'>ClapErrorType</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "clap";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

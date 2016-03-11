@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `gz_header` struct in crate `libz_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, gz_header">
+
+    <title>libz_sys::gz_header - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>libz_sys</a></p><script>window.sidebarCurrent = {name: 'gz_header', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>libz_sys</a>::<wbr><a class='struct' href=''>gz_header</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-31' class='srclink' href='../src/libz_sys/lib.rs.html.html#28-42' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct gz_header {
+    pub text: <a class='type' href='../libc/type.c_int.html' title='libc::c_int'>c_int</a>,
+    pub time: <a class='type' href='../libz_sys/type.uLong.html' title='libz_sys::uLong'>uLong</a>,
+    pub xflags: <a class='type' href='../libc/type.c_int.html' title='libc::c_int'>c_int</a>,
+    pub os: <a class='type' href='../libc/type.c_int.html' title='libc::c_int'>c_int</a>,
+    pub extra: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut </a><a class='type' href='../libz_sys/type.Bytef.html' title='libz_sys::Bytef'>Bytef</a>,
+    pub extra_len: <a class='type' href='../libz_sys/type.uInt.html' title='libz_sys::uInt'>uInt</a>,
+    pub extra_max: <a class='type' href='../libz_sys/type.uInt.html' title='libz_sys::uInt'>uInt</a>,
+    pub name: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut </a><a class='type' href='../libz_sys/type.Bytef.html' title='libz_sys::Bytef'>Bytef</a>,
+    pub name_max: <a class='type' href='../libz_sys/type.uInt.html' title='libz_sys::uInt'>uInt</a>,
+    pub comment: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut </a><a class='type' href='../libz_sys/type.Bytef.html' title='libz_sys::Bytef'>Bytef</a>,
+    pub comm_max: <a class='type' href='../libz_sys/type.uInt.html' title='libz_sys::uInt'>uInt</a>,
+    pub hcrc: <a class='type' href='../libc/type.c_int.html' title='libc::c_int'>c_int</a>,
+    pub done: <a class='type' href='../libc/type.c_int.html' title='libc::c_int'>c_int</a>,
+}</pre><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.text'><code>text</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.time'><code>time</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.xflags'><code>xflags</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.os'><code>os</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.extra'><code>extra</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.extra_len'><code>extra_len</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.extra_max'><code>extra_max</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.name'><code>name</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.name_max'><code>name_max</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.comment'><code>comment</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.comm_max'><code>comm_max</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.hcrc'><code>hcrc</code></td><td></td></tr><tr class='stab '>
+                                  <td id='structfield.done'><code>done</code></td><td></td></tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "libz_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
