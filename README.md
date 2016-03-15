@@ -43,7 +43,7 @@ Oxipng follows Semantic Versioning.
 Oxipng is a command-line utility. Basic usage looks similar to the following:
 
 ```
-oxipng -o 4 -i 1 --strip *.png
+oxipng -o 4 -i 1 --strip safe *.png
 ```
 
 The most commonly used options are as follows:
@@ -57,8 +57,10 @@ PNG interlacing on any images that are processed. `-i 0` will remove interlacing
 processed images. Not specifying either will keep the same interlacing state as the
 input image. Note: Interlacing can add 25-50% to the size of an optimized image. Only use
 it if you have a good reason. (*Not Yet Implemented*)
-* Strip: Used to remove metadata info from processed images. Used via `--strip` or `-s`.
-Can save a few kilobytes if you don't need the metadata.
+* Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
+Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
+will never affect rendering of the image. "All" removes all metadata that is not critical
+to the image. You can also pass a comma-separated list of specific metadata chunks to remove.
 
 More advanced options can be found by running `oxipng -h`.
 
