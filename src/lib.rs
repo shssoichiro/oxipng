@@ -1,14 +1,17 @@
 extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
-extern crate crossbeam;
 extern crate libc;
 extern crate libz_sys;
+extern crate num_cpus;
+extern crate scoped_pool;
 
+use scoped_pool::Pool;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
 use std::io::{BufWriter, Write, stderr, stdout};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 pub mod deflate {
     pub mod deflate;
@@ -78,6 +81,8 @@ pub struct Options {
 
 /// Perform optimization on the input file using the options provided
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
+    type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
+
     // Decode PNG from file
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
@@ -189,62 +194,69 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     }
 
     if opts.idat_recoding || something_changed {
+        // Use 1 thread on single-core, otherwise use threads = 1.5x CPU cores
+        let num_cpus = num_cpus::get();
+        let thread_count = num_cpus + (num_cpus >> 1);
+        let pool = Pool::new(thread_count);
         // Go through selected permutations and determine the best
-        let mut best: Option<(u8, u8, u8, u8, Vec<u8>)> = None;
+        let best: Arc<Mutex<Option<TrialWithData>>> = Arc::new(Mutex::new(None));
         let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
-        let mut results = Vec::with_capacity(combinations);
+        let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
+        let mut filters: HashMap<u8, Vec<u8>> = HashMap::with_capacity(filter.len());
         if opts.verbosity.is_some() {
             writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
         }
-        crossbeam::scope(|scope| {
-            for f in &filter {
-                let filtered = png.filter_image(*f);
-                for zc in &compression {
-                    for zm in &memory {
-                        for zs in &strategies {
-                            let moved_filtered = filtered.clone();
-                            results.push(scope.spawn(move || {
-                                let new_idat = match deflate::deflate::deflate(&moved_filtered,
-                                                                               *zc,
-                                                                               *zm,
-                                                                               *zs,
-                                                                               opts.window) {
-                                    Ok(x) => x,
-                                    Err(x) => return Err(x),
-                                };
 
-                                if opts.verbosity == Some(1) {
-                                    writeln!(&mut stderr(), "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                                             *zc,
-                                             *zm,
-                                             *zs,
-                                             *f,
-                                             new_idat.len()).ok();
-                                }
-
-                                Ok((*f, *zc, *zm, *zs, new_idat.clone()))
-                            }));
-                        }
+        for f in &filter {
+            let filtered = png.filter_image(*f);
+            filters.insert(*f, filtered.clone());
+            for zc in &compression {
+                for zm in &memory {
+                    for zs in &strategies {
+                        results.push((*f, *zc, *zm, *zs));
                     }
                 }
             }
+        }
+        pool.scoped(|scope| {
+            let original_len = png.idat_data.len();
+            let interlacing_changed = opts.interlace.is_some() &&
+                                      opts.interlace != Some(png.ihdr_data.interlaced);
+            for trial in &results {
+                let filtered = filters.get(&trial.0).unwrap();
+                let best = best.clone();
+                scope.execute(move || {
+                    let new_idat = deflate::deflate::deflate(filtered,
+                                                             trial.1,
+                                                             trial.2,
+                                                             trial.3,
+                                                             opts.window)
+                                       .unwrap();
+
+                    if opts.verbosity == Some(1) {
+                        writeln!(&mut stderr(),
+                                 "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                                 trial.1,
+                                 trial.2,
+                                 trial.3,
+                                 trial.0,
+                                 new_idat.len())
+                            .ok();
+                    }
+
+                    let mut best = best.lock().unwrap();
+                    if (best.is_some() &&
+                        new_idat.len() < best.as_ref().map(|x| x.4.len()).unwrap()) ||
+                       (best.is_none() &&
+                        (new_idat.len() < original_len || interlacing_changed || opts.force)) {
+                        *best = Some((trial.0, trial.1, trial.2, trial.3, new_idat));
+                    }
+                });
+            }
         });
 
-        for result in results {
-            if let Ok(ok_result) = result.join() {
-                if (best.is_some() &&
-                    ok_result.4.len() < best.as_ref().map(|x| x.4.len()).unwrap()) ||
-                   (best.is_none() &&
-                    (ok_result.4.len() < png.idat_data.len() ||
-                     (opts.interlace.is_some() &&
-                      opts.interlace != Some(png.ihdr_data.interlaced)) ||
-                     opts.force)) {
-                    best = Some(ok_result);
-                }
-            }
-        }
-
-        if let Some(better) = best {
+        let mut final_best = best.lock().unwrap();
+        if let Some(better) = final_best.take() {
             png.idat_data = better.4.clone();
             if opts.verbosity.is_some() {
                 writeln!(&mut stderr(), "Found better combination:").ok();
