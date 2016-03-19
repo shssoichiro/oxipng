@@ -1,3 +1,7 @@
+**Version 0.2.2 (unreleased)**
+ - Limit number of threads to 1.5x number of cores
+ - Significantly improve memory usage, especially with high optimization levels. ([#32](https://github.com/shssoichiro/oxipng/issues/32))
+
 **Version 0.2.1**
  - Add rustdoc for public methods and structs
  - Improve filter mode 5 heuristic ([#16](https://github.com/shssoichiro/oxipng/issues/16))
