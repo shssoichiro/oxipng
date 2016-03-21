@@ -290,12 +290,10 @@ impl PngData {
     }
     /// Format the `PngData` struct into a valid PNG bytestream
     pub fn output(&self) -> Vec<u8> {
-        // FIXME: This code can all be refactored
         // PNG header
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
-        let mut ihdr_data = Vec::with_capacity(17);
-        ihdr_data.extend_from_slice(b"IHDR");
+        let mut ihdr_data = Vec::with_capacity(13);
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
         ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
@@ -303,85 +301,34 @@ impl PngData {
         ihdr_data.write_u8(0).ok(); // Compression -- deflate
         ihdr_data.write_u8(0).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
-        output.reserve(ihdr_data.len() + 8);
-        output.write_u32::<BigEndian>(ihdr_data.len() as u32 - 4).ok();
-        let crc = crc32::checksum_ieee(&ihdr_data);
-        output.append(&mut ihdr_data);
-        output.write_u32::<BigEndian>(crc).ok();
+        write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
         for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
             !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")
         }) {
-            let mut header_data = Vec::with_capacity(header.len() + 4);
-            header_data.extend(key.as_bytes());
-            header_data.extend_from_slice(header);
-            output.reserve(header_data.len() + 8);
-            output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
-            let crc = crc32::checksum_ieee(&header_data);
-            output.append(&mut header_data);
-            output.write_u32::<BigEndian>(crc).ok();
+            write_png_block(&key.as_bytes(), &header, &mut output);
         }
         // Palette
         if let Some(palette) = self.palette.clone() {
-            let mut palette_data = Vec::with_capacity(palette.len() + 4);
-            palette_data.extend_from_slice(b"PLTE");
-            palette_data.extend(palette);
-            output.reserve(palette_data.len() + 8);
-            output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
-            let crc = crc32::checksum_ieee(&palette_data);
-            output.append(&mut palette_data);
-            output.write_u32::<BigEndian>(crc).ok();
+            write_png_block(b"PLTE", &palette, &mut output);
             if let Some(transparency_palette) = self.transparency_palette.clone() {
                 // Transparency pixel
-                let mut palette_data = Vec::with_capacity(transparency_palette.len() + 4);
-                palette_data.extend_from_slice(b"tRNS");
-                palette_data.extend(transparency_palette);
-                output.reserve(palette_data.len() + 8);
-                output.write_u32::<BigEndian>(palette_data.len() as u32 - 4).ok();
-                let crc = crc32::checksum_ieee(&palette_data);
-                output.append(&mut palette_data);
-                output.write_u32::<BigEndian>(crc).ok();
+                write_png_block(b"tRNS", &transparency_palette, &mut output);
             }
         } else if let Some(transparency_pixel) = self.transparency_pixel.clone() {
             // Transparency pixel
-            let mut pixel_data = Vec::with_capacity(transparency_pixel.len() + 4);
-            pixel_data.extend_from_slice(b"tRNS");
-            pixel_data.extend(transparency_pixel);
-            output.reserve(pixel_data.len() + 8);
-            output.write_u32::<BigEndian>(pixel_data.len() as u32 - 4).ok();
-            let crc = crc32::checksum_ieee(&pixel_data);
-            output.append(&mut pixel_data);
-            output.write_u32::<BigEndian>(crc).ok();
+            write_png_block(b"tRNS", &transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
         for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
             **key == "bKGD" || **key == "hIST" || **key == "tRNS"
         }) {
-            let mut header_data = Vec::with_capacity(header.len() + 4);
-            header_data.extend(key.as_bytes());
-            header_data.extend_from_slice(header);
-            output.reserve(header_data.len() + 8);
-            output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
-            let crc = crc32::checksum_ieee(&header_data);
-            output.append(&mut header_data);
-            output.write_u32::<BigEndian>(crc).ok();
+            write_png_block(&key.as_bytes(), &header, &mut output);
         }
         // IDAT data
-        let mut idat_data = Vec::with_capacity(self.idat_data.len() + 4);
-        idat_data.extend_from_slice(b"IDAT");
-        idat_data.extend(self.idat_data.clone());
-        output.reserve(idat_data.len() + 8);
-        output.write_u32::<BigEndian>(idat_data.len() as u32 - 4).ok();
-        let crc = crc32::checksum_ieee(&idat_data);
-        output.append(&mut idat_data);
-        output.write_u32::<BigEndian>(crc).ok();
+        write_png_block(b"IDAT", &self.idat_data, &mut output);
         // Stream end
-        let iend_data = b"IEND";
-        output.reserve(iend_data.len() + 8);
-        output.write_u32::<BigEndian>(0).ok();
-        let crc = crc32::checksum_ieee(iend_data);
-        output.extend_from_slice(iend_data);
-        output.write_u32::<BigEndian>(crc).ok();
+        write_png_block(b"IEND", &[], &mut output);
 
         output
     }
@@ -771,7 +718,6 @@ fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
     }
 
     for line in png.scan_lines() {
-        // FIXME: I hate having to iterate twice...
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
@@ -1189,4 +1135,15 @@ fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, String> {
         filter: byte_data[11],
         interlaced: byte_data[12],
     })
+}
+
+fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
+    let mut header_data = Vec::with_capacity(header.len() + 4);
+    header_data.extend_from_slice(key);
+    header_data.extend_from_slice(header);
+    output.reserve(header_data.len() + 8);
+    output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
+    let crc = crc32::checksum_ieee(&header_data);
+    output.append(&mut header_data);
+    output.write_u32::<BigEndian>(crc).ok();
 }
