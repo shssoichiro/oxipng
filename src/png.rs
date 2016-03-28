@@ -123,6 +123,8 @@ pub struct ScanLines<'a> {
     pub png: &'a PngData,
     start: usize,
     end: usize,
+    /// Current pass number, and 0-indexed row within the pass
+    pass: Option<(u8, u32)>,
 }
 
 impl<'a> Iterator for ScanLines<'a> {
@@ -130,7 +132,99 @@ impl<'a> Iterator for ScanLines<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.end == self.png.raw_data.len() {
             None
+        } else if self.png.ihdr_data.interlaced == 1 {
+            // Scanlines for interlaced PNG files
+            if self.pass.is_none() {
+                self.pass = Some((1, 0));
+            }
+            // Handle edge cases for images smaller than 5 pixels in either direction
+            if self.png.ihdr_data.width < 5 && self.pass.unwrap().0 == 2 {
+                if let Some(pass) = self.pass.as_mut() {
+                    pass.0 = 3;
+                    pass.1 = 4;
+                }
+            }
+            // Intentionally keep these separate so that they can be applied one after another
+            if self.png.ihdr_data.height < 5 && self.pass.unwrap().0 == 3 {
+                if let Some(pass) = self.pass.as_mut() {
+                    pass.0 = 4;
+                    pass.1 = 0;
+                }
+            }
+            let bits_per_pixel = self.png.ihdr_data.bit_depth.as_u8() as usize *
+                                 self.png.channels_per_pixel() as usize;
+            let mut bits_per_line = self.png.ihdr_data.width as usize * bits_per_pixel;
+            let y_steps;
+            match self.pass {
+                Some((1, _)) => {
+                    bits_per_line >>= 3;
+                    y_steps = 8;
+                }
+                Some((2, _)) => {
+                    bits_per_line >>= 3;
+                    y_steps = 8;
+                }
+                Some((3, _)) => {
+                    bits_per_line >>= 2;
+                    y_steps = 8;
+                }
+                Some((4, _)) => {
+                    bits_per_line >>= 2;
+                    y_steps = 4;
+                }
+                Some((5, _)) => {
+                    bits_per_line >>= 1;
+                    y_steps = 4;
+                }
+                Some((6, _)) => {
+                    bits_per_line >>= 1;
+                    y_steps = 2;
+                }
+                Some((7, _)) => {
+                    y_steps = 2;
+                }
+                _ => unreachable!(),
+            }
+            // Determine whether to trim the last (overflow) pixel for rows on this pass
+            let gap = bits_per_line % bits_per_pixel;
+            if gap != 0 {
+                let x_start = bits_per_pixel *
+                              match self.pass.unwrap().0 {
+                    2 => 4,
+                    4 => 2,
+                    6 => 1,
+                    _ => 0,
+                };
+                if gap >= x_start {
+                    bits_per_line += bits_per_pixel - gap;
+                } else {
+                    bits_per_line -= gap;
+                }
+            }
+            // Round up without converting to float
+            let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
+            self.start = self.end;
+            self.end = self.start + bytes_per_line + 1;
+            // TODO: Handle 4x4 pixel images
+            if let Some(pass) = self.pass.as_mut() {
+                if pass.1 + y_steps >= self.png.ihdr_data.height {
+                    pass.0 += 1;
+                    pass.1 = match pass.0 {
+                        3 => 4,
+                        5 => 2,
+                        7 => 1,
+                        _ => 0,
+                    };
+                } else {
+                    pass.1 += y_steps;
+                }
+            }
+            Some(ScanLine {
+                filter: self.png.raw_data[self.start],
+                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+            })
         } else {
+            // Standard, non-interlaced PNG scanlines
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
@@ -338,6 +432,7 @@ impl PngData {
             png: &self,
             start: 0,
             end: 0,
+            pass: None,
         }
     }
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
@@ -543,11 +638,15 @@ impl PngData {
     /// Convert the image to the specified interlacing type
     /// Returns true if the interlacing was changed, false otherwise
     pub fn change_interlacing(&mut self, interlace: u8) -> bool {
-        // TODO: Implement
-        if interlace != self.ihdr_data.interlaced {
+        if interlace == self.ihdr_data.interlaced {
             return false;
         }
 
+        if interlace == 1 {
+            // TODO: Interlace
+        } else {
+            // TODO: Deinterlace
+        }
         false
     }
 }
