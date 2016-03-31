@@ -157,27 +157,27 @@ impl<'a> Iterator for ScanLines<'a> {
             let y_steps;
             match self.pass {
                 Some((1, _)) => {
-                    bits_per_line >>= 3;
+                    bits_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
                     y_steps = 8;
                 }
                 Some((2, _)) => {
-                    bits_per_line >>= 3;
+                    bits_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
                     y_steps = 8;
                 }
                 Some((3, _)) => {
-                    bits_per_line >>= 2;
+                    bits_per_line = (bits_per_line as f32 / 4f32).ceil() as usize;
                     y_steps = 8;
                 }
                 Some((4, _)) => {
-                    bits_per_line >>= 2;
+                    bits_per_line = (bits_per_line as f32 / 4f32).ceil() as usize;
                     y_steps = 4;
                 }
                 Some((5, _)) => {
-                    bits_per_line >>= 1;
+                    bits_per_line = (bits_per_line as f32 / 2f32).ceil() as usize;
                     y_steps = 4;
                 }
                 Some((6, _)) => {
-                    bits_per_line >>= 1;
+                    bits_per_line = (bits_per_line as f32 / 2f32).ceil() as usize;
                     y_steps = 2;
                 }
                 Some((7, _)) => {
@@ -201,11 +201,9 @@ impl<'a> Iterator for ScanLines<'a> {
                     bits_per_line -= gap;
                 }
             }
-            // Round up without converting to float
-            let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
+            let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
-            // TODO: Handle 4x4 pixel images
             if let Some(pass) = self.pass.as_mut() {
                 if pass.1 + y_steps >= self.png.ihdr_data.height {
                     pass.0 += 1;
@@ -228,8 +226,7 @@ impl<'a> Iterator for ScanLines<'a> {
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
-            // Round up without converting to float
-            let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
+            let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
