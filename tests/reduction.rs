@@ -1259,3 +1259,18 @@ fn grayscale_8_should_be_palette_1() {
                      png::ColorType::Indexed,
                      png::BitDepth::One);
 }
+
+#[test]
+fn small_files() {
+    let input = PathBuf::from("tests/files/small_files.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::Indexed,
+                     png::BitDepth::Eight,
+                     png::ColorType::Indexed,
+                     png::BitDepth::One);
+}

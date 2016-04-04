@@ -1272,5 +1272,5 @@ fn interlaced_small_files() {
                      png::ColorType::Indexed,
                      png::BitDepth::Eight,
                      png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     png::BitDepth::One);
 }
