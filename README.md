@@ -1,6 +1,6 @@
 # Oxipng
 
-[![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg)](https://travis-ci.org/shssoichiro/oxipng)
+[![Build Status](https://travis-ci.org/shssoichiro/oxipng.svg?branch=master)](https://travis-ci.org/shssoichiro/oxipng)
 [![Version](https://img.shields.io/crates/v/oxipng.svg)](https://crates.io/crates/oxipng)
 [![License](https://img.shields.io/crates/l/oxipng.svg)](https://github.com/shssoichiro/oxipng/blob/master/LICENSE)
 
@@ -66,7 +66,7 @@ More advanced options can be found by running `oxipng -h`.
 
 ## History
 
-Oxipng began as a completely rewrite of the OptiPNG project,
+Oxipng began as a complete rewrite of the OptiPNG project,
 which is assumed to be dead as no commit has been made to it since March 2014.
 The name has been changed to avoid confusion and potential legal issues.
 

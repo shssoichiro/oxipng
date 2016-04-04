@@ -1,3 +1,8 @@
+**Version 0.3.0 (unreleased)**
+ - Support interlaced images
+ - Allow converting between progressive and interlaced images
+ - Fix a bug that would cause oxipng to crash on very small images
+
 **Version 0.2.2**
  - Limit number of threads to 1.5x number of cores
  - Significantly improve memory usage, especially with high optimization levels. ([#32](https://github.com/shssoichiro/oxipng/issues/32))

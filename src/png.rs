@@ -123,6 +123,8 @@ pub struct ScanLines<'a> {
     pub png: &'a PngData,
     start: usize,
     end: usize,
+    /// Current pass number, and 0-indexed row within the pass
+    pass: Option<(u8, u32)>,
 }
 
 impl<'a> Iterator for ScanLines<'a> {
@@ -130,12 +132,97 @@ impl<'a> Iterator for ScanLines<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.end == self.png.raw_data.len() {
             None
+        } else if self.png.ihdr_data.interlaced == 1 {
+            // Scanlines for interlaced PNG files
+            if self.pass.is_none() {
+                self.pass = Some((1, 0));
+            }
+            // Handle edge cases for images smaller than 5 pixels in either direction
+            if self.png.ihdr_data.width < 5 && self.pass.unwrap().0 == 2 {
+                if let Some(pass) = self.pass.as_mut() {
+                    pass.0 = 3;
+                    pass.1 = 4;
+                }
+            }
+            // Intentionally keep these separate so that they can be applied one after another
+            if self.png.ihdr_data.height < 5 && self.pass.unwrap().0 == 3 {
+                if let Some(pass) = self.pass.as_mut() {
+                    pass.0 = 4;
+                    pass.1 = 0;
+                }
+            }
+            let bits_per_pixel = self.png.ihdr_data.bit_depth.as_u8() as usize *
+                                 self.png.channels_per_pixel() as usize;
+            let mut bits_per_line = self.png.ihdr_data.width as usize * bits_per_pixel;
+            let y_steps;
+            match self.pass {
+                Some((1, _)) | Some((2, _)) => {
+                    bits_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
+                    y_steps = 8;
+                }
+                Some((3, _)) => {
+                    bits_per_line = (bits_per_line as f32 / 4f32).ceil() as usize;
+                    y_steps = 8;
+                }
+                Some((4, _)) => {
+                    bits_per_line = (bits_per_line as f32 / 4f32).ceil() as usize;
+                    y_steps = 4;
+                }
+                Some((5, _)) => {
+                    bits_per_line = (bits_per_line as f32 / 2f32).ceil() as usize;
+                    y_steps = 4;
+                }
+                Some((6, _)) => {
+                    bits_per_line = (bits_per_line as f32 / 2f32).ceil() as usize;
+                    y_steps = 2;
+                }
+                Some((7, _)) => {
+                    y_steps = 2;
+                }
+                _ => unreachable!(),
+            }
+            // Determine whether to trim the last (overflow) pixel for rows on this pass
+            let gap = bits_per_line % bits_per_pixel;
+            if gap != 0 {
+                let x_start = bits_per_pixel *
+                              match self.pass.unwrap().0 {
+                    2 => 4,
+                    4 => 2,
+                    6 => 1,
+                    _ => 0,
+                };
+                if gap >= x_start {
+                    bits_per_line += bits_per_pixel - gap;
+                } else {
+                    bits_per_line -= gap;
+                }
+            }
+            let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
+            self.start = self.end;
+            self.end = self.start + bytes_per_line + 1;
+            if let Some(pass) = self.pass.as_mut() {
+                if pass.1 + y_steps >= self.png.ihdr_data.height {
+                    pass.0 += 1;
+                    pass.1 = match pass.0 {
+                        3 => 4,
+                        5 => 2,
+                        7 => 1,
+                        _ => 0,
+                    };
+                } else {
+                    pass.1 += y_steps;
+                }
+            }
+            Some(ScanLine {
+                filter: self.png.raw_data[self.start],
+                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+            })
         } else {
+            // Standard, non-interlaced PNG scanlines
             let bits_per_line = self.png.ihdr_data.width as usize *
                                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
-            // Round up without converting to float
-            let bytes_per_line = (bits_per_line + bits_per_line % 8) >> 3;
+            let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
@@ -338,6 +425,7 @@ impl PngData {
             png: &self,
             start: 0,
             end: 0,
+            pass: None,
         }
     }
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
@@ -542,13 +630,225 @@ impl PngData {
     }
     /// Convert the image to the specified interlacing type
     /// Returns true if the interlacing was changed, false otherwise
+    /// The `interlace` parameter specifies the *new* interlacing mode
+    /// Assumes that the data has already been de-filtered
     pub fn change_interlacing(&mut self, interlace: u8) -> bool {
-        // TODO: Implement
-        if interlace != self.ihdr_data.interlaced {
+        if interlace == self.ihdr_data.interlaced {
             return false;
         }
 
-        false
+        if interlace == 1 {
+            // Convert progressive to interlaced data
+            interlace_image(self);
+        } else {
+            // Convert interlaced to progressive data
+            deinterlace_image(self);
+        }
+        true
+    }
+}
+
+fn interlace_image(png: &mut PngData) {
+    let mut passes: Vec<BitVec> = Vec::with_capacity(7);
+    for _ in 0..7 {
+        passes.push(BitVec::new());
+    }
+    let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
+    for (index, line) in png.scan_lines().enumerate() {
+        match index % 8 {
+            // Add filter bytes to appropriate lines
+            0 => {
+                passes[0].extend(BitVec::from_elem(8, false));
+                passes[3].extend(BitVec::from_elem(8, false));
+                passes[5].extend(BitVec::from_elem(8, false));
+                if png.ihdr_data.width > 4 {
+                    passes[1].extend(BitVec::from_elem(8, false));
+                }
+            }
+            4 => {
+                passes[3].extend(BitVec::from_elem(8, false));
+                passes[5].extend(BitVec::from_elem(8, false));
+                passes[2].extend(BitVec::from_elem(8, false));
+            }
+            2 | 6 => {
+                passes[4].extend(BitVec::from_elem(8, false));
+                passes[5].extend(BitVec::from_elem(8, false));
+            }
+            _ => {
+                passes[6].extend(BitVec::from_elem(8, false));
+            }
+        }
+        let bit_vec = BitVec::from_bytes(&line.data);
+        for (i, bit) in bit_vec.iter().enumerate() {
+            // Avoid moving padded 0's into new image
+            if i >= (png.ihdr_data.width * bits_per_pixel as u32) as usize {
+                break;
+            }
+            // Copy pixels into interlaced passes
+            let pix_modulo = (((i / bits_per_pixel as usize) as f32).floor() as usize) % 8;
+            match index % 8 {
+                0 => {
+                    match pix_modulo {
+                        0 => passes[0].push(bit),
+                        4 => passes[1].push(bit),
+                        2 | 6 => passes[3].push(bit),
+                        _ => passes[5].push(bit),
+                    }
+                }
+                4 => {
+                    match pix_modulo {
+                        0 | 4 => passes[2].push(bit),
+                        2 | 6 => passes[3].push(bit),
+                        _ => passes[5].push(bit),
+                    }
+                }
+                2 | 6 => {
+                    match pix_modulo % 2 {
+                        0 => passes[4].push(bit),
+                        _ => passes[5].push(bit),
+                    }
+                }
+                _ => {
+                    passes[6].push(bit);
+                }
+            }
+        }
+        // Pad end of line on each pass to get 8 bits per byte
+        for pass in &mut passes {
+            while pass.len() % 8 != 0 {
+                pass.push(false);
+            }
+        }
+    }
+    let mut output = Vec::new();
+    for pass in &passes {
+        output.extend(pass.to_bytes());
+    }
+    png.raw_data = output;
+}
+
+fn deinterlace_image(png: &mut PngData) {
+    let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
+    let mut lines: Vec<BitVec> = Vec::with_capacity(png.ihdr_data.height as usize);
+    for _ in 0..png.ihdr_data.height {
+        // Initialize each output line with a starting filter byte of 0
+        // as well as some blank data
+        lines.push(BitVec::from_elem(8 + bits_per_pixel as usize * png.ihdr_data.width as usize,
+                                     false));
+    }
+    let mut current_pass = 1;
+    let mut pass_constants = interlaced_constants(current_pass);
+    let mut current_y: usize = pass_constants.y_shift as usize;
+    for line in png.scan_lines() {
+        let bit_vec = BitVec::from_bytes(&line.data);
+        let bits_in_line = ((png.ihdr_data.width - pass_constants.x_shift as u32) as f32 /
+                            pass_constants.x_step as f32)
+                               .ceil() as usize *
+                           bits_per_pixel as usize;
+        for (i, bit) in bit_vec.iter().enumerate() {
+            // Avoid moving padded 0's into new image
+            if i >= bits_in_line {
+                break;
+            }
+            let current_x: usize = pass_constants.x_shift as usize +
+                                   (i / bits_per_pixel as usize) * pass_constants.x_step as usize;
+            // Copy this bit into the output line, offset by 8 because of filter byte
+            let index = 8 + (i % bits_per_pixel as usize) + current_x * bits_per_pixel as usize;
+            lines[current_y].set(index, bit);
+        }
+        // Calculate the next line and move to next pass if necessary
+        current_y += pass_constants.y_step as usize;
+        if current_y >= png.ihdr_data.height as usize {
+            if current_pass == 7 {
+                break;
+            }
+            current_pass += 1;
+            if current_pass == 2 && png.ihdr_data.width <= 4 {
+                current_pass += 1;
+            }
+            if current_pass == 3 && png.ihdr_data.height <= 4 {
+                current_pass += 1;
+            }
+            pass_constants = interlaced_constants(current_pass);
+            current_y = pass_constants.y_shift as usize;
+        }
+    }
+    let mut output = Vec::new();
+    for line in &mut lines {
+        while line.len() % 8 != 0 {
+            line.push(false);
+        }
+        output.extend(line.to_bytes());
+    }
+    png.raw_data = output;
+}
+
+struct InterlacedConstants {
+    x_shift: u8,
+    y_shift: u8,
+    x_step: u8,
+    y_step: u8,
+}
+
+fn interlaced_constants(pass: u8) -> InterlacedConstants {
+    match pass {
+        1 => {
+            InterlacedConstants {
+                x_shift: 0,
+                y_shift: 0,
+                x_step: 8,
+                y_step: 8,
+            }
+        }
+        2 => {
+            InterlacedConstants {
+                x_shift: 4,
+                y_shift: 0,
+                x_step: 8,
+                y_step: 8,
+            }
+        }
+        3 => {
+            InterlacedConstants {
+                x_shift: 0,
+                y_shift: 4,
+                x_step: 4,
+                y_step: 8,
+            }
+        }
+        4 => {
+            InterlacedConstants {
+                x_shift: 2,
+                y_shift: 0,
+                x_step: 4,
+                y_step: 4,
+            }
+        }
+        5 => {
+            InterlacedConstants {
+                x_shift: 0,
+                y_shift: 2,
+                x_step: 2,
+                y_step: 4,
+            }
+        }
+        6 => {
+            InterlacedConstants {
+                x_shift: 1,
+                y_shift: 0,
+                x_step: 2,
+                y_step: 2,
+            }
+        }
+        7 => {
+            InterlacedConstants {
+                x_shift: 0,
+                y_shift: 1,
+                x_step: 1,
+                y_step: 2,
+            }
+        }
+        _ => unreachable!(),
     }
 }
 
