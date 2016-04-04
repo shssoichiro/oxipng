@@ -56,7 +56,7 @@ to give any extra compression gains and is not recommended.
 PNG interlacing on any images that are processed. `-i 0` will remove interlacing from all
 processed images. Not specifying either will keep the same interlacing state as the
 input image. Note: Interlacing can add 25-50% to the size of an optimized image. Only use
-it if you have a good reason. (*Not Yet Implemented*)
+it if you have a good reason.
 * Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
 Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
 will never affect rendering of the image. "All" removes all metadata that is not critical
