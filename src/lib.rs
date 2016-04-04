@@ -186,10 +186,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     if let Some(interlacing) = opts.interlace {
         if png.change_interlacing(interlacing) {
+            png.ihdr_data.interlaced = interlacing;
             something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
         }
     }
 
