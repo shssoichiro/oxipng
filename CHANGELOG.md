@@ -1,6 +1,6 @@
-**Version 0.3.0 (unreleased)**
- - Support interlaced images
- - Allow converting between progressive and interlaced images
+**Version 0.3.0**
+ - Properly decode interlaced images
+ - [SEMVER_MINOR] Allow converting between progressive and interlaced images ([#3](https://github.com/shssoichiro/oxipng/issues/3))
  - Fix a bug that would cause oxipng to crash on very small images
 
 **Version 0.2.2**
