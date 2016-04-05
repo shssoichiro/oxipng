@@ -681,7 +681,7 @@ fn interlace_image(png: &mut PngData) {
                 break;
             }
             // Copy pixels into interlaced passes
-            let pix_modulo = (((i / bits_per_pixel as usize) as f32).floor() as usize) % 8;
+            let pix_modulo = (i / bits_per_pixel as usize) % 8;
             match index % 8 {
                 0 => {
                     match pix_modulo {
@@ -1035,10 +1035,11 @@ fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 4 * byte_depth as usize;
+    let colored_bytes = bpp - byte_depth as usize;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp >= (bpp - byte_depth as usize) {
+            if i % bpp >= colored_bytes {
                 if *byte != 255 {
                     return None;
                 }
@@ -1055,13 +1056,14 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 4 * byte_depth as usize;
+    let colored_bytes = bpp - byte_depth as usize;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut low_bytes = Vec::with_capacity(4);
         let mut high_bytes = Vec::with_capacity(4);
         let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
         for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp < (bpp - byte_depth as usize) {
+            if i % bpp < colored_bytes {
                 if byte_depth == 1 || i % 2 == 1 {
                     low_bytes.push(*byte);
                 } else {
@@ -1186,6 +1188,7 @@ fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
     // Only perform reduction if we can get to 4-bits or less
     let mut palette = Vec::with_capacity(16);
     let bpp: usize = png.ihdr_data.bit_depth.as_u8() as usize;
+    let bpp_inverse = 8 - bpp;
     for line in png.scan_lines() {
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
@@ -1193,11 +1196,11 @@ fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
         for (i, bit) in bit_vec.iter().enumerate() {
             cur_pixel.push(bit);
             if i % bpp == bpp - 1 {
-                let pix_value = cur_pixel.to_bytes()[0] >> (8 - bpp);
+                let pix_value = cur_pixel.to_bytes()[0] >> bpp_inverse;
                 let pix_slice = vec![pix_value, pix_value, pix_value];
                 if palette.contains(&pix_slice) {
                     let index = palette.iter().enumerate().find(|&x| x.1 == &pix_slice).unwrap().0;
-                    let idx = BitVec::from_bytes(&[(index as u8) << (8 - bpp)]);
+                    let idx = BitVec::from_bytes(&[(index as u8) << bpp_inverse]);
                     for b in idx.iter().take(bpp) {
                         reduced.push(b);
                     }
@@ -1207,7 +1210,7 @@ fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
                         return None;
                     }
                     palette.push(pix_slice.clone());
-                    let idx = BitVec::from_bytes(&[(len as u8) << (8 - bpp)]);
+                    let idx = BitVec::from_bytes(&[(len as u8) << bpp_inverse]);
                     for b in idx.iter().take(bpp) {
                         reduced.push(b);
                     }
@@ -1248,6 +1251,7 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
 
     // Iterate through scanlines and assign grayscale value to each pixel
     let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
+    let bit_depth_inverse = 8 - bit_depth;
     for line in png.scan_lines() {
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
@@ -1258,7 +1262,7 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             cur_pixel.push(bit);
             if cur_pixel.len() == bit_depth {
                 // `to_bytes` gives us e.g. 10000000 for a 1-bit pixel, when we would want 00000001
-                let padded_pixel = cur_pixel.to_bytes()[0] >> (8 - bit_depth);
+                let padded_pixel = cur_pixel.to_bytes()[0] >> bit_depth_inverse;
                 let palette_idx: usize = padded_pixel as usize * 3;
                 reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
                 // BitVec's clear function doesn't set len to 0
@@ -1321,10 +1325,11 @@ fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 2 * byte_depth as usize;
+    let colored_bytes = bpp - byte_depth as usize;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp >= (bpp - byte_depth as usize) {
+            if i % bpp >= colored_bytes {
                 if *byte != 255 {
                     return None;
                 }
