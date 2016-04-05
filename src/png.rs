@@ -473,12 +473,8 @@ impl PngData {
                     let (best_filter, best_line) = trials.iter()
                                                          .min_by_key(|x| {
                                                              x.1.iter().fold(0u64, |acc, &x| {
-                                                                 let signed: i16 = if x > 127 {
-                                                                     (x as i16) - 256
-                                                                 } else {
-                                                                     x as i16
-                                                                 };
-                                                                 acc + signed.abs() as u64
+                                                                 let signed = x as i8;
+                                                                 acc + (signed as i16).abs() as u64
                                                              })
                                                          })
                                                          .unwrap();

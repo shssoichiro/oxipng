@@ -1,3 +1,6 @@
+**Version 0.3.1 (unreleased)**
+ - Performance optimizations
+
 **Version 0.3.0**
  - Properly decode interlaced images
  - [SEMVER_MINOR] Allow converting between progressive and interlaced images ([#3](https://github.com/shssoichiro/oxipng/issues/3))
