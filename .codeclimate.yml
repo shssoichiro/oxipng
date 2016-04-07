@@ -1,0 +1,18 @@
+engines:
+  csslint:
+    enabled: false
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - rust
+  eslint:
+    enabled: false
+  fixme:
+    enabled: true
+ratings:
+  paths:
+  - "**.rs"
+exclude_paths:
+- tests/
+- doc/
