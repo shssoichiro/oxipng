@@ -239,7 +239,6 @@ fn main() {
 
     handle_optimization(matches.values_of("files")
                                .unwrap()
-                               .iter()
                                .map(PathBuf::from)
                                .collect(),
                         opts);

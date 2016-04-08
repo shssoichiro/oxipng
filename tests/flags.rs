@@ -423,3 +423,43 @@ fn interlacing_1_to_0_small_files() {
 
     remove_file(output).ok();
 }
+
+#[test]
+fn interlaced_0_to_1_other_filter_mode() {
+    let input = PathBuf::from("tests/files/interlaced_0_to_1_other_filter_mode.png");
+    let mut opts = get_opts(&input);
+    opts.interlace = Some(1);
+    let mut filter = HashSet::new();
+    filter.insert(4);
+    opts.filter = filter;
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.interlaced == 0);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.interlaced == 1);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}

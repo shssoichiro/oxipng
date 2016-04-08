@@ -1,6 +1,8 @@
 **Version 0.4.0 (unreleased)**
  - Performance optimizations
  - [SEMVER_MAJOR] `-s` automatically infers `--strip safe`
+ - Update byteorder and clap crates
+ - Fix issue where interlaced images incorrectly applied filters on the first line of a pass
 
 **Version 0.3.0**
  - Properly decode interlaced images

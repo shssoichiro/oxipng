@@ -197,6 +197,11 @@ impl<'a> Iterator for ScanLines<'a> {
                     bits_per_line -= gap;
                 }
             }
+            let current_pass = if let Some(pass) = self.pass {
+                Some(pass.0)
+            } else {
+                None
+            };
             let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
@@ -216,6 +221,7 @@ impl<'a> Iterator for ScanLines<'a> {
             Some(ScanLine {
                 filter: self.png.raw_data[self.start],
                 data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                pass: current_pass,
             })
         } else {
             // Standard, non-interlaced PNG scanlines
@@ -228,6 +234,7 @@ impl<'a> Iterator for ScanLines<'a> {
             Some(ScanLine {
                 filter: self.png.raw_data[self.start],
                 data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                pass: None,
             })
         }
     }
@@ -240,6 +247,8 @@ pub struct ScanLine {
     pub filter: u8,
     /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
     pub data: Vec<u8>,
+    /// The current pass if the image is interlaced
+    pub pass: Option<u8>,
 }
 
 #[derive(Debug,Clone)]
@@ -456,34 +465,42 @@ impl PngData {
                    8f32)
                       .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
+        let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
-            match filter {
-                0 | 1 | 2 | 3 | 4 => {
-                    filtered.push(filter);
-                    filtered.extend(filter_line(filter, bpp, &line.data, &last_line));
-                }
-                5 => {
-                    // Heuristically guess best filter per line
-                    // Uses MSAD algorithm mentioned in libpng reference docs
-                    // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
-                    for filter in 0..5 {
-                        trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
+            if last_pass == line.pass {
+                match filter {
+                    0 | 1 | 2 | 3 | 4 => {
+                        filtered.push(filter);
+                        filtered.extend(filter_line(filter, bpp, &line.data, &last_line));
                     }
-                    let (best_filter, best_line) = trials.iter()
-                                                         .min_by_key(|x| {
-                                                             x.1.iter().fold(0u64, |acc, &x| {
-                                                                 let signed = x as i8;
-                                                                 acc + (signed as i16).abs() as u64
+                    5 => {
+                        // Heuristically guess best filter per line
+                        // Uses MSAD algorithm mentioned in libpng reference docs
+                        // http://www.libpng.org/pub/png/book/chapter09.html
+                        let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
+                        for filter in 0..5 {
+                            trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
+                        }
+                        let (best_filter, best_line) = trials.iter()
+                                                             .min_by_key(|x| {
+                                                                 x.1.iter().fold(0u64, |acc, &x| {
+                                                                     let signed = x as i8;
+                                                                     acc +
+                                                                     (signed as i16).abs() as u64
+                                                                 })
                                                              })
-                                                         })
-                                                         .unwrap();
-                    filtered.push(*best_filter);
-                    filtered.extend_from_slice(best_line);
+                                                             .unwrap();
+                        filtered.push(*best_filter);
+                        filtered.extend_from_slice(best_line);
+                    }
+                    _ => unreachable!(),
                 }
-                _ => unreachable!(),
+            } else {
+                filtered.push(0);
+                filtered.extend(filter_line(0, bpp, &line.data, &last_line));
             }
             last_line = line.data.clone();
+            last_pass = line.pass;
         }
         filtered
     }

@@ -22,14 +22,14 @@ doc = false
 
 [dependencies]
 bit-vec = "^0.4.2"
-byteorder = "^0.4.0"
-clap = "^1.5.4"
-crc = "^1.0.0"
+byteorder = "^0.5.0"
+clap = "^2.2.5"
+crc = "^1.2.0"
 libc = "^0.2.4"
 libz-sys = "^1.0.0"
 num_cpus = "^0.2.11"
-regex = "^0.1.8"
+regex = "^0.1.63"
 scoped-pool = "^0.1.8"
 
 [dev-dependencies]
-image = "^0.6.1"
+image = "^0.8.0"
