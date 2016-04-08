@@ -204,8 +204,12 @@ fn main() {
             .arg(Arg::with_name("strip")
                      .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
                      .long("strip")
+                     .takes_value(true)
+                     .conflicts_with("strip-safe"))
+            .arg(Arg::with_name("strip-safe")
+                     .help("Strip safely-removable metadata objects")
                      .short("s")
-                     .takes_value(true))
+                     .conflicts_with("strip"))
             .after_help("Optimization levels:
     -o 0		=>	--zc 3 --nz				(0 or 1 trials)
     -o 1		=>	--zc 9					(1 trial, determined heuristically)
@@ -502,6 +506,10 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
             }
             opts.strip = png::Headers::Some(hdrs);
         }
+    }
+
+    if matches.is_present("strip-safe") {
+        opts.strip = png::Headers::Safe;
     }
 
     Ok(())

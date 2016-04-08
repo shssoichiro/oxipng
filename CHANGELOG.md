@@ -1,5 +1,6 @@
-**Version 0.3.1 (unreleased)**
+**Version 0.4.0 (unreleased)**
  - Performance optimizations
+ - [SEMVER_MAJOR] `-s` automatically infers `--strip safe`
 
 **Version 0.3.0**
  - Properly decode interlaced images
