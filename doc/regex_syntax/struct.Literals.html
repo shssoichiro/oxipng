@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Literals` struct in crate `regex_syntax`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Literals">
+
+    <title>regex_syntax::Literals - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>regex_syntax</a></p><script>window.sidebarCurrent = {name: 'Literals', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>regex_syntax</a>::<wbr><a class='struct' href=''>Literals</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-12' class='srclink' href='../src/regex_syntax/literals.rs.html#34-38' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Literals {
+    // some fields omitted
+}</pre><div class='docblock'><p>A set of literal byte strings extracted from a regular expression.</p>
+
+<p>Every member of the set is a <code>Lit</code>, which is represented by a <code>Vec&lt;u8&gt;</code>.
+(Notably, it may contain invalid UTF-8.) Every member is said to be either
+<em>complete</em> or <em>cut</em>. A complete literal means that it extends until the
+beginning (or end) of the regular expression. In some circumstances, this
+can be used to indicate a match in the regular expression.</p>
+
+<p>Note that a key aspect of literal extraction is knowing when to stop. It is
+not feasible to blindly extract all literals from a regular expression,
+even if there are finitely many. For example, the regular expression
+<code>[0-9]{10}</code> has <code>10^10</code> distinct literals. For this reason, literal
+extraction is bounded to some low number by default using heuristics, but
+the limits can be tweaked.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h3><div class='impl-items'><h4 id='method.empty' class='method'><code>fn <a href='#method.empty' class='fnname'>empty</a>() -&gt; <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Returns a new empty set of literals using default limits.</p>
+</div><h4 id='method.limit_size' class='method'><code>fn <a href='#method.limit_size' class='fnname'>limit_size</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Get the approximate size limit (in bytes) of this set.</p>
+</div><h4 id='method.set_limit_size' class='method'><code>fn <a href='#method.set_limit_size' class='fnname'>set_limit_size</a>(&amp;mut self, size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; &amp;mut <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Set the approximate size limit (in bytes) of this set.</p>
+
+<p>If extracting a literal would put the set over this limit, then
+extraction stops.</p>
+
+<p>The new limits will only apply to additions to this set. Existing
+members remain unchanged, even if the set exceeds the new limit.</p>
+</div><h4 id='method.limit_class' class='method'><code>fn <a href='#method.limit_class' class='fnname'>limit_class</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Get the character class size limit for this set.</p>
+</div><h4 id='method.set_limit_class' class='method'><code>fn <a href='#method.set_limit_class' class='fnname'>set_limit_class</a>(&amp;mut self, size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; &amp;mut <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Limits the size of character(or byte) classes considered.</p>
+
+<p>A value of <code>0</code> prevents all character classes from being considered.</p>
+
+<p>This limit also applies to case insensitive literals, since each
+character in the case insensitive literal is converted to a class, and
+then case folded.</p>
+
+<p>The new limits will only apply to additions to this set. Existing
+members remain unchanged, even if the set exceeds the new limit.</p>
+</div><h4 id='method.literals' class='method'><code>fn <a href='#method.literals' class='fnname'>literals</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='struct' href='../regex_syntax/struct.Lit.html' title='regex_syntax::Lit'>Lit</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Returns the set of literals as a slice. Its order is unspecified.</p>
+</div><h4 id='method.all_complete' class='method'><code>fn <a href='#method.all_complete' class='fnname'>all_complete</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if all members in this set are complete.</p>
+</div><h4 id='method.any_complete' class='method'><code>fn <a href='#method.any_complete' class='fnname'>any_complete</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if any member in this set is complete.</p>
+</div><h4 id='method.contains_empty' class='method'><code>fn <a href='#method.contains_empty' class='fnname'>contains_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if this set contains an empty literal.</p>
+</div><h4 id='method.is_empty' class='method'><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if this set is empty or if all of its members is empty.</p>
+</div><h4 id='method.to_empty' class='method'><code>fn <a href='#method.to_empty' class='fnname'>to_empty</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Returns a new empty set of literals using this set&#39;s limits.</p>
+</div><h4 id='method.longest_common_prefix' class='method'><code>fn <a href='#method.longest_common_prefix' class='fnname'>longest_common_prefix</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Returns the longest common prefix of all members in this set.</p>
+</div><h4 id='method.longest_common_suffix' class='method'><code>fn <a href='#method.longest_common_suffix' class='fnname'>longest_common_suffix</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Returns the longest common suffix of all members in this set.</p>
+</div><h4 id='method.unambiguous_prefixes' class='method'><code>fn <a href='#method.unambiguous_prefixes' class='fnname'>unambiguous_prefixes</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Returns a new set of prefixes of this set of literals that are
+guaranteed to be unambiguous.</p>
+
+<p>Any substring match with a member of the set is returned is guaranteed
+to never overlap with a substring match of another member of the set
+at the same starting position.</p>
+
+<p>Given any two members of the returned set, neither is a substring of
+the other.</p>
+</div><h4 id='method.unambiguous_suffixes' class='method'><code>fn <a href='#method.unambiguous_suffixes' class='fnname'>unambiguous_suffixes</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<div class='docblock'><p>Returns a new set of suffixes of this set of literals that are
+guaranteed to be unambiguous.</p>
+
+<p>Any substring match with a member of the set is returned is guaranteed
+to never overlap with a substring match of another member of the set
+at the same ending position.</p>
+
+<p>Given any two members of the returned set, neither is a substring of
+the other.</p>
+</div><h4 id='method.union_prefixes' class='method'><code>fn <a href='#method.union_prefixes' class='fnname'>union_prefixes</a>(&amp;mut self, expr: &amp;<a class='enum' href='../regex_syntax/enum.Expr.html' title='regex_syntax::Expr'>Expr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Unions the prefixes from the given expression to this set.</p>
+
+<p>If prefixes could not be added (for example, this set would exceed its
+size limits or the set of prefixes from <code>expr</code> includes the empty
+string), then false is returned.</p>
+
+<p>Note that prefix literals extracted from <code>expr</code> are said to be complete
+if and only if the literal extends from the beginning of <code>expr</code> to the
+end of <code>expr</code>.</p>
+</div><h4 id='method.union_suffixes' class='method'><code>fn <a href='#method.union_suffixes' class='fnname'>union_suffixes</a>(&amp;mut self, expr: &amp;<a class='enum' href='../regex_syntax/enum.Expr.html' title='regex_syntax::Expr'>Expr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Unions the suffixes from the given expression to this set.</p>
+
+<p>If suffixes could not be added (for example, this set would exceed its
+size limits or the set of suffixes from <code>expr</code> includes the empty
+string), then false is returned.</p>
+
+<p>Note that prefix literals extracted from <code>expr</code> are said to be complete
+if and only if the literal extends from the end of <code>expr</code> to the
+beginning of <code>expr</code>.</p>
+</div><h4 id='method.union' class='method'><code>fn <a href='#method.union' class='fnname'>union</a>(&amp;mut self, lits: <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Unions this set with another set.</p>
+
+<p>If the union would cause the set to exceed its limits, then the union
+is skipped and it returns false. Otherwise, if the union succeeds, it
+returns true.</p>
+</div><h4 id='method.cross_product' class='method'><code>fn <a href='#method.cross_product' class='fnname'>cross_product</a>(&amp;mut self, lits: &amp;<a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Extends this set with another set.</p>
+
+<p>The set of literals is extended via a cross product.</p>
+
+<p>If a cross product would cause this set to exceed its limits, then the
+cross product is skipped and it returns false. Otherwise, if the cross
+product succeeds, it returns true.</p>
+</div><h4 id='method.cross_add' class='method'><code>fn <a href='#method.cross_add' class='fnname'>cross_add</a>(&amp;mut self, bytes: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Extends each literal in this set with the bytes given.</p>
+
+<p>If the set is empty, then the given literal is added to the set.</p>
+
+<p>If adding any number of bytes to all members of this set causes a limit
+to be exceeded, then no bytes are added and false is returned. If a
+prefix of <code>bytes</code> can be fit into this set, then it is used and all
+resulting literals are cut.</p>
+</div><h4 id='method.add' class='method'><code>fn <a href='#method.add' class='fnname'>add</a>(&amp;mut self, lit: <a class='struct' href='../regex_syntax/struct.Lit.html' title='regex_syntax::Lit'>Lit</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Adds the given literal to this set.</p>
+
+<p>Returns false if adding this literal would cause the class to be too
+big.</p>
+</div><h4 id='method.add_char_class' class='method'><code>fn <a href='#method.add_char_class' class='fnname'>add_char_class</a>(&amp;mut self, cls: &amp;<a class='struct' href='../regex_syntax/struct.CharClass.html' title='regex_syntax::CharClass'>CharClass</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Extends each literal in this set with the character class given.</p>
+
+<p>Returns false if the character class was too big to add.</p>
+</div><h4 id='method.add_byte_class' class='method'><code>fn <a href='#method.add_byte_class' class='fnname'>add_byte_class</a>(&amp;mut self, cls: &amp;<a class='struct' href='../regex_syntax/struct.ByteClass.html' title='regex_syntax::ByteClass'>ByteClass</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Extends each literal in this set with the byte class given.</p>
+
+<p>Returns false if the byte class was too big to add.</p>
+</div><h4 id='method.cut' class='method'><code>fn <a href='#method.cut' class='fnname'>cut</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Cuts every member of this set. When a member is cut, it can never
+be extended.</p>
+</div><h4 id='method.reverse' class='method'><code>fn <a href='#method.reverse' class='fnname'>reverse</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Reverses all members in place.</p>
+</div><h4 id='method.clear' class='method'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Clears this set of all members.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.Literals.html' title='regex_syntax::Literals'>Literals</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "regex_syntax";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

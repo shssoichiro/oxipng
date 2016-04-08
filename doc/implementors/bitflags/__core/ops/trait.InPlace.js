@@ -1,0 +1,10 @@
+(function() {var implementors = {};
+implementors['bitflags'] = ["impl&lt;'a, T&gt; <a class='trait' href='bitflags/__core/ops/trait.InPlace.html' title='bitflags::__core::ops::InPlace'>InPlace</a>&lt;T&gt; for <a class='struct' href='bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;","impl&lt;'a, T&gt; <a class='trait' href='bitflags/__core/ops/trait.InPlace.html' title='bitflags::__core::ops::InPlace'>InPlace</a>&lt;T&gt; for <a class='struct' href='bitflags/__core/collections/linked_list/struct.BackPlace.html' title='bitflags::__core::collections::linked_list::BackPlace'>BackPlace</a>&lt;'a, T&gt;",];
+
+            if (window.register_implementors) {
+                window.register_implementors(implementors);
+            } else {
+                window.pending_implementors = implementors;
+            }
+        
+})()

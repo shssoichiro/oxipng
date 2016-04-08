@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ToSocketAddrs` trait in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ToSocketAddrs">
+
+    <title>bitflags::__core::net::ToSocketAddrs - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>net</a></p><script>window.sidebarCurrent = {name: 'ToSocketAddrs', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>net</a>::<wbr><a class='trait' href=''>ToSocketAddrs</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-5780' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/addr/trait.ToSocketAddrs.html?gotosrc=5780' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait ToSocketAddrs <span class='where'>where Self::<a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>Iter</a>::<a class='trait' href='../../../bitflags/__core/iter/trait.Iterator.html' title='bitflags::__core::iter::Iterator'>Item</a> == <a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a></span> {
+    type <a href='#associatedtype.Iter' class='type'>Iter</a>: <a class='trait' href='../../../bitflags/__core/iter/trait.Iterator.html' title='bitflags::__core::iter::Iterator'>Iterator</a>;
+    fn <a href='#tymethod.to_socket_addrs' class='fnname'>to_socket_addrs</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;Self::<a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>Iter</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;;
+}</pre><div class='docblock'><p>A trait for objects which can be converted or resolved to one or more
+<code>SocketAddr</code> values.</p>
+
+<p>This trait is used for generic address resolution when constructing network
+objects.  By default it is implemented for the following types:</p>
+
+<ul>
+<li><p><code>SocketAddr</code>, <code>SocketAddrV4</code>, <code>SocketAddrV6</code> - <code>to_socket_addrs</code> is
+identity function.</p></li>
+<li><p><code>(IpvNAddr, u16)</code> - <code>to_socket_addrs</code> constructs <code>SocketAddr</code> trivially.</p></li>
+<li><p><code>(&amp;str, u16)</code> - the string should be either a string representation of an
+IP address expected by <code>FromStr</code> implementation for <code>IpvNAddr</code> or a host
+name.</p></li>
+<li><p><code>&amp;str</code> - the string should be either a string representation of a
+<code>SocketAddr</code> as expected by its <code>FromStr</code> implementation or a string like
+<code>&lt;host_name&gt;:&lt;port&gt;</code> pair where <code>&lt;port&gt;</code> is a <code>u16</code> value.</p></li>
+</ul>
+
+<p>This trait allows constructing network objects like <code>TcpStream</code> or
+<code>UdpSocket</code> easily with values of various types for the bind/connection
+address. It is needed because sometimes one type is more appropriate than
+the other: for simple uses a string like <code>&quot;localhost:12345&quot;</code> is much nicer
+than manual construction of the corresponding <code>SocketAddr</code>, but sometimes
+<code>SocketAddr</code> value is <em>the</em> main source of the address, and converting it to
+some other type (e.g. a string) just for it to be converted back to
+<code>SocketAddr</code> in constructor methods is pointless.</p>
+
+<p>Some examples:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::{<span class='ident'>SocketAddrV4</span>, <span class='ident'>TcpStream</span>, <span class='ident'>UdpSocket</span>, <span class='ident'>TcpListener</span>, <span class='ident'>Ipv4Addr</span>};
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>ip</span> <span class='op'>=</span> <span class='ident'>Ipv4Addr</span>::<span class='ident'>new</span>(<span class='number'>127</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>1</span>);
+    <span class='kw'>let</span> <span class='ident'>port</span> <span class='op'>=</span> <span class='number'>12345</span>;
+
+    <span class='comment'>// The following lines are equivalent modulo possible &quot;localhost&quot; name</span>
+    <span class='comment'>// resolution differences</span>
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='ident'>SocketAddrV4</span>::<span class='ident'>new</span>(<span class='ident'>ip</span>, <span class='ident'>port</span>));
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>((<span class='ident'>ip</span>, <span class='ident'>port</span>));
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>((<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='ident'>port</span>));
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>((<span class='string'>&quot;localhost&quot;</span>, <span class='ident'>port</span>));
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:12345&quot;</span>);
+    <span class='kw'>let</span> <span class='ident'>tcp_s</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;localhost:12345&quot;</span>);
+
+    <span class='comment'>// TcpListener::bind(), UdpSocket::bind() and UdpSocket::send_to()</span>
+    <span class='comment'>// behave similarly</span>
+    <span class='kw'>let</span> <span class='ident'>tcp_l</span> <span class='op'>=</span> <span class='ident'>TcpListener</span>::<span class='ident'>bind</span>(<span class='string'>&quot;localhost:12345&quot;</span>);
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>udp_s</span> <span class='op'>=</span> <span class='ident'>UdpSocket</span>::<span class='ident'>bind</span>((<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='ident'>port</span>)).<span class='ident'>unwrap</span>();
+    <span class='ident'>udp_s</span>.<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span>[<span class='number'>7</span>], (<span class='ident'>ip</span>, <span class='number'>23451</span>)).<span class='ident'>unwrap</span>();
+}</pre>
+</div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.Iter' class='method stab '><code>type <a href='#associatedtype.Iter' class='type'>Iter</a>: <a class='trait' href='../../../bitflags/__core/iter/trait.Iterator.html' title='bitflags::__core::iter::Iterator'>Iterator</a></code></h3><div class='docblock'><p>Returned iterator over socket addresses which this type may correspond
+to.</p>
+</div></div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.to_socket_addrs' class='method stab '><code>fn <a href='#tymethod.to_socket_addrs' class='fnname'>to_socket_addrs</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;Self::<a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>Iter</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h3><div class='docblock'><p>Converts this object to an iterator of resolved <code>SocketAddr</code>s.</p>
+
+<p>The returned iterator may not actually yield any values depending on the
+outcome of any resolution performed.</p>
+
+<p>Note that this function may block the current thread while resolution is
+performed.</p>
+
+<h1 id='errors' class='section-header'><a href='#errors'>Errors</a></h1>
+<p>Any errors encountered during resolution will be returned as an <code>Err</code>.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='enum' href='../../../bitflags/__core/net/enum.IpAddr.html' title='bitflags::__core::net::IpAddr'>IpAddr</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></li>
+<li><code>impl <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></li>
+<li><code>impl <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a>&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></li>
+<li><code>impl <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a> for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;'a [</a><a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
+</ul><script type="text/javascript" async
+                         src="../../../implementors/std/net/addr/trait.ToSocketAddrs.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.8/src/unix/bsd/apple/b64.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.9/src/unix/bsd/apple/b64.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>b64.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../../../main.css">
+    
 
     <link rel="shortcut icon" href="https://doc.rust-lang.org/favicon.ico">
     
@@ -56,6 +57,9 @@
 <span id="13">13</span>
 <span id="14">14</span>
 <span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! 64-bit specific Apple (ios/darwin) definitions</span>
 
@@ -72,6 +76,9 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_MUTEX_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>56</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_COND_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>40</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_RWLOCK_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>192</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>TIOCTIMESTAMP</span>: ::<span class='ident'>c_ulong</span> <span class='op'>=</span> <span class='number'>0x40107459</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>TIOCDCDTIMESTAMP</span>: ::<span class='ident'>c_ulong</span> <span class='op'>=</span> <span class='number'>0x40107458</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

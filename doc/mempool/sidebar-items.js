@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Pool","A fast memory pool."]],"type":[["CreateFn","The type of an initialization function."]]});

@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.55/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -559,6 +560,117 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -579,7 +691,8 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This crate&#39;s documentation provides some simple examples, describes Unicode</span>
 <span class='doccomment'>//! support and exhaustively lists the supported syntax. For more specific</span>
-<span class='doccomment'>//! details on the API, please see the documentation for the `Regex` type.</span>
+<span class='doccomment'>//! details on the API, please see the documentation for the</span>
+<span class='doccomment'>//! [`Regex`](struct.Regex.html) type.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! # Usage</span>
 <span class='doccomment'>//!</span>
@@ -852,6 +965,17 @@
 <span class='doccomment'>//! # }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
+<span class='doccomment'>//! # Opt out of Unicode support</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The `bytes` sub-module provides a `Regex` type that can be used to match</span>
+<span class='doccomment'>//! on `&amp;[u8]`. By default, text is interpreted as ASCII compatible text with</span>
+<span class='doccomment'>//! all Unicode support disabled (e.g., `.` matches any byte instead of any</span>
+<span class='doccomment'>//! Unicode codepoint). Unicode support can be selectively enabled with the</span>
+<span class='doccomment'>//! `u` flag. See the `bytes` module documentation for more details.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Note that Unicode support *cannot* be selectively disabled on the main</span>
+<span class='doccomment'>//! `Regex` type that matches on `&amp;str`.</span>
+<span class='doccomment'>//!</span>
 <span class='doccomment'>//! # Syntax</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The syntax supported in this crate is almost in an exact correspondence</span>
@@ -1028,7 +1152,7 @@
 <span class='doccomment'>//! allowed to store a fixed number of states. (When the limit is reached, its</span>
 <span class='doccomment'>//! states are wiped and continues on, possibly duplicating previous work.)</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>, <span class='ident'>unused_imports</span>, <span class='ident'>unused_variables</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
 
 <span class='comment'>// #![deny(missing_docs)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
@@ -1039,44 +1163,143 @@
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>aho_corasick</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>memchr</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>mempool</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>quickcheck</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>regex_syntax</span> <span class='kw'>as</span> <span class='ident'>syntax</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>utf8_ranges</span>;
 
-<span class='comment'>// The re module is essentially our public interface.</span>
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re</span>::{
-    <span class='ident'>Regex</span>, <span class='ident'>Error</span>, <span class='ident'>Captures</span>, <span class='ident'>SubCaptures</span>, <span class='ident'>SubCapturesPos</span>, <span class='ident'>SubCapturesNamed</span>,
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>set</span>::{<span class='ident'>RegexSet</span>, <span class='ident'>SetMatches</span>, <span class='ident'>SetMatchesIntoIter</span>, <span class='ident'>SetMatchesIter</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_unicode</span>::{
+    <span class='ident'>Regex</span>, <span class='ident'>Captures</span>, <span class='ident'>SubCaptures</span>, <span class='ident'>SubCapturesPos</span>, <span class='ident'>SubCapturesNamed</span>,
     <span class='ident'>CaptureNames</span>, <span class='ident'>FindCaptures</span>, <span class='ident'>FindMatches</span>,
     <span class='ident'>Replacer</span>, <span class='ident'>NoExpand</span>, <span class='ident'>RegexSplits</span>, <span class='ident'>RegexSplitsN</span>,
     <span class='ident'>quote</span>, <span class='ident'>is_match</span>,
 };
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>set</span>::{<span class='ident'>RegexSet</span>, <span class='ident'>SetMatches</span>, <span class='ident'>SetMatchesIntoIter</span>, <span class='ident'>SetMatchesIter</span>};
+
+<span class='doccomment'>/**
+Match regular expressions on arbitrary bytes.
+
+This module provides a nearly identical API to the one found in the
+top-level of this crate. There are two important differences:
+
+1. Matching is done on `&amp;[u8]` instead of `&amp;str`. Additionally, `Vec&lt;u8&gt;`
+is used where `String` would have been used.
+2. Regular expressions are compiled with Unicode support *disabled* by
+default. This means that while Unicode regular expressions can only match valid
+UTF-8, regular expressions in this module can match arbitrary bytes. Unicode
+support can be selectively enabled via the `u` flag in regular expressions
+provided by this sub-module.
+
+# Example: match null terminated string
+
+This shows how to find all null-terminated strings in a slice of bytes:
+
+```rust
+# use regex::bytes::Regex;
+let re = Regex::new(r&quot;(?P&lt;cstr&gt;[^\x00]+)\x00&quot;).unwrap();
+let text = b&quot;foo\x00bar\x00baz\x00&quot;;
+
+// Extract all of the strings without the null terminator from each match.
+// The unwrap is OK here since a match requires the `cstr` capture to match.
+let cstrs: Vec&lt;&amp;[u8]&gt; =
+    re.captures_iter(text)
+      .map(|c| c.name(&quot;cstr&quot;).unwrap())
+      .collect();
+assert_eq!(vec![&amp;b&quot;foo&quot;[..], &amp;b&quot;bar&quot;[..], &amp;b&quot;baz&quot;[..]], cstrs);
+```
+
+# Example: selectively enable Unicode support
+
+This shows how to match an arbitrary byte pattern followed by a UTF-8 encoded
+string (e.g., to extract a title from a Matroska file):
+
+```rust
+# use std::str;
+# use regex::bytes::Regex;
+let re = Regex::new(r&quot;\x7b\xa9(?:[\x80-\xfe]|[\x40-\xff].)(?u:(.*))&quot;).unwrap();
+let text = b&quot;\x12\xd0\x3b\x5f\x7b\xa9\x85\xe2\x98\x83\x80\x98\x54\x76\x68\x65&quot;;
+let caps = re.captures(text).unwrap();
+
+// Notice that despite the `.*` at the end, it will only match valid UTF-8
+// because Unicode mode was enabled with the `u` flag. Without the `u` flag,
+// the `.*` would match the rest of the bytes.
+assert_eq!((7, 10), caps.pos(1).unwrap());
+
+// If there was a match, Unicode mode guarantees that `title` is valid UTF-8.
+let title = str::from_utf8(caps.at(1).unwrap()).unwrap();
+assert_eq!(&quot;☃&quot;, title);
+```
+
+In general, if the Unicode flag is enabled in a capture group and that capture
+is part of the overall match, then the capture is *guaranteed* to be valid
+UTF-8.
+
+# Syntax
+
+The supported syntax is pretty much the same as the syntax for Unicode
+regular expressions with a few changes that make sense for matching arbitrary
+bytes:
+
+1. A new flag, `u`, is available for switching to Unicode mode.
+2. By default, `u` is disabled, which roughly corresponds to &quot;ASCII compatible&quot;
+mode.
+3. In ASCII compatible mode, neither Unicode codepoints nor Unicode character
+classes are allowed.
+4. In ASCII compatible mode, Perl character classes (`\w`, `\d` and `\s`)
+revert to their typical ASCII definition. `\w` maps to `[[:word:]]`, `\d` maps
+to `[[:digit:]]` and `\s` maps to `[[:space:]]`.
+5. In ASCII compatible mode, word boundaries use the ASCII compatible `\w` to
+determine whether a byte is a word byte or not.
+6. Hexadecimal notation can be used to specify arbitrary bytes instead of
+Unicode codepoints. For example, in ASCII compatible mode, `\xFF` matches the
+literal byte `\xFF`, while in Unicode mode, `\xFF` is a Unicode codepoint that
+matches its UTF-8 encoding of `\xC3\xBF`. Similarly for octal notation.
+7. `.` matches any *byte* except for `\n` instead of any codepoint. When the
+`s` flag is enabled, `.` matches any byte.
+
+# Performance
+
+In general, one should expect performance on `&amp;[u8]` to be roughly similar to
+performance on `&amp;str`.
+*/</span>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>bytes</span> {
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_bytes</span>::<span class='op'>*</span>;
+}
 
 <span class='kw'>mod</span> <span class='ident'>backtrack</span>;
-<span class='kw'>mod</span> <span class='ident'>char</span>;
-<span class='kw'>mod</span> <span class='ident'>char_utf8</span>;
+<span class='kw'>mod</span> <span class='ident'>utf8</span>;
 <span class='kw'>mod</span> <span class='ident'>compile</span>;
 <span class='kw'>mod</span> <span class='ident'>dfa</span>;
+<span class='kw'>mod</span> <span class='ident'>error</span>;
 <span class='kw'>mod</span> <span class='ident'>exec</span>;
+<span class='kw'>mod</span> <span class='ident'>expand</span>;
+<span class='kw'>mod</span> <span class='ident'>freqs</span>;
 <span class='kw'>mod</span> <span class='ident'>input</span>;
 <span class='kw'>mod</span> <span class='ident'>literals</span>;
-<span class='kw'>mod</span> <span class='ident'>nfa</span>;
-<span class='kw'>mod</span> <span class='ident'>pool</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;pattern&quot;</span>)]</span>
+<span class='kw'>mod</span> <span class='ident'>pattern</span>;
+<span class='kw'>mod</span> <span class='ident'>pikevm</span>;
 <span class='kw'>mod</span> <span class='ident'>prog</span>;
-<span class='kw'>mod</span> <span class='ident'>re</span>;
+<span class='kw'>mod</span> <span class='ident'>re_bytes</span>;
+<span class='kw'>mod</span> <span class='ident'>re_plugin</span>;
+<span class='kw'>mod</span> <span class='ident'>re_trait</span>;
+<span class='kw'>mod</span> <span class='ident'>re_unicode</span>;
 <span class='kw'>mod</span> <span class='ident'>set</span>;
 <span class='kw'>mod</span> <span class='ident'>sparse</span>;
 
 <span class='doccomment'>/// The `internal` module exists to support the `regex!` macro and other</span>
-<span class='doccomment'>/// suspicious activity, such as testing different matching engines.</span>
+<span class='doccomment'>/// suspicious activity, such as testing different matching engines and</span>
+<span class='doccomment'>/// supporting the `regex-debug` CLI utility.</span>
 <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>internal</span> {
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>char</span>::<span class='ident'>Char</span>;
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>compile</span>::<span class='ident'>Compiler</span>;
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>exec</span>::{<span class='ident'>Exec</span>, <span class='ident'>ExecBuilder</span>};
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>input</span>::{<span class='ident'>Input</span>, <span class='ident'>CharInput</span>, <span class='ident'>InputAt</span>};
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>literals</span>::{<span class='ident'>BuildPrefixes</span>, <span class='ident'>Literals</span>};
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>input</span>::{<span class='ident'>Char</span>, <span class='ident'>Input</span>, <span class='ident'>CharInput</span>, <span class='ident'>InputAt</span>};
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>literals</span>::<span class='ident'>LiteralSearcher</span>;
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>prog</span>::{<span class='ident'>Program</span>, <span class='ident'>Inst</span>, <span class='ident'>EmptyLook</span>, <span class='ident'>InstRanges</span>};
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re</span>::<span class='ident'>ExNative</span>;
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_plugin</span>::<span class='ident'>Plugin</span>;
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_unicode</span>::<span class='ident'>_Regex</span>;
 }
 </pre>
 </section>

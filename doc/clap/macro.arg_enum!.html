@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,26 +44,29 @@
 
     <section id='main' class="content macro">
 <h1 class='fqn'><span class='in-band'><a href='index.html'>clap</a>::<wbr><a class='macro' href=''>arg_enum!</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-4577' class='srclink' href='../src/clap/macros.rs.html.html#425-600' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-4899' class='srclink' href='../src/clap/macros.rs.html#281-351' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>arg_enum</span> {
-    (<span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>as_item</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>item</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>impls</span> ( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tts</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ) <span class='op'>-&gt;</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span>)) <span class='op'>=&gt;</span> { ... };
+    (<span class='attribute'>#[$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span>:<span class='ident'>meta</span>),<span class='op'>+</span>]</span> <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
+    (<span class='attribute'>#[$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span>:<span class='ident'>meta</span>),<span class='op'>+</span>]</span> <span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
     (<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
-    (<span class='attribute'>#[<span class='ident'>derive</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>d</span>:<span class='ident'>ident</span>),<span class='op'>+</span>)]</span> <span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
-    (<span class='attribute'>#[<span class='ident'>derive</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>d</span>:<span class='ident'>ident</span>),<span class='op'>+</span>)]</span> <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw'>enum</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>ident</span>),<span class='op'>+</span> } ) <span class='op'>=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Convenience macro to generate more complete enums with variants to be used as a type when
-parsing arguments. This enum also provides a <code>variants()</code> function which can be used to retrieve a
-<code>Vec&lt;&amp;&#39;static str&gt;</code> of the variant names.</p>
+parsing arguments. This enum also provides a <code>variants()</code> function which can be used to
+retrieve a <code>Vec&lt;&amp;&#39;static str&gt;</code> of the variant names, as well as implementing <code>FromStr</code> and
+<code>Display</code> automatically.</p>
 
-<p><strong>NOTE:</strong> Case insensitivity is supported for ASCII characters</p>
+<p><strong>NOTE:</strong> Case insensitivity is supported for ASCII characters only</p>
 
 <p><strong>NOTE:</strong> This macro automatically implements std::str::FromStr and std::fmt::Display</p>
 
-<p>These enums support pub (or not) and use of the #[derive()] traits</p>
+<p><strong>NOTE:</strong> These enums support pub (or not) and uses of the #[derive()] traits</p>
 
 <h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
@@ -80,7 +84,7 @@ parsing arguments. This enum also provides a <code>variants()</code> function wh
     <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;app&quot;</span>)
                 .<span class='ident'>arg_from_usage</span>(<span class='string'>&quot;&lt;foo&gt; &#39;the foo&#39;&quot;</span>)
                 .<span class='ident'>get_matches</span>();
-    <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='macro'>value_t_or_exit</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>value_of</span>(<span class='string'>&quot;foo&quot;</span>), <span class='ident'>Foo</span>);
+    <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='macro'>value_t</span><span class='macro'>!</span>(<span class='ident'>m</span>, <span class='string'>&quot;foo&quot;</span>, <span class='ident'>Foo</span>).<span class='ident'>unwrap_or_else</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>e</span>.<span class='ident'>exit</span>());
 
     <span class='comment'>// Use f like any other Foo variant...</span>
 }</pre>

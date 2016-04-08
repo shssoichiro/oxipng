@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.55/src/sparse.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/sparse.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>sparse.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -141,7 +142,7 @@
 <span class='doccomment'>/// N.B. The type parameter is misleading. For the most part, this is only</span>
 <span class='doccomment'>/// meant to work on instruction pointers. We use a touch of generics to</span>
 <span class='doccomment'>/// support 32 bit instruction pointers.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SparseSet</span> {
     <span class='doccomment'>/// Dense contains the instruction pointers in the order in which they</span>
     <span class='doccomment'>/// were inserted. Accessing elements &gt;= self.size is illegal.</span>

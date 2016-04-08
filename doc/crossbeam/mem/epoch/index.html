@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>mem</a>::<wbr><a class='mod' href=''>epoch</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-9' class='srclink' href='../../../src/crossbeam/mem/epoch/mod.rs.html.html#1-486' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-9' class='srclink' href='../../../src/crossbeam/mem/epoch/mod.rs.html#1-263' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Epoch-based memory management</p>
 
 <p>This module provides fast, easy to use memory management for lock free data
@@ -174,47 +175,42 @@ to a <code>Guard</code>.</p></li>
 }</pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Atomic.html'
-                               title='crossbeam::mem::epoch::Atomic'>Atomic</a></td>
-                        <td class='docblock short'>
-                             <p>Like <code>std::sync::atomic::AtomicPtr</code>.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Guard.html'
-                               title='crossbeam::mem::epoch::Guard'>Guard</a></td>
-                        <td class='docblock short'>
-                             <p>An RAII-style guard for pinning the current epoch.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Owned.html'
-                               title='crossbeam::mem::epoch::Owned'>Owned</a></td>
-                        <td class='docblock short'>
-                             <p>Like <code>Box&lt;T&gt;</code>: an owned, heap-allocated data value of type <code>T</code>.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Shared.html'
-                               title='crossbeam::mem::epoch::Shared'>Shared</a></td>
-                        <td class='docblock short'>
-                             <p>Like <code>&amp;&#39;a T</code>: a shared reference valid for lifetime <code>&#39;a</code>.</p>
-                        </td>
-                    </tr>
-                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Atomic.html'
+                                  title='crossbeam::mem::epoch::Atomic'>Atomic</a></td>
+                           <td class='docblock short'>
+                                <p>Like <code>std::sync::atomic::AtomicPtr</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Guard.html'
+                                  title='crossbeam::mem::epoch::Guard'>Guard</a></td>
+                           <td class='docblock short'>
+                                <p>An RAII-style guard for pinning the current epoch.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Owned.html'
+                                  title='crossbeam::mem::epoch::Owned'>Owned</a></td>
+                           <td class='docblock short'>
+                                <p>Like <code>Box&lt;T&gt;</code>: an owned, heap-allocated data value of type <code>T</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Shared.html'
+                                  title='crossbeam::mem::epoch::Shared'>Shared</a></td>
+                           <td class='docblock short'>
+                                <p>Like <code>&amp;&#39;a T</code>: a shared reference valid for lifetime <code>&#39;a</code>.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.pin.html'
-                               title='crossbeam::mem::epoch::pin'>pin</a></td>
-                        <td class='docblock short'>
-                             <p>Pin the current epoch.</p>
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.pin.html'
+                                  title='crossbeam::mem::epoch::pin'>pin</a></td>
+                           <td class='docblock short'>
+                                <p>Pin the current epoch.</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

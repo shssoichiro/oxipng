@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `spawn` fn in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, spawn">
+
+    <title>bitflags::__core::thread::spawn - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>thread</a></p><script>window.sidebarCurrent = {name: 'spawn', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>thread</a>::<wbr><a class='fn' href=''>spawn</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-992' class='srclink' href='https://doc.rust-lang.org/nightly/std/thread/fn.spawn.html?gotosrc=992' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn spawn&lt;F, T&gt;(f: F) -&gt; <a class='struct' href='../../../bitflags/__core/thread/struct.JoinHandle.html' title='bitflags::__core::thread::JoinHandle'>JoinHandle</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; T + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> + 'static, T: <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> + 'static</span></pre><span class="since">1.0.0</span><div class='docblock'><p>Spawns a new thread, returning a <code>JoinHandle</code> for it.</p>
+
+<p>The join handle will implicitly <em>detach</em> the child thread upon being
+dropped. In this case, the child thread may outlive the parent (unless
+the parent thread is the main thread; the whole process is terminated when
+the main thread finishes.) Additionally, the join handle provides a <code>join</code>
+method that can be used to join the child thread. If the child thread
+panics, <code>join</code> will return an <code>Err</code> containing the argument given to
+<code>panic</code>.</p>
+
+<h1 id='panics' class='section-header'><a href='#panics'>Panics</a></h1>
+<p>Panics if the OS fails to create a thread; use <code>Builder::spawn</code>
+to recover from such errors.</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

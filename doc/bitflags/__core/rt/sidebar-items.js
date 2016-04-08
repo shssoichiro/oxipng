@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["begin_unwind","This is the entry point of unwinding for panic!() and assert!()."],["begin_unwind_fmt","The entry point for unwinding with a formatted message."]]});

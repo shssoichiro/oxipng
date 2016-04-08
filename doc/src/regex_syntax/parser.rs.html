@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-syntax-0.2.5/src/parser.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-syntax-0.3.1/src/parser.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>parser.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -2392,6 +2393,370 @@
 <span id="2349">2349</span>
 <span id="2350">2350</span>
 <span id="2351">2351</span>
+<span id="2352">2352</span>
+<span id="2353">2353</span>
+<span id="2354">2354</span>
+<span id="2355">2355</span>
+<span id="2356">2356</span>
+<span id="2357">2357</span>
+<span id="2358">2358</span>
+<span id="2359">2359</span>
+<span id="2360">2360</span>
+<span id="2361">2361</span>
+<span id="2362">2362</span>
+<span id="2363">2363</span>
+<span id="2364">2364</span>
+<span id="2365">2365</span>
+<span id="2366">2366</span>
+<span id="2367">2367</span>
+<span id="2368">2368</span>
+<span id="2369">2369</span>
+<span id="2370">2370</span>
+<span id="2371">2371</span>
+<span id="2372">2372</span>
+<span id="2373">2373</span>
+<span id="2374">2374</span>
+<span id="2375">2375</span>
+<span id="2376">2376</span>
+<span id="2377">2377</span>
+<span id="2378">2378</span>
+<span id="2379">2379</span>
+<span id="2380">2380</span>
+<span id="2381">2381</span>
+<span id="2382">2382</span>
+<span id="2383">2383</span>
+<span id="2384">2384</span>
+<span id="2385">2385</span>
+<span id="2386">2386</span>
+<span id="2387">2387</span>
+<span id="2388">2388</span>
+<span id="2389">2389</span>
+<span id="2390">2390</span>
+<span id="2391">2391</span>
+<span id="2392">2392</span>
+<span id="2393">2393</span>
+<span id="2394">2394</span>
+<span id="2395">2395</span>
+<span id="2396">2396</span>
+<span id="2397">2397</span>
+<span id="2398">2398</span>
+<span id="2399">2399</span>
+<span id="2400">2400</span>
+<span id="2401">2401</span>
+<span id="2402">2402</span>
+<span id="2403">2403</span>
+<span id="2404">2404</span>
+<span id="2405">2405</span>
+<span id="2406">2406</span>
+<span id="2407">2407</span>
+<span id="2408">2408</span>
+<span id="2409">2409</span>
+<span id="2410">2410</span>
+<span id="2411">2411</span>
+<span id="2412">2412</span>
+<span id="2413">2413</span>
+<span id="2414">2414</span>
+<span id="2415">2415</span>
+<span id="2416">2416</span>
+<span id="2417">2417</span>
+<span id="2418">2418</span>
+<span id="2419">2419</span>
+<span id="2420">2420</span>
+<span id="2421">2421</span>
+<span id="2422">2422</span>
+<span id="2423">2423</span>
+<span id="2424">2424</span>
+<span id="2425">2425</span>
+<span id="2426">2426</span>
+<span id="2427">2427</span>
+<span id="2428">2428</span>
+<span id="2429">2429</span>
+<span id="2430">2430</span>
+<span id="2431">2431</span>
+<span id="2432">2432</span>
+<span id="2433">2433</span>
+<span id="2434">2434</span>
+<span id="2435">2435</span>
+<span id="2436">2436</span>
+<span id="2437">2437</span>
+<span id="2438">2438</span>
+<span id="2439">2439</span>
+<span id="2440">2440</span>
+<span id="2441">2441</span>
+<span id="2442">2442</span>
+<span id="2443">2443</span>
+<span id="2444">2444</span>
+<span id="2445">2445</span>
+<span id="2446">2446</span>
+<span id="2447">2447</span>
+<span id="2448">2448</span>
+<span id="2449">2449</span>
+<span id="2450">2450</span>
+<span id="2451">2451</span>
+<span id="2452">2452</span>
+<span id="2453">2453</span>
+<span id="2454">2454</span>
+<span id="2455">2455</span>
+<span id="2456">2456</span>
+<span id="2457">2457</span>
+<span id="2458">2458</span>
+<span id="2459">2459</span>
+<span id="2460">2460</span>
+<span id="2461">2461</span>
+<span id="2462">2462</span>
+<span id="2463">2463</span>
+<span id="2464">2464</span>
+<span id="2465">2465</span>
+<span id="2466">2466</span>
+<span id="2467">2467</span>
+<span id="2468">2468</span>
+<span id="2469">2469</span>
+<span id="2470">2470</span>
+<span id="2471">2471</span>
+<span id="2472">2472</span>
+<span id="2473">2473</span>
+<span id="2474">2474</span>
+<span id="2475">2475</span>
+<span id="2476">2476</span>
+<span id="2477">2477</span>
+<span id="2478">2478</span>
+<span id="2479">2479</span>
+<span id="2480">2480</span>
+<span id="2481">2481</span>
+<span id="2482">2482</span>
+<span id="2483">2483</span>
+<span id="2484">2484</span>
+<span id="2485">2485</span>
+<span id="2486">2486</span>
+<span id="2487">2487</span>
+<span id="2488">2488</span>
+<span id="2489">2489</span>
+<span id="2490">2490</span>
+<span id="2491">2491</span>
+<span id="2492">2492</span>
+<span id="2493">2493</span>
+<span id="2494">2494</span>
+<span id="2495">2495</span>
+<span id="2496">2496</span>
+<span id="2497">2497</span>
+<span id="2498">2498</span>
+<span id="2499">2499</span>
+<span id="2500">2500</span>
+<span id="2501">2501</span>
+<span id="2502">2502</span>
+<span id="2503">2503</span>
+<span id="2504">2504</span>
+<span id="2505">2505</span>
+<span id="2506">2506</span>
+<span id="2507">2507</span>
+<span id="2508">2508</span>
+<span id="2509">2509</span>
+<span id="2510">2510</span>
+<span id="2511">2511</span>
+<span id="2512">2512</span>
+<span id="2513">2513</span>
+<span id="2514">2514</span>
+<span id="2515">2515</span>
+<span id="2516">2516</span>
+<span id="2517">2517</span>
+<span id="2518">2518</span>
+<span id="2519">2519</span>
+<span id="2520">2520</span>
+<span id="2521">2521</span>
+<span id="2522">2522</span>
+<span id="2523">2523</span>
+<span id="2524">2524</span>
+<span id="2525">2525</span>
+<span id="2526">2526</span>
+<span id="2527">2527</span>
+<span id="2528">2528</span>
+<span id="2529">2529</span>
+<span id="2530">2530</span>
+<span id="2531">2531</span>
+<span id="2532">2532</span>
+<span id="2533">2533</span>
+<span id="2534">2534</span>
+<span id="2535">2535</span>
+<span id="2536">2536</span>
+<span id="2537">2537</span>
+<span id="2538">2538</span>
+<span id="2539">2539</span>
+<span id="2540">2540</span>
+<span id="2541">2541</span>
+<span id="2542">2542</span>
+<span id="2543">2543</span>
+<span id="2544">2544</span>
+<span id="2545">2545</span>
+<span id="2546">2546</span>
+<span id="2547">2547</span>
+<span id="2548">2548</span>
+<span id="2549">2549</span>
+<span id="2550">2550</span>
+<span id="2551">2551</span>
+<span id="2552">2552</span>
+<span id="2553">2553</span>
+<span id="2554">2554</span>
+<span id="2555">2555</span>
+<span id="2556">2556</span>
+<span id="2557">2557</span>
+<span id="2558">2558</span>
+<span id="2559">2559</span>
+<span id="2560">2560</span>
+<span id="2561">2561</span>
+<span id="2562">2562</span>
+<span id="2563">2563</span>
+<span id="2564">2564</span>
+<span id="2565">2565</span>
+<span id="2566">2566</span>
+<span id="2567">2567</span>
+<span id="2568">2568</span>
+<span id="2569">2569</span>
+<span id="2570">2570</span>
+<span id="2571">2571</span>
+<span id="2572">2572</span>
+<span id="2573">2573</span>
+<span id="2574">2574</span>
+<span id="2575">2575</span>
+<span id="2576">2576</span>
+<span id="2577">2577</span>
+<span id="2578">2578</span>
+<span id="2579">2579</span>
+<span id="2580">2580</span>
+<span id="2581">2581</span>
+<span id="2582">2582</span>
+<span id="2583">2583</span>
+<span id="2584">2584</span>
+<span id="2585">2585</span>
+<span id="2586">2586</span>
+<span id="2587">2587</span>
+<span id="2588">2588</span>
+<span id="2589">2589</span>
+<span id="2590">2590</span>
+<span id="2591">2591</span>
+<span id="2592">2592</span>
+<span id="2593">2593</span>
+<span id="2594">2594</span>
+<span id="2595">2595</span>
+<span id="2596">2596</span>
+<span id="2597">2597</span>
+<span id="2598">2598</span>
+<span id="2599">2599</span>
+<span id="2600">2600</span>
+<span id="2601">2601</span>
+<span id="2602">2602</span>
+<span id="2603">2603</span>
+<span id="2604">2604</span>
+<span id="2605">2605</span>
+<span id="2606">2606</span>
+<span id="2607">2607</span>
+<span id="2608">2608</span>
+<span id="2609">2609</span>
+<span id="2610">2610</span>
+<span id="2611">2611</span>
+<span id="2612">2612</span>
+<span id="2613">2613</span>
+<span id="2614">2614</span>
+<span id="2615">2615</span>
+<span id="2616">2616</span>
+<span id="2617">2617</span>
+<span id="2618">2618</span>
+<span id="2619">2619</span>
+<span id="2620">2620</span>
+<span id="2621">2621</span>
+<span id="2622">2622</span>
+<span id="2623">2623</span>
+<span id="2624">2624</span>
+<span id="2625">2625</span>
+<span id="2626">2626</span>
+<span id="2627">2627</span>
+<span id="2628">2628</span>
+<span id="2629">2629</span>
+<span id="2630">2630</span>
+<span id="2631">2631</span>
+<span id="2632">2632</span>
+<span id="2633">2633</span>
+<span id="2634">2634</span>
+<span id="2635">2635</span>
+<span id="2636">2636</span>
+<span id="2637">2637</span>
+<span id="2638">2638</span>
+<span id="2639">2639</span>
+<span id="2640">2640</span>
+<span id="2641">2641</span>
+<span id="2642">2642</span>
+<span id="2643">2643</span>
+<span id="2644">2644</span>
+<span id="2645">2645</span>
+<span id="2646">2646</span>
+<span id="2647">2647</span>
+<span id="2648">2648</span>
+<span id="2649">2649</span>
+<span id="2650">2650</span>
+<span id="2651">2651</span>
+<span id="2652">2652</span>
+<span id="2653">2653</span>
+<span id="2654">2654</span>
+<span id="2655">2655</span>
+<span id="2656">2656</span>
+<span id="2657">2657</span>
+<span id="2658">2658</span>
+<span id="2659">2659</span>
+<span id="2660">2660</span>
+<span id="2661">2661</span>
+<span id="2662">2662</span>
+<span id="2663">2663</span>
+<span id="2664">2664</span>
+<span id="2665">2665</span>
+<span id="2666">2666</span>
+<span id="2667">2667</span>
+<span id="2668">2668</span>
+<span id="2669">2669</span>
+<span id="2670">2670</span>
+<span id="2671">2671</span>
+<span id="2672">2672</span>
+<span id="2673">2673</span>
+<span id="2674">2674</span>
+<span id="2675">2675</span>
+<span id="2676">2676</span>
+<span id="2677">2677</span>
+<span id="2678">2678</span>
+<span id="2679">2679</span>
+<span id="2680">2680</span>
+<span id="2681">2681</span>
+<span id="2682">2682</span>
+<span id="2683">2683</span>
+<span id="2684">2684</span>
+<span id="2685">2685</span>
+<span id="2686">2686</span>
+<span id="2687">2687</span>
+<span id="2688">2688</span>
+<span id="2689">2689</span>
+<span id="2690">2690</span>
+<span id="2691">2691</span>
+<span id="2692">2692</span>
+<span id="2693">2693</span>
+<span id="2694">2694</span>
+<span id="2695">2695</span>
+<span id="2696">2696</span>
+<span id="2697">2697</span>
+<span id="2698">2698</span>
+<span id="2699">2699</span>
+<span id="2700">2700</span>
+<span id="2701">2701</span>
+<span id="2702">2702</span>
+<span id="2703">2703</span>
+<span id="2704">2704</span>
+<span id="2705">2705</span>
+<span id="2706">2706</span>
+<span id="2707">2707</span>
+<span id="2708">2708</span>
+<span id="2709">2709</span>
+<span id="2710">2710</span>
+<span id="2711">2711</span>
+<span id="2712">2712</span>
+<span id="2713">2713</span>
+<span id="2714">2714</span>
+<span id="2715">2715</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2404,11 +2769,13 @@
 <span class='comment'>// except according to those terms.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>max</span>, <span class='ident'>min</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>u8</span>;
 
 <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>regex</span>::<span class='ident'>UNICODE_CLASSES</span>;
 
 <span class='kw'>use</span> {
-    <span class='ident'>Expr</span>, <span class='ident'>Repeater</span>, <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>, <span class='ident'>CaptureIndex</span>, <span class='ident'>CaptureName</span>,
+    <span class='ident'>Expr</span>, <span class='ident'>Repeater</span>, <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>,
+    <span class='ident'>CaptureIndex</span>, <span class='ident'>CaptureName</span>,
     <span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>, <span class='prelude-ty'>Result</span>,
 };
 
@@ -2429,7 +2796,7 @@
 }
 
 <span class='doccomment'>/// Flag state used in the parser.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>Debug</span>, <span class='ident'>Default</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Flags</span> {
     <span class='doccomment'>/// i</span>
     <span class='kw'>pub</span> <span class='ident'>casei</span>: <span class='ident'>bool</span>,
@@ -2441,6 +2808,25 @@
     <span class='kw'>pub</span> <span class='ident'>swap_greed</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// x</span>
     <span class='kw'>pub</span> <span class='ident'>ignore_space</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// u</span>
+    <span class='kw'>pub</span> <span class='ident'>unicode</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// Not actually a flag, but when false, the `u` flag is forbidden and</span>
+    <span class='doccomment'>/// setting `unicode` to `false` will result in an error.</span>
+    <span class='kw'>pub</span> <span class='ident'>allow_bytes</span>: <span class='ident'>bool</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>Flags</span> {
+    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='ident'>Flags</span> {
+            <span class='ident'>casei</span>: <span class='boolval'>false</span>,
+            <span class='ident'>multi</span>: <span class='boolval'>false</span>,
+            <span class='ident'>dotnl</span>: <span class='boolval'>false</span>,
+            <span class='ident'>swap_greed</span>: <span class='boolval'>false</span>,
+            <span class='ident'>ignore_space</span>: <span class='boolval'>false</span>,
+            <span class='ident'>unicode</span>: <span class='boolval'>true</span>,
+            <span class='ident'>allow_bytes</span>: <span class='boolval'>false</span>,
+        }
+    }
 }
 
 <span class='doccomment'>/// An ephemeral type for representing the expression stack.</span>
@@ -2478,6 +2864,9 @@
     <span class='comment'>// Starts at the beginning of the input and consumes until either the end</span>
     <span class='comment'>// of input or an error.</span>
     <span class='kw'>fn</span> <span class='ident'>parse_expr</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Expr</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>allow_bytes</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>FlagNotAllowed</span>(<span class='string'>&#39;u&#39;</span>)));
+        }
         <span class='kw'>while</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>eof</span>() {
             <span class='kw'>let</span> <span class='ident'>build_expr</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>() {
                 <span class='string'>&#39;\\&#39;</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_escape</span>()),
@@ -2488,7 +2877,13 @@
                 <span class='string'>&#39;{&#39;</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_counted_repeat</span>()),
                 <span class='string'>&#39;[&#39;</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>maybe_parse_ascii</span>() {
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_class</span>()),
-                    <span class='prelude-val'>Some</span>(<span class='ident'>cls</span>) <span class='op'>=&gt;</span> <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>cls</span>)),
+                    <span class='prelude-val'>Some</span>(<span class='ident'>cls</span>) <span class='op'>=&gt;</span> {
+                        <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                            <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>cls</span>)
+                        } <span class='kw'>else</span> {
+                            <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>cls</span>.<span class='ident'>to_byte_class</span>())
+                        })
+                    }
                 },
                 <span class='string'>&#39;^&#39;</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>multi</span> {
@@ -2506,9 +2901,17 @@
                 }
                 <span class='string'>&#39;.&#39;</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>dotnl</span> {
-                        <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyChar</span>)
+                        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                            <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyChar</span>)
+                        } <span class='kw'>else</span> {
+                            <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyByte</span>)
+                        }
                     } <span class='kw'>else</span> {
-                        <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyCharNoNL</span>)
+                        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                            <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyCharNoNL</span>)
+                        } <span class='kw'>else</span> {
+                            <span class='self'>self</span>.<span class='ident'>parse_one</span>(<span class='ident'>Expr</span>::<span class='ident'>AnyByteNoNL</span>)
+                        }
                     }
                 }
                 <span class='string'>&#39;(&#39;</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_group</span>()),
@@ -2518,10 +2921,10 @@
                     <span class='self'>self</span>.<span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>old_flags</span>;
                     <span class='ident'>e</span>
                 }
-                _ <span class='op'>=&gt;</span> <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
-                    <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='self'>self</span>.<span class='ident'>bump</span>()],
-                    <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
-                }),
+                _ <span class='op'>=&gt;</span> {
+                    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bump</span>();
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='ident'>c</span>))
+                }
             };
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>build_expr</span>.<span class='ident'>is_empty</span>() {
                 <span class='self'>self</span>.<span class='ident'>stack</span>.<span class='ident'>push</span>(<span class='ident'>build_expr</span>);
@@ -2541,26 +2944,34 @@
         }
         <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cur</span>();
         <span class='kw'>if</span> <span class='ident'>is_punct</span>(<span class='ident'>c</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
-                <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='self'>self</span>.<span class='ident'>bump</span>()],
-                <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
-            }));
-        }
-
-        <span class='kw'>fn</span> <span class='ident'>lit</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>Build</span> {
-            <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> { <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>], <span class='ident'>casei</span>: <span class='boolval'>false</span> })
+            <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bump</span>();
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='ident'>c</span>)));
         }
         <span class='kw'>match</span> <span class='ident'>c</span> {
-            <span class='string'>&#39;a&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\x07&#39;</span>)) }
-            <span class='string'>&#39;f&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\x0C&#39;</span>)) }
-            <span class='string'>&#39;t&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\t&#39;</span>)) }
-            <span class='string'>&#39;n&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\n&#39;</span>)) }
-            <span class='string'>&#39;r&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\r&#39;</span>)) }
-            <span class='string'>&#39;v&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>lit</span>(<span class='string'>&#39;\x0B&#39;</span>)) }
+            <span class='string'>&#39;a&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\x07&#39;</span>))) }
+            <span class='string'>&#39;f&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\x0C&#39;</span>))) }
+            <span class='string'>&#39;t&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\t&#39;</span>))) }
+            <span class='string'>&#39;n&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\n&#39;</span>))) }
+            <span class='string'>&#39;r&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\r&#39;</span>))) }
+            <span class='string'>&#39;v&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='string'>&#39;\x0B&#39;</span>))) }
             <span class='string'>&#39;A&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>StartText</span>)) }
             <span class='string'>&#39;z&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>EndText</span>)) }
-            <span class='string'>&#39;b&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>WordBoundary</span>)) }
-            <span class='string'>&#39;B&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>NotWordBoundary</span>)) }
+            <span class='string'>&#39;b&#39;</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>bump</span>();
+                <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>WordBoundary</span>
+                } <span class='kw'>else</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>WordBoundaryAscii</span>
+                }))
+            }
+            <span class='string'>&#39;B&#39;</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>bump</span>();
+                <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>NotWordBoundary</span>
+                } <span class='kw'>else</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>NotWordBoundaryAscii</span>
+                }))
+            }
             <span class='string'>&#39;0&#39;</span><span class='op'>|</span><span class='string'>&#39;1&#39;</span><span class='op'>|</span><span class='string'>&#39;2&#39;</span><span class='op'>|</span><span class='string'>&#39;3&#39;</span><span class='op'>|</span><span class='string'>&#39;4&#39;</span><span class='op'>|</span><span class='string'>&#39;5&#39;</span><span class='op'>|</span><span class='string'>&#39;6&#39;</span><span class='op'>|</span><span class='string'>&#39;7&#39;</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>parse_octal</span>(),
             <span class='string'>&#39;x&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>bump</span>(); <span class='self'>self</span>.<span class='ident'>parse_hex</span>() }
             <span class='string'>&#39;p&#39;</span><span class='op'>|</span><span class='string'>&#39;P&#39;</span> <span class='op'>=&gt;</span> {
@@ -2570,7 +2981,11 @@
             }
             <span class='string'>&#39;d&#39;</span><span class='op'>|</span><span class='string'>&#39;s&#39;</span><span class='op'>|</span><span class='string'>&#39;w&#39;</span><span class='op'>|</span><span class='string'>&#39;D&#39;</span><span class='op'>|</span><span class='string'>&#39;S&#39;</span><span class='op'>|</span><span class='string'>&#39;W&#39;</span> <span class='op'>=&gt;</span> {
                 <span class='self'>self</span>.<span class='ident'>bump</span>();
-                <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='self'>self</span>.<span class='ident'>parse_perl_class</span>(<span class='ident'>c</span>))))
+                <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='self'>self</span>.<span class='ident'>parse_perl_class</span>(<span class='ident'>c</span>))
+                } <span class='kw'>else</span> {
+                    <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='self'>self</span>.<span class='ident'>parse_perl_class</span>(<span class='ident'>c</span>).<span class='ident'>to_byte_class</span>())
+                }))
             }
             <span class='ident'>c</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnrecognizedEscape</span>(<span class='ident'>c</span>))),
         }
@@ -2637,6 +3052,13 @@
                 <span class='string'>&#39;s&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>dotnl</span> <span class='op'>=</span> <span class='ident'>sign</span>; <span class='ident'>saw_flag</span> <span class='op'>=</span> <span class='boolval'>true</span> }
                 <span class='string'>&#39;U&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>swap_greed</span> <span class='op'>=</span> <span class='ident'>sign</span>; <span class='ident'>saw_flag</span> <span class='op'>=</span> <span class='boolval'>true</span> }
                 <span class='string'>&#39;x&#39;</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>ignore_space</span> <span class='op'>=</span> <span class='ident'>sign</span>; <span class='ident'>saw_flag</span> <span class='op'>=</span> <span class='boolval'>true</span> }
+                <span class='string'>&#39;u&#39;</span> <span class='op'>=&gt;</span> {
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>allow_bytes</span> {
+                        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>FlagNotAllowed</span>(<span class='string'>&#39;u&#39;</span>)));
+                    }
+                    <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> <span class='op'>=</span> <span class='ident'>sign</span>;
+                    <span class='ident'>saw_flag</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+                }
                 <span class='string'>&#39;-&#39;</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>sign</span> {
                         <span class='comment'>// e.g., (?-i-s)</span>
@@ -2809,10 +3231,11 @@
         <span class='comment'>//</span>
         <span class='comment'>// Hence, we `unwrap` with reckless abandon.</span>
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>u32</span>::<span class='ident'>from_str_radix</span>(<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='number'>8</span>).<span class='ident'>ok</span>().<span class='ident'>expect</span>(<span class='string'>&quot;valid octal number&quot;</span>);
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
-            <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unicode scalar value&quot;</span>)],
-            <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
-        }))
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>u32_to_one_byte</span>(<span class='ident'>n</span>)));
+        }
+        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unicode scalar value&quot;</span>);
+        <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='ident'>c</span>)))
     }
 
     <span class='comment'>// Parses a hex number, e.g., `a\x5ab`.</span>
@@ -2842,16 +3265,16 @@
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bump_get</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='ident'>c</span> <span class='op'>!=</span> <span class='string'>&#39;}&#39;</span>).<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&quot;</span>.<span class='ident'>into</span>());
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>u32</span>::<span class='ident'>from_str_radix</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>, <span class='number'>16</span>)
                          .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidBase16</span>(<span class='ident'>s</span>))));
-        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>)
-                          .<span class='ident'>ok_or</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='ident'>n</span>))));
         <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>bump_if</span>(<span class='string'>&#39;}&#39;</span>) {
             <span class='comment'>// e.g., a\x{d</span>
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnclosedHex</span>));
         }
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
-            <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>],
-            <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
-        }))
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>u32_to_one_byte</span>(<span class='ident'>n</span>)));
+        }
+        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>)
+                          .<span class='ident'>ok_or</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='ident'>n</span>))));
+        <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='ident'>c</span>)))
     }
 
     <span class='comment'>// Parses a two-digit hex number, e.g., `a\x5ab`.</span>
@@ -2870,11 +3293,11 @@
         }
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>u32</span>::<span class='ident'>from_str_radix</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>, <span class='number'>16</span>)
                          .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidBase16</span>(<span class='ident'>s</span>))));
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
-            <span class='comment'>// Because 0...255 are all valid Unicode scalar values.</span>
-            <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unicode scalar value&quot;</span>)],
-            <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
-        }))
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>u32_to_one_byte</span>(<span class='ident'>n</span>)));
+        }
+        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unicode scalar value&quot;</span>);
+        <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>lit</span>(<span class='ident'>c</span>)))
     }
 
     <span class='comment'>// Parses a character class, e.g., `[^a-zA-Z0-9]+`.</span>
@@ -2909,8 +3332,19 @@
                     <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class2</span>)) <span class='op'>=&gt;</span> {
                         <span class='ident'>class</span>.<span class='ident'>ranges</span>.<span class='ident'>extend</span>(<span class='ident'>class2</span>);
                     }
+                    <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class2</span>)) <span class='op'>=&gt;</span> {
+                        <span class='kw'>for</span> <span class='ident'>byte_range</span> <span class='kw'>in</span> <span class='ident'>class2</span> {
+                            <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>byte_range</span>.<span class='ident'>start</span> <span class='kw'>as</span> <span class='ident'>char</span>;
+                            <span class='kw'>let</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>byte_range</span>.<span class='ident'>end</span> <span class='kw'>as</span> <span class='ident'>char</span>;
+                            <span class='ident'>class</span>.<span class='ident'>ranges</span>.<span class='ident'>push</span>(<span class='ident'>ClassRange</span>::<span class='ident'>new</span>(<span class='ident'>s</span>, <span class='ident'>e</span>));
+                        }
+                    }
                     <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> { <span class='ident'>chars</span>, .. }) <span class='op'>=&gt;</span> {
                         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_class_range</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>class</span>, <span class='ident'>chars</span>[<span class='number'>0</span>]));
+                    }
+                    <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> { <span class='ident'>bytes</span>, .. }) <span class='op'>=&gt;</span> {
+                        <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>bytes</span>[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>char</span>;
+                        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_class_range</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>class</span>, <span class='ident'>start</span>));
                     }
                     <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
                         <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidClassEscape</span>(<span class='ident'>e</span>);
@@ -2926,7 +3360,11 @@
             }
         }
         <span class='ident'>class</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>class_transform</span>(<span class='ident'>negated</span>, <span class='ident'>class</span>).<span class='ident'>canonicalize</span>();
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>)))
+        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+            <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>)
+        } <span class='kw'>else</span> {
+            <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>.<span class='ident'>to_byte_class</span>())
+        }))
     }
 
     <span class='comment'>// Parses a single range in a character class.</span>
@@ -2962,7 +3400,12 @@
         <span class='comment'>// make sure it&#39;s a valid range.</span>
         <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>() {
             <span class='string'>&#39;\\&#39;</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>parse_escape</span>()) {
-                <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> { <span class='ident'>chars</span>, .. }) <span class='op'>=&gt;</span> <span class='ident'>chars</span>[<span class='number'>0</span>],
+                <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>Literal</span> { <span class='ident'>chars</span>, .. }) <span class='op'>=&gt;</span> {
+                    <span class='ident'>chars</span>[<span class='number'>0</span>]
+                }
+                <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> { <span class='ident'>bytes</span>, .. }) <span class='op'>=&gt;</span> {
+                    <span class='ident'>bytes</span>[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>char</span>
+                }
                 <span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidClassEscape</span>(<span class='ident'>e</span>)));
                 }
@@ -3043,7 +3486,13 @@
             };
         <span class='kw'>match</span> <span class='ident'>unicode_class</span>(<span class='kw-2'>&amp;</span><span class='ident'>name</span>) {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnrecognizedUnicodeClass</span>(<span class='ident'>name</span>))),
-            <span class='prelude-val'>Some</span>(<span class='ident'>cls</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='self'>self</span>.<span class='ident'>class_transform</span>(<span class='ident'>neg</span>, <span class='ident'>cls</span>)),
+            <span class='prelude-val'>Some</span>(<span class='ident'>cls</span>) <span class='op'>=&gt;</span> {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+                    <span class='prelude-val'>Ok</span>(<span class='self'>self</span>.<span class='ident'>class_transform</span>(<span class='ident'>neg</span>, <span class='ident'>cls</span>))
+                } <span class='kw'>else</span> {
+                    <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>))
+                }
+            }
         }
     }
 
@@ -3054,10 +3503,19 @@
     <span class='comment'>// No parser state is changed.</span>
     <span class='kw'>fn</span> <span class='ident'>parse_perl_class</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>CharClass</span> {
         <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>regex</span>::{<span class='ident'>PERLD</span>, <span class='ident'>PERLS</span>, <span class='ident'>PERLW</span>};
-        <span class='kw'>let</span> (<span class='ident'>cls</span>, <span class='ident'>negate</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>name</span> {
-            <span class='string'>&#39;d&#39;</span> <span class='op'>|</span> <span class='string'>&#39;D&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLD</span>), <span class='ident'>name</span> <span class='op'>==</span> <span class='string'>&#39;D&#39;</span>),
-            <span class='string'>&#39;s&#39;</span> <span class='op'>|</span> <span class='string'>&#39;S&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLS</span>), <span class='ident'>name</span> <span class='op'>==</span> <span class='string'>&#39;S&#39;</span>),
-            <span class='string'>&#39;w&#39;</span> <span class='op'>|</span> <span class='string'>&#39;W&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLW</span>), <span class='ident'>name</span> <span class='op'>==</span> <span class='string'>&#39;W&#39;</span>),
+        <span class='kw'>let</span> (<span class='ident'>cls</span>, <span class='ident'>negate</span>) <span class='op'>=</span> <span class='kw'>match</span> (<span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span>, <span class='ident'>name</span>) {
+            (<span class='boolval'>true</span>, <span class='string'>&#39;d&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLD</span>), <span class='boolval'>false</span>),
+            (<span class='boolval'>true</span>, <span class='string'>&#39;D&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLD</span>), <span class='boolval'>true</span>),
+            (<span class='boolval'>true</span>, <span class='string'>&#39;s&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLS</span>), <span class='boolval'>false</span>),
+            (<span class='boolval'>true</span>, <span class='string'>&#39;S&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLS</span>), <span class='boolval'>true</span>),
+            (<span class='boolval'>true</span>, <span class='string'>&#39;w&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLW</span>), <span class='boolval'>false</span>),
+            (<span class='boolval'>true</span>, <span class='string'>&#39;W&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>raw_class_to_expr</span>(<span class='ident'>PERLW</span>), <span class='boolval'>true</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;d&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;digit&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>false</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;D&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;digit&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>true</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;s&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;space&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>false</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;S&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;space&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>true</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;w&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;word&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>false</span>),
+            (<span class='boolval'>false</span>, <span class='string'>&#39;W&#39;</span>) <span class='op'>=&gt;</span> (<span class='ident'>ascii_class</span>(<span class='string'>&quot;word&quot;</span>).<span class='ident'>unwrap</span>(), <span class='boolval'>true</span>),
             _ <span class='op'>=&gt;</span> <span class='macro'>unreachable</span><span class='macro'>!</span>(),
         };
         <span class='self'>self</span>.<span class='ident'>class_transform</span>(<span class='ident'>negate</span>, <span class='ident'>cls</span>)
@@ -3149,6 +3607,54 @@
             <span class='ident'>cls</span> <span class='op'>=</span> <span class='ident'>cls</span>.<span class='ident'>negate</span>();
         }
         <span class='ident'>cls</span>
+    }
+
+    <span class='comment'>// Translates a Unicode codepoint into a single UTF-8 byte, and returns an</span>
+    <span class='comment'>// error if it&#39;s not possible.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This will panic if self.flags.unicode == true.</span>
+    <span class='kw'>fn</span> <span class='ident'>codepoint_to_one_byte</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span>);
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>to_string</span>().<span class='ident'>as_bytes</span>().<span class='ident'>to_owned</span>();
+        <span class='kw'>if</span> <span class='ident'>bytes</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>));
+        }
+        <span class='prelude-val'>Ok</span>(<span class='ident'>bytes</span>[<span class='number'>0</span>])
+    }
+
+    <span class='comment'>// Creates a new byte literal from a single byte.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// If the given number can&#39;t fit into a single byte, then it is assumed</span>
+    <span class='comment'>// to be a Unicode codepoint and an error is returned.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This should only be called when the bytes flag is enabled.</span>
+    <span class='kw'>fn</span> <span class='ident'>u32_to_one_byte</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>b</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Build</span><span class='op'>&gt;</span> {
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span>);
+        <span class='kw'>if</span> <span class='ident'>b</span> <span class='op'>&gt;</span> <span class='ident'>u8</span>::<span class='ident'>MAX</span> <span class='kw'>as</span> <span class='ident'>u32</span> {
+            <span class='prelude-val'>Err</span>(<span class='self'>self</span>.<span class='ident'>err</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>))
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> {
+                <span class='ident'>bytes</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u8</span>],
+                <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
+            }))
+        }
+    }
+
+    <span class='comment'>// Creates a new literal expr from a Unicode codepoint.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Creates a byte literal if the `bytes` flag is set.</span>
+    <span class='kw'>fn</span> <span class='ident'>lit</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Build</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>Build</span>::<span class='ident'>Expr</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>unicode</span> {
+            <span class='ident'>Expr</span>::<span class='ident'>Literal</span> {
+                <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>],
+                <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
+            }
+        } <span class='kw'>else</span> {
+            <span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> {
+                <span class='ident'>bytes</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>codepoint_to_one_byte</span>(<span class='ident'>c</span>))],
+                <span class='ident'>casei</span>: <span class='self'>self</span>.<span class='ident'>flags</span>.<span class='ident'>casei</span>,
+            }
+        }))
     }
 }
 
@@ -3525,9 +4031,13 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
-    <span class='kw'>use</span> { <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>, <span class='ident'>Expr</span>, <span class='ident'>Repeater</span>, <span class='ident'>ErrorKind</span> };
+    <span class='kw'>use</span> {
+        <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>, <span class='ident'>ByteClass</span>, <span class='ident'>ByteRange</span>,
+        <span class='ident'>Expr</span>, <span class='ident'>Repeater</span>,
+        <span class='ident'>ErrorKind</span>,
+    };
     <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>regex</span>::{<span class='ident'>PERLD</span>, <span class='ident'>PERLS</span>, <span class='ident'>PERLW</span>};
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>LOWER</span>, <span class='ident'>UPPER</span>, <span class='ident'>Flags</span>, <span class='ident'>Parser</span>};
+    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>LOWER</span>, <span class='ident'>UPPER</span>, <span class='ident'>Flags</span>, <span class='ident'>Parser</span>, <span class='ident'>ascii_class</span>};
 
     <span class='kw'>static</span> <span class='ident'>YI</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [(<span class='ident'>char</span>, <span class='ident'>char</span>)] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[
         (<span class='string'>&#39;\u{a000}&#39;</span>, <span class='string'>&#39;\u{a48c}&#39;</span>), (<span class='string'>&#39;\u{a490}&#39;</span>, <span class='string'>&#39;\u{a4c6}&#39;</span>),
@@ -3539,6 +4049,25 @@
     <span class='kw'>fn</span> <span class='ident'>liti</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>Expr</span> { <span class='ident'>Expr</span>::<span class='ident'>Literal</span> { <span class='ident'>chars</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>], <span class='ident'>casei</span>: <span class='boolval'>true</span> } }
     <span class='kw'>fn</span> <span class='ident'>b</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> { <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>v</span>) }
     <span class='kw'>fn</span> <span class='ident'>c</span>(<span class='ident'>es</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Expr</span>]) <span class='op'>-&gt;</span> <span class='ident'>Expr</span> { <span class='ident'>Expr</span>::<span class='ident'>Concat</span>(<span class='ident'>es</span>.<span class='ident'>to_vec</span>()) }
+
+    <span class='kw'>fn</span> <span class='ident'>pb</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Expr</span> {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>allow_bytes</span>: <span class='boolval'>true</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='ident'>Parser</span>::<span class='ident'>parse</span>(<span class='ident'>s</span>, <span class='ident'>flags</span>).<span class='ident'>unwrap</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>blit</span>(<span class='ident'>b</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>Expr</span> {
+        <span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> {
+            <span class='ident'>bytes</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>b</span>],
+            <span class='ident'>casei</span>: <span class='boolval'>false</span>,
+        }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>bliti</span>(<span class='ident'>b</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>Expr</span> {
+        <span class='ident'>Expr</span>::<span class='ident'>LiteralBytes</span> {
+            <span class='ident'>bytes</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>b</span>],
+            <span class='ident'>casei</span>: <span class='boolval'>true</span>,
+        }
+    }
 
     <span class='kw'>fn</span> <span class='ident'>class</span>(<span class='ident'>ranges</span>: <span class='kw-2'>&amp;</span>[(<span class='ident'>char</span>, <span class='ident'>char</span>)]) <span class='op'>-&gt;</span> <span class='ident'>CharClass</span> {
         <span class='kw'>let</span> <span class='ident'>ranges</span> <span class='op'>=</span> <span class='ident'>ranges</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>()
@@ -3554,6 +4083,24 @@
         <span class='ident'>cls</span>.<span class='ident'>canonicalize</span>()
     }
 
+    <span class='kw'>fn</span> <span class='ident'>bclass</span>(<span class='ident'>ranges</span>: <span class='kw-2'>&amp;</span>[(<span class='ident'>u8</span>, <span class='ident'>u8</span>)]) <span class='op'>-&gt;</span> <span class='ident'>ByteClass</span> {
+        <span class='kw'>let</span> <span class='ident'>ranges</span> <span class='op'>=</span> <span class='ident'>ranges</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>()
+                           .<span class='ident'>map</span>(<span class='op'>|</span>(<span class='ident'>c1</span>, <span class='ident'>c2</span>)<span class='op'>|</span> <span class='ident'>ByteRange</span>::<span class='ident'>new</span>(<span class='ident'>c1</span>, <span class='ident'>c2</span>)).<span class='ident'>collect</span>();
+        <span class='ident'>ByteClass</span>::<span class='ident'>new</span>(<span class='ident'>ranges</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>asciid</span>() <span class='op'>-&gt;</span> <span class='ident'>ByteClass</span> {
+        <span class='ident'>ascii_class</span>(<span class='string'>&quot;digit&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>to_byte_class</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>asciis</span>() <span class='op'>-&gt;</span> <span class='ident'>ByteClass</span> {
+        <span class='ident'>ascii_class</span>(<span class='string'>&quot;space&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>to_byte_class</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>asciiw</span>() <span class='op'>-&gt;</span> <span class='ident'>ByteClass</span> {
+        <span class='ident'>ascii_class</span>(<span class='string'>&quot;word&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>to_byte_class</span>()
+    }
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>empty</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Empty</span>);
@@ -3562,11 +4109,13 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>literal</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;a&quot;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;a&#39;</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)a&quot;</span>), <span class='ident'>blit</span>(<span class='string'>b&#39;a&#39;</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>literal_string</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;ab&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Concat</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>lit</span>(<span class='string'>&#39;a&#39;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;b&#39;</span>)]));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)ab&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Concat</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>blit</span>(<span class='string'>b&#39;a&#39;</span>), <span class='ident'>blit</span>(<span class='string'>b&#39;b&#39;</span>)]));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -3829,6 +4378,11 @@
             <span class='ident'>i</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
         });
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u:a)&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Group</span> {
+            <span class='ident'>e</span>: <span class='ident'>b</span>(<span class='ident'>bliti</span>(<span class='string'>b&#39;a&#39;</span>)),
+            <span class='ident'>i</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
+        });
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -3836,6 +4390,14 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i:a)a&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[
             <span class='ident'>Expr</span>::<span class='ident'>Group</span> {
                 <span class='ident'>e</span>: <span class='ident'>b</span>(<span class='ident'>liti</span>(<span class='string'>&#39;a&#39;</span>)),
+                <span class='ident'>i</span>: <span class='prelude-val'>None</span>,
+                <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
+            },
+            <span class='ident'>lit</span>(<span class='string'>&#39;a&#39;</span>),
+        ]));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u:a)a&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[
+            <span class='ident'>Expr</span>::<span class='ident'>Group</span> {
+                <span class='ident'>e</span>: <span class='ident'>b</span>(<span class='ident'>bliti</span>(<span class='string'>b&#39;a&#39;</span>)),
                 <span class='ident'>i</span>: <span class='prelude-val'>None</span>,
                 <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
             },
@@ -3852,6 +4414,14 @@
                 <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
             },
             <span class='ident'>liti</span>(<span class='string'>&#39;a&#39;</span>),
+        ]));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)(?u-i:a)a&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[
+            <span class='ident'>Expr</span>::<span class='ident'>Group</span> {
+                <span class='ident'>e</span>: <span class='ident'>b</span>(<span class='ident'>lit</span>(<span class='string'>&#39;a&#39;</span>)),
+                <span class='ident'>i</span>: <span class='prelude-val'>None</span>,
+                <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
+            },
+            <span class='ident'>bliti</span>(<span class='string'>b&#39;a&#39;</span>),
         ]));
     }
 
@@ -3901,6 +4471,14 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?is)a.(?i-s)a.&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[
             <span class='ident'>liti</span>(<span class='string'>&#39;a&#39;</span>), <span class='ident'>Expr</span>::<span class='ident'>AnyChar</span>, <span class='ident'>liti</span>(<span class='string'>&#39;a&#39;</span>), <span class='ident'>Expr</span>::<span class='ident'>AnyCharNoNL</span>,
         ]));
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>any_byte</span>() {
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(
+            <span class='ident'>pb</span>(<span class='string'>&quot;(?-u).(?u).&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>Expr</span>::<span class='ident'>AnyByteNoNL</span>, <span class='ident'>Expr</span>::<span class='ident'>AnyCharNoNL</span>]));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(
+            <span class='ident'>pb</span>(<span class='string'>&quot;(?s)(?-u).(?u).&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>Expr</span>::<span class='ident'>AnyByte</span>, <span class='ident'>Expr</span>::<span class='ident'>AnyChar</span>]));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -3980,6 +4558,9 @@
             <span class='ident'>Expr</span>::<span class='ident'>StartText</span>, <span class='ident'>Expr</span>::<span class='ident'>EndText</span>,
             <span class='ident'>Expr</span>::<span class='ident'>WordBoundary</span>, <span class='ident'>Expr</span>::<span class='ident'>NotWordBoundary</span>,
         ]));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\b\B&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[
+            <span class='ident'>Expr</span>::<span class='ident'>WordBoundaryAscii</span>, <span class='ident'>Expr</span>::<span class='ident'>NotWordBoundaryAscii</span>,
+        ]));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -3995,12 +4576,21 @@
     <span class='kw'>fn</span> <span class='ident'>escape_octal</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\123&quot;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\1234&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;4&#39;</span>)]));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\377&quot;</span>), <span class='ident'>blit</span>(<span class='number'>0xFF</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_hex2</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\x53&quot;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\x534&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;4&#39;</span>)]));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\xff&quot;</span>), <span class='ident'>blit</span>(<span class='number'>0xFF</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\x00&quot;</span>), <span class='ident'>blit</span>(<span class='number'>0x0</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[\x00]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;\x00&#39;</span>, <span class='string'>b&#39;\x00&#39;</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\x00]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;\x01&#39;</span>, <span class='string'>b&#39;\xFF&#39;</span>)])));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4008,6 +4598,8 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\x{53}&quot;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\x{53}4&quot;</span>), <span class='ident'>c</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>lit</span>(<span class='string'>&#39;S&#39;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;4&#39;</span>)]));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\x{2603}&quot;</span>), <span class='ident'>lit</span>(<span class='string'>&#39;\u{2603}&#39;</span>));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\x{00FF}&quot;</span>), <span class='ident'>blit</span>(<span class='number'>0xFF</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4074,64 +4666,79 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_d</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\d&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\d&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_s</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\s&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\s&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciis</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_w</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\w&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>)));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\w&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciiw</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_d_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\D&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>negate</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\D&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_s_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\S&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>negate</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\S&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciis</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_w_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;\W&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>negate</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)\W&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciiw</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_d_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\d&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\d&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_s_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\s&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\s&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciis</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_w_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\w&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\w&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciiw</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_d_case_fold_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\D&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciid</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\D&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_s_case_fold_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\S&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciis</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\S&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>escape_perl_w_case_fold_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)\W&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciiw</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)\W&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4140,6 +4747,13 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[\x00]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;\x00&#39;</span>, <span class='string'>&#39;\x00&#39;</span>)])));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[\n]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;\n&#39;</span>, <span class='string'>&#39;\n&#39;</span>)])));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[\n]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;\n&#39;</span>, <span class='string'>&#39;\n&#39;</span>)])));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[a]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;a&#39;</span>, <span class='string'>b&#39;a&#39;</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[\x00]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='number'>0</span>, <span class='number'>0</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[\n]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;\n&#39;</span>, <span class='string'>b&#39;\n&#39;</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[\n]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;\n&#39;</span>, <span class='string'>b&#39;\n&#39;</span>)])));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4156,12 +4770,28 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[^\n]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[
             (<span class='string'>&#39;\x00&#39;</span>, <span class='string'>&#39;\x09&#39;</span>), (<span class='string'>&#39;\x0b&#39;</span>, <span class='string'>&#39;\u{10FFFF}&#39;</span>),
         ])));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^a]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[
+            (<span class='number'>0x00</span>, <span class='number'>0x60</span>), (<span class='number'>0x62</span>, <span class='number'>0xFF</span>),
+        ])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\x00]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[
+            (<span class='number'>0x01</span>, <span class='number'>0xFF</span>),
+        ])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\n]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[
+            (<span class='number'>0x00</span>, <span class='number'>0x09</span>), (<span class='number'>0x0B</span>, <span class='number'>0xFF</span>),
+        ])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[^\n]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[
+            (<span class='number'>0x00</span>, <span class='number'>0x09</span>), (<span class='number'>0x0B</span>, <span class='number'>0xFF</span>),
+        ])));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>class_singleton_class</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>)));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[\p{Yi}]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>YI</span>)));
+
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>to_byte_class</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4169,6 +4799,13 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\w]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\s]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>negate</span>()));
+
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciid</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciiw</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\w]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciis</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\s]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4176,22 +4813,35 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\D]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>)));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\W]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>)));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;[^\S]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>)));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\D]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\W]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciiw</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?-u)[^\S]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciis</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>class_singleton_class_casei</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>case_fold</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[\p{Yi}]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>YI</span>).<span class='ident'>case_fold</span>()));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>class_singleton_class_negate_casei</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\d]&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\w]&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\s]&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciid</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\d]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciiw</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\w]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>asciis</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\s]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bytes</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4199,6 +4849,10 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\D]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLD</span>).<span class='ident'>case_fold</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\W]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLW</span>).<span class='ident'>case_fold</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\S]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>PERLS</span>).<span class='ident'>case_fold</span>()));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\D]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciid</span>().<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\W]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciiw</span>().<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>r&quot;(?i-u)[^\S]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>asciis</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4234,7 +4888,7 @@
     <span class='kw'>fn</span> <span class='ident'>class_multiple_class_negate_casei</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\d\p{Yi}]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>classes</span>(<span class='kw-2'>&amp;</span>[
             <span class='ident'>PERLD</span>, <span class='ident'>YI</span>,
-        ]).<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+        ]).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4243,7 +4897,7 @@
         <span class='kw'>let</span> <span class='ident'>nyi</span> <span class='op'>=</span> <span class='ident'>class</span>(<span class='ident'>YI</span>).<span class='ident'>negate</span>();
         <span class='kw'>let</span> <span class='ident'>class</span> <span class='op'>=</span> <span class='ident'>CharClass</span>::<span class='ident'>empty</span>().<span class='ident'>merge</span>(<span class='ident'>nperld</span>).<span class='ident'>merge</span>(<span class='ident'>nyi</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>r&quot;(?i)[^\D\P{Yi}]&quot;</span>),
-                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>.<span class='ident'>negate</span>().<span class='ident'>case_fold</span>()));
+                   <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>.<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4279,34 +4933,54 @@
     <span class='kw'>fn</span> <span class='ident'>class_overlapping</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[a-fd-h]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;a&#39;</span>, <span class='string'>&#39;h&#39;</span>)])));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[a-fg-m]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;a&#39;</span>, <span class='string'>&#39;m&#39;</span>)])));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[a-fd-h]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;a&#39;</span>, <span class='string'>b&#39;h&#39;</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[a-fg-m]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;a&#39;</span>, <span class='string'>b&#39;m&#39;</span>)])));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[:upper:]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>)));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[[:upper:]]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>)));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[:upper:]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[[:upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_not</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_not</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[:abc:]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;:&#39;</span>, <span class='string'>&#39;:&#39;</span>), (<span class='string'>&#39;a&#39;</span>, <span class='string'>&#39;c&#39;</span>)])));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[:abc:]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>bclass</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>b&#39;:&#39;</span>, <span class='string'>b&#39;:&#39;</span>), (<span class='string'>b&#39;a&#39;</span>, <span class='string'>b&#39;c&#39;</span>)])));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_multiple</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_multiple</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[[:lower:][:upper:]]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>classes</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>UPPER</span>, <span class='ident'>LOWER</span>])));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[[:lower:][:upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>classes</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>UPPER</span>, <span class='ident'>LOWER</span>]).<span class='ident'>to_byte_class</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_negate</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_negate</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[[:^upper:]]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[^[:^upper:]]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>)));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[[:^upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>().<span class='ident'>negate</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?-u)[^[:^upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_negate_multiple</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_negate_multiple</span>() {
         <span class='kw'>let</span> (<span class='ident'>nlower</span>, <span class='ident'>nupper</span>) <span class='op'>=</span> (<span class='ident'>class</span>(<span class='ident'>LOWER</span>).<span class='ident'>negate</span>(), <span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>negate</span>());
         <span class='kw'>let</span> <span class='ident'>cls</span> <span class='op'>=</span> <span class='ident'>CharClass</span>::<span class='ident'>empty</span>().<span class='ident'>merge</span>(<span class='ident'>nlower</span>).<span class='ident'>merge</span>(<span class='ident'>nupper</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;[[:^lower:][:^upper:]]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>cls</span>.<span class='ident'>clone</span>()));
@@ -4314,24 +4988,40 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_case_fold</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i)[:upper:]&quot;</span>), <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>case_fold</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i)[[:upper:]]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>case_fold</span>()));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)[:upper:]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>().<span class='ident'>case_fold</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)[[:upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>ascii_class_negate_case_fold</span>() {
+    <span class='kw'>fn</span> <span class='ident'>ascii_classes_negate_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i)[[:^upper:]]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i)[^[:^upper:]]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>case_fold</span>()));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)[[:^upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(
+                       <span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)[^[:^upper:]]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(<span class='ident'>class</span>(<span class='ident'>UPPER</span>).<span class='ident'>to_byte_class</span>().<span class='ident'>case_fold</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>single_class_negate_case_fold</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>(<span class='string'>&quot;(?i)[^x]&quot;</span>),
                    <span class='ident'>Expr</span>::<span class='ident'>Class</span>(<span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;x&#39;</span>, <span class='string'>&#39;x&#39;</span>)]).<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pb</span>(<span class='string'>&quot;(?i-u)[^x]&quot;</span>),
+                   <span class='ident'>Expr</span>::<span class='ident'>ClassBytes</span>(
+                       <span class='ident'>class</span>(<span class='kw-2'>&amp;</span>[(<span class='string'>&#39;x&#39;</span>, <span class='string'>&#39;x&#39;</span>)])
+                       .<span class='ident'>to_byte_class</span>().<span class='ident'>case_fold</span>().<span class='ident'>negate</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4423,12 +5113,51 @@
     <span class='comment'>// Test every single possible error case.</span>
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>test_err</span> {
-        (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pos</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {{
-            <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>Parser</span>::<span class='ident'>parse</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>, <span class='ident'>Flags</span>::<span class='ident'>default</span>()).<span class='ident'>unwrap_err</span>();
+        (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pos</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
+            <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pos</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>, <span class='ident'>Flags</span>::<span class='ident'>default</span>());
+        };
+        (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pos</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>flags</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {{
+            <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>Parser</span>::<span class='ident'>parse</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>flags</span>).<span class='ident'>unwrap_err</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pos</span>, <span class='ident'>err</span>.<span class='ident'>pos</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>, <span class='ident'>err</span>.<span class='ident'>kind</span>);
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>re</span>.<span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='ident'>err</span>.<span class='ident'>surround</span>));
         }}
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>flags_default_byte_flag_not_allowed</span>() {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>unicode</span>: <span class='boolval'>false</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>0</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>FlagNotAllowed</span>(<span class='string'>&#39;u&#39;</span>), <span class='ident'>flags</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>flags_byte_flag_not_allowed</span>() {
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>&quot;(?-u)a&quot;</span>, <span class='number'>3</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>FlagNotAllowed</span>(<span class='string'>&#39;u&#39;</span>));
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>unicode_char_not_allowed</span>() {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>allow_bytes</span>: <span class='boolval'>true</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>&quot;☃(?-u:☃)&quot;</span>, <span class='number'>7</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>, <span class='ident'>flags</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>unicode_class_not_allowed</span>() {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>allow_bytes</span>: <span class='boolval'>true</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;☃(?-u:\pL)&quot;</span>, <span class='number'>9</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>, <span class='ident'>flags</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>unicode_hex_not_allowed</span>() {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>allow_bytes</span>: <span class='boolval'>true</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;(?-u)\x{FFFF}&quot;</span>, <span class='number'>13</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>, <span class='ident'>flags</span>);
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;(?-u)\x{100}&quot;</span>, <span class='number'>12</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>, <span class='ident'>flags</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>unicode_octal_not_allowed</span>() {
+        <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>Flags</span> { <span class='ident'>allow_bytes</span>: <span class='boolval'>true</span>, .. <span class='ident'>Flags</span>::<span class='ident'>default</span>() };
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;(?-u)\400&quot;</span>, <span class='number'>9</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnicodeNotAllowed</span>, <span class='ident'>flags</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4648,12 +5377,12 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>error_escape_hex_invalid_scalar_value_surrogate</span>() {
-        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;\x{D800}&quot;</span>, <span class='number'>7</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='number'>0xD800</span>));
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;\x{D800}&quot;</span>, <span class='number'>8</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='number'>0xD800</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>error_escape_hex_invalid_scalar_value_high</span>() {
-        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;\x{110000}&quot;</span>, <span class='number'>9</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='number'>0x110000</span>));
+        <span class='macro'>test_err</span><span class='macro'>!</span>(<span class='string'>r&quot;\x{110000}&quot;</span>, <span class='number'>10</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidScalarValue</span>(<span class='number'>0x110000</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

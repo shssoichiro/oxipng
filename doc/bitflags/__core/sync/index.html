@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `sync` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, sync">
+
+    <title>bitflags::__core::sync - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'sync', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>sync</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-8589' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/index.html?gotosrc=8589' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Useful synchronization primitives.</p>
+
+<p>This module contains useful safe and unsafe synchronization primitives.
+Most of the primitives in this module do not provide any sort of locking
+and/or blocking at all, but rather provide the necessary tools to build
+other types of concurrent primitives.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='atomic/index.html'
+                                  title='bitflags::__core::sync::atomic'>atomic</a></td>
+                           <td class='docblock short'>
+                                <p>Atomic types</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='mpsc/index.html'
+                                  title='bitflags::__core::sync::mpsc'>mpsc</a></td>
+                           <td class='docblock short'>
+                                <p>Multi-producer, single-consumer FIFO queue communication primitives.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Arc.html'
+                                  title='bitflags::__core::sync::Arc'>Arc</a></td>
+                           <td class='docblock short'>
+                                <p>An atomically reference counted wrapper for shared state.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Barrier.html'
+                                  title='bitflags::__core::sync::Barrier'>Barrier</a></td>
+                           <td class='docblock short'>
+                                <p>A barrier enables multiple threads to synchronize the beginning
+of some computation.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.BarrierWaitResult.html'
+                                  title='bitflags::__core::sync::BarrierWaitResult'>BarrierWaitResult</a></td>
+                           <td class='docblock short'>
+                                <p>A result returned from wait.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Condvar.html'
+                                  title='bitflags::__core::sync::Condvar'>Condvar</a></td>
+                           <td class='docblock short'>
+                                <p>A Condition Variable</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Mutex.html'
+                                  title='bitflags::__core::sync::Mutex'>Mutex</a></td>
+                           <td class='docblock short'>
+                                <p>A mutual exclusion primitive useful for protecting shared data</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.MutexGuard.html'
+                                  title='bitflags::__core::sync::MutexGuard'>MutexGuard</a></td>
+                           <td class='docblock short'>
+                                <p>An RAII implementation of a &quot;scoped lock&quot; of a mutex. When this structure is
+dropped (falls out of scope), the lock will be unlocked.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Once.html'
+                                  title='bitflags::__core::sync::Once'>Once</a></td>
+                           <td class='docblock short'>
+                                <p>A synchronization primitive which can be used to run a one-time global
+initialization. Useful for one-time initialization for FFI or related
+functionality. This type can only be constructed with the <code>ONCE_INIT</code>
+value.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.PoisonError.html'
+                                  title='bitflags::__core::sync::PoisonError'>PoisonError</a></td>
+                           <td class='docblock short'>
+                                <p>A type of error which can be returned whenever a lock is acquired.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RwLock.html'
+                                  title='bitflags::__core::sync::RwLock'>RwLock</a></td>
+                           <td class='docblock short'>
+                                <p>A reader-writer lock</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RwLockReadGuard.html'
+                                  title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a></td>
+                           <td class='docblock short'>
+                                <p>RAII structure used to release the shared read access of a lock when
+dropped.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RwLockWriteGuard.html'
+                                  title='bitflags::__core::sync::RwLockWriteGuard'>RwLockWriteGuard</a></td>
+                           <td class='docblock short'>
+                                <p>RAII structure used to release the exclusive write access of a lock when
+dropped.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.WaitTimeoutResult.html'
+                                  title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a></td>
+                           <td class='docblock short'>
+                                <p>A type indicating whether a timed wait on a condition variable returned
+due to a time out or not.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Weak.html'
+                                  title='bitflags::__core::sync::Weak'>Weak</a></td>
+                           <td class='docblock short'>
+                                <p>A weak pointer to an <code>Arc</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.StaticCondvar.html'
+                                  title='bitflags::__core::sync::StaticCondvar'>StaticCondvar</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Statically allocated condition variables.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.StaticMutex.html'
+                                  title='bitflags::__core::sync::StaticMutex'>StaticMutex</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>The static mutex type is provided to allow for static allocation of mutexes.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.StaticRwLock.html'
+                                  title='bitflags::__core::sync::StaticRwLock'>StaticRwLock</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Structure representing a statically allocated RwLock.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.TryLockError.html'
+                                  title='bitflags::__core::sync::TryLockError'>TryLockError</a></td>
+                           <td class='docblock short'>
+                                <p>An enumeration of possible errors which can occur while calling the
+<code>try_lock</code> method.</p>
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.ONCE_INIT.html'
+                                  title='bitflags::__core::sync::ONCE_INIT'>ONCE_INIT</a></td>
+                           <td class='docblock short'>
+                                <p>Initialization value for static <code>Once</code> values.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.CONDVAR_INIT.html'
+                                  title='bitflags::__core::sync::CONDVAR_INIT'>CONDVAR_INIT</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Constant initializer for a statically allocated condition variable.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.MUTEX_INIT.html'
+                                  title='bitflags::__core::sync::MUTEX_INIT'>MUTEX_INIT</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Static initialization of a mutex. This constant can be used to initialize
+other mutex constants.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.RW_LOCK_INIT.html'
+                                  title='bitflags::__core::sync::RW_LOCK_INIT'>RW_LOCK_INIT</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Constant initialization for a statically-initialized rwlock.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.LockResult.html'
+                                  title='bitflags::__core::sync::LockResult'>LockResult</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.TryLockResult.html'
+                                  title='bitflags::__core::sync::TryLockResult'>TryLockResult</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

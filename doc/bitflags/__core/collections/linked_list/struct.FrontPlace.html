@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `FrontPlace` struct in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, FrontPlace">
+
+    <title>bitflags::__core::collections::linked_list::FrontPlace - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>bitflags</a>::<wbr><a href='../../index.html'>__core</a>::<wbr><a href='../index.html'>collections</a>::<wbr><a href='index.html'>linked_list</a></p><script>window.sidebarCurrent = {name: 'FrontPlace', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../../index.html'>bitflags</a>::<wbr><a href='../../index.html'>__core</a>::<wbr><a href='../index.html'>collections</a>::<wbr><a href='index.html'>linked_list</a>::<wbr><a class='struct' href=''>FrontPlace</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2767' class='srclink' href='https://doc.rust-lang.org/nightly/collections/linked_list/struct.FrontPlace.html?gotosrc=2767' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>#[must_use = "places do nothing unless written to with `<-` syntax"]
+pub struct FrontPlace&lt;'a, T&gt; <span class='where'>where T: 'a</span> {
+    // some fields omitted
+}</pre><div class='stability'><em class='stab unstable'>Unstable (<code>collection_placement</code>)<p>: struct name and placement protocol are subject to change</p>
+</em></div><div class='docblock'><p>A place for insertion at the front of a <code>LinkedList</code>.</p>
+
+<p>See <a href="struct.LinkedList.html#method.front_place"><code>LinkedList::front_place</code></a> for details.</p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.InPlace.html' title='bitflags::__core::ops::InPlace'>InPlace</a>&lt;T&gt; for <a class='struct' href='../../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Owner' class='type'><code>type <a href='../../../../bitflags/__core/ops/trait.InPlace.html#associatedtype.Owner' class='type'>Owner</a> = <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a></code></h4>
+<h4 id='method.finalize' class='method'><code>unsafe fn <a href='../../../../bitflags/__core/ops/trait.InPlace.html#tymethod.finalize' class='fnname'>finalize</a>(self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Place.html' title='bitflags::__core::ops::Place'>Place</a>&lt;T&gt; for <a class='struct' href='../../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></h3><div class='impl-items'><h4 id='method.pointer' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Place.html#tymethod.pointer' class='fnname'>pointer</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.pointer.html'>*mut T</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Placer.html' title='bitflags::__core::ops::Placer'>Placer</a>&lt;T&gt; for <a class='struct' href='../../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Place' class='type'><code>type <a href='../../../../bitflags/__core/ops/trait.Placer.html#associatedtype.Place' class='type'>Place</a> = <a class='struct' href='../../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.make_place' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Placer.html#tymethod.make_place' class='fnname'>make_place</a>(self) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

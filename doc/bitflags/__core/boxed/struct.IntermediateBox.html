@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `IntermediateBox` struct in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, IntermediateBox">
+
+    <title>bitflags::__core::boxed::IntermediateBox - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>boxed</a></p><script>window.sidebarCurrent = {name: 'IntermediateBox', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>boxed</a>::<wbr><a class='struct' href=''>IntermediateBox</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-100' class='srclink' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.IntermediateBox.html?gotosrc=100' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct IntermediateBox&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span> {
+    // some fields omitted
+}</pre><div class='stability'><em class='stab unstable'>Unstable (<code>placement_in</code>)<p>: placement box design is still being worked out.</p>
+</em></div><div class='docblock'><p><code>IntermediateBox</code> represents uninitialized backing storage for <code>Box</code>.</p>
+
+<p>FIXME (pnkfelix): Ideally we would just reuse <code>Box&lt;T&gt;</code> instead of
+introducing a separate <code>IntermediateBox&lt;T&gt;</code>; but then you hit
+issues when you e.g. attempt to destructure an instance of <code>Box</code>,
+since it is a lang item and so it gets special handling by the
+compiler.  Easier just to make this parallel type for now.</p>
+
+<p>FIXME (pnkfelix): Currently the <code>box</code> protocol only supports
+creating instances of sized types. This IntermediateBox is
+designed to be forward-compatible with a future protocol that
+supports creating instances of unsized types; that is why the type
+parameter has the <code>?Sized</code> generalization marker, and is also why
+this carries an explicit size. However, it probably does not need
+to carry the explicit alignment; that is just a work-around for
+the fact that the <code>align_of</code> intrinsic currently requires the
+input type to be Sized (which I do not think is strictly
+necessary).</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

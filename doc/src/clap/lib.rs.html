@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/clap-1.5.5/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -479,538 +480,117 @@
 <span id="436">436</span>
 <span id="437">437</span>
 <span id="438">438</span>
-<span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
-<span id="576">576</span>
-<span id="577">577</span>
-<span id="578">578</span>
-<span id="579">579</span>
-<span id="580">580</span>
-<span id="581">581</span>
-<span id="582">582</span>
-<span id="583">583</span>
-<span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
-<span id="588">588</span>
-<span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
-<span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
-<span id="655">655</span>
-<span id="656">656</span>
-<span id="657">657</span>
-<span id="658">658</span>
-<span id="659">659</span>
-<span id="660">660</span>
-<span id="661">661</span>
-<span id="662">662</span>
-<span id="663">663</span>
-<span id="664">664</span>
-<span id="665">665</span>
-<span id="666">666</span>
-<span id="667">667</span>
-<span id="668">668</span>
-<span id="669">669</span>
-<span id="670">670</span>
-<span id="671">671</span>
-<span id="672">672</span>
-<span id="673">673</span>
-<span id="674">674</span>
-<span id="675">675</span>
-<span id="676">676</span>
-<span id="677">677</span>
-<span id="678">678</span>
-<span id="679">679</span>
-<span id="680">680</span>
-<span id="681">681</span>
-<span id="682">682</span>
-<span id="683">683</span>
-<span id="684">684</span>
-<span id="685">685</span>
-<span id="686">686</span>
-<span id="687">687</span>
-<span id="688">688</span>
-<span id="689">689</span>
 </pre><pre class='rust '>
-<span class='doccomment'>//! Command Line Argument Parser for Rust</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! It is a simple to use, efficient, and full featured library for parsing</span>
-<span class='doccomment'>//! command line arguments</span>
-<span class='doccomment'>//! and subcommands when writing console, or terminal applications.</span>
+<span class='comment'>// Copyright ⓒ 2015-2016 Kevin B. Knapp and clap-rs contributors.</span>
+<span class='comment'>// Licensed under the MIT license</span>
+<span class='comment'>// (see LICENSE or &lt;http://opensource.org/licenses/MIT&gt;) All files in the project carrying such</span>
+<span class='comment'>// notice may not be copied, modified, or distributed except according to those terms.</span>
+
+<span class='doccomment'>//! A simple to use, efficient, and full featured library for parsing command line arguments and subcommands when writing console, or terminal applications.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## About</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `clap` is used to parse *and validate* the string of command line arguments</span>
-<span class='doccomment'>//! provided by the</span>
-<span class='doccomment'>//! user at runtime. You provide the list of valid possibilities, and `clap`</span>
-<span class='doccomment'>//! handles the rest. This</span>
-<span class='doccomment'>//! means you focus on your *applications* functionality, and less on the</span>
-<span class='doccomment'>//! parsing and validating of</span>
-<span class='doccomment'>//! arguments.</span>
+<span class='doccomment'>//! `clap` is used to parse *and validate* the string of command line arguments provided by the user at runtime. You provide the list of valid possibilities, and `clap` handles the rest. This means you focus on your *applications* functionality, and less on the parsing and validating of arguments.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `clap` also provides the traditional version and help switches (or flags)</span>
-<span class='doccomment'>//! &#39;for free&#39; meaning</span>
-<span class='doccomment'>//! automatically with no configuration. It does this by checking list of valid</span>
-<span class='doccomment'>//! possibilities you</span>
-<span class='doccomment'>//! supplied and if you haven&#39;t them already (or only defined some of them),</span>
-<span class='doccomment'>//! `clap` will auto-</span>
-<span class='doccomment'>//! generate the applicable ones. If you are using subcommands, `clap` will</span>
-<span class='doccomment'>//! also auto-generate a</span>
-<span class='doccomment'>//! `help` subcommand for you in addition to the traditional flags.</span>
+<span class='doccomment'>//! `clap` also provides the traditional version and help switches (or flags) &#39;for free&#39; meaning automatically with no configuration. It does this by checking list of valid possibilities you supplied and adding only the ones you haven&#39;t already defined. If you are using subcommands, `clap` will also auto-generate a `help` subcommand for you in addition to the traditional flags.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Once `clap` parses the user provided string of arguments, it returns the</span>
-<span class='doccomment'>//! matches along with any</span>
-<span class='doccomment'>//! applicable values. If the user made an error or typo, `clap` informs them</span>
-<span class='doccomment'>//! of the mistake and</span>
-<span class='doccomment'>//! exits gracefully. Because of this, you can make reasonable assumptions in</span>
-<span class='doccomment'>//! your code about the</span>
-<span class='doccomment'>//! validity of the arguments.</span>
+<span class='doccomment'>//! Once `clap` parses the user provided string of arguments, it returns the matches along with any applicable values. If the user made an error or typo, `clap` informs them of the mistake and exits gracefully (or returns a `Result` type and allows you to perform any clean up prior to exit). Because of this, you can make reasonable assumptions in your code about the validity of the arguments.</span>
+<span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## FAQ</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! For a full FAQ and more in depth details, see</span>
-<span class='doccomment'>//! [the wiki page](https://github.com/kbknapp/clap-rs/wiki/FAQ)</span>
+<span class='doccomment'>//! For a full FAQ and more in depth details, see [the wiki page](https://github.com/kbknapp/clap-rs/wiki/FAQ)</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ### Comparisons</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! First, let me say that these comparisons are highly subjective, and not</span>
-<span class='doccomment'>//! meant</span>
-<span class='doccomment'>//! in a critical or harsh manner. All the argument parsing libraries out there</span>
-<span class='doccomment'>//! (to include `clap`) have their own strengths and weaknesses. Sometimes it</span>
-<span class='doccomment'>//! just</span>
-<span class='doccomment'>//! comes down to personal taste when all other factors are equal. When in</span>
-<span class='doccomment'>//! doubt,</span>
-<span class='doccomment'>//! try them all and pick one that you enjoy :) There&#39;s plenty of room in the</span>
-<span class='doccomment'>//! Rust</span>
-<span class='doccomment'>//! community for multiple implementations!</span>
+<span class='doccomment'>//! First, let me say that these comparisons are highly subjective, and not meant in a critical or harsh manner. All the argument parsing libraries out there (to include `clap`) have their own strengths and weaknesses. Sometimes it just comes down to personal taste when all other factors are equal. When in doubt, try them all and pick one that you enjoy :) There&#39;s plenty of room in the Rust community for multiple implementations!</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! #### How does `clap` compare to `getopts`?</span>
+<span class='doccomment'>//! #### How does `clap` compare to [getopts](https://github.com/rust-lang-nursery/getopts)?</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! [getopts](https://github.com/rust-lang-nursery/getopts) is a very basic,</span>
-<span class='doccomment'>//! fairly</span>
-<span class='doccomment'>//! minimalist argument parsing library. This isn&#39;t a bad thing, sometimes you</span>
-<span class='doccomment'>//! don&#39;t need tons of features, you just want to parse some simple arguments,</span>
-<span class='doccomment'>//! and</span>
-<span class='doccomment'>//! have some help text generated for you based on valid arguments you specify.</span>
-<span class='doccomment'>//! When using `getopts` you must manually implement most of the common features</span>
-<span class='doccomment'>//! (such as checking to display help messages, usage strings, etc.). If you</span>
-<span class='doccomment'>//! want a</span>
-<span class='doccomment'>//! highly custom argument parser, and don&#39;t mind writing most the argument</span>
-<span class='doccomment'>//! parser</span>
-<span class='doccomment'>//! yourself, `getopts` is an excellent base.</span>
+<span class='doccomment'>//! `getopts` is a very basic, fairly minimalist argument parsing library. This isn&#39;t a bad thing, sometimes you don&#39;t need tons of features, you just want to parse some simple arguments, and have some help text generated for you based on valid arguments you specify. The downside to this approach is that you must manually implement most of the common features (such as checking to display help messages, usage strings, etc.). If you want a highly custom argument parser, and don&#39;t mind writing the majority of the functionality yourself, `getopts` is an excellent base.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Due to it&#39;s lack of features, `getopts` also doesn&#39;t allocate much, or at</span>
-<span class='doccomment'>//! all.</span>
-<span class='doccomment'>//! This gives it somewhat of a performance boost. Although, as you start</span>
-<span class='doccomment'>//! implementing those features you need manually, that boost quickly</span>
-<span class='doccomment'>//! disappears.</span>
+<span class='doccomment'>//! `getopts` also doesn&#39;t allocate much, or at all. This gives it a very small performance boost. Although, as you start implementing additional features, that boost quickly disappears.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Personally, I find many, many people that use `getopts` are manually</span>
-<span class='doccomment'>//! implementing features that `clap` has by default. Using `clap` simplifies</span>
-<span class='doccomment'>//! your</span>
-<span class='doccomment'>//! codebase allowing you to focus on your application, and not argument</span>
-<span class='doccomment'>//! parsing.</span>
+<span class='doccomment'>//! Personally, I find many, many uses of `getopts` are manually implementing features that `clap` provides by default. Using `clap` simplifies your codebase allowing you to focus on your application, and not argument parsing.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Reasons to use `getopts` instead of `clap`</span>
+<span class='doccomment'>//! #### How does `clap` compare to [docopt.rs](https://github.com/docopt/docopt.rs)?</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!  * You need a few allocations as possible, don&#39;t plan on implementing any</span>
-<span class='doccomment'>//!    additional features</span>
-<span class='doccomment'>//!  * You want a highly custom argument parser, but want to use an established</span>
-<span class='doccomment'>//!    parser as a base</span>
+<span class='doccomment'>//! I first want to say I&#39;m a big a fan of BurntSushi&#39;s work, the creator of `Docopt.rs`. I aspire to produce the quality of libraries that this man does! When it comes to comparing these two libraries they are very different. `docopt` tasks you with writing a help message, and then it parsers that message for you to determine all valid arguments and their use. Some people LOVE this approach, others do not. If you&#39;re willing to write a detailed help message, it&#39;s nice that you can stick that in your program and have `docopt` do the rest. On the downside, it&#39;s far less flexible.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! #### How does `clap` compare to `docopt.rs`?</span>
+<span class='doccomment'>//! `docopt` is also excellent at translating arguments into Rust types automatically. There is even a syntax extension which will do all this for you, if you&#39;re willing to use a nightly compiler (use of a stable compiler requires you to somewhat manually translate from arguments to Rust types). To use BurntSushi&#39;s words, `docopt` is also a sort of black box. You get what you get, and it&#39;s hard to tweak implementation or customize the experience for your use case.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! I first want to say I&#39;m a big a fan of BurntSushi&#39;s work, the creator of</span>
-<span class='doccomment'>//! [Docopt.rs](https://github.com/docopt/docopt.rs). I aspire to produce the</span>
-<span class='doccomment'>//! quality of libraries that this man does! When it comes to comparing these</span>
-<span class='doccomment'>//! two</span>
-<span class='doccomment'>//! libraries they are very different. `docopt` tasks you with writing a help</span>
-<span class='doccomment'>//! message, and then it parsers that message for you to determine all valid</span>
-<span class='doccomment'>//! arguments and their use. Some people LOVE this, others not so much. If</span>
-<span class='doccomment'>//! you&#39;re</span>
-<span class='doccomment'>//! willing to write a detailed help message, it&#39;s nice that you can stick that</span>
-<span class='doccomment'>//! in</span>
-<span class='doccomment'>//! your program and have `docopt` do the rest. On the downside, it&#39;s somewhat</span>
-<span class='doccomment'>//! less</span>
-<span class='doccomment'>//! flexible than other options out there, and requires the help message change</span>
-<span class='doccomment'>//! if</span>
-<span class='doccomment'>//! you need to make changes.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! `docopt` is also excellent at translating arguments into Rust types</span>
-<span class='doccomment'>//! automatically. There is even a syntax extension which will do all this for</span>
-<span class='doccomment'>//! you,</span>
-<span class='doccomment'>//! ifou to manually translate from arguments to Rust types). To use</span>
-<span class='doccomment'>//! BurntSushi&#39;s</span>
-<span class='doccomment'>//! words, `docopt` is also somewhat of a black box. You get what you get, and</span>
-<span class='doccomment'>//! it&#39;s</span>
-<span class='doccomment'>//! hard to tweak implementation or customise your experience for your use case.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! Because `docopt` is doing a ton of work to parse your help messages and</span>
-<span class='doccomment'>//! determine what you were trying to communicate as valid arguments, it&#39;s also</span>
-<span class='doccomment'>//! one</span>
-<span class='doccomment'>//! of the more heavy weight parsers performance-wise. For most applications</span>
-<span class='doccomment'>//! this</span>
-<span class='doccomment'>//! isn&#39;t a concern, but it&#39;s something to keep in mind.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! Reasons to use `docopt` instead of `clap`</span>
-<span class='doccomment'>//! * You want automatic translation from arguments to Rust types, and are</span>
-<span class='doccomment'>//! using a</span>
-<span class='doccomment'>//!    nightly compiler</span>
-<span class='doccomment'>//!  * Performance isn&#39;t a concern</span>
-<span class='doccomment'>//!  * You don&#39;t have any complex relationships between arguments</span>
+<span class='doccomment'>//! Because `docopt` is doing a ton of work to parse your help messages and determine what you were trying to communicate as valid arguments, it&#39;s also one of the more heavy weight parsers performance-wise. For most applications this isn&#39;t a concern and this isn&#39;t to say `docopt` is slow, in fact from it. This is just something to keep in mind while comparing.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! #### All else being equal, what are some reasons to use `clap`?</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `clap` is fast, and as lightweight as possible while still giving all the</span>
-<span class='doccomment'>//! features you&#39;d expect from a modern argument parser. If you use `clap` when</span>
-<span class='doccomment'>//! just need some simple arguments parsed, you&#39;ll find it a walk in the park.</span>
-<span class='doccomment'>//! But</span>
-<span class='doccomment'>//! `clap` also makes it possible to represent extremely complex, and advanced</span>
-<span class='doccomment'>//! requirements, without too much thought. `clap` aims to be intuitive, easy to</span>
-<span class='doccomment'>//! use, and fully capable for wide variety use cases and needs.</span>
+<span class='doccomment'>//! `clap` is as fast, and as lightweight as possible while still giving all the features you&#39;d expect from a modern argument parser. In fact, for the amount and type of features `clap` offers it remains about as fast as `getopts`. If you use `clap` when just need some simple arguments parsed, you&#39;ll find its a walk in the park. `clap` also makes it possible to represent extremely complex, and advanced requirements, without too much thought. `clap` aims to be intuitive, easy to use, and fully capable for wide variety use cases and needs.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ## Quick Examples</span>
+<span class='doccomment'>//! ## Quick Example</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! The following examples show a quick example of some of the very basic</span>
-<span class='doccomment'>//! functionality of `clap`.</span>
-<span class='doccomment'>//! For more advanced usage, such as requirements, exclusions, groups, multiple</span>
-<span class='doccomment'>//! values and</span>
-<span class='doccomment'>//! occurrences see the [video tutorials][video tutorials],</span>
-<span class='doccomment'>//! [documentation][docs], or</span>
-<span class='doccomment'>//! [examples/][examples] directory of this crate&#39;s repository.</span>
+<span class='doccomment'>//! The following examples show a quick example of some of the very basic functionality of `clap`. For more advanced usage, such as requirements, conflicts, groups, multiple values and occurrences see the [documentation](http://kbknapp.github.io/clap-rs/clap/index.html), [examples/](examples) directory of this repository or the [video tutorials](https://www.youtube.com/playlist?list=PLza5oFLQGTl0Bc_EU_pBNcX-rhVqDTRxv) (which are quite outdated by now).</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! **NOTE:** All these examples are functionally the same, but show three</span>
-<span class='doccomment'>//! different styles in</span>
-<span class='doccomment'>//! which to use `clap`</span>
+<span class='doccomment'>//!  **NOTE:** All these examples are functionally the same, but show three different styles in which to use `clap`</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ```no_run</span>
-<span class='doccomment'>//! // (Full example with detailed comments in examples/01a_quick_example.rs)</span>
-<span class='doccomment'>//! //</span>
-<span class='doccomment'>//! // This example demonstrates clap&#39;s &quot;usage strings&quot; method of creating</span>
-<span class='doccomment'>//! // arguments which is less less verbose</span>
-<span class='doccomment'>//! extern crate clap;</span>
-<span class='doccomment'>//! use clap::{Arg, App, SubCommand};</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! fn main() {</span>
-<span class='doccomment'>//!     let matches = App::new(&quot;myapp&quot;)</span>
-<span class='doccomment'>//!         .version(&quot;1.0&quot;)</span>
-<span class='doccomment'>//!         .author(&quot;Kevin K. &lt;kbknapp@gmail.com&gt;&quot;)</span>
-<span class='doccomment'>//!         .about(&quot;Does awesome things&quot;)</span>
-<span class='doccomment'>//!         .args_from_usage(</span>
-<span class='doccomment'>//!             &quot;-c --config=[CONFIG] &#39;Sets a custom config file&#39;</span>
-<span class='doccomment'>//!              &lt;INPUT&gt; &#39;Sets the input file to use&#39;</span>
-<span class='doccomment'>//!              [debug]... -d &#39;Sets the level of debugging information&#39;&quot;)</span>
-<span class='doccomment'>//!         .subcommand(SubCommand::with_name(&quot;test&quot;)</span>
-<span class='doccomment'>//!             .about(&quot;controls testing features&quot;)</span>
-<span class='doccomment'>//!             .version(&quot;1.3&quot;)</span>
-<span class='doccomment'>//!             .author(&quot;Someone E. &lt;someone_else@other.com&gt;&quot;)</span>
-<span class='doccomment'>//!             .arg_from_usage(</span>
-<span class='doccomment'>//!                 &quot;-v --verbose &#39;Print test information verbosely&#39;&quot;))</span>
-<span class='doccomment'>//!         .get_matches();</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Calling .unwrap() is safe here because &quot;INPUT&quot; is required (if</span>
-<span class='doccomment'>//!     // &quot;INPUT&quot; wasn&#39;t required we could have used an &#39;if let&#39; to</span>
-<span class='doccomment'>//!     // conditionally get the value)</span>
-<span class='doccomment'>//!     println!(&quot;Using input file: {}&quot;, matches.value_of(&quot;INPUT&quot;).unwrap());</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Gets a value for config if supplied by user, or defaults to</span>
-<span class='doccomment'>//!     // &quot;default.conf&quot;</span>
-<span class='doccomment'>//!     let config = matches.value_of(&quot;CONFIG&quot;).unwrap_or(&quot;default.conf&quot;);</span>
-<span class='doccomment'>//!     println!(&quot;Value for config: {}&quot;, config);</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Vary the output based on how many times the user used the &quot;debug&quot;</span>
-<span class='doccomment'>//!     // flag (i.e. &#39;myapp -d -d -d&#39; or &#39;myapp -ddd&#39; vs &#39;myapp -d&#39;)</span>
-<span class='doccomment'>//!     match matches.occurrences_of(&quot;debug&quot;) {</span>
-<span class='doccomment'>//!         0 =&gt; println!(&quot;Debug mode is off&quot;),</span>
-<span class='doccomment'>//!         1 =&gt; println!(&quot;Debug mode is kind of on&quot;),</span>
-<span class='doccomment'>//!         2 =&gt; println!(&quot;Debug mode is on&quot;),</span>
-<span class='doccomment'>//!         3 | _ =&gt; println!(&quot;Don&#39;t be crazy&quot;),</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // You can information about subcommands by requesting their matches by</span>
-<span class='doccomment'>//!     // name (as below), requesting just the name used, or both at the same</span>
-<span class='doccomment'>//!     // time</span>
-<span class='doccomment'>//!     if let Some(matches) = matches.subcommand_matches(&quot;test&quot;) {</span>
-<span class='doccomment'>//!         if matches.is_present(&quot;verbose&quot;) {</span>
-<span class='doccomment'>//!             println!(&quot;Printing verbosely...&quot;);</span>
-<span class='doccomment'>//!         } else {</span>
-<span class='doccomment'>//!             println!(&quot;Printing normally...&quot;);</span>
-<span class='doccomment'>//!         }</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // more program logic goes here...</span>
-<span class='doccomment'>//! }</span>
-<span class='doccomment'>//! ```</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! The following example is functionally the same as the one above, but this</span>
-<span class='doccomment'>//! method allows more</span>
-<span class='doccomment'>//! advanced configuration options (not shown in this small example), or even</span>
-<span class='doccomment'>//! dynamically</span>
-<span class='doccomment'>//! generating arguments when desired. Both methods can be used together to get</span>
-<span class='doccomment'>//! the best of both</span>
-<span class='doccomment'>//! worlds (see the documentation, [examples/][examples], or video tutorials).</span>
+<span class='doccomment'>//! The following example is show a method that allows more advanced configuration options (not shown in this small example), or even dynamically generating arguments when desired. The downside is it&#39;s more verbose.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```no_run</span>
 <span class='doccomment'>//! // (Full example with detailed comments in examples/01b_quick_example.rs)</span>
 <span class='doccomment'>//! //</span>
-<span class='doccomment'>//! // This example demonstrates clap&#39;s full &#39;builder pattern&#39; style of</span>
-<span class='doccomment'>//! // creating arguments which is</span>
-<span class='doccomment'>//! // more verbose, but allows easier editing, and at times more advanced</span>
-<span class='doccomment'>//! // options, or the possibility</span>
+<span class='doccomment'>//! // This example demonstrates clap&#39;s full &#39;builder pattern&#39; style of creating arguments which is</span>
+<span class='doccomment'>//! // more verbose, but allows easier editing, and at times more advanced options, or the possibility</span>
 <span class='doccomment'>//! // to generate arguments dynamically.</span>
 <span class='doccomment'>//! extern crate clap;</span>
 <span class='doccomment'>//! use clap::{Arg, App, SubCommand};</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! fn main() {</span>
-<span class='doccomment'>//!     let matches = App::new(&quot;myapp&quot;)</span>
-<span class='doccomment'>//!         .version(&quot;1.0&quot;)</span>
-<span class='doccomment'>//!         .author(&quot;Kevin K. &lt;kbknapp@gmail.com&gt;&quot;)</span>
-<span class='doccomment'>//!         .about(&quot;Does awesome things&quot;)</span>
-<span class='doccomment'>//!         .arg(Arg::with_name(&quot;CONFIG&quot;)</span>
-<span class='doccomment'>//!             .short(&quot;c&quot;)</span>
-<span class='doccomment'>//!             .long(&quot;config&quot;)</span>
-<span class='doccomment'>//!             .help(&quot;Sets a custom config file&quot;)</span>
-<span class='doccomment'>//!             .takes_value(true))</span>
-<span class='doccomment'>//!         .arg(Arg::with_name(&quot;INPUT&quot;)</span>
-<span class='doccomment'>//!             .help(&quot;Sets the input file to use&quot;)</span>
-<span class='doccomment'>//!             .required(true)</span>
-<span class='doccomment'>//!             .index(1))</span>
-<span class='doccomment'>//!         .arg(Arg::with_name(&quot;debug&quot;)</span>
-<span class='doccomment'>//!             .short(&quot;d&quot;)</span>
-<span class='doccomment'>//!             .multiple(true)</span>
-<span class='doccomment'>//!             .help(&quot;Sets the level of debugging information&quot;))</span>
-<span class='doccomment'>//!         .subcommand(SubCommand::with_name(&quot;test&quot;)</span>
-<span class='doccomment'>//!             .about(&quot;controls testing features&quot;)</span>
-<span class='doccomment'>//!             .version(&quot;1.3&quot;)</span>
-<span class='doccomment'>//!             .author(&quot;Someone E. &lt;someone_else@other.com&gt;&quot;)</span>
-<span class='doccomment'>//!             .arg(Arg::with_name(&quot;verbose&quot;)</span>
-<span class='doccomment'>//!                 .short(&quot;v&quot;)</span>
-<span class='doccomment'>//!                 .help(&quot;print test information verbosely&quot;)))</span>
-<span class='doccomment'>//!         .get_matches();</span>
+<span class='doccomment'>//!     let matches = App::new(&quot;My Super Program&quot;)</span>
+<span class='doccomment'>//!                           .version(&quot;1.0&quot;)</span>
+<span class='doccomment'>//!                           .author(&quot;Kevin K. &lt;kbknapp@gmail.com&gt;&quot;)</span>
+<span class='doccomment'>//!                           .about(&quot;Does awesome things&quot;)</span>
+<span class='doccomment'>//!                           .arg(Arg::with_name(&quot;config&quot;)</span>
+<span class='doccomment'>//!                                .short(&quot;c&quot;)</span>
+<span class='doccomment'>//!                                .long(&quot;config&quot;)</span>
+<span class='doccomment'>//!                                .value_name(&quot;FILE&quot;)</span>
+<span class='doccomment'>//!                                .help(&quot;Sets a custom config file&quot;)</span>
+<span class='doccomment'>//!                                .takes_value(true))</span>
+<span class='doccomment'>//!                           .arg(Arg::with_name(&quot;INPUT&quot;)</span>
+<span class='doccomment'>//!                                .help(&quot;Sets the input file to use&quot;)</span>
+<span class='doccomment'>//!                                .required(true)</span>
+<span class='doccomment'>//!                                .index(1))</span>
+<span class='doccomment'>//!                           .arg(Arg::with_name(&quot;v&quot;)</span>
+<span class='doccomment'>//!                                .short(&quot;v&quot;)</span>
+<span class='doccomment'>//!                                .multiple(true)</span>
+<span class='doccomment'>//!                                .help(&quot;Sets the level of verbosity&quot;))</span>
+<span class='doccomment'>//!                           .subcommand(SubCommand::with_name(&quot;test&quot;)</span>
+<span class='doccomment'>//!                                       .about(&quot;controls testing features&quot;)</span>
+<span class='doccomment'>//!                                       .version(&quot;1.3&quot;)</span>
+<span class='doccomment'>//!                                       .author(&quot;Someone E. &lt;someone_else@other.com&gt;&quot;)</span>
+<span class='doccomment'>//!                                       .arg(Arg::with_name(&quot;debug&quot;)</span>
+<span class='doccomment'>//!                                           .short(&quot;d&quot;)</span>
+<span class='doccomment'>//!                                           .help(&quot;print debug information verbosely&quot;)))</span>
+<span class='doccomment'>//!                           .get_matches();</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Calling .unwrap() is safe here because &quot;INPUT&quot; is required (if</span>
-<span class='doccomment'>//!     // &quot;INPUT&quot; wasn&#39;t required we could have used an &#39;if let&#39; to</span>
-<span class='doccomment'>//!     // conditionally get the value)</span>
-<span class='doccomment'>//!     println!(&quot;Using input file: {}&quot;, matches.value_of(&quot;INPUT&quot;).unwrap());</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Gets a value for config if supplied by user, or defaults to</span>
-<span class='doccomment'>//!     // &quot;default.conf&quot;</span>
-<span class='doccomment'>//!     let config = matches.value_of(&quot;CONFIG&quot;).unwrap_or(&quot;default.conf&quot;);</span>
+<span class='doccomment'>//!     // Gets a value for config if supplied by user, or defaults to &quot;default.conf&quot;</span>
+<span class='doccomment'>//!     let config = matches.value_of(&quot;config&quot;).unwrap_or(&quot;default.conf&quot;);</span>
 <span class='doccomment'>//!     println!(&quot;Value for config: {}&quot;, config);</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Vary the output based on how many times the user used the &quot;debug&quot;</span>
-<span class='doccomment'>//!     // flag (i.e. &#39;myapp -d -d -d&#39; or &#39;myapp -ddd&#39; vs &#39;myapp -d&#39;)</span>
-<span class='doccomment'>//!     match matches.occurrences_of(&quot;debug&quot;) {</span>
-<span class='doccomment'>//!         0 =&gt; println!(&quot;Debug mode is off&quot;),</span>
-<span class='doccomment'>//!         1 =&gt; println!(&quot;Debug mode is kind of on&quot;),</span>
-<span class='doccomment'>//!         2 =&gt; println!(&quot;Debug mode is on&quot;),</span>
+<span class='doccomment'>//!     // Calling .unwrap() is safe here because &quot;INPUT&quot; is required (if &quot;INPUT&quot; wasn&#39;t</span>
+<span class='doccomment'>//!     // required we could have used an &#39;if let&#39; to conditionally get the value)</span>
+<span class='doccomment'>//!     println!(&quot;Using input file: {}&quot;, matches.value_of(&quot;INPUT&quot;).unwrap());</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!     // Vary the output based on how many times the user used the &quot;verbose&quot; flag</span>
+<span class='doccomment'>//!     // (i.e. &#39;myprog -v -v -v&#39; or &#39;myprog -vvv&#39; vs &#39;myprog -v&#39;</span>
+<span class='doccomment'>//!     match matches.occurrences_of(&quot;v&quot;) {</span>
+<span class='doccomment'>//!         0 =&gt; println!(&quot;No verbose info&quot;),</span>
+<span class='doccomment'>//!         1 =&gt; println!(&quot;Some verbose info&quot;),</span>
+<span class='doccomment'>//!         2 =&gt; println!(&quot;Tons of verbose info&quot;),</span>
 <span class='doccomment'>//!         3 | _ =&gt; println!(&quot;Don&#39;t be crazy&quot;),</span>
 <span class='doccomment'>//!     }</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // You can information about subcommands by requesting their matches by</span>
-<span class='doccomment'>//!     // name (as below), requesting just the name used, or both at the same</span>
-<span class='doccomment'>//!     // time</span>
+<span class='doccomment'>//!     // You can handle information about subcommands by requesting their matches by name</span>
+<span class='doccomment'>//!     // (as below), requesting just the name used, or both at the same time</span>
 <span class='doccomment'>//!     if let Some(matches) = matches.subcommand_matches(&quot;test&quot;) {</span>
-<span class='doccomment'>//!         if matches.is_present(&quot;verbose&quot;) {</span>
-<span class='doccomment'>//!             println!(&quot;Printing verbosely...&quot;);</span>
+<span class='doccomment'>//!         if matches.is_present(&quot;debug&quot;) {</span>
+<span class='doccomment'>//!             println!(&quot;Printing debug info...&quot;);</span>
 <span class='doccomment'>//!         } else {</span>
 <span class='doccomment'>//!             println!(&quot;Printing normally...&quot;);</span>
 <span class='doccomment'>//!         }</span>
@@ -1020,15 +600,44 @@
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! The following combines the previous two examples by using the simplicity of</span>
-<span class='doccomment'>//! the `from_usage`</span>
-<span class='doccomment'>//! methods and the performance of the Builder Pattern.</span>
+<span class='doccomment'>//! The following example is functionally the same as the one above, but shows a far less verbose method but sacrifices some of the advanced configuration options (not shown in this small example).</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```no_run</span>
-<span class='doccomment'>//! // (Full example with detailed comments in examples/01c_quick_example.rs)</span>
+<span class='doccomment'>//! // (Full example with detailed comments in examples/01a_quick_example.rs)</span>
 <span class='doccomment'>//! //</span>
-<span class='doccomment'>//! // This example demonstrates clap&#39;s &quot;usage strings&quot; method of creating</span>
-<span class='doccomment'>//! // arguments which is less verbose</span>
+<span class='doccomment'>//! // This example demonstrates clap&#39;s &quot;usage strings&quot; method of creating arguments which is less</span>
+<span class='doccomment'>//! // less verbose</span>
+<span class='doccomment'>//! extern crate clap;</span>
+<span class='doccomment'>//! use clap::{Arg, App, SubCommand};</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! fn main() {</span>
+<span class='doccomment'>//!     let matches = App::new(&quot;myapp&quot;)</span>
+<span class='doccomment'>//!                           .version(&quot;1.0&quot;)</span>
+<span class='doccomment'>//!                           .author(&quot;Kevin K. &lt;kbknapp@gmail.com&gt;&quot;)</span>
+<span class='doccomment'>//!                           .about(&quot;Does awesome things&quot;)</span>
+<span class='doccomment'>//!                           .args_from_usage(</span>
+<span class='doccomment'>//!                               &quot;-c, --config=[FILE] &#39;Sets a custom config file&#39;</span>
+<span class='doccomment'>//!                               &lt;INPUT&gt;              &#39;Sets the input file to use&#39;</span>
+<span class='doccomment'>//!                               -v...                &#39;Sets the level of verbosity&#39;&quot;)</span>
+<span class='doccomment'>//!                           .subcommand(SubCommand::with_name(&quot;test&quot;)</span>
+<span class='doccomment'>//!                                       .about(&quot;controls testing features&quot;)</span>
+<span class='doccomment'>//!                                       .version(&quot;1.3&quot;)</span>
+<span class='doccomment'>//!                                       .author(&quot;Someone E. &lt;someone_else@other.com&gt;&quot;)</span>
+<span class='doccomment'>//!                                       .arg_from_usage(&quot;-d, --debug &#39;Print debug information&#39;&quot;))</span>
+<span class='doccomment'>//!                           .get_matches();</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!     // Same as previous example...</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//! ```</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The following combines the previous two examples by using the less verbose `from_usage` methods and the performance of the Builder Pattern.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```ignore</span>
+<span class='doccomment'>//! // (Full example with detailed comments in examples/01c_quick_example.rs)</span>
+<span class='doccomment'>//! // Must be compiled with `--features unstable`</span>
+<span class='doccomment'>//! //</span>
+<span class='doccomment'>//! // This example demonstrates clap&#39;s &quot;usage strings&quot; method of creating arguments which is less</span>
+<span class='doccomment'>//! // less verbose</span>
 <span class='doccomment'>//! #[macro_use]</span>
 <span class='doccomment'>//! extern crate clap;</span>
 <span class='doccomment'>//!</span>
@@ -1037,57 +646,22 @@
 <span class='doccomment'>//!         (version: &quot;1.0&quot;)</span>
 <span class='doccomment'>//!         (author: &quot;Kevin K. &lt;kbknapp@gmail.com&gt;&quot;)</span>
 <span class='doccomment'>//!         (about: &quot;Does awesome things&quot;)</span>
-<span class='doccomment'>//!         (@arg CONFIG: -c --config +takes_value &quot;Sets a custom config file&quot;)</span>
+<span class='doccomment'>//!         (@arg config: -c --config +takes_value &quot;Sets a custom config file&quot;)</span>
 <span class='doccomment'>//!         (@arg INPUT: +required &quot;Sets the input file to use&quot;)</span>
-<span class='doccomment'>//!         (@arg debug: -d ... &quot;Sets the level of debugging information&quot;)</span>
+<span class='doccomment'>//!         (@arg verbose: -v ... &quot;Sets the level of verbosity&quot;)</span>
 <span class='doccomment'>//!         (@subcommand test =&gt;</span>
 <span class='doccomment'>//!             (about: &quot;controls testing features&quot;)</span>
 <span class='doccomment'>//!             (version: &quot;1.3&quot;)</span>
 <span class='doccomment'>//!             (author: &quot;Someone E. &lt;someone_else@other.com&gt;&quot;)</span>
-<span class='doccomment'>//!             (@arg verbose: -v --verbose &quot;Print test information verbosely&quot;)</span>
+<span class='doccomment'>//!             (@arg verbose: -d --debug &quot;Print debug information&quot;)</span>
 <span class='doccomment'>//!         )</span>
 <span class='doccomment'>//!     ).get_matches();</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Calling .unwrap() is safe here because &quot;INPUT&quot; is required (if</span>
-<span class='doccomment'>//!     // &quot;INPUT&quot; wasn&#39;t required we could have used an &#39;if let&#39; to</span>
-<span class='doccomment'>//!     // conditionally get the value)</span>
-<span class='doccomment'>//!     println!(&quot;Using input file: {}&quot;, matches.value_of(&quot;INPUT&quot;).unwrap());</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Gets a value for config if supplied by user, or defaults to</span>
-<span class='doccomment'>//!     // &quot;default.conf&quot;</span>
-<span class='doccomment'>//!     let config = matches.value_of(&quot;CONFIG&quot;).unwrap_or(&quot;default.conf&quot;);</span>
-<span class='doccomment'>//!     println!(&quot;Value for config: {}&quot;, config);</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // Vary the output based on how many times the user used the &quot;debug&quot;</span>
-<span class='doccomment'>//!     // flag (i.e. &#39;myapp -d -d -d&#39; or &#39;myapp -ddd&#39; vs &#39;myapp -d&#39;)</span>
-<span class='doccomment'>//!     match matches.occurrences_of(&quot;debug&quot;) {</span>
-<span class='doccomment'>//!         0 =&gt; println!(&quot;Debug mode is off&quot;),</span>
-<span class='doccomment'>//!         1 =&gt; println!(&quot;Debug mode is kind of on&quot;),</span>
-<span class='doccomment'>//!         2 =&gt; println!(&quot;Debug mode is on&quot;),</span>
-<span class='doccomment'>//!         3 | _ =&gt; println!(&quot;Don&#39;t be crazy&quot;),</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // You can information about subcommands by requesting their matches by</span>
-<span class='doccomment'>//!     // name (as below), requesting just the name used, or both at the same</span>
-<span class='doccomment'>//!     // time</span>
-<span class='doccomment'>//!     if let Some(matches) = matches.subcommand_matches(&quot;test&quot;) {</span>
-<span class='doccomment'>//!         if matches.is_present(&quot;verbose&quot;) {</span>
-<span class='doccomment'>//!             println!(&quot;Printing verbosely...&quot;);</span>
-<span class='doccomment'>//!         } else {</span>
-<span class='doccomment'>//!             println!(&quot;Printing normally...&quot;);</span>
-<span class='doccomment'>//!         }</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // more program logic goes here...</span>
+<span class='doccomment'>//! // Same as previous examples...</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! This final method shows how you can use a YAML file to build your CLI and</span>
-<span class='doccomment'>//! keep your Rust source</span>
-<span class='doccomment'>//! tidy. First, create the `cli.yml` file to hold your CLI options, but it</span>
-<span class='doccomment'>//! could be called</span>
-<span class='doccomment'>//! anything we like (we&#39;ll use the same both examples above to keep it</span>
-<span class='doccomment'>//! functionally equivalent):</span>
+<span class='doccomment'>//! This final method shows how you can use a YAML file to build your CLI and keep your Rust source tidy or support multiple localized translations by having different YAML files for each localization. First, create the `cli.yml` file to hold your CLI options, but it could be called anything we like (we&#39;ll use the same both examples above to keep it functionally equivalent):</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```yaml</span>
 <span class='doccomment'>//! name: myapp</span>
@@ -1095,102 +669,58 @@
 <span class='doccomment'>//! author: Kevin K. &lt;kbknapp@gmail.com&gt;</span>
 <span class='doccomment'>//! about: Does awesome things</span>
 <span class='doccomment'>//! args:</span>
-<span class='doccomment'>//!     - CONFIG:</span>
+<span class='doccomment'>//!     - config:</span>
 <span class='doccomment'>//!         short: c</span>
 <span class='doccomment'>//!         long: config</span>
+<span class='doccomment'>//!         value_name: FILE</span>
 <span class='doccomment'>//!         help: Sets a custom config file</span>
 <span class='doccomment'>//!         takes_value: true</span>
 <span class='doccomment'>//!     - INPUT:</span>
 <span class='doccomment'>//!         help: Sets the input file to use</span>
 <span class='doccomment'>//!         required: true</span>
 <span class='doccomment'>//!         index: 1</span>
-<span class='doccomment'>//!     - debug:</span>
-<span class='doccomment'>//!         short: d</span>
+<span class='doccomment'>//!     - verbose:</span>
+<span class='doccomment'>//!         short: v</span>
 <span class='doccomment'>//!         multiple: true</span>
-<span class='doccomment'>//!         help: Sets the level of debugging information</span>
+<span class='doccomment'>//!         help: Sets the level of verbosity</span>
 <span class='doccomment'>//! subcommands:</span>
 <span class='doccomment'>//!     - test:</span>
 <span class='doccomment'>//!         about: controls testing features</span>
 <span class='doccomment'>//!         version: 1.3</span>
 <span class='doccomment'>//!         author: Someone E. &lt;someone_else@other.com&gt;</span>
 <span class='doccomment'>//!         args:</span>
-<span class='doccomment'>//!             - verbose:</span>
-<span class='doccomment'>//!                 short: v</span>
-<span class='doccomment'>//!                 help: print test information verbosely</span>
+<span class='doccomment'>//!             - debug:</span>
+<span class='doccomment'>//!                 short: d</span>
+<span class='doccomment'>//!                 help: print debug information</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Now we create our `main.rs` file just like we would have with the previous</span>
-<span class='doccomment'>//! two examples:</span>
+<span class='doccomment'>//! Now we create our `main.rs` file just like we would have with the previous two examples:</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```ignore</span>
 <span class='doccomment'>//! // (Full example with detailed comments in examples/17_yaml.rs)</span>
 <span class='doccomment'>//! //</span>
-<span class='doccomment'>//! // This example demonstrates clap&#39;s building from YAML style of creating</span>
-<span class='doccomment'>//! arguments which is far</span>
-<span class='doccomment'>//! // more clean, but takes a very small performance hit compared to the other</span>
-<span class='doccomment'>//! two methods.</span>
+<span class='doccomment'>//! // This example demonstrates clap&#39;s building from YAML style of creating arguments which is far</span>
+<span class='doccomment'>//! // more clean, but takes a very small performance hit compared to the other two methods.</span>
 <span class='doccomment'>//! #[macro_use]</span>
 <span class='doccomment'>//! extern crate clap;</span>
 <span class='doccomment'>//! use clap::App;</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! fn main() {</span>
-<span class='doccomment'>//! // The YAML file is found relative to the current file, similar to how</span>
-<span class='doccomment'>//! modules are found</span>
+<span class='doccomment'>//!     // The YAML file is found relative to the current file, similar to how modules are found</span>
 <span class='doccomment'>//!     let yaml = load_yaml!(&quot;cli.yml&quot;);</span>
 <span class='doccomment'>//!     let matches = App::from_yaml(yaml).get_matches();</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! // Calling .unwrap() is safe here because &quot;INPUT&quot; is required (if</span>
-<span class='doccomment'>//! &quot;INPUT&quot; wasn&#39;t</span>
-<span class='doccomment'>//! // required we could have used an &#39;if let&#39; to conditionally get the</span>
-<span class='doccomment'>//! value)</span>
-<span class='doccomment'>//!     println!(&quot;Using input file: {}&quot;, matches.value_of(&quot;INPUT&quot;).unwrap());</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! // Gets a value for config if supplied by user, or defaults to</span>
-<span class='doccomment'>//! &quot;default.conf&quot;</span>
-<span class='doccomment'>//!     let config = matches.value_of(&quot;CONFIG&quot;).unwrap_or(&quot;default.conf&quot;);</span>
-<span class='doccomment'>//!     println!(&quot;Value for config: {}&quot;, config);</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! // Vary the output based on how many times the user used the &quot;debug&quot;</span>
-<span class='doccomment'>//! flag</span>
-<span class='doccomment'>//!     // (i.e. &#39;myapp -d -d -d&#39; or &#39;myapp -ddd&#39; vs &#39;myapp -d&#39;</span>
-<span class='doccomment'>//!     match matches.occurrences_of(&quot;debug&quot;) {</span>
-<span class='doccomment'>//!         0 =&gt; println!(&quot;Debug mode is off&quot;),</span>
-<span class='doccomment'>//!         1 =&gt; println!(&quot;Debug mode is kind of on&quot;),</span>
-<span class='doccomment'>//!         2 =&gt; println!(&quot;Debug mode is on&quot;),</span>
-<span class='doccomment'>//!         3 | _ =&gt; println!(&quot;Don&#39;t be crazy&quot;),</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! // You can information about subcommands by requesting their matches by</span>
-<span class='doccomment'>//! name</span>
-<span class='doccomment'>//!     // (as below), requesting just the name used, or both at the same time</span>
-<span class='doccomment'>//!     if let Some(matches) = matches.subcommand_matches(&quot;test&quot;) {</span>
-<span class='doccomment'>//!         if matches.is_present(&quot;verbose&quot;) {</span>
-<span class='doccomment'>//!             println!(&quot;Printing verbosely...&quot;);</span>
-<span class='doccomment'>//!         } else {</span>
-<span class='doccomment'>//!             println!(&quot;Printing normally...&quot;);</span>
-<span class='doccomment'>//!         }</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // more program logic goes here...</span>
+<span class='doccomment'>//!     // Same as previous examples...</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! If you were to compile any of the above programs and run them with the flag</span>
-<span class='doccomment'>//! `--help` or `-h`</span>
-<span class='doccomment'>//! (or `help` subcommand, since we defined `test` as a subcommand) the</span>
-<span class='doccomment'>//! following would be output</span>
+<span class='doccomment'>//! **NOTE**: The YAML and macro builder options require adding a special `features` flag when compiling `clap` because they are not compiled by default. Simply change your `clap = &quot;2&quot;` to `clap = {version = &quot;2&quot;, features = [&quot;yaml&quot;]}` for YAML, or `features = [&quot;unstable&quot;]` for the macro builder, in your `Cargo.toml`.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! **NOTE**: The YAML option requires adding a special `features` flag when</span>
-<span class='doccomment'>//! compiling `clap`</span>
-<span class='doccomment'>//! because it is not compiled by default since it takes additional</span>
-<span class='doccomment'>//! dependencies that some people</span>
-<span class='doccomment'>//! may not need. Simply change your `clap = &quot;1&quot;` to `clap = {version = &quot;1&quot;,</span>
-<span class='doccomment'>//! features = [&quot;yaml&quot;]}`</span>
-<span class='doccomment'>//! in your `Cargo.toml` to use the YAML version.</span>
+<span class='doccomment'>//! If you were to compile any of the above programs and run them with the flag `--help` or `-h` (or `help` subcommand, since we defined `test` as a subcommand) the following would be output</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ```text</span>
-<span class='doccomment'>//! $ myapp --help</span>
-<span class='doccomment'>//! myapp 1.0</span>
+<span class='doccomment'>//! ```ignore</span>
+<span class='doccomment'>//! $ myprog --help</span>
+<span class='doccomment'>//! My Super Program 1.0</span>
 <span class='doccomment'>//! Kevin K. &lt;kbknapp@gmail.com&gt;</span>
 <span class='doccomment'>//! Does awesome things</span>
 <span class='doccomment'>//!</span>
@@ -1198,12 +728,12 @@
 <span class='doccomment'>//!     MyApp [FLAGS] [OPTIONS] &lt;INPUT&gt; [SUBCOMMAND]</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! FLAGS:</span>
-<span class='doccomment'>//!     -d               Turn debugging information on</span>
 <span class='doccomment'>//!     -h, --help       Prints this message</span>
+<span class='doccomment'>//!     -v               Sets the level of verbosity</span>
 <span class='doccomment'>//!     -V, --version    Prints version information</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! OPTIONS:</span>
-<span class='doccomment'>//!     -c, --config &lt;CONFIG&gt;    Sets a custom config file</span>
+<span class='doccomment'>//!     -c, --config &lt;FILE&gt;    Sets a custom config file</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ARGS:</span>
 <span class='doccomment'>//!     INPUT    The input file to use</span>
@@ -1213,9 +743,7 @@
 <span class='doccomment'>//!     test    Controls testing features</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! **NOTE:** You could also run `myapp test --help` to see similar output and</span>
-<span class='doccomment'>//! options for the</span>
-<span class='doccomment'>//! `test` subcommand.</span>
+<span class='doccomment'>//! **NOTE:** You could also run `myapp test --help` to see similar output and options for the `test` subcommand.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Try it!</span>
 <span class='doccomment'>//!</span>
@@ -1223,8 +751,7 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! To try out the pre-built example, use the following steps:</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! * Clone the repo `$ git clone https://github.com/kbknapp/clap-rs &amp;&amp; cd</span>
-<span class='doccomment'>//! clap-rs/clap-tests`</span>
+<span class='doccomment'>//! * Clone the repository `$ git clone https://github.com/kbknapp/clap-rs &amp;&amp; cd clap-rs/clap-tests`</span>
 <span class='doccomment'>//! * Compile the example `$ cargo build --release`</span>
 <span class='doccomment'>//! * Run the help info `$ ./target/release/claptests --help`</span>
 <span class='doccomment'>//! * Play with the arguments!</span>
@@ -1237,32 +764,30 @@
 <span class='doccomment'>//! *</span>
 <span class='doccomment'>//! ```toml</span>
 <span class='doccomment'>//! [dependencies]</span>
-<span class='doccomment'>//! clap = &quot;1&quot;</span>
+<span class='doccomment'>//! clap = &quot;2&quot;</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! * Add the following to your `src/main.rs`</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ```no_run</span>
+<span class='doccomment'>//! ```ignore</span>
 <span class='doccomment'>//! extern crate clap;</span>
 <span class='doccomment'>//! use clap::App;</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! fn main() {</span>
-<span class='doccomment'>//!   let _ = App::new(&quot;fake&quot;).version(&quot;v1.0-beta&quot;).get_matches();</span>
+<span class='doccomment'>//!   App::new(&quot;fake&quot;).version(&quot;v1.0-beta&quot;).get_matches();</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! * Build your program `$ cargo build --release`</span>
-<span class='doccomment'>//! * Run w/ help or version `$ ./target/release/fake --help` or `$</span>
-<span class='doccomment'>//! ./target/release/fake --version`</span>
+<span class='doccomment'>//! * Run with help or version `$ ./target/release/fake --help` or `$ ./target/release/fake --version`</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Usage</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! For full usage, add `clap` as a dependency in your `Cargo.toml` file to use</span>
-<span class='doccomment'>//! from crates.io:</span>
+<span class='doccomment'>//! For full usage, add `clap` as a dependency in your `Cargo.toml` file to use from crates.io:</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!  ```toml</span>
 <span class='doccomment'>//!  [dependencies]</span>
-<span class='doccomment'>//!  clap = &quot;1&quot;</span>
+<span class='doccomment'>//!  clap = &quot;2&quot;</span>
 <span class='doccomment'>//!  ```</span>
 <span class='doccomment'>//!  Or track the latest on the master branch at github:</span>
 <span class='doccomment'>//!</span>
@@ -1273,31 +798,25 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Add `extern crate clap;` to your crate root.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Define a list of valid arguments for your program (see the</span>
-<span class='doccomment'>//! [documentation][docs] or</span>
-<span class='doccomment'>//! [examples/][examples] directory of this repo)</span>
+<span class='doccomment'>//! Define a list of valid arguments for your program (see the [documentation](https://kbknapp.github.io/clap-rs/index.html) or [examples/](examples) directory of this repo)</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Then run `cargo build` or `cargo update &amp;&amp; cargo build` for your project.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ### Optional Dependencies / Features</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! If you&#39;d like to keep your dependency list to **only** `clap`, you can</span>
-<span class='doccomment'>//! disable any features</span>
-<span class='doccomment'>//! that require an additional dependency. To do this, add this to your</span>
-<span class='doccomment'>//! `Cargo.toml`:</span>
+<span class='doccomment'>//! If you&#39;d like to keep your dependency list to **only** `clap`, you can disable any features that require an additional dependency. To do this, add this to your `Cargo.toml`:</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```toml</span>
 <span class='doccomment'>//! [dependencies.clap]</span>
-<span class='doccomment'>//! version = &quot;1&quot;</span>
+<span class='doccomment'>//! version = &quot;2&quot;</span>
 <span class='doccomment'>//! default-features = false</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can also selectively enable only the features you&#39;d like to include, by</span>
-<span class='doccomment'>//! adding:</span>
+<span class='doccomment'>//! You can also selectively enable only the features you&#39;d like to include, by adding:</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```toml</span>
 <span class='doccomment'>//! [dependencies.clap]</span>
-<span class='doccomment'>//! version = &quot;1&quot;</span>
+<span class='doccomment'>//! version = &quot;2&quot;</span>
 <span class='doccomment'>//! default-features = false</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! # Cherry-pick the features you&#39;d like to use</span>
@@ -1306,94 +825,63 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The following is a list of optional `clap` features:</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! * **&quot;suggestions&quot;**: Turns on the `Did you mean &#39;--myoption&#39; ?` feature for</span>
-<span class='doccomment'>//! when users make</span>
-<span class='doccomment'>//! typos.</span>
-<span class='doccomment'>//! * **&quot;color&quot;**: Turns on red error messages. This feature only works on</span>
-<span class='doccomment'>//! non-Windows OSs.</span>
-<span class='doccomment'>//! * **&quot;lints&quot;**: This is **not** included by default and should only be used</span>
-<span class='doccomment'>//! while developing to</span>
-<span class='doccomment'>//! run basic lints against changes. This can only be used on Rust nightly.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! ### Dependencies Tree</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! The following graphic depicts `clap`s dependency graph.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!  * **Dashed** Line: Optional dependency</span>
-<span class='doccomment'>//! * **Red** Color: **NOT** included by default (must use cargo `features` to</span>
-<span class='doccomment'>//! enable)</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! ![clap dependencies](https://raw.githubusercontent.</span>
-<span class='doccomment'>//! com/kbknapp/clap-rs/master/clap.png)</span>
+<span class='doccomment'>//! * **&quot;suggestions&quot;**: Turns on the `Did you mean &#39;--myoption&#39; ?` feature for when users make typos.</span>
+<span class='doccomment'>//! * **&quot;color&quot;**: Turns on colored error messages. This feature only works on non-Windows OSs.</span>
+<span class='doccomment'>//! * **&quot;lints&quot;**: This is **not** included by default and should only be used while developing to run basic lints against changes. This can only be used on Rust nightly.</span>
+<span class='doccomment'>//! * **&quot;debug&quot;**: This is **not** included by default and should only be used while developing to display debugging information.</span>
+<span class='doccomment'>//! * **&quot;yaml&quot;**: This is **not** included by default. Enables building CLIs from YAML documents.</span>
+<span class='doccomment'>//! * **&quot;unstable&quot;**: This is **not** included by default. Enables unstable features, unstable refers to whether or not they may change, not performance stability.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ### More Information</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can find complete documentation on the [github-pages site][docs] for</span>
-<span class='doccomment'>//! this project.</span>
+<span class='doccomment'>//! You can find complete documentation on the [github-pages site](http://kbknapp.github.io/clap-rs/clap/index.html) for this project.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can also find usage examples in the [examples/][examples] directory of</span>
-<span class='doccomment'>//! this repo.</span>
+<span class='doccomment'>//! You can also find usage examples in the [examples/](examples) directory of this repo.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! #### Video Tutorials</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! There&#39;s also the video tutorial series [Argument Parsing with Rust][video</span>
-<span class='doccomment'>//! tutorials] that I&#39;ve</span>
-<span class='doccomment'>//! been working on.</span>
+<span class='doccomment'>//! There&#39;s also the video tutorial series [Argument Parsing with Rust](https://www.youtube.com/playlist?list=PLza5oFLQGTl0Bc_EU_pBNcX-rhVqDTRxv) that I&#39;ve been working on.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! *Note*: Two new videos have just been added ([08 From</span>
-<span class='doccomment'>//! Usage](https://youtu.be/xc6VdedFrG0), and</span>
-<span class='doccomment'>//! [09 Typed Values](https://youtu.be/mZn3C1DnD90)), if you&#39;re already</span>
-<span class='doccomment'>//! familiar with `clap` but</span>
-<span class='doccomment'>//! want to know more about these two details you can check out those videos</span>
-<span class='doccomment'>//! without watching the</span>
-<span class='doccomment'>//! previous few.</span>
+<span class='doccomment'>//! *Note*: Two new videos have just been added ([08 From Usage](https://youtu.be/xc6VdedFrG0), and [09 Typed Values](https://youtu.be/mZn3C1DnD90)), if you&#39;re already familiar with `clap` but want to know more about these two details you can check out those videos without watching the previous few.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! *Note*: Apologies for the resolution of the first video, it will be updated</span>
-<span class='doccomment'>//! to a better</span>
-<span class='doccomment'>//! resolution soon. The other videos have a proper resolution.</span>
+<span class='doccomment'>//! *Note*: Apologies for the resolution of the first video, it will be updated to a better resolution soon. The other videos have a proper resolution.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ### Running the tests</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! If contributing, you can run the tests as follows (assuming you&#39;re in the</span>
-<span class='doccomment'>//! `clap-rs` directory)</span>
+<span class='doccomment'>//! If contributing, you can run the tests as follows (assuming you&#39;re in the `clap-rs` directory)</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ```sh</span>
-<span class='doccomment'>//! cargo test --features yaml &amp;&amp; make -C clap-tests test</span>
+<span class='doccomment'>//! ```ignore</span>
+<span class='doccomment'>//! $ cargo test &amp;&amp; make -C clap-tests test</span>
+<span class='doccomment'>//! $ cargo test --features yaml</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! # Only on nightly compiler:</span>
+<span class='doccomment'>//! $ cargo build --features lints</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## License</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `clap` is licensed under the MIT license. Please read the</span>
-<span class='doccomment'>//! [LICENSE-MIT][license]</span>
-<span class='doccomment'>//! file in</span>
-<span class='doccomment'>//! this repository for more information.</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! [examples]: https://github.com/kbknapp/clap-rs/tree/master/examples</span>
-<span class='doccomment'>//! [docs]: http://kbknapp.github.io/clap-rs/clap/index.html</span>
-<span class='doccomment'>//! [video tutorials]:</span>
-<span class='doccomment'>//! https://www.youtube.com/playlist?list=PLza5oFLQGTl0Bc_EU_pBNcX-rhVqDTRxv</span>
-<span class='doccomment'>//! [license]:</span>
-<span class='doccomment'>//! https://raw.githubusercontent.com/kbknapp/clap-rs/master/LICENSE-MIT</span>
+<span class='doccomment'>//! `clap` is licensed under the MIT license. Please read the [LICENSE-MIT](LICENSE-MIT) file in this repository for more information.</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span><span class='op'>=</span> <span class='string'>&quot;lib&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>clippy</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>not</span>(<span class='ident'>any</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)), <span class='ident'>deny</span>(<span class='ident'>unstable_features</span>))]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(<span class='ident'>missing_docs</span>,
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(
+        <span class='ident'>missing_docs</span>,
         <span class='ident'>missing_debug_implementations</span>,
         <span class='ident'>missing_copy_implementations</span>,
         <span class='ident'>trivial_casts</span>,
         <span class='ident'>trivial_numeric_casts</span>,
-        <span class='ident'>unsafe_code</span>,
         <span class='ident'>unused_import_braces</span>,
+        <span class='ident'>unused_allocation</span>,
         <span class='ident'>unused_qualifications</span>)]</span>
 <span class='comment'>// clippy false positives, or ones we&#39;re ok with...</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>explicit_iter_loop</span>))]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>should_implement_trait</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>cyclomatic_complexity</span>))]</span>
 <span class='comment'>// Only while bitflats uses &quot;_first&quot; inside it&#39;s macros</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>used_underscore_binding</span>))]</span>
+<span class='comment'>// Only while bitflats fails this lint</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;lints&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>if_not_else</span>))]</span>
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;suggestions&quot;</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>strsim</span>;
@@ -1401,25 +889,36 @@
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>ansi_term</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>yaml_rust</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;wrap_help&quot;</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;windows&quot;</span>)))]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;wrap_help&quot;</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;windows&quot;</span>)))]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>unicode_width</span>;
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bitflags</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>vec_map</span>;
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>yaml_rust</span>::<span class='ident'>YamlLoader</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>Arg</span>, <span class='ident'>ArgGroup</span>, <span class='ident'>ArgMatches</span>, <span class='ident'>SubCommand</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>Arg</span>, <span class='ident'>ArgGroup</span>, <span class='ident'>ArgMatches</span>, <span class='ident'>SubCommand</span>, <span class='ident'>ArgSettings</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>app</span>::{<span class='ident'>App</span>, <span class='ident'>AppSettings</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>fmt</span>::<span class='ident'>Format</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>errors</span>::{<span class='ident'>ClapError</span>, <span class='ident'>ClapErrorType</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>errors</span>::{<span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>, <span class='prelude-ty'>Result</span>};
 
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>mod</span> <span class='ident'>macros</span>;
 <span class='kw'>mod</span> <span class='ident'>app</span>;
 <span class='kw'>mod</span> <span class='ident'>args</span>;
-<span class='kw'>mod</span> <span class='ident'>usageparser</span>;
+<span class='kw'>mod</span> <span class='ident'>usage_parser</span>;
 <span class='kw'>mod</span> <span class='ident'>fmt</span>;
 <span class='kw'>mod</span> <span class='ident'>suggestions</span>;
 <span class='kw'>mod</span> <span class='ident'>errors</span>;
+<span class='kw'>mod</span> <span class='ident'>osstringext</span>;
+<span class='kw'>mod</span> <span class='ident'>term</span>;
+<span class='kw'>mod</span> <span class='ident'>strext</span>;
+
+<span class='kw'>const</span> <span class='ident'>INTERNAL_ERROR_MSG</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;Fatal internal error. Please consider filing a bug \
+                                          report at https://github.com/kbknapp/clap-rs/issues&quot;</span>;
+<span class='kw'>const</span> <span class='ident'>INVALID_UTF8</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;unexpected invalid UTF-8 code point&quot;</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `recover` fn in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, recover">
+
+    <title>bitflags::__core::panic::recover - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>panic</a></p><script>window.sidebarCurrent = {name: 'recover', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>panic</a>::<wbr><a class='fn' href=''>recover</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-6784' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/fn.recover.html?gotosrc=6784' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn recover&lt;F, R&gt;(f: F) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;R, <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/any/trait.Any.html' title='bitflags::__core::any::Any'>Any</a> + 'static + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a>&gt;&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/panic/trait.RecoverSafe.html' title='bitflags::__core::panic::RecoverSafe'>RecoverSafe</a> + <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; R</span></pre><div class='stability'><em class='stab unstable'>Unstable (<code>recover</code>)<p>: awaiting feedback</p>
+</em></div><div class='docblock'><p>Invokes a closure, capturing the cause of panic if one occurs.</p>
+
+<p>This function will return <code>Ok</code> with the closure&#39;s result if the closure
+does not panic, and will return <code>Err(cause)</code> if the closure panics. The
+<code>cause</code> returned is the object with which panic was originally invoked.</p>
+
+<p>It is currently undefined behavior to unwind from Rust code into foreign
+code, so this function is particularly useful when Rust is called from
+another language (normally C). This can run arbitrary Rust code, capturing a
+panic and allowing a graceful handling of the error.</p>
+
+<p>It is <strong>not</strong> recommended to use this function for a general try/catch
+mechanism. The <code>Result</code> type is more appropriate to use for functions that
+can fail on a regular basis.</p>
+
+<p>The closure provided is required to adhere to the <code>RecoverSafe</code> to ensure
+that all captured variables are safe to cross this recover boundary. The
+purpose of this bound is to encode the concept of <a href="https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md">exception safety</a> in
+the type system. Most usage of this function should not need to worry about
+this bound as programs are naturally panic safe without <code>unsafe</code> code. If it
+becomes a problem the associated <code>AssertRecoverSafe</code> wrapper type in this
+module can be used to quickly assert that the usage here is indeed exception
+safe.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>recover</span>, <span class='ident'>std_panic</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>panic</span>;
+
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='op'>||</span> {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;hello!&quot;</span>);
+});
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_ok</span>());
+
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='op'>||</span> {
+    <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;oh no!&quot;</span>);
+});
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

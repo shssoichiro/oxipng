@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["thread_rng","Retrieve the lazily-initialized thread-local random number generator, seeded by the system. Intended to be used in method chaining style, e.g. `thread_rng().gen::<isize>()`."]],"struct":[["ThreadRng","The thread-local RNG."]],"trait":[["Rng","A random number generator."]]});

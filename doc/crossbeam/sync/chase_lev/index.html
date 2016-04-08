@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,15 +44,16 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>sync</a>::<wbr><a class='mod' href=''>chase_lev</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-677' class='srclink' href='../../../src/crossbeam/sync/chase_lev.rs.html.html#11-576' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-688' class='srclink' href='../../../src/crossbeam/sync/chase_lev.rs.html#11-592' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A lock-free concurrent work-stealing deque</p>
 
-<p>This module contains an implementation of the Chase-Lev work stealing deque
-described in &quot;Dynamic Circular Work-Stealing Deque&quot;. The implementation is
-heavily based on the pseudocode found in the paper.</p>
+<p>This module contains a hybrid implementation of the Chase-Lev work stealing deque
+described in <a href="http://neteril.org/%7Ejeremie/Dynamic_Circular_Work_Queue.pdf">&quot;Dynamic Circular Work-Stealing Deque&quot;</a> and the improved version
+described in <a href="http://www.di.ens.fr/%7Ezappa/readings/ppopp13.pdf">&quot;Correct and Efficient Work-Stealing for Weak Memory Models&quot;</a>.
+The implementation is heavily based on the pseudocode found in the papers.</p>
 
 <h1 id='example' class='section-header'><a href='#example'>Example</a></h1>
 <pre class='rust rust-example-rendered'>
@@ -72,43 +74,39 @@ heavily based on the pseudocode found in the paper.</p>
 <span class='ident'>stealer2</span>.<span class='ident'>steal</span>();</pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Stealer.html'
-                               title='crossbeam::sync::chase_lev::Stealer'>Stealer</a></td>
-                        <td class='docblock short'>
-                             <p>The stealing half of the work-stealing deque. Stealers have access to the
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Stealer.html'
+                                  title='crossbeam::sync::chase_lev::Stealer'>Stealer</a></td>
+                           <td class='docblock short'>
+                                <p>The stealing half of the work-stealing deque. Stealers have access to the
 opposite end of the deque from the worker, and they only have access to the
 <code>steal</code> method.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Worker.html'
-                               title='crossbeam::sync::chase_lev::Worker'>Worker</a></td>
-                        <td class='docblock short'>
-                             <p>Worker half of the work-stealing deque. This worker has exclusive access to
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Worker.html'
+                                  title='crossbeam::sync::chase_lev::Worker'>Worker</a></td>
+                           <td class='docblock short'>
+                                <p>Worker half of the work-stealing deque. This worker has exclusive access to
 one side of the deque, and uses <code>push</code> and <code>try_pop</code> method to manipulate it.</p>
-                        </td>
-                    </tr>
-                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.Steal.html'
-                               title='crossbeam::sync::chase_lev::Steal'>Steal</a></td>
-                        <td class='docblock short'>
-                             <p>When stealing some data, this is an enumeration of the possible outcomes.</p>
-                        </td>
-                    </tr>
-                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Steal.html'
+                                  title='crossbeam::sync::chase_lev::Steal'>Steal</a></td>
+                           <td class='docblock short'>
+                                <p>When stealing some data, this is an enumeration of the possible outcomes.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.deque.html'
-                               title='crossbeam::sync::chase_lev::deque'>deque</a></td>
-                        <td class='docblock short'>
-                             <p>Creates a new empty deque</p>
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.deque.html'
+                                  title='crossbeam::sync::chase_lev::deque'>deque</a></td>
+                           <td class='docblock short'>
+                                <p>Creates a new empty deque</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

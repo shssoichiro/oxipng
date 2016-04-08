@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>oxipng</a>::<wbr><a class='struct' href=''>Options</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-759' class='srclink' href='../src/oxipng/src/lib.rs.html.html#21-77' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-823' class='srclink' href='../src/oxipng/src/lib.rs.html#24-80' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Options {
     pub backup: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
     pub out_file: <a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.PathBuf.html' title='std::path::PathBuf'>PathBuf</a>,
@@ -75,62 +76,62 @@
 }</pre><div class='docblock'><p>Options controlling the output of the <code>optimize</code> function</p>
 </div><h2 class='fields'>Fields</h2>
 <table><tr class='stab '>
-                                  <td id='structfield.backup'><code>backup</code></td><td><div class='docblock'><p>Whether the input file should be backed up before writing the output</p>
+                             <td id='structfield.backup'><code>backup</code></td><td><div class='docblock'><p>Whether the input file should be backed up before writing the output</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.out_file'><code>out_file</code></td><td><div class='docblock'><p>Path to write the output file to</p>
+                             <td id='structfield.out_file'><code>out_file</code></td><td><div class='docblock'><p>Path to write the output file to</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.out_dir'><code>out_dir</code></td><td><div class='docblock'><p>Used only in CLI interface</p>
+                             <td id='structfield.out_dir'><code>out_dir</code></td><td><div class='docblock'><p>Used only in CLI interface</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.stdout'><code>stdout</code></td><td><div class='docblock'><p>Write to stdout instead of a file</p>
+                             <td id='structfield.stdout'><code>stdout</code></td><td><div class='docblock'><p>Write to stdout instead of a file</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.fix_errors'><code>fix_errors</code></td><td><div class='docblock'><p>Attempt to fix errors when decoding the input file</p>
+                             <td id='structfield.fix_errors'><code>fix_errors</code></td><td><div class='docblock'><p>Attempt to fix errors when decoding the input file</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.pretend'><code>pretend</code></td><td><div class='docblock'><p>Don&#39;t actually write any output, just calculate the best results</p>
+                             <td id='structfield.pretend'><code>pretend</code></td><td><div class='docblock'><p>Don&#39;t actually write any output, just calculate the best results</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.recursive'><code>recursive</code></td><td><div class='docblock'><p>Used only in CLI interface</p>
+                             <td id='structfield.recursive'><code>recursive</code></td><td><div class='docblock'><p>Used only in CLI interface</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.clobber'><code>clobber</code></td><td><div class='docblock'><p>Overwrite existing output files</p>
+                             <td id='structfield.clobber'><code>clobber</code></td><td><div class='docblock'><p>Overwrite existing output files</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.create'><code>create</code></td><td><div class='docblock'><p>Create new output files if they don&#39;t exist</p>
+                             <td id='structfield.create'><code>create</code></td><td><div class='docblock'><p>Create new output files if they don&#39;t exist</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.force'><code>force</code></td><td><div class='docblock'><p>Write to output even if there was no improvement in compression</p>
+                             <td id='structfield.force'><code>force</code></td><td><div class='docblock'><p>Write to output even if there was no improvement in compression</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.preserve_attrs'><code>preserve_attrs</code></td><td><div class='docblock'><p>Ensure the output file has the same permissions as the input file</p>
+                             <td id='structfield.preserve_attrs'><code>preserve_attrs</code></td><td><div class='docblock'><p>Ensure the output file has the same permissions as the input file</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.verbosity'><code>verbosity</code></td><td><div class='docblock'><p>How verbose the console logging should be (<code>None</code> for quiet, <code>Some(0)</code> for normal, <code>Some(1)</code> for verbose)</p>
+                             <td id='structfield.verbosity'><code>verbosity</code></td><td><div class='docblock'><p>How verbose the console logging should be (<code>None</code> for quiet, <code>Some(0)</code> for normal, <code>Some(1)</code> for verbose)</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.filter'><code>filter</code></td><td><div class='docblock'><p>Which filters to try on the file (0-5)</p>
+                             <td id='structfield.filter'><code>filter</code></td><td><div class='docblock'><p>Which filters to try on the file (0-5)</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.interlace'><code>interlace</code></td><td><div class='docblock'><p>Whether to change the interlacing type of the file
+                             <td id='structfield.interlace'><code>interlace</code></td><td><div class='docblock'><p>Whether to change the interlacing type of the file
 <code>None</code> will not change the current interlacing type
 <code>Some(x)</code> will change the file to interlacing mode <code>x</code></p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.compression'><code>compression</code></td><td><div class='docblock'><p>Which zlib compression levels to try on the file (1-9)</p>
+                             <td id='structfield.compression'><code>compression</code></td><td><div class='docblock'><p>Which zlib compression levels to try on the file (1-9)</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.memory'><code>memory</code></td><td><div class='docblock'><p>Which zlib memory levels to try on the file (1-9)</p>
+                             <td id='structfield.memory'><code>memory</code></td><td><div class='docblock'><p>Which zlib memory levels to try on the file (1-9)</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.strategies'><code>strategies</code></td><td><div class='docblock'><p>Which zlib compression strategies to try on the file (0-3)</p>
+                             <td id='structfield.strategies'><code>strategies</code></td><td><div class='docblock'><p>Which zlib compression strategies to try on the file (0-3)</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.window'><code>window</code></td><td><div class='docblock'><p>Window size to use when compressing the file, as <code>2^window</code> bytes
+                             <td id='structfield.window'><code>window</code></td><td><div class='docblock'><p>Window size to use when compressing the file, as <code>2^window</code> bytes
 Doesn&#39;t affect compression but may affect speed and memory usage
 15 is recommended default, 8-15 are valid values</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.bit_depth_reduction'><code>bit_depth_reduction</code></td><td><div class='docblock'><p>Whether to attempt bit depth reduction</p>
+                             <td id='structfield.bit_depth_reduction'><code>bit_depth_reduction</code></td><td><div class='docblock'><p>Whether to attempt bit depth reduction</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.color_type_reduction'><code>color_type_reduction</code></td><td><div class='docblock'><p>Whether to attempt color type reduction</p>
+                             <td id='structfield.color_type_reduction'><code>color_type_reduction</code></td><td><div class='docblock'><p>Whether to attempt color type reduction</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.palette_reduction'><code>palette_reduction</code></td><td><div class='docblock'><p>Whether to attempt palette reduction</p>
+                             <td id='structfield.palette_reduction'><code>palette_reduction</code></td><td><div class='docblock'><p>Whether to attempt palette reduction</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.idat_recoding'><code>idat_recoding</code></td><td><div class='docblock'><p>Whether to perform IDAT recoding
+                             <td id='structfield.idat_recoding'><code>idat_recoding</code></td><td><div class='docblock'><p>Whether to perform IDAT recoding
 If any type of reduction is performed, IDAT recoding will be performed
 regardless of this setting</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.strip'><code>strip</code></td><td><div class='docblock'><p>Which headers to strip from the PNG file, if any</p>
+                             <td id='structfield.strip'><code>strip</code></td><td><div class='docblock'><p>Which headers to strip from the PNG file, if any</p>
 </div></td></tr><tr class='stab '>
-                                  <td id='structfield.use_heuristics'><code>use_heuristics</code></td><td><div class='docblock'><p>Whether to use heuristics to pick the best filter and compression
+                             <td id='structfield.use_heuristics'><code>use_heuristics</code></td><td><div class='docblock'><p>Whether to use heuristics to pick the best filter and compression
 Intended for use with <code>-o 1</code> from the CLI interface</p>
-</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h4>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a></code></h4>
 <h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>

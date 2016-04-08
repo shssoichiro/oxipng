@@ -1,6 +1,6 @@
-**Version 0.4.0 (unreleased)**
+**Version 0.4.0**
  - Performance optimizations
- - [SEMVER_MAJOR] `-s` automatically infers `--strip safe`
+ - [SEMVER_MAJOR] `-s` automatically infers `--strip safe` ([#31](https://github.com/shssoichiro/oxipng/issues/31))
  - Update byteorder and clap crates
  - Fix issue where interlaced images incorrectly applied filters on the first line of a pass
 

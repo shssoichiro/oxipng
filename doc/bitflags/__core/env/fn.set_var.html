@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `set_var` fn in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, set_var">
+
+    <title>bitflags::__core::env::set_var - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>env</a></p><script>window.sidebarCurrent = {name: 'set_var', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>env</a>::<wbr><a class='fn' href=''>set_var</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2871' class='srclink' href='https://doc.rust-lang.org/nightly/std/env/fn.set_var.html?gotosrc=2871' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn set_var&lt;K, V&gt;(k: K, v: V) <span class='where'>where K: <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='../../../bitflags/__core/ffi/struct.OsStr.html' title='bitflags::__core::ffi::OsStr'>OsStr</a>&gt;, V: <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='../../../bitflags/__core/ffi/struct.OsStr.html' title='bitflags::__core::ffi::OsStr'>OsStr</a>&gt;</span></pre><span class="since">1.0.0</span><div class='docblock'><p>Sets the environment variable <code>k</code> to the value <code>v</code> for the currently running
+process.</p>
+
+<p>Note that while concurrent access to environment variables is safe in Rust,
+some platforms only expose inherently unsafe non-threadsafe APIs for
+inspecting the environment. As a result extra care needs to be taken when
+auditing calls to unsafe external FFI functions to ensure that any external
+environment accesses are properly synchronized with accesses in Rust.</p>
+
+<p>Discussion of this unsafety on Unix may be found in:</p>
+
+<ul>
+<li><a href="http://austingroupbugs.net/view.php?id=188">Austin Group Bugzilla</a></li>
+<li><a href="https://sourceware.org/bugzilla/show_bug.cgi?id=15607#c2">GNU C library Bugzilla</a></li>
+</ul>
+
+<h1 id='panics' class='section-header'><a href='#panics'>Panics</a></h1>
+<p>This function may panic if <code>key</code> is empty, contains an ASCII equals sign
+<code>&#39;=&#39;</code> or the NUL character <code>&#39;\0&#39;</code>, or when the value contains the NUL
+character.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
+
+<span class='kw'>let</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='string'>&quot;KEY&quot;</span>;
+<span class='ident'>env</span>::<span class='ident'>set_var</span>(<span class='ident'>key</span>, <span class='string'>&quot;VALUE&quot;</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>env</span>::<span class='ident'>var</span>(<span class='ident'>key</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&quot;VALUE&quot;</span>.<span class='ident'>to_string</span>()));</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

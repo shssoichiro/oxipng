@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>oxipng</a>::<wbr><a href='../index.html'>deflate</a>::<wbr><a href='index.html'>stream</a>::<wbr><a class='struct' href=''>Stream</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-46' class='srclink' href='../../../src/oxipng/src/deflate/stream.rs.html.html#11-14' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-50' class='srclink' href='../../../src/oxipng/src/deflate/stream.rs.html#11-14' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Stream&lt;D: Direction&gt; {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;<a class='enum' href='../../../oxipng/deflate/stream/enum.Compress.html' title='oxipng::deflate::stream::Compress'>Compress</a>&gt;</code></h3><div class='impl-items'><h4 id='method.new_compress' class='method'><code>fn <a href='#method.new_compress' class='fnname'>new_compress</a>(lvl: <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a>, window_bits: <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a>, mem_size: <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a>, strategy: <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a>) -&gt; <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;<a class='enum' href='../../../oxipng/deflate/stream/enum.Compress.html' title='oxipng::deflate::stream::Compress'>Compress</a>&gt;</code></h4>
@@ -56,7 +57,7 @@
 </div><h3 class='impl'><code>impl <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;<a class='enum' href='../../../oxipng/deflate/stream/enum.Decompress.html' title='oxipng::deflate::stream::Decompress'>Decompress</a>&gt;</code></h3><div class='impl-items'><h4 id='method.decompress_vec' class='method'><code>fn <a href='#method.decompress_vec' class='fnname'>decompress_vec</a>(&amp;mut self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, output: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;) -&gt; <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a></code></h4>
 </div><h3 class='impl'><code>impl <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;<a class='enum' href='../../../oxipng/deflate/stream/enum.Compress.html' title='oxipng::deflate::stream::Compress'>Compress</a>&gt;</code></h3><div class='impl-items'><h4 id='method.compress_vec' class='method'><code>fn <a href='#method.compress_vec' class='fnname'>compress_vec</a>(&amp;mut self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, output: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;) -&gt; <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a></code></h4>
 <h4 id='method.reset' class='method'><code>fn <a href='#method.reset' class='fnname'>reset</a>(&amp;mut self) -&gt; <a class='type' href='../../../libc/type.c_int.html' title='libc::c_int'>c_int</a></code></h4>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;D: Direction&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;D&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;D: Direction&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../../oxipng/deflate/stream/struct.Stream.html' title='oxipng::deflate::stream::Stream'>Stream</a>&lt;D&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

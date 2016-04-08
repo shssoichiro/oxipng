@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -43,29 +44,28 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>regex</a>::<wbr><a class='struct' href=''>Captures</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-3047' class='srclink' href='../src/regex/re.rs.html.html#880-884' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-3875' class='srclink' href='../src/regex/re_unicode.rs.html#839-843' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Captures&lt;'t&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>Captures represents a group of captured strings for a single match.</p>
 
 <p>The 0th capture always corresponds to the entire match. Each subsequent
-index corresponds to the next capture group in the regex.
-If a capture group is named, then the matched string is <em>also</em> available
-via the <code>name</code> method. (Note that the 0th capture is always unnamed and so
-must be accessed with the <code>at</code> method.)</p>
+index corresponds to the next capture group in the regex. If a capture
+group is named, then the matched string is <em>also</em> available via the <code>name</code>
+method. (Note that the 0th capture is always unnamed and so must be
+accessed with the <code>at</code> method.)</p>
 
 <p>Positions returned from a capture group are always byte indices.</p>
 
 <p><code>&#39;t</code> is the lifetime of the matched text.</p>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'t&gt; <a class='struct' href='../regex/struct.Captures.html' title='regex::Captures'>Captures</a>&lt;'t&gt;</code></h3><div class='impl-items'><h4 id='method.pos' class='method'><code>fn <a href='#method.pos' class='fnname'>pos</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;</code></h4>
-<div class='docblock'><p>Returns the start and end positions of the Nth capture group.
-Returns <code>None</code> if <code>i</code> is not a valid capture group or if the capture
-group did not match anything.
-The positions returned are <em>always</em> byte indices with respect to the
-original string matched.</p>
+<div class='docblock'><p>Returns the start and end positions of the Nth capture group. Returns
+<code>None</code> if <code>i</code> is not a valid capture group or if the capture group did
+not match anything. The positions returned are <em>always</em> byte indices
+with respect to the original string matched.</p>
 </div><h4 id='method.at' class='method'><code>fn <a href='#method.at' class='fnname'>at</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'t <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
 <div class='docblock'><p>Returns the matched string for the capture group <code>i</code>.  If <code>i</code> isn&#39;t
 a valid capture group or didn&#39;t match anything, then <code>None</code> is
@@ -112,8 +112,8 @@ of <code>a</code> and can&#39;t outlive it); to do that, use <code>at()</code> i
 
 <h1 id='panics' class='section-header'><a href='#panics'>Panics</a></h1>
 <p>If there is no group at the given index.</p>
-</div><div class='impl-items'><h4 id='associatedtype.Output' class='type'><code>type Output = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
-<h4 id='method.index' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#method.index' class='fnname'>index</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+</div><div class='impl-items'><h4 id='associatedtype.Output' class='type'><code>type <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#associatedtype.Output' class='type'>Output</a> = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.index' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#tymethod.index' class='fnname'>index</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 </div><h3 class='impl'><code>impl&lt;'t, 'i&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html' title='core::ops::Index'>Index</a>&lt;&amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../regex/struct.Captures.html' title='regex::Captures'>Captures</a>&lt;'t&gt;</code></h3><div class='docblock'><p>Get a group by name.</p>
 
 <p><code>&#39;t</code> is the lifetime of the matched text and <code>&#39;i</code> is the lifetime
@@ -125,8 +125,8 @@ of <code>a</code> and can&#39;t outlive it); to do that, use <code>name</code> i
 
 <h1 id='panics-1' class='section-header'><a href='#panics-1'>Panics</a></h1>
 <p>If there is no group named by the given value.</p>
-</div><div class='impl-items'><h4 id='associatedtype.Output-1' class='type'><code>type Output = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
-<h4 id='method.index-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#method.index' class='fnname'>index</a>&lt;'a&gt;(&amp;'a self, name: &amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+</div><div class='impl-items'><h4 id='associatedtype.Output-1' class='type'><code>type <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#associatedtype.Output' class='type'>Output</a> = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.index-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#tymethod.index' class='fnname'>index</a>&lt;'a&gt;(&amp;'a self, name: &amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

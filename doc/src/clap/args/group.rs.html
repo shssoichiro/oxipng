@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/clap-1.5.5/src/args/group.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/args/group.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>group.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -375,6 +376,173 @@
 <span id="332">332</span>
 <span id="333">333</span>
 <span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>BTreeMap</span>;
@@ -383,18 +551,18 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>yaml_rust</span>::<span class='ident'>Yaml</span>;
 
-<span class='doccomment'>/// `ArgGroup`s are a family of related arguments and way for you to say, &quot;Any of these arguments&quot;.</span>
-<span class='doccomment'>/// By placing arguments in a logical group, you can make easier requirement and exclusion rules</span>
-<span class='doccomment'>/// instead of having to list each individually, or when you want a rule to apply &quot;any but not all&quot;</span>
-<span class='doccomment'>/// arguments.</span>
+<span class='doccomment'>/// `ArgGroup`s are a family of related arguments and way for you to express, &quot;Any of these</span>
+<span class='doccomment'>/// arguments&quot;. By placing arguments in a logical group, you can create easier requirement and</span>
+<span class='doccomment'>/// exclusion rules instead of having to list each argument individually, or when you want a rule</span>
+<span class='doccomment'>/// to apply &quot;any but not all&quot; arguments.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// For instance, you can make an entire ArgGroup required, this means that one (and *only* one)</span>
-<span class='doccomment'>/// argument. from that group must be present. Using more than one argument from an ArgGroup causes</span>
-<span class='doccomment'>/// a failure (graceful exit).</span>
+<span class='doccomment'>/// For instance, you can make an entire `ArgGroup` required, this means that one (and *only* one)</span>
+<span class='doccomment'>/// argument from that group must be present. Using more than one argument from an `ArgGroup`</span>
+<span class='doccomment'>/// causes a parsing failure.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// You can also do things such as name an ArgGroup as a confliction or requirement, meaning any</span>
-<span class='doccomment'>/// of the arguments that belong to that group will cause a failure if present, or must present</span>
-<span class='doccomment'>/// respectively.</span>
+<span class='doccomment'>/// You can also do things such as name an entire `ArgGroup` as a conflict or requirement for</span>
+<span class='doccomment'>/// another argument, meaning any of the arguments that belong to that group will cause a failure</span>
+<span class='doccomment'>/// if present, or must present respectively.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Perhaps the most common use of `ArgGroup`s is to require one and *only* one argument to be</span>
 <span class='doccomment'>/// present out of a given set. Imagine that you had multiple arguments, and you want one of them</span>
@@ -406,45 +574,53 @@
 <span class='doccomment'>/// `--minor`, and `--patch`. All of these arguments shouldn&#39;t be used at one time but you want to</span>
 <span class='doccomment'>/// specify that *at least one* of them is used. For this, you can create a group.</span>
 <span class='doccomment'>///</span>
+<span class='doccomment'>/// Finally, you may use `ArgGroup`s to pull a value from a group of arguments when you don&#39;t care</span>
+<span class='doccomment'>/// exaclty which argument was actually used at runtime.</span>
+<span class='doccomment'>///</span>
 <span class='doccomment'>/// # Examples</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// ```no_run</span>
+<span class='doccomment'>/// The following example demonstrates using an `ArgGroup` to ensure that one, and only one, of</span>
+<span class='doccomment'>/// the arguments from the specified group is present at runtime.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
 <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-<span class='doccomment'>/// let _ = App::new(&quot;app&quot;)</span>
-<span class='doccomment'>/// .args_from_usage(&quot;--set-ver [ver] &#39;set the version manually&#39;</span>
-<span class='doccomment'>///                   --major         &#39;auto increase major&#39;</span>
-<span class='doccomment'>///                   --minor         &#39;auto increase minor&#39;</span>
-<span class='doccomment'>///                   --patch         &#39;auto increase patch&quot;)</span>
-<span class='doccomment'>/// .arg_group(ArgGroup::with_name(&quot;vers&quot;)</span>
-<span class='doccomment'>///                     .add_all(&amp;[&quot;ver&quot;, &quot;major&quot;, &quot;minor&quot;,&quot;patch&quot;])</span>
-<span class='doccomment'>///                     .required(true))</span>
-<span class='doccomment'>/// # .get_matches();</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;ar</span><span class='op'>&gt;</span> {
+<span class='doccomment'>/// App::new(&quot;app&quot;)</span>
+<span class='doccomment'>///     .args_from_usage(</span>
+<span class='doccomment'>///         &quot;--set-ver [ver] &#39;set the version manually&#39;</span>
+<span class='doccomment'>///          --major         &#39;auto increase major&#39;</span>
+<span class='doccomment'>///          --minor         &#39;auto increase minor&#39;</span>
+<span class='doccomment'>///          --patch         &#39;auto increase patch&#39;&quot;)</span>
+<span class='doccomment'>///     .group(ArgGroup::with_name(&quot;vers&quot;)</span>
+<span class='doccomment'>///          .args(&amp;[&quot;set-ver&quot;, &quot;major&quot;, &quot;minor&quot;,&quot;patch&quot;])</span>
+<span class='doccomment'>///          .required(true))</span>
+<span class='doccomment'>/// # ;</span>
+<span class='doccomment'>/// ```</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Default</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span>,
+    <span class='kw'>pub</span> <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='kw'>pub</span> <span class='ident'>required</span>: <span class='ident'>bool</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='ident'>requires</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>requires</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='ident'>conflicts</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>conflicts</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;ar</span><span class='op'>&gt;</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;ar</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Creates a new instance of `ArgGroup` using a unique string name.</span>
-    <span class='doccomment'>/// The name will only be used by the library consumer and not displayed to the use.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='doccomment'>/// Creates a new instance of `ArgGroup` using a unique string name. The name will be used to</span>
+    <span class='doccomment'>/// get values from the group or refer to the group inside of conflict and requirement rules.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```rust</span>
     <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
     <span class='doccomment'>/// ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_name</span>(<span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_name</span>(<span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='ident'>ArgGroup</span> {
             <span class='ident'>name</span>: <span class='ident'>n</span>,
             <span class='ident'>required</span>: <span class='boolval'>false</span>,
@@ -464,12 +640,234 @@
     <span class='doccomment'>/// let ag = ArgGroup::from_yaml(yml);</span>
     <span class='doccomment'>/// ```</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_yaml</span><span class='op'>&lt;</span><span class='lifetime'>&#39;y</span><span class='op'>&gt;</span>(<span class='ident'>y</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;y</span> <span class='ident'>BTreeMap</span><span class='op'>&lt;</span><span class='ident'>Yaml</span>, <span class='ident'>Yaml</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;y</span>, <span class='lifetime'>&#39;y</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_yaml</span>(<span class='ident'>y</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Yaml</span>) <span class='op'>-&gt;</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+        <span class='ident'>ArgGroup</span>::<span class='ident'>from</span>(<span class='ident'>y</span>.<span class='ident'>as_hash</span>().<span class='ident'>unwrap</span>())
+    }
+
+    <span class='doccomment'>/// Adds an argument to this group by name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, ArgGroup, Arg};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .arg(&quot;config&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>arg</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>name</span> <span class='op'>!=</span> <span class='ident'>n</span>,
+                <span class='string'>&quot;ArgGroup &#39;{}&#39; can not have same name as arg inside it&quot;</span>,
+                <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>name</span>);
+        <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Adds multiple arguments to this group by name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{ArgGroup, Arg};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>args</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
+            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>arg</span>(<span class='ident'>n</span>);
+        }
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the group as required or not. A required group will be displayed in the usage string</span>
+    <span class='doccomment'>/// of the application in the format `[arg|arg2|arg3]`. A required `ArgGroup` simply states</span>
+    <span class='doccomment'>/// that one, and only one argument from this group *must* be present at runtime (unless</span>
+    <span class='doccomment'>/// conflicting with another argument).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** This setting only applies to the current `App` / `SubCommand`, and not globally.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{Arg, ArgGroup};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>///     .required(true)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>r</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='self'>self</span>.<span class='ident'>required</span> <span class='op'>=</span> <span class='ident'>r</span>;
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the requirement rules of this group. This is not to be confused with a required group.</span>
+    <span class='doccomment'>/// Requirement rules function just like argument requirement rules, you can name other</span>
+    <span class='doccomment'>/// arguments or groups that must be present when one of the arguments from this group is used.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** The name provided may be an argument, or group name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ArgGroup};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;other_group&quot;)</span>
+    <span class='doccomment'>///     .requires(&quot;files&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>requires</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>reqs</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>requires</span> {
+            <span class='ident'>reqs</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>requires</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]);
+        }
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the requirement rules of this group. This is not to be confused with a required group.</span>
+    <span class='doccomment'>/// Requirement rules function just like argument requirement rules, you can name other</span>
+    <span class='doccomment'>/// arguments or groups that must be present when one of the arguments from this group is used.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** The names provided may be an argument, or group name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ArgGroup};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;other_group&quot;)</span>
+    <span class='doccomment'>///     .requires_all(&amp;[&quot;config&quot;, &quot;input&quot;]) // No different than saying, .requires(&quot;files&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>requires_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
+            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>requires</span>(<span class='ident'>n</span>);
+        }
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the exclusion rules of this group. Exclusion (aka conflict) rules function just like</span>
+    <span class='doccomment'>/// argument exclusion rules, you can name other arguments or groups that must not be present</span>
+    <span class='doccomment'>/// when one of the arguments from this group are used.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** The name provided may be an argument, or group name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ArgGroup};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;other_group&quot;)</span>
+    <span class='doccomment'>///     .conflicts_with(&quot;files&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>conflicts_with</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>confs</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>conflicts</span> {
+            <span class='ident'>confs</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>conflicts</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]);
+        }
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the exclusion rules of this group. Exclusion rules function just like argument</span>
+    <span class='doccomment'>/// exclusion rules, you can name other arguments or groups that must not be present when one</span>
+    <span class='doccomment'>/// of the arguments from this group are used.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** The names provided may be an argument, or group name</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ArgGroup};</span>
+    <span class='doccomment'>/// let cfg_arg = Arg::with_name(&quot;config&quot;);</span>
+    <span class='doccomment'>/// let in_arg = Arg::with_name(&quot;input&quot;);</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;files&quot;)</span>
+    <span class='doccomment'>///     .args(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
+    <span class='doccomment'>/// // ...</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ArgGroup::with_name(&quot;other_group&quot;)</span>
+    <span class='doccomment'>///     .conflicts_with_all(&amp;[&quot;files&quot;, &quot;input&quot;]) // same as saying, conflicts_with(&quot;files&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>conflicts_with_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
+            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>conflicts_with</span>(<span class='ident'>n</span>);
+        }
+        <span class='self'>self</span>
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span> {
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>,
+               <span class='string'>&quot;{{\n\
+                   \tname: {:?},\n\
+                   \targs: {:?},\n\
+                   \trequired: {:?},\n\
+                   \trequires: {:?},\n\
+                   \tconflicts: {:?},\n\
+                }}&quot;</span>,
+               <span class='self'>self</span>.<span class='ident'>name</span>,
+               <span class='self'>self</span>.<span class='ident'>args</span>,
+               <span class='self'>self</span>.<span class='ident'>required</span>,
+               <span class='self'>self</span>.<span class='ident'>requires</span>,
+               <span class='self'>self</span>.<span class='ident'>conflicts</span>)
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;z</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;z</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>g</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;z</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='ident'>ArgGroup</span> {
+            <span class='ident'>name</span>: <span class='ident'>g</span>.<span class='ident'>name</span>,
+            <span class='ident'>required</span>: <span class='ident'>g</span>.<span class='ident'>required</span>,
+            <span class='ident'>args</span>: <span class='ident'>g</span>.<span class='ident'>args</span>.<span class='ident'>clone</span>(),
+            <span class='ident'>requires</span>: <span class='ident'>g</span>.<span class='ident'>requires</span>.<span class='ident'>clone</span>(),
+            <span class='ident'>conflicts</span>: <span class='ident'>g</span>.<span class='ident'>conflicts</span>.<span class='ident'>clone</span>(),
+        }
+    }
+}
+
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BTreeMap</span><span class='op'>&lt;</span><span class='ident'>Yaml</span>, <span class='ident'>Yaml</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BTreeMap</span><span class='op'>&lt;</span><span class='ident'>Yaml</span>, <span class='ident'>Yaml</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='comment'>// We WANT this to panic on error...so expect() is good.</span>
-        <span class='kw'>let</span> <span class='ident'>name_yml</span> <span class='op'>=</span> <span class='ident'>y</span>.<span class='ident'>keys</span>().<span class='ident'>nth</span>(<span class='number'>0</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>name_str</span> <span class='op'>=</span> <span class='ident'>name_yml</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='ident'>name_str</span>);
-        <span class='kw'>let</span> <span class='ident'>group_settings</span> <span class='op'>=</span> <span class='ident'>y</span>.<span class='ident'>get</span>(<span class='ident'>name_yml</span>).<span class='ident'>unwrap</span>().<span class='ident'>as_hash</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>default</span>();
+        <span class='kw'>let</span> <span class='ident'>group_settings</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>b</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
+            <span class='kw'>let</span> <span class='ident'>name_yml</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>keys</span>().<span class='ident'>nth</span>(<span class='number'>0</span>).<span class='ident'>expect</span>(<span class='string'>&quot;failed to get name&quot;</span>);
+            <span class='kw'>let</span> <span class='ident'>name_str</span> <span class='op'>=</span> <span class='ident'>name_yml</span>.<span class='ident'>as_str</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to convert name to str&quot;</span>);
+            <span class='ident'>a</span>.<span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>name_str</span>;
+            <span class='ident'>b</span>.<span class='ident'>get</span>(<span class='ident'>name_yml</span>).<span class='ident'>expect</span>(<span class='string'>&quot;failed to get name_str&quot;</span>).<span class='ident'>as_hash</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to convert to a hash&quot;</span>)
+        } <span class='kw'>else</span> {
+            <span class='ident'>b</span>
+        };
 
         <span class='kw'>for</span> (<span class='ident'>k</span>, <span class='ident'>v</span>) <span class='kw'>in</span> <span class='ident'>group_settings</span>.<span class='ident'>iter</span>() {
             <span class='ident'>a</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>k</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>() {
@@ -477,8 +875,14 @@
                 <span class='string'>&quot;args&quot;</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>for</span> <span class='ident'>ys</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>as_vec</span>().<span class='ident'>unwrap</span>() {
                         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=</span> <span class='ident'>ys</span>.<span class='ident'>as_str</span>() {
-                            <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>add</span>(<span class='ident'>s</span>);
+                            <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>arg</span>(<span class='ident'>s</span>);
                         }
+                    }
+                    <span class='ident'>a</span>
+                }
+                <span class='string'>&quot;arg&quot;</span> <span class='op'>=&gt;</span> {
+                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>ys</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>as_str</span>() {
+                        <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>arg</span>(<span class='ident'>ys</span>);
                     }
                     <span class='ident'>a</span>
                 }
@@ -498,200 +902,35 @@
                     }
                     <span class='ident'>a</span>
                 }
+                <span class='string'>&quot;name&quot;</span> <span class='op'>=&gt;</span> {
+                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>ys</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>as_str</span>() {
+                        <span class='ident'>a</span>.<span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>ys</span>;
+                    }
+                    <span class='ident'>a</span>
+                }
                 <span class='ident'>s</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Unknown ArgGroup setting &#39;{}&#39; in YAML file for \
                              ArgGroup &#39;{}&#39;&quot;</span>,
                             <span class='ident'>s</span>,
-                            <span class='ident'>name_str</span>),
+                            <span class='ident'>a</span>.<span class='ident'>name</span>),
             }
         }
 
         <span class='ident'>a</span>
-    }
-
-    <span class='doccomment'>/// Adds an argument to this group by name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .add(&quot;config&quot;)</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>add</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>name</span> <span class='op'>!=</span> <span class='ident'>n</span>,
-                <span class='string'>&quot;ArgGroup &#39;{}&#39; can not have same name as arg inside it&quot;</span>,
-                <span class='self'>self</span>.<span class='ident'>name</span>);
-        <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Adds multiple arguments to this group by name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .add_all(&amp;[&quot;config&quot;, &quot;input&quot;, &quot;output&quot;])</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>add_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
-            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>add</span>(<span class='ident'>n</span>);
-        }
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Sets the requirement of this group. A required group will be displayed in the usage string</span>
-    <span class='doccomment'>/// of the application in the format `[arg|arg2|arg3]`. A required `ArgGroup` simply states</span>
-    <span class='doccomment'>/// that one, and only one argument from this group *must* be present at runtime (unless</span>
-    <span class='doccomment'>/// conflicting with another argument).</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .required(true)</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>r</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='self'>self</span>.<span class='ident'>required</span> <span class='op'>=</span> <span class='ident'>r</span>;
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Sets the requirement rules of this group. This is not to be confused with a required group.</span>
-    <span class='doccomment'>/// Requirement rules function just like argument requirement rules, you can name other</span>
-    <span class='doccomment'>/// arguments or groups that must be present when one of the arguments from this group is used.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **NOTE:** The name provided may be an argument, or group name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .requires(&quot;config&quot;)</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>requires</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>reqs</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>requires</span> {
-            <span class='ident'>reqs</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
-        } <span class='kw'>else</span> {
-            <span class='self'>self</span>.<span class='ident'>requires</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]);
-        }
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Sets the requirement rules of this group. This is not to be confused with a required group.</span>
-    <span class='doccomment'>/// Requirement rules function just like argument requirement rules, you can name other</span>
-    <span class='doccomment'>/// arguments or groups that must be present when one of the arguments from this group is used.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **NOTE:** The names provided may be an argument, or group name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .requires_all(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>requires_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
-            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>requires</span>(<span class='ident'>n</span>);
-        }
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Sets the exclusion rules of this group. Exclusion rules function just like argument</span>
-    <span class='doccomment'>/// exclusion rules, you can name other arguments or groups that must not be present when one</span>
-    <span class='doccomment'>/// of the arguments from this group are used.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **NOTE:** The name provided may be an argument, or group name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .conflicts_with(&quot;config&quot;)</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>conflicts_with</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>confs</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>conflicts</span> {
-            <span class='ident'>confs</span>.<span class='ident'>push</span>(<span class='ident'>n</span>);
-        } <span class='kw'>else</span> {
-            <span class='self'>self</span>.<span class='ident'>conflicts</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]);
-        }
-        <span class='self'>self</span>
-    }
-
-    <span class='doccomment'>/// Sets the exclusion rules of this group. Exclusion rules function just like argument</span>
-    <span class='doccomment'>/// exclusion rules, you can name other arguments or groups that must not be present when one</span>
-    <span class='doccomment'>/// of the arguments from this group are used.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **NOTE:** The names provided may be an argument, or group name</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, ArgGroup};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myprog&quot;)</span>
-    <span class='doccomment'>/// #                 .arg_group(</span>
-    <span class='doccomment'>/// # ArgGroup::with_name(&quot;config&quot;)</span>
-    <span class='doccomment'>/// .conflicts_with_all(&amp;[&quot;config&quot;, &quot;input&quot;])</span>
-    <span class='doccomment'>/// # ).get_matches();</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>conflicts_with_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ns</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;ar</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='kw'>for</span> <span class='ident'>n</span> <span class='kw'>in</span> <span class='ident'>ns</span> {
-            <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>conflicts_with</span>(<span class='ident'>n</span>);
-        }
-        <span class='self'>self</span>
-    }
-}
-
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;ar</span><span class='op'>&gt;</span> <span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;ar</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span> {
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>,
-               <span class='string'>&quot;{{
-            name:{:?},
-            args: {:?},
-            required: {:?},
-            requires: {:?},
-            conflicts: {:?},
-}}&quot;</span>,
-               <span class='self'>self</span>.<span class='ident'>name</span>,
-               <span class='self'>self</span>.<span class='ident'>args</span>,
-               <span class='self'>self</span>.<span class='ident'>required</span>,
-               <span class='self'>self</span>.<span class='ident'>requires</span>,
-               <span class='self'>self</span>.<span class='ident'>conflicts</span>)
     }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>ArgGroup</span>;
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
+    <span class='kw'>use</span> <span class='ident'>yaml_rust</span>::<span class='ident'>YamlLoader</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>groups</span>() {
         <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>)
-                    .<span class='ident'>add</span>(<span class='string'>&quot;a1&quot;</span>)
-                    .<span class='ident'>add_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>])
-                    .<span class='ident'>add</span>(<span class='string'>&quot;a4&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a1&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a4&quot;</span>)
+                    .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>])
                     .<span class='ident'>required</span>(<span class='boolval'>true</span>)
                     .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;c1&quot;</span>)
                     .<span class='ident'>conflicts_with_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>])
@@ -700,15 +939,111 @@
                     .<span class='ident'>requires_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>])
                     .<span class='ident'>requires</span>(<span class='string'>&quot;r4&quot;</span>);
 
-        <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a1&quot;</span>, <span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>, <span class='string'>&quot;a4&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a1&quot;</span>, <span class='string'>&quot;a4&quot;</span>, <span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>];
         <span class='kw'>let</span> <span class='ident'>reqs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;r1&quot;</span>, <span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>, <span class='string'>&quot;r4&quot;</span>];
         <span class='kw'>let</span> <span class='ident'>confs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;c1&quot;</span>, <span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>, <span class='string'>&quot;c4&quot;</span>];
 
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>args</span>, <span class='ident'>args</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>requires</span>.<span class='ident'>unwrap</span>(), <span class='ident'>reqs</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>conflicts</span>.<span class='ident'>unwrap</span>(), <span class='ident'>confs</span>);
-
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>requires</span>, <span class='prelude-val'>Some</span>(<span class='ident'>reqs</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>conflicts</span>, <span class='prelude-val'>Some</span>(<span class='ident'>confs</span>));
     }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_debug</span>() {
+        <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a1&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a4&quot;</span>)
+                    .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>])
+                    .<span class='ident'>required</span>(<span class='boolval'>true</span>)
+                    .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;c1&quot;</span>)
+                    .<span class='ident'>conflicts_with_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>])
+                    .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;c4&quot;</span>)
+                    .<span class='ident'>requires</span>(<span class='string'>&quot;r1&quot;</span>)
+                    .<span class='ident'>requires_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>])
+                    .<span class='ident'>requires</span>(<span class='string'>&quot;r4&quot;</span>);
+
+        <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a1&quot;</span>, <span class='string'>&quot;a4&quot;</span>, <span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>reqs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;r1&quot;</span>, <span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>, <span class='string'>&quot;r4&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>confs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;c1&quot;</span>, <span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>, <span class='string'>&quot;c4&quot;</span>];
+
+        <span class='kw'>let</span> <span class='ident'>debug_str</span> <span class='op'>=</span>
+               <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{{\n\
+                   \tname: \&quot;test\&quot;,\n\
+                   \targs: {:?},\n\
+                   \trequired: {:?},\n\
+                   \trequires: {:?},\n\
+                   \tconflicts: {:?},\n\
+               }}&quot;</span>, <span class='ident'>args</span>, <span class='boolval'>true</span>, <span class='prelude-val'>Some</span>(<span class='ident'>reqs</span>), <span class='prelude-val'>Some</span>(<span class='ident'>confs</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>g</span>), <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>debug_str</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_from</span>() {
+        <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a1&quot;</span>)
+                    .<span class='ident'>arg</span>(<span class='string'>&quot;a4&quot;</span>)
+                    .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>])
+                    .<span class='ident'>required</span>(<span class='boolval'>true</span>)
+                    .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;c1&quot;</span>)
+                    .<span class='ident'>conflicts_with_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>])
+                    .<span class='ident'>conflicts_with</span>(<span class='string'>&quot;c4&quot;</span>)
+                    .<span class='ident'>requires</span>(<span class='string'>&quot;r1&quot;</span>)
+                    .<span class='ident'>requires_all</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>])
+                    .<span class='ident'>requires</span>(<span class='string'>&quot;r4&quot;</span>);
+
+        <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a1&quot;</span>, <span class='string'>&quot;a4&quot;</span>, <span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>reqs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;r1&quot;</span>, <span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>, <span class='string'>&quot;r4&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>confs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;c1&quot;</span>, <span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>, <span class='string'>&quot;c4&quot;</span>];
+
+        <span class='kw'>let</span> <span class='ident'>g2</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>from</span>(<span class='kw-2'>&amp;</span><span class='ident'>g</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g2</span>.<span class='ident'>args</span>, <span class='ident'>args</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g2</span>.<span class='ident'>requires</span>, <span class='prelude-val'>Some</span>(<span class='ident'>reqs</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g2</span>.<span class='ident'>conflicts</span>, <span class='prelude-val'>Some</span>(<span class='ident'>confs</span>));
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;yaml&quot;</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>, <span class='ident'>test</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_yaml</span>() {
+
+        <span class='kw'>let</span> <span class='ident'>g_yaml</span> <span class='op'>=</span>
+<span class='string'>&quot;name: test
+args:
+- a1
+- a4
+- a2
+- a3
+conflicts_with:
+- c1
+- c2
+- c3
+- c4
+requires:
+- r1
+- r2
+- r3
+- r4&quot;</span>;
+        <span class='kw'>let</span> <span class='ident'>yml</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>YamlLoader</span>::<span class='ident'>load_from_str</span>(<span class='ident'>g_yaml</span>).<span class='ident'>expect</span>(<span class='string'>&quot;failed to load YAML file&quot;</span>)[<span class='number'>0</span>];
+        <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='ident'>ArgGroup</span>::<span class='ident'>from_yaml</span>(<span class='ident'>yml</span>);
+        <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a1&quot;</span>, <span class='string'>&quot;a4&quot;</span>, <span class='string'>&quot;a2&quot;</span>, <span class='string'>&quot;a3&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>reqs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;r1&quot;</span>, <span class='string'>&quot;r2&quot;</span>, <span class='string'>&quot;r3&quot;</span>, <span class='string'>&quot;r4&quot;</span>];
+        <span class='kw'>let</span> <span class='ident'>confs</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;c1&quot;</span>, <span class='string'>&quot;c2&quot;</span>, <span class='string'>&quot;c3&quot;</span>, <span class='string'>&quot;c4&quot;</span>];
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>args</span>, <span class='ident'>args</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>requires</span>, <span class='prelude-val'>Some</span>(<span class='ident'>reqs</span>));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>g</span>.<span class='ident'>conflicts</span>, <span class='prelude-val'>Some</span>(<span class='ident'>confs</span>));
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>ArgGroup</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='ident'>ArgGroup</span> {
+            <span class='ident'>name</span>: <span class='self'>self</span>.<span class='ident'>name</span>,
+            <span class='ident'>required</span>: <span class='self'>self</span>.<span class='ident'>required</span>,
+            <span class='ident'>args</span>: <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>clone</span>(),
+            <span class='ident'>requires</span>: <span class='self'>self</span>.<span class='ident'>requires</span>.<span class='ident'>clone</span>(),
+            <span class='ident'>conflicts</span>: <span class='self'>self</span>.<span class='ident'>conflicts</span>.<span class='ident'>clone</span>(),
+        }
+    }
+
 }
 </pre>
 </section>

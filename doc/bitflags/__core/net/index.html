@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `net` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, net">
+
+    <title>bitflags::__core::net - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'net', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>net</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-5174' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/index.html?gotosrc=5174' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Networking primitives for TCP/UDP communication.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.AddrParseError.html'
+                                  title='bitflags::__core::net::AddrParseError'>AddrParseError</a></td>
+                           <td class='docblock short'>
+                                <p>An error returned when parsing an IP address or a socket address.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Incoming.html'
+                                  title='bitflags::__core::net::Incoming'>Incoming</a></td>
+                           <td class='docblock short'>
+                                <p>An infinite iterator over the connections from a <code>TcpListener</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Ipv4Addr.html'
+                                  title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></td>
+                           <td class='docblock short'>
+                                <p>Representation of an IPv4 address.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Ipv6Addr.html'
+                                  title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></td>
+                           <td class='docblock short'>
+                                <p>Representation of an IPv6 address.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SocketAddrV4.html'
+                                  title='bitflags::__core::net::SocketAddrV4'>SocketAddrV4</a></td>
+                           <td class='docblock short'>
+                                <p>An IPv4 socket address which is a (ip, port) combination.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SocketAddrV6.html'
+                                  title='bitflags::__core::net::SocketAddrV6'>SocketAddrV6</a></td>
+                           <td class='docblock short'>
+                                <p>An IPv6 socket address.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TcpListener.html'
+                                  title='bitflags::__core::net::TcpListener'>TcpListener</a></td>
+                           <td class='docblock short'>
+                                <p>A structure representing a socket server.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TcpStream.html'
+                                  title='bitflags::__core::net::TcpStream'>TcpStream</a></td>
+                           <td class='docblock short'>
+                                <p>A structure which represents a TCP stream between a local socket and a
+remote socket.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.UdpSocket.html'
+                                  title='bitflags::__core::net::UdpSocket'>UdpSocket</a></td>
+                           <td class='docblock short'>
+                                <p>A User Datagram Protocol socket.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.LookupHost.html'
+                                  title='bitflags::__core::net::LookupHost'>LookupHost</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>An iterator over <code>SocketAddr</code> values returned from a host lookup operation.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.IpAddr.html'
+                                  title='bitflags::__core::net::IpAddr'>IpAddr</a></td>
+                           <td class='docblock short'>
+                                <p>An IP address, either an IPv4 or IPv6 address.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Shutdown.html'
+                                  title='bitflags::__core::net::Shutdown'>Shutdown</a></td>
+                           <td class='docblock short'>
+                                <p>Possible values which can be passed to the <code>shutdown</code> method of <code>TcpStream</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.SocketAddr.html'
+                                  title='bitflags::__core::net::SocketAddr'>SocketAddr</a></td>
+                           <td class='docblock short'>
+                                <p>Representation of a socket address for networking applications.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='enum' href='enum.Ipv6MulticastScope.html'
+                                  title='bitflags::__core::net::Ipv6MulticastScope'>Ipv6MulticastScope</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] 
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ToSocketAddrs.html'
+                                  title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a></td>
+                           <td class='docblock short'>
+                                <p>A trait for objects which can be converted or resolved to one or more
+<code>SocketAddr</code> values.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class='unstable module-item'>
+                           <td><a class='fn' href='fn.lookup_host.html'
+                                  title='bitflags::__core::net::lookup_host'>lookup_host</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Resolve the host specified by <code>host</code> as a number of <code>SocketAddr</code> instances.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.8/src/unix/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.9/src/unix/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     <link rel="shortcut icon" href="https://doc.rust-lang.org/favicon.ico">
     
@@ -772,6 +773,13 @@
 <span id="729">729</span>
 <span id="730">730</span>
 <span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Definitions found commonly among almost all Unix derivatives</span>
 <span class='doccomment'>//!</span>
@@ -873,6 +881,13 @@
         <span class='kw'>pub</span> <span class='ident'>fd</span>: ::<span class='ident'>c_int</span>,
         <span class='kw'>pub</span> <span class='ident'>events</span>: ::<span class='ident'>c_short</span>,
         <span class='kw'>pub</span> <span class='ident'>revents</span>: ::<span class='ident'>c_short</span>,
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>winsize</span> {
+        <span class='kw'>pub</span> <span class='ident'>ws_row</span>: ::<span class='ident'>c_ushort</span>,
+        <span class='kw'>pub</span> <span class='ident'>ws_col</span>: ::<span class='ident'>c_ushort</span>,
+        <span class='kw'>pub</span> <span class='ident'>ws_xpixel</span>: ::<span class='ident'>c_ushort</span>,
+        <span class='kw'>pub</span> <span class='ident'>ws_ypixel</span>: ::<span class='ident'>c_ushort</span>,
     }
 }
 
@@ -1501,7 +1516,7 @@
         <span class='kw'>mod</span> <span class='ident'>solaris</span>;
         <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>solaris</span>::<span class='op'>*</span>;
     } <span class='kw'>else</span> {
-        <span class='comment'>// ...</span>
+        <span class='comment'>// Unknown target_os</span>
     }
 }
 </pre>

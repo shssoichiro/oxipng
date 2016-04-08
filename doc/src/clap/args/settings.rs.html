@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/clap-1.5.5/src/args/settings.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/args/settings.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>settings.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -122,73 +123,72 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
+<span id="82">82</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ascii</span>::<span class='ident'>AsciiExt</span>;
 
 <span class='macro'>bitflags</span><span class='macro'>!</span> {
     <span class='ident'>flags</span> <span class='ident'>Flags</span>: <span class='ident'>u8</span> {
-        <span class='kw'>const</span> <span class='ident'>REQUIRED</span>   <span class='op'>=</span> <span class='number'>0b00001</span>,
-        <span class='kw'>const</span> <span class='ident'>MULTIPLE</span>   <span class='op'>=</span> <span class='number'>0b00010</span>,
-        <span class='kw'>const</span> <span class='ident'>EMPTY_VALS</span> <span class='op'>=</span> <span class='number'>0b00100</span>,
-        <span class='kw'>const</span> <span class='ident'>GLOBAL</span>     <span class='op'>=</span> <span class='number'>0b01000</span>,
-        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>     <span class='op'>=</span> <span class='number'>0b10000</span>,
+        <span class='kw'>const</span> <span class='ident'>REQUIRED</span>   <span class='op'>=</span> <span class='number'>0b00000001</span>,
+        <span class='kw'>const</span> <span class='ident'>MULTIPLE</span>   <span class='op'>=</span> <span class='number'>0b00000010</span>,
+        <span class='kw'>const</span> <span class='ident'>EMPTY_VALS</span> <span class='op'>=</span> <span class='number'>0b00000100</span>,
+        <span class='kw'>const</span> <span class='ident'>GLOBAL</span>     <span class='op'>=</span> <span class='number'>0b00001000</span>,
+        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>     <span class='op'>=</span> <span class='number'>0b00010000</span>,
+        <span class='kw'>const</span> <span class='ident'>TAKES_VAL</span>  <span class='op'>=</span> <span class='number'>0b00100000</span>,
+        <span class='kw'>const</span> <span class='ident'>USE_DELIM</span>  <span class='op'>=</span> <span class='number'>0b01000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEXT_LINE_HELP</span> <span class='op'>=</span> <span class='number'>0b10000000</span>,
     }
 }
 
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
+<span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ArgFlags</span>(<span class='ident'>Flags</span>);
 
 <span class='kw'>impl</span> <span class='ident'>ArgFlags</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='ident'>ArgFlags</span>(<span class='ident'>EMPTY_VALS</span>)
+        <span class='ident'>ArgFlags</span>::<span class='ident'>default</span>()
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArgSettings</span>) {
-        <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>s</span> {
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Required</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>insert</span>(<span class='ident'>REQUIRED</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Multiple</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>insert</span>(<span class='ident'>MULTIPLE</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>EmptyValues</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>insert</span>(<span class='ident'>EMPTY_VALS</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Global</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>insert</span>(<span class='ident'>GLOBAL</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Hidden</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>insert</span>(<span class='ident'>HIDDEN</span>),
-        }
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unset</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArgSettings</span>) {
-        <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>s</span> {
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Required</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>remove</span>(<span class='ident'>REQUIRED</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Multiple</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>remove</span>(<span class='ident'>MULTIPLE</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>EmptyValues</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>remove</span>(<span class='ident'>EMPTY_VALS</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Global</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>remove</span>(<span class='ident'>GLOBAL</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Hidden</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>remove</span>(<span class='ident'>HIDDEN</span>),
-        }
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_set</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArgSettings</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>s</span> {
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Required</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>contains</span>(<span class='ident'>REQUIRED</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Multiple</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>contains</span>(<span class='ident'>MULTIPLE</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>EmptyValues</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>contains</span>(<span class='ident'>EMPTY_VALS</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Global</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>contains</span>(<span class='ident'>GLOBAL</span>),
-            <span class='ident'>ArgSettings</span>::<span class='ident'>Hidden</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>contains</span>(<span class='ident'>HIDDEN</span>),
-        }
+    <span class='macro'>impl_settings</span><span class='macro'>!</span>{<span class='ident'>ArgSettings</span>,
+        <span class='ident'>Required</span> <span class='op'>=&gt;</span> <span class='ident'>REQUIRED</span>,
+        <span class='ident'>Multiple</span> <span class='op'>=&gt;</span> <span class='ident'>MULTIPLE</span>,
+        <span class='ident'>EmptyValues</span> <span class='op'>=&gt;</span> <span class='ident'>EMPTY_VALS</span>,
+        <span class='ident'>Global</span> <span class='op'>=&gt;</span> <span class='ident'>GLOBAL</span>,
+        <span class='ident'>Hidden</span> <span class='op'>=&gt;</span> <span class='ident'>HIDDEN</span>,
+        <span class='ident'>TakesValue</span> <span class='op'>=&gt;</span> <span class='ident'>TAKES_VAL</span>,
+        <span class='ident'>UseValueDelimiter</span> <span class='op'>=&gt;</span> <span class='ident'>USE_DELIM</span>,
+        <span class='ident'>NextLineHelp</span> <span class='op'>=&gt;</span> <span class='ident'>NEXT_LINE_HELP</span>
     }
 }
 
 <span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>ArgFlags</span> {
     <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='ident'>ArgFlags</span>::<span class='ident'>new</span>()
+        <span class='ident'>ArgFlags</span>(<span class='ident'>EMPTY_VALS</span> <span class='op'>|</span> <span class='ident'>USE_DELIM</span>)
     }
 }
 
+<span class='doccomment'>/// Various settings that apply to arguments and may be set, unset, and checked via getter/setter</span>
+<span class='doccomment'>/// methods `Arg::set`, `Arg::unset`, and `Arg::is_set`</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>, <span class='ident'>Clone</span>)]</span>
 <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>ArgSettings</span> {
+    <span class='doccomment'>/// The argument must be used</span>
     <span class='ident'>Required</span>,
+    <span class='doccomment'>/// The argument may be used multiple times such as `--flag --flag`</span>
     <span class='ident'>Multiple</span>,
+    <span class='doccomment'>/// The argument allows empty values such as `--option &quot;&quot;`</span>
     <span class='ident'>EmptyValues</span>,
+    <span class='doccomment'>/// The argument should be propagated down through all child subcommands</span>
     <span class='ident'>Global</span>,
+    <span class='doccomment'>/// The argument should **not** be shown in help text</span>
     <span class='ident'>Hidden</span>,
+    <span class='doccomment'>/// The argument accepts a value, such as `--option &lt;value&gt;`</span>
+    <span class='ident'>TakesValue</span>,
+    <span class='doccomment'>/// Determines if the argument allows values to be grouped via a delimter</span>
+    <span class='ident'>UseValueDelimiter</span>,
+    <span class='doccomment'>/// Prints the help text on the line after the argument</span>
+    <span class='ident'>NextLineHelp</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>FromStr</span> <span class='kw'>for</span> <span class='ident'>ArgSettings</span> {
@@ -200,6 +200,9 @@
             <span class='string'>&quot;global&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>Global</span>),
             <span class='string'>&quot;emptyvalues&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>EmptyValues</span>),
             <span class='string'>&quot;hidden&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>Hidden</span>),
+            <span class='string'>&quot;takesvalue&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>TakesValue</span>),
+            <span class='string'>&quot;usevaluedelimiter&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>UseValueDelimiter</span>),
+            <span class='string'>&quot;nextlinehelp&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>NextLineHelp</span>),
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;unknown ArgSetting, cannot convert from str&quot;</span>.<span class='ident'>to_owned</span>()),
         }
     }

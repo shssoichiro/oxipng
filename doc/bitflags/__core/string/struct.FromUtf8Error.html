@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `FromUtf8Error` struct in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, FromUtf8Error">
+
+    <title>bitflags::__core::string::FromUtf8Error - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>string</a></p><script>window.sidebarCurrent = {name: 'FromUtf8Error', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>string</a>::<wbr><a class='struct' href=''>FromUtf8Error</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-3458' class='srclink' href='https://doc.rust-lang.org/nightly/collections/string/struct.FromUtf8Error.html?gotosrc=3458' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct FromUtf8Error {
+    // some fields omitted
+}</pre><span class="since">1.0.0</span><div class='docblock'><p>A possible error value when converting a <code>String</code> from a UTF-8 byte vector.</p>
+
+<p>This type is the error type for the <a href="struct.String.html#method.from_utf8"><code>from_utf8()</code></a> method on <a href="struct.String.html"><code>String</code></a>. It
+is designed in such a way to carefully avoid reallocations: the
+<a href="struct.FromUtf8Error.html#method.into_bytes"><code>into_bytes()</code></a> method will give back the byte vector that was used in the
+conversion attempt.</p>
+
+<p>The <a href="../../std/str/struct.Utf8Error.html"><code>Utf8Error</code></a> type provided by <a href="../../std/str/index.html"><code>std::str</code></a> represents an error that may
+occur when converting a slice of <a href="../../std/primitive.u8.html"><code>u8</code></a>s to a <a href="../../std/primitive.str.html"><code>&amp;str</code></a>. In this sense, it&#39;s
+an analogue to <code>FromUtf8Error</code>, and you can get one from a <code>FromUtf8Error</code>
+through the <a href="#method.utf8_error"><code>utf8_error()</code></a> method.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>Basic usage:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// some invalid bytes, in a vector</span>
+<span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>159</span>];
+
+<span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>value</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>159</span>], <span class='ident'>value</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>into_bytes</span>());</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/string/struct.FromUtf8Error.html' title='bitflags::__core::string::FromUtf8Error'>FromUtf8Error</a></code></h3><div class='impl-items'><h4 id='method.into_bytes' class='method'><code>fn <a href='#method.into_bytes' class='fnname'>into_bytes</a>(self) -&gt; <a class='struct' href='../../../bitflags/__core/vec/struct.Vec.html' title='bitflags::__core::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>&gt;</code></h4>
+<div class='docblock'><p>Returns the bytes that were attempted to convert to a <code>String</code>.</p>
+
+<p>This method is carefully constructed to avoid allocation. It will
+consume the error, moving out the bytes, so that a copy of the bytes
+does not need to be made.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<p>Basic usage:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// some invalid bytes, in a vector</span>
+<span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>159</span>];
+
+<span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>159</span>], <span class='ident'>value</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>into_bytes</span>());</pre>
+</div><h4 id='method.utf8_error' class='method'><code>fn <a href='#method.utf8_error' class='fnname'>utf8_error</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a></code></h4>
+<div class='docblock'><p>Fetch a <code>Utf8Error</code> to get more details about the conversion failure.</p>
+
+<p>The <a href="../../std/str/struct.Utf8Error.html"><code>Utf8Error</code></a> type provided by <a href="../../std/str/index.html"><code>std::str</code></a> represents an error that may
+occur when converting a slice of <a href="../../std/primitive.u8.html"><code>u8</code></a>s to a <a href="../../std/primitive.str.html"><code>&amp;str</code></a>. In this sense, it&#39;s
+an analogue to <code>FromUtf8Error</code>. See its documentation for more details
+on using it.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<p>Basic usage:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// some invalid bytes, in a vector</span>
+<span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>159</span>];
+
+<span class='kw'>let</span> <span class='ident'>error</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>).<span class='ident'>unwrap_err</span>().<span class='ident'>utf8_error</span>();
+
+<span class='comment'>// the first byte is invalid here</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='ident'>error</span>.<span class='ident'>valid_up_to</span>());</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> for <a class='struct' href='../../../bitflags/__core/string/struct.FromUtf8Error.html' title='bitflags::__core::string::FromUtf8Error'>FromUtf8Error</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/string/struct.FromUtf8Error.html' title='bitflags::__core::string::FromUtf8Error'>FromUtf8Error</a></code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

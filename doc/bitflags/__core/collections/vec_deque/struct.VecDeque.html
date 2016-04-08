@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `VecDeque` struct in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, VecDeque">
+
+    <title>bitflags::__core::collections::vec_deque::VecDeque - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>bitflags</a>::<wbr><a href='../../index.html'>__core</a>::<wbr><a href='../index.html'>collections</a>::<wbr><a href='index.html'>vec_deque</a></p><script>window.sidebarCurrent = {name: 'VecDeque', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../../index.html'>bitflags</a>::<wbr><a href='../../index.html'>__core</a>::<wbr><a href='../index.html'>collections</a>::<wbr><a href='index.html'>vec_deque</a>::<wbr><a class='struct' href=''>VecDeque</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-5202' class='srclink' href='https://doc.rust-lang.org/nightly/collections/vec_deque/struct.VecDeque.html?gotosrc=5202' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct VecDeque&lt;T&gt; {
+    // some fields omitted
+}</pre><span class="since">1.0.0</span><div class='docblock'><p><code>VecDeque</code> is a growable ring buffer, which can be used as a double-ended
+queue efficiently.</p>
+
+<p>The &quot;default&quot; usage of this type as a queue is to use <code>push_back</code> to add to
+the queue, and <code>pop_front</code> to remove from the queue. <code>extend</code> and <code>append</code>
+push onto the back in this manner, and iterating over <code>VecDeque</code> goes front
+to back.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a></span></code></h3><div class='impl-items'><h4 id='method.resize' class='method'><code>fn <a href='#method.resize' class='fnname'>resize</a>(&amp;mut self, new_len: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, value: T)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>deque_extras</code>)<p>: matches collection reform specification; waiting on panic semantics</p>
+</em></div><div class='docblock'><p>Modifies the <code>VecDeque</code> in-place so that <code>len()</code> is equal to new_len,
+either by removing excess elements or by appending copies of a value to the back.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>deque_extras</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>10</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>15</span>);
+<span class='ident'>buf</span>.<span class='ident'>resize</span>(<span class='number'>2</span>, <span class='number'>0</span>);
+<span class='ident'>buf</span>.<span class='ident'>resize</span>(<span class='number'>6</span>, <span class='number'>20</span>);
+<span class='kw'>for</span> (<span class='ident'>a</span>, <span class='ident'>b</span>) <span class='kw'>in</span> [<span class='number'>5</span>, <span class='number'>10</span>, <span class='number'>20</span>, <span class='number'>20</span>, <span class='number'>20</span>, <span class='number'>20</span>].<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>) {
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>, <span class='ident'>b</span>);
+}</pre>
+</div></div><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Creates an empty <code>VecDeque</code>.</p>
+</div><h4 id='method.with_capacity' class='method'><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>(n: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Creates an empty <code>VecDeque</code> with space for at least <code>n</code> elements.</p>
+</div><h4 id='method.get' class='method'><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;T&gt;</code></h4>
+<div class='docblock'><p>Retrieves an element in the <code>VecDeque</code> by index.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>4</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>4</span>));</pre>
+</div><h4 id='method.get_mut' class='method'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;mut T&gt;</code></h4>
+<div class='docblock'><p>Retrieves an element in the <code>VecDeque</code> mutably by index.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>4</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>elem</span>) <span class='op'>=</span> <span class='ident'>buf</span>.<span class='ident'>get_mut</span>(<span class='number'>1</span>) {
+    <span class='op'>*</span><span class='ident'>elem</span> <span class='op'>=</span> <span class='number'>7</span>;
+}
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>1</span>], <span class='number'>7</span>);</pre>
+</div><h4 id='method.swap' class='method'><code>fn <a href='#method.swap' class='fnname'>swap</a>(&amp;mut self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Swaps elements at indices <code>i</code> and <code>j</code>.</p>
+
+<p><code>i</code> and <code>j</code> may be equal.</p>
+
+<p>Fails if there is no element with either index.</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>4</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>swap</span>(<span class='number'>0</span>, <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>0</span>], <span class='number'>5</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>2</span>], <span class='number'>3</span>);</pre>
+</div><h4 id='method.capacity' class='method'><code>fn <a href='#method.capacity' class='fnname'>capacity</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of elements the <code>VecDeque</code> can hold without
+reallocating.</p>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='ident'>buf</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>10</span>);</pre>
+</div><h4 id='method.reserve_exact' class='method'><code>fn <a href='#method.reserve_exact' class='fnname'>reserve_exact</a>(&amp;mut self, additional: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Reserves the minimum capacity for exactly <code>additional</code> more elements to be inserted in the
+given <code>VecDeque</code>. Does nothing if the capacity is already sufficient.</p>
+
+<p>Note that the allocator may give the collection more space than it requests. Therefore
+capacity can not be relied upon to be precisely minimal. Prefer <code>reserve</code> if future
+insertions are expected.</p>
+
+<h1 id='panics' class='section-header'><a href='#panics'>Panics</a></h1>
+<p>Panics if the new capacity overflows <code>usize</code>.</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='ident'>buf</span>.<span class='ident'>reserve_exact</span>(<span class='number'>10</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>11</span>);</pre>
+</div><h4 id='method.reserve' class='method'><code>fn <a href='#method.reserve' class='fnname'>reserve</a>(&amp;mut self, additional: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Reserves capacity for at least <code>additional</code> more elements to be inserted in the given
+<code>VecDeque</code>. The collection may reserve more space to avoid frequent reallocations.</p>
+
+<h1 id='panics-1' class='section-header'><a href='#panics-1'>Panics</a></h1>
+<p>Panics if the new capacity overflows <code>usize</code>.</p>
+
+<h1 id='examples-6' class='section-header'><a href='#examples-6'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='ident'>buf</span>.<span class='ident'>reserve</span>(<span class='number'>10</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>11</span>);</pre>
+</div><h4 id='method.shrink_to_fit' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.shrink_to_fit' class='fnname'>shrink_to_fit</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Shrinks the capacity of the <code>VecDeque</code> as much as possible.</p>
+
+<p>It will drop down as close as possible to the length but the allocator may still inform the
+<code>VecDeque</code> that there is space for a few more elements.</p>
+
+<h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>with_capacity</span>(<span class='number'>15</span>);
+<span class='ident'>buf</span>.<span class='ident'>extend</span>(<span class='number'>0</span>..<span class='number'>4</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>capacity</span>(), <span class='number'>15</span>);
+<span class='ident'>buf</span>.<span class='ident'>shrink_to_fit</span>();
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>4</span>);</pre>
+</div><h4 id='method.truncate' class='method'><code>fn <a href='#method.truncate' class='fnname'>truncate</a>(&amp;mut self, len: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>deque_extras</code>)<p>: matches collection reform specification; waiting on panic semantics</p>
+</em></div><div class='docblock'><p>Shortens a <code>VecDeque</code>, dropping excess elements from the back.</p>
+
+<p>If <code>len</code> is greater than the <code>VecDeque</code>&#39;s current length, this has no
+effect.</p>
+
+<h1 id='examples-8' class='section-header'><a href='#examples-8'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>deque_extras</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>10</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>15</span>);
+<span class='ident'>buf</span>.<span class='ident'>truncate</span>(<span class='number'>1</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>5</span>), <span class='ident'>buf</span>.<span class='ident'>get</span>(<span class='number'>0</span>));</pre>
+</div><h4 id='method.iter' class='method'><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;self) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/vec_deque/struct.Iter.html' title='bitflags::__core::collections::vec_deque::Iter'>Iter</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Returns a front-to-back iterator.</p>
+
+<h1 id='examples-9' class='section-header'><a href='#examples-9'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>4</span>);
+<span class='kw'>let</span> <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[_] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='number'>5</span>, <span class='kw-2'>&amp;</span><span class='number'>3</span>, <span class='kw-2'>&amp;</span><span class='number'>4</span>];
+<span class='kw'>let</span> <span class='ident'>c</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>buf</span>.<span class='ident'>iter</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>c</span>[..], <span class='ident'>b</span>);</pre>
+</div><h4 id='method.iter_mut' class='method'><code>fn <a href='#method.iter_mut' class='fnname'>iter_mut</a>(&amp;mut self) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/vec_deque/struct.IterMut.html' title='bitflags::__core::collections::vec_deque::IterMut'>IterMut</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Returns a front-to-back iterator that returns mutable references.</p>
+
+<h1 id='examples-10' class='section-header'><a href='#examples-10'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>4</span>);
+<span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>buf</span>.<span class='ident'>iter_mut</span>() {
+    <span class='op'>*</span><span class='ident'>num</span> <span class='op'>=</span> <span class='op'>*</span><span class='ident'>num</span> <span class='op'>-</span> <span class='number'>2</span>;
+}
+<span class='kw'>let</span> <span class='ident'>b</span>: <span class='kw-2'>&amp;</span>[_] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='number'>3</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='number'>1</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='number'>2</span>];
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>.<span class='ident'>iter_mut</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>i32</span><span class='op'>&gt;&gt;</span>()[..], <span class='ident'>b</span>);</pre>
+</div><h4 id='method.as_slices' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.as_slices' class='fnname'>as_slices</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[T]</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[T]</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></h4>
+<div class='docblock'><p>Returns a pair of slices which contain, in order, the contents of the
+<code>VecDeque</code>.</p>
+</div><h4 id='method.as_mut_slices' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.as_mut_slices' class='fnname'>as_mut_slices</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;mut [T]</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;mut [T]</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a></code></h4>
+<div class='docblock'><p>Returns a pair of slices which contain, in order, the contents of the
+<code>VecDeque</code>.</p>
+</div><h4 id='method.len' class='method'><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of elements in the <code>VecDeque</code>.</p>
+
+<h1 id='examples-11' class='section-header'><a href='#examples-11'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);
+<span class='ident'>v</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);</pre>
+</div><h4 id='method.is_empty' class='method'><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the buffer contains no elements</p>
+
+<h1 id='examples-12' class='section-header'><a href='#examples-12'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>is_empty</span>());
+<span class='ident'>v</span>.<span class='ident'>push_front</span>(<span class='number'>1</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>v</span>.<span class='ident'>is_empty</span>());</pre>
+</div><h4 id='method.drain' class='method'><span class="since">1.6.0</span><code>fn <a href='#method.drain' class='fnname'>drain</a>&lt;R&gt;(&amp;mut self, range: R) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/vec_deque/struct.Drain.html' title='bitflags::__core::collections::vec_deque::Drain'>Drain</a>&lt;T&gt; <span class='where'>where R: <a class='trait' href='https://doc.rust-lang.org/nightly/collections/range/trait.RangeArgument.html' title='collections::range::RangeArgument'>RangeArgument</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>&gt;</span></code></h4>
+<div class='docblock'><p>Create a draining iterator that removes the specified range in the
+<code>VecDeque</code> and yields the removed items.</p>
+
+<p>Note 1: The element range is removed even if the iterator is not
+consumed until the end.</p>
+
+<p>Note 2: It is unspecified how many elements are removed from the deque,
+if the <code>Drain</code> value is not dropped, but the borrow it holds expires
+(eg. due to mem::forget).</p>
+
+<h1 id='panics-2' class='section-header'><a href='#panics-2'>Panics</a></h1>
+<p>Panics if the starting point is greater than the end point or if
+the end point is greater than the length of the vector.</p>
+
+<h1 id='examples-13' class='section-header'><a href='#examples-13'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>(), <span class='ident'>v</span>.<span class='ident'>drain</span>(<span class='number'>2</span>..).<span class='ident'>collect</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>(), <span class='ident'>v</span>);
+
+<span class='comment'>// A full range clears all contents</span>
+<span class='ident'>v</span>.<span class='ident'>drain</span>(..);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>is_empty</span>());</pre>
+</div><h4 id='method.clear' class='method'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Clears the buffer, removing all values.</p>
+
+<h1 id='examples-14' class='section-header'><a href='#examples-14'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>v</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>v</span>.<span class='ident'>clear</span>();
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>is_empty</span>());</pre>
+</div><h4 id='method.front' class='method'><code>fn <a href='#method.front' class='fnname'>front</a>(&amp;self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;T&gt;</code></h4>
+<div class='docblock'><p>Provides a reference to the front element, or <code>None</code> if the sequence is
+empty.</p>
+
+<h1 id='examples-15' class='section-header'><a href='#examples-15'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>front</span>(), <span class='prelude-val'>None</span>);
+
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>front</span>(), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>));</pre>
+</div><h4 id='method.front_mut' class='method'><code>fn <a href='#method.front_mut' class='fnname'>front_mut</a>(&amp;mut self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;mut T&gt;</code></h4>
+<div class='docblock'><p>Provides a mutable reference to the front element, or <code>None</code> if the
+sequence is empty.</p>
+
+<h1 id='examples-16' class='section-header'><a href='#examples-16'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>front_mut</span>(), <span class='prelude-val'>None</span>);
+
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='kw'>match</span> <span class='ident'>d</span>.<span class='ident'>front_mut</span>() {
+    <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='number'>9</span>,
+    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (),
+}
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>front</span>(), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>9</span>));</pre>
+</div><h4 id='method.back' class='method'><code>fn <a href='#method.back' class='fnname'>back</a>(&amp;self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;T&gt;</code></h4>
+<div class='docblock'><p>Provides a reference to the back element, or <code>None</code> if the sequence is
+empty.</p>
+
+<h1 id='examples-17' class='section-header'><a href='#examples-17'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>back</span>(), <span class='prelude-val'>None</span>);
+
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>back</span>(), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>));</pre>
+</div><h4 id='method.back_mut' class='method'><code>fn <a href='#method.back_mut' class='fnname'>back_mut</a>(&amp;mut self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;mut T&gt;</code></h4>
+<div class='docblock'><p>Provides a mutable reference to the back element, or <code>None</code> if the
+sequence is empty.</p>
+
+<h1 id='examples-18' class='section-header'><a href='#examples-18'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>back</span>(), <span class='prelude-val'>None</span>);
+
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='kw'>match</span> <span class='ident'>d</span>.<span class='ident'>back_mut</span>() {
+    <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='number'>9</span>,
+    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (),
+}
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>back</span>(), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>9</span>));</pre>
+</div><h4 id='method.pop_front' class='method'><code>fn <a href='#method.pop_front' class='fnname'>pop_front</a>(&amp;mut self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Removes the first element and returns it, or <code>None</code> if the sequence is
+empty.</p>
+
+<h1 id='examples-19' class='section-header'><a href='#examples-19'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>pop_front</span>(), <span class='prelude-val'>Some</span>(<span class='number'>1</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>pop_front</span>(), <span class='prelude-val'>Some</span>(<span class='number'>2</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>pop_front</span>(), <span class='prelude-val'>None</span>);</pre>
+</div><h4 id='method.push_front' class='method'><code>fn <a href='#method.push_front' class='fnname'>push_front</a>(&amp;mut self, value: T)</code></h4>
+<div class='docblock'><p>Inserts an element first in the sequence.</p>
+
+<h1 id='examples-20' class='section-header'><a href='#examples-20'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>d</span>.<span class='ident'>push_front</span>(<span class='number'>1</span>);
+<span class='ident'>d</span>.<span class='ident'>push_front</span>(<span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>front</span>(), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>));</pre>
+</div><h4 id='method.push_back' class='method'><code>fn <a href='#method.push_back' class='fnname'>push_back</a>(&amp;mut self, value: T)</code></h4>
+<div class='docblock'><p>Appends an element to the back of a buffer</p>
+
+<h1 id='examples-21' class='section-header'><a href='#examples-21'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>3</span>, <span class='op'>*</span><span class='ident'>buf</span>.<span class='ident'>back</span>().<span class='ident'>unwrap</span>());</pre>
+</div><h4 id='method.pop_back' class='method'><code>fn <a href='#method.pop_back' class='fnname'>pop_back</a>(&amp;mut self) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Removes the last element from a buffer and returns it, or <code>None</code> if
+it is empty.</p>
+
+<h1 id='examples-22' class='section-header'><a href='#examples-22'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>pop_back</span>(), <span class='prelude-val'>None</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>pop_back</span>(), <span class='prelude-val'>Some</span>(<span class='number'>3</span>));</pre>
+</div><h4 id='method.swap_remove_back' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.swap_remove_back' class='fnname'>swap_remove_back</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Removes an element from anywhere in the <code>VecDeque</code> and returns it, replacing it with the
+last element.</p>
+
+<p>This does not preserve ordering, but is O(1).</p>
+
+<p>Returns <code>None</code> if <code>index</code> is out of bounds.</p>
+
+<h1 id='examples-23' class='section-header'><a href='#examples-23'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>swap_remove_back</span>(<span class='number'>0</span>), <span class='prelude-val'>None</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>swap_remove_back</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='number'>1</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>0</span>], <span class='number'>3</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>1</span>], <span class='number'>2</span>);</pre>
+</div><h4 id='method.swap_remove_front' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.swap_remove_front' class='fnname'>swap_remove_front</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Removes an element from anywhere in the <code>VecDeque</code> and returns it,
+replacing it with the first element.</p>
+
+<p>This does not preserve ordering, but is O(1).</p>
+
+<p>Returns <code>None</code> if <code>index</code> is out of bounds.</p>
+
+<h1 id='examples-24' class='section-header'><a href='#examples-24'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>swap_remove_front</span>(<span class='number'>0</span>), <span class='prelude-val'>None</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>swap_remove_front</span>(<span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>0</span>], <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='number'>1</span>], <span class='number'>1</span>);</pre>
+</div><h4 id='method.insert' class='method'><span class="since">1.5.0</span><code>fn <a href='#method.insert' class='fnname'>insert</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, value: T)</code></h4>
+<div class='docblock'><p>Inserts an element at <code>index</code> within the <code>VecDeque</code>. Whichever
+end is closer to the insertion point will be moved to make room,
+and all the affected elements will be moved to new positions.</p>
+
+<h1 id='panics-3' class='section-header'><a href='#panics-3'>Panics</a></h1>
+<p>Panics if <code>index</code> is greater than <code>VecDeque</code>&#39;s length</p>
+
+<h1 id='examples-25' class='section-header'><a href='#examples-25'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>10</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>12</span>);
+<span class='ident'>buf</span>.<span class='ident'>insert</span>(<span class='number'>1</span>, <span class='number'>11</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>11</span>), <span class='ident'>buf</span>.<span class='ident'>get</span>(<span class='number'>1</span>));</pre>
+</div><h4 id='method.remove' class='method'><code>fn <a href='#method.remove' class='fnname'>remove</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Removes and returns the element at <code>index</code> from the <code>VecDeque</code>.
+Whichever end is closer to the removal point will be moved to make
+room, and all the affected elements will be moved to new positions.
+Returns <code>None</code> if <code>index</code> is out of bounds.</p>
+
+<h1 id='examples-26' class='section-header'><a href='#examples-26'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>1</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>2</span>);
+<span class='ident'>buf</span>.<span class='ident'>push_back</span>(<span class='number'>3</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>remove</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>get</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>));</pre>
+</div><h4 id='method.split_off' class='method'><span class="since">1.4.0</span><code>fn <a href='#method.split_off' class='fnname'>split_off</a>(&amp;mut self, at: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Splits the collection into two at the given index.</p>
+
+<p>Returns a newly allocated <code>Self</code>. <code>self</code> contains elements <code>[0, at)</code>,
+and the returned <code>Self</code> contains elements <code>[at, len)</code>.</p>
+
+<p>Note that the capacity of <code>self</code> does not change.</p>
+
+<h1 id='panics-4' class='section-header'><a href='#panics-4'>Panics</a></h1>
+<p>Panics if <code>at &gt; len</code></p>
+
+<h1 id='examples-27' class='section-header'><a href='#examples-27'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>,<span class='number'>2</span>,<span class='number'>3</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='kw'>let</span> <span class='ident'>buf2</span> <span class='op'>=</span> <span class='ident'>buf</span>.<span class='ident'>split_off</span>(<span class='number'>1</span>);
+<span class='comment'>// buf = [1], buf2 = [2, 3]</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf2</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);</pre>
+</div><h4 id='method.append' class='method'><span class="since">1.4.0</span><code>fn <a href='#method.append' class='fnname'>append</a>(&amp;mut self, other: &amp;mut <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;)</code></h4>
+<div class='docblock'><p>Moves all the elements of <code>other</code> into <code>Self</code>, leaving <code>other</code> empty.</p>
+
+<h1 id='panics-5' class='section-header'><a href='#panics-5'>Panics</a></h1>
+<p>Panics if the new number of elements in self overflows a <code>usize</code>.</p>
+
+<h1 id='examples-28' class='section-header'><a href='#examples-28'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf2</span>: <span class='ident'>VecDeque</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>].<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='ident'>buf</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='number'>6</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf2</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);</pre>
+</div><h4 id='method.retain' class='method'><span class="since">1.4.0</span><code>fn <a href='#method.retain' class='fnname'>retain</a>&lt;F&gt;(&amp;mut self, f: F) <span class='where'>where F: <a class='trait' href='../../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(&amp;T) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></span></code></h4>
+<div class='docblock'><p>Retains only the elements specified by the predicate.</p>
+
+<p>In other words, remove all elements <code>e</code> such that <code>f(&amp;e)</code> returns false.
+This method operates in place and preserves the order of the retained
+elements.</p>
+
+<h1 id='examples-29' class='section-header'><a href='#examples-29'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>VecDeque</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>VecDeque</span>::<span class='ident'>new</span>();
+<span class='ident'>buf</span>.<span class='ident'>extend</span>(<span class='number'>1</span>..<span class='number'>5</span>);
+<span class='ident'>buf</span>.<span class='ident'>retain</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span><span class='op'>%</span><span class='number'>2</span> <span class='op'>==</span> <span class='number'>0</span>);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>buf</span>.<span class='ident'>into_iter</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>[..], <span class='kw-2'>&amp;</span>[<span class='number'>2</span>, <span class='number'>4</span>]);</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/cmp/trait.PartialEq.html' title='bitflags::__core::cmp::PartialEq'>PartialEq</a>&lt;<a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where A: <a class='trait' href='../../../../bitflags/__core/cmp/trait.PartialEq.html' title='bitflags::__core::cmp::PartialEq'>PartialEq</a>&lt;A&gt;</span></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.Extend.html' title='bitflags::__core::iter::Extend'>Extend</a>&lt;&amp;'a T&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a> + 'a</span></code><span class="since">1.2.0</span></h3><div class='impl-items'><h4 id='method.extend' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.Extend.html#tymethod.extend' class='fnname'>extend</a>&lt;I&gt;(&amp;mut self, iter: I) <span class='where'>where I: <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=&amp;'a T&gt;</span></code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/default/trait.Default.html' title='bitflags::__core::default::Default'>Default</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='../../../../bitflags/__core/default/trait.Default.html#tymethod.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a></span></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='../../../../bitflags/__core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='../../../../bitflags/__core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.Extend.html' title='bitflags::__core::iter::Extend'>Extend</a>&lt;A&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;</code></h3><div class='impl-items'><h4 id='method.extend-1' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.Extend.html#tymethod.extend' class='fnname'>extend</a>&lt;T&gt;(&amp;mut self, iter: T) <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=A&gt;</span></code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where A: <a class='trait' href='../../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a></span></code></h3><div class='impl-items'><h4 id='method.cmp' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.Ord.html#tymethod.cmp' class='fnname'>cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;) -&gt; <a class='enum' href='../../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/cmp/trait.PartialOrd.html' title='bitflags::__core::cmp::PartialOrd'>PartialOrd</a>&lt;<a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where A: <a class='trait' href='../../../../bitflags/__core/cmp/trait.PartialOrd.html' title='bitflags::__core::cmp::PartialOrd'>PartialOrd</a>&lt;A&gt;</span></code></h3><div class='impl-items'><h4 id='method.partial_cmp' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialOrd.html#tymethod.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;) -&gt; <a class='enum' href='../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialOrd.html#method.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialOrd.html#method.le' class='fnname'>le</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialOrd.html#method.gt' class='fnname'>gt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><code>fn <a href='../../../../bitflags/__core/cmp/trait.PartialOrd.html#method.ge' class='fnname'>ge</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/cmp/trait.Eq.html' title='bitflags::__core::cmp::Eq'>Eq</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where A: <a class='trait' href='../../../../bitflags/__core/cmp/trait.Eq.html' title='bitflags::__core::cmp::Eq'>Eq</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.IndexMut.html' title='bitflags::__core::ops::IndexMut'>IndexMut</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;</code></h3><div class='impl-items'><h4 id='method.index_mut' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.IndexMut.html#tymethod.index_mut' class='fnname'>index_mut</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; &amp;mut A</code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Index.html' title='bitflags::__core::ops::Index'>Index</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Output' class='type'><code>type <a href='../../../../bitflags/__core/ops/trait.Index.html#associatedtype.Output' class='type'>Output</a> = A</code></h4>
+<h4 id='method.index' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Index.html#tymethod.index' class='fnname'>index</a>(&amp;self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; &amp;A</code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/hash/trait.Hash.html' title='bitflags::__core::hash::Hash'>Hash</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where A: <a class='trait' href='../../../../bitflags/__core/hash/trait.Hash.html' title='bitflags::__core::hash::Hash'>Hash</a></span></code></h3><div class='impl-items'><h4 id='method.hash' class='method'><code>fn <a href='../../../../bitflags/__core/hash/trait.Hash.html#tymethod.hash' class='fnname'>hash</a>&lt;H&gt;(&amp;self, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='../../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code></h4>
+<h4 id='method.hash_slice' class='method'><span class="since">1.3.0</span><code>fn <a href='../../../../bitflags/__core/hash/trait.Hash.html#method.hash_slice' class='fnname'>hash_slice</a>&lt;H&gt;(data: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[Self]</a>, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='../../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a> for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.Item' class='type'>Item</a> = T</code></h4>
+<h4 id='associatedtype.IntoIter' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.IntoIter' class='type'>IntoIter</a> = <a class='struct' href='../../../../bitflags/__core/collections/vec_deque/struct.IntoIter.html' title='bitflags::__core::collections::vec_deque::IntoIter'>IntoIter</a>&lt;T&gt;</code></h4>
+<h4 id='method.into_iter' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#tymethod.into_iter' class='fnname'>into_iter</a>(self) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/vec_deque/struct.IntoIter.html' title='bitflags::__core::collections::vec_deque::IntoIter'>IntoIter</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.FromIterator.html' title='bitflags::__core::iter::FromIterator'>FromIterator</a>&lt;A&gt; for <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt;</code></h3><div class='impl-items'><h4 id='method.from_iter' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.FromIterator.html#tymethod.from_iter' class='fnname'>from_iter</a>&lt;T&gt;(iter: T) -&gt; <a class='struct' href='../../../../bitflags/__core/collections/struct.VecDeque.html' title='bitflags::__core::collections::VecDeque'>VecDeque</a>&lt;A&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=A&gt;</span></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

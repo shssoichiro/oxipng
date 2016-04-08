@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `CString` struct in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, CString">
+
+    <title>bitflags::__core::ffi::CString - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>ffi</a></p><script>window.sidebarCurrent = {name: 'CString', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>ffi</a>::<wbr><a class='struct' href=''>CString</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-3008' class='srclink' href='https://doc.rust-lang.org/nightly/std/ffi/c_str/struct.CString.html?gotosrc=3008' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct CString {
+    // some fields omitted
+}</pre><span class="since">1.0.0</span><div class='docblock'><p>A type representing an owned C-compatible string</p>
+
+<p>This type serves the primary purpose of being able to safely generate a
+C-compatible string from a Rust byte slice or vector. An instance of this
+type is a static guarantee that the underlying bytes contain no interior 0
+bytes and the final byte is 0.</p>
+
+<p>A <code>CString</code> is created from either a byte slice or a byte vector. After
+being created, a <code>CString</code> predominately inherits all of its methods from
+the <code>Deref</code> implementation to <code>[c_char]</code>. Note that the underlying array
+is represented as an array of <code>c_char</code> as opposed to <code>u8</code>. A <code>u8</code> slice
+can be obtained with the <code>as_bytes</code> method.  Slices produced from a <code>CString</code>
+do <em>not</em> contain the trailing nul terminator unless otherwise specified.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CString</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>raw</span>::<span class='ident'>c_char</span>;
+
+<span class='kw'>extern</span> {
+    <span class='kw'>fn</span> <span class='ident'>my_printer</span>(<span class='ident'>s</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_char</span>);
+}
+
+<span class='kw'>let</span> <span class='ident'>c_to_print</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='string'>&quot;Hello, world!&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='kw'>unsafe</span> {
+    <span class='ident'>my_printer</span>(<span class='ident'>c_to_print</span>.<span class='ident'>as_ptr</span>());
+}</pre>
+
+<h1 id='safety' class='section-header'><a href='#safety'>Safety</a></h1>
+<p><code>CString</code> is intended for working with traditional C-style strings
+(a sequence of non-null bytes terminated by a single null byte); the
+primary use case for these kinds of strings is interoperating with C-like
+code. Often you will need to transfer ownership to/from that external
+code. It is strongly recommended that you thoroughly read through the
+documentation of <code>CString</code> before use, as improper ownership management
+of <code>CString</code> instances can lead to invalid memory accesses, memory leaks,
+and other memory errors.</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

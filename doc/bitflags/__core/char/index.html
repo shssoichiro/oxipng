@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `char` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, char">
+
+    <title>bitflags::__core::char - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'char', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>char</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-179' class='srclink' href='https://doc.rust-lang.org/nightly/rustc_unicode/char/index.html?gotosrc=179' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>A character type.</p>
+
+<p>The <code>char</code> type represents a single character. More specifically, since
+&#39;character&#39; isn&#39;t a well-defined concept in Unicode, <code>char</code> is a &#39;<a href="http://www.unicode.org/glossary/#unicode_scalar_value">Unicode
+scalar value</a>&#39;, which is similar to, but not the same as, a &#39;<a href="http://www.unicode.org/glossary/#code_point">Unicode code
+point</a>&#39;.</p>
+
+<p>This module exists for technical reasons, the primary documentation for
+<code>char</code> is directly on <a href="../../std/primitive.char.html">the <code>char</code> primitive type</a>
+itself.</p>
+
+<p>This module is the home of the iterator implementations for the iterators
+implemented on <code>char</code>, as well as some useful constants and conversion
+functions that convert various types to <code>char</code>.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.EscapeDefault.html'
+                                  title='bitflags::__core::char::EscapeDefault'>EscapeDefault</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator that yields the literal escape code of a <code>char</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.EscapeUnicode.html'
+                                  title='bitflags::__core::char::EscapeUnicode'>EscapeUnicode</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an iterator that yields the hexadecimal Unicode escape of a
+character, as <code>char</code>s.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ToLowercase.html'
+                                  title='bitflags::__core::char::ToLowercase'>ToLowercase</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an iterator that yields the lowercase equivalent of a <code>char</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ToUppercase.html'
+                                  title='bitflags::__core::char::ToUppercase'>ToUppercase</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an iterator that yields the uppercase equivalent of a <code>char</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.DecodeUtf16.html'
+                                  title='bitflags::__core::char::DecodeUtf16'>DecodeUtf16</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>An iterator that decodes UTF-16 encoded code points from an iterator of <code>u16</code>s.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.EncodeUtf16.html'
+                                  title='bitflags::__core::char::EncodeUtf16'>EncodeUtf16</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>An iterator over <code>u16</code> entries represending the UTF-16 encoding of a <code>char</code>
+value.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.EncodeUtf8.html'
+                                  title='bitflags::__core::char::EncodeUtf8'>EncodeUtf8</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>An iterator over <code>u8</code> entries represending the UTF-8 encoding of a <code>char</code>
+value.</p>
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.MAX.html'
+                                  title='bitflags::__core::char::MAX'>MAX</a></td>
+                           <td class='docblock short'>
+                                <p>The highest valid code point a <code>char</code> can have.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.REPLACEMENT_CHARACTER.html'
+                                  title='bitflags::__core::char::REPLACEMENT_CHARACTER'>REPLACEMENT_CHARACTER</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p><code>U+FFFD REPLACEMENT CHARACTER</code> (�) is used in Unicode to represent a decoding error.
+It can occur, for example, when giving ill-formed UTF-8 bytes to
+<a href="../../std/string/struct.String.html#method.from_utf8_lossy"><code>String::from_utf8_lossy</code></a>.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.UNICODE_VERSION.html'
+                                  title='bitflags::__core::char::UNICODE_VERSION'>UNICODE_VERSION</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>The version of <a href="http://www.unicode.org/">Unicode</a>
+that the unicode parts of <code>CharExt</code> and <code>UnicodeStrPrelude</code> traits are based on.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.from_digit.html'
+                                  title='bitflags::__core::char::from_digit'>from_digit</a></td>
+                           <td class='docblock short'>
+                                <p>Converts a digit in the given radix to a <code>char</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.from_u32.html'
+                                  title='bitflags::__core::char::from_u32'>from_u32</a></td>
+                           <td class='docblock short'>
+                                <p>Converts a <code>u32</code> to a <code>char</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.from_u32_unchecked.html'
+                                  title='bitflags::__core::char::from_u32_unchecked'>from_u32_unchecked</a></td>
+                           <td class='docblock short'>
+                                <p>Converts a <code>u32</code> to a <code>char</code>, ignoring validity.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='fn' href='fn.decode_utf16.html'
+                                  title='bitflags::__core::char::decode_utf16'>decode_utf16</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Create an iterator over the UTF-16 encoded code points in <code>iter</code>,
+returning unpaired surrogates as <code>Err</code>s.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

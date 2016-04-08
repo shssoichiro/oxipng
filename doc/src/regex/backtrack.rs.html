@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.55/src/backtrack.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/backtrack.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>backtrack.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -334,6 +335,17 @@
 <span id="291">291</span>
 <span id="292">292</span>
 <span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -363,9 +375,10 @@
 <span class='comment'>// the bitset has to be zeroed on each execution, which becomes quite expensive</span>
 <span class='comment'>// on large bitsets.</span>
 
-<span class='kw'>use</span> <span class='ident'>exec</span>::<span class='ident'>Search</span>;
+<span class='kw'>use</span> <span class='ident'>exec</span>::<span class='ident'>ProgramCache</span>;
 <span class='kw'>use</span> <span class='ident'>input</span>::{<span class='ident'>Input</span>, <span class='ident'>InputAt</span>};
 <span class='kw'>use</span> <span class='ident'>prog</span>::{<span class='ident'>Program</span>, <span class='ident'>InstPtr</span>};
+<span class='kw'>use</span> <span class='ident'>re_trait</span>::<span class='ident'>Slot</span>;
 
 <span class='doccomment'>/// Returns true iff the given regex and input should be executed by this</span>
 <span class='doccomment'>/// engine with reasonable memory usage.</span>
@@ -387,25 +400,26 @@
 
 <span class='doccomment'>/// A backtracking matching engine.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Backtrack</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span>, <span class='lifetime'>&#39;c</span>: <span class='lifetime'>&#39;b</span>, <span class='lifetime'>&#39;m</span>: <span class='lifetime'>&#39;b</span>, <span class='lifetime'>&#39;r</span>, <span class='ident'>I</span><span class='op'>&gt;</span> {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Bounded</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;m</span>, <span class='lifetime'>&#39;r</span>, <span class='lifetime'>&#39;s</span>, <span class='ident'>I</span><span class='op'>&gt;</span> {
     <span class='ident'>prog</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>Program</span>,
     <span class='ident'>input</span>: <span class='ident'>I</span>,
-    <span class='ident'>search</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='kw-2'>mut</span> <span class='ident'>Search</span><span class='op'>&lt;</span><span class='lifetime'>&#39;m</span>, <span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>,
-    <span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>BacktrackCache</span>,
+    <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;m</span> <span class='kw-2'>mut</span> [<span class='ident'>bool</span>],
+    <span class='ident'>slots</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;s</span> <span class='kw-2'>mut</span> [<span class='ident'>Slot</span>],
+    <span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Cache</span>,
 }
 
 <span class='doccomment'>/// Shared cached state between multiple invocations of a backtracking engine</span>
 <span class='doccomment'>/// in the same thread.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BacktrackCache</span> {
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Cache</span> {
     <span class='ident'>jobs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Job</span><span class='op'>&gt;</span>,
     <span class='ident'>visited</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Bits</span><span class='op'>&gt;</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>BacktrackCache</span> {
+<span class='kw'>impl</span> <span class='ident'>Cache</span> {
     <span class='doccomment'>/// Create new empty cache for the backtracking engine.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='ident'>BacktrackCache</span> { <span class='ident'>jobs</span>: <span class='macro'>vec</span><span class='macro'>!</span>[], <span class='ident'>visited</span>: <span class='macro'>vec</span><span class='macro'>!</span>[] }
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>_prog</span>: <span class='kw-2'>&amp;</span><span class='ident'>Program</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='ident'>Cache</span> { <span class='ident'>jobs</span>: <span class='macro'>vec</span><span class='macro'>!</span>[], <span class='ident'>visited</span>: <span class='macro'>vec</span><span class='macro'>!</span>[] }
     }
 }
 
@@ -421,24 +435,28 @@
     <span class='ident'>SaveRestore</span> { <span class='ident'>slot</span>: <span class='ident'>usize</span>, <span class='ident'>old_pos</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> },
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span>, <span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;m</span>, <span class='lifetime'>&#39;r</span>, <span class='ident'>I</span>: <span class='ident'>Input</span><span class='op'>&gt;</span> <span class='ident'>Backtrack</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span>, <span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;r</span>, <span class='lifetime'>&#39;m</span>, <span class='ident'>I</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;m</span>, <span class='lifetime'>&#39;r</span>, <span class='lifetime'>&#39;s</span>, <span class='ident'>I</span>: <span class='ident'>Input</span><span class='op'>&gt;</span> <span class='ident'>Bounded</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;m</span>, <span class='lifetime'>&#39;r</span>, <span class='lifetime'>&#39;s</span>, <span class='ident'>I</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Execute the backtracking matching engine.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// If there&#39;s a match, `exec` returns `true` and populates the given</span>
     <span class='doccomment'>/// captures accordingly.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>exec</span>(
         <span class='ident'>prog</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>Program</span>,
-        <span class='ident'>search</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='kw-2'>mut</span> <span class='ident'>Search</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;m</span><span class='op'>&gt;</span>,
+        <span class='ident'>cache</span>: <span class='kw-2'>&amp;</span><span class='ident'>ProgramCache</span>,
+        <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;m</span> <span class='kw-2'>mut</span> [<span class='ident'>bool</span>],
+        <span class='ident'>slots</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;s</span> <span class='kw-2'>mut</span> [<span class='ident'>Slot</span>],
         <span class='ident'>input</span>: <span class='ident'>I</span>,
         <span class='ident'>start</span>: <span class='ident'>usize</span>,
     ) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='ident'>cache</span>.<span class='ident'>borrow_mut</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cache</span>.<span class='ident'>backtrack</span>;
         <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>input</span>.<span class='ident'>at</span>(<span class='ident'>start</span>);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>prog</span>.<span class='ident'>cache_backtrack</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>Backtrack</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>Bounded</span> {
             <span class='ident'>prog</span>: <span class='ident'>prog</span>,
             <span class='ident'>input</span>: <span class='ident'>input</span>,
-            <span class='ident'>search</span>: <span class='ident'>search</span>,
-            <span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>m</span>,
+            <span class='ident'>matches</span>: <span class='ident'>matches</span>,
+            <span class='ident'>slots</span>: <span class='ident'>slots</span>,
+            <span class='ident'>m</span>: <span class='ident'>cache</span>,
         };
         <span class='ident'>b</span>.<span class='ident'>exec_</span>(<span class='ident'>start</span>)
     }
@@ -489,32 +507,33 @@
                 <span class='self'>self</span>.<span class='ident'>backtrack</span>(<span class='ident'>at</span>)
             };
         }
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>matched</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='kw'>loop</span> {
             <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>prefixes</span>.<span class='ident'>is_empty</span>() {
                 <span class='ident'>at</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>input</span>.<span class='ident'>prefix_at</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>prefixes</span>, <span class='ident'>at</span>) {
-                    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='boolval'>false</span>,
+                    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>,
                     <span class='prelude-val'>Some</span>(<span class='ident'>at</span>) <span class='op'>=&gt;</span> <span class='ident'>at</span>,
                 };
             }
-            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>backtrack</span>(<span class='ident'>at</span>) {
+            <span class='ident'>matched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>backtrack</span>(<span class='ident'>at</span>) <span class='op'>||</span> <span class='ident'>matched</span>;
+            <span class='kw'>if</span> <span class='ident'>matched</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>matches</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                 <span class='kw'>return</span> <span class='boolval'>true</span>;
             }
             <span class='kw'>if</span> <span class='ident'>at</span>.<span class='ident'>is_end</span>() {
-                <span class='kw'>return</span> <span class='boolval'>false</span>;
+                <span class='kw'>break</span>;
             }
             <span class='ident'>at</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>input</span>.<span class='ident'>at</span>(<span class='ident'>at</span>.<span class='ident'>next_pos</span>());
         }
+        <span class='ident'>matched</span>
     }
 
     <span class='doccomment'>/// The main backtracking loop starting at the given input position.</span>
-    <span class='comment'>// This `inline(always)` seems to result in about a 10-15% increase in</span>
-    <span class='comment'>// throughput on the `hard` benchmarks (over a standard `inline`). ---AG</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>backtrack</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>start</span>: <span class='ident'>InputAt</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='comment'>// N.B. We use an explicit stack to avoid recursion.</span>
         <span class='comment'>// To avoid excessive pushing and popping, most transitions are handled</span>
         <span class='comment'>// in the `step` helper function, which only pushes to the stack when</span>
         <span class='comment'>// there&#39;s a capture or a branch.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>matched</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='self'>self</span>.<span class='ident'>m</span>.<span class='ident'>jobs</span>.<span class='ident'>push</span>(<span class='ident'>Job</span>::<span class='ident'>Inst</span> { <span class='ident'>ip</span>: <span class='number'>0</span>, <span class='ident'>at</span>: <span class='ident'>start</span> });
         <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>job</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>m</span>.<span class='ident'>jobs</span>.<span class='ident'>pop</span>() {
             <span class='kw'>match</span> <span class='ident'>job</span> {
@@ -522,18 +541,21 @@
                     <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>step</span>(<span class='ident'>ip</span>, <span class='ident'>at</span>) {
                         <span class='comment'>// Only quit if we&#39;re matching one regex.</span>
                         <span class='comment'>// If we&#39;re matching a regex set, then mush on and</span>
-                        <span class='comment'>// try to find other matches.</span>
-                        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>matches</span>.<span class='ident'>len</span>() <span class='op'>&lt;=</span> <span class='number'>1</span> {
+                        <span class='comment'>// try to find other matches (if we want them).</span>
+                        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>matches</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                             <span class='kw'>return</span> <span class='boolval'>true</span>;
                         }
+                        <span class='ident'>matched</span> <span class='op'>=</span> <span class='boolval'>true</span>;
                     }
                 }
                 <span class='ident'>Job</span>::<span class='ident'>SaveRestore</span> { <span class='ident'>slot</span>, <span class='ident'>old_pos</span> } <span class='op'>=&gt;</span> {
-                    <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>captures</span>[<span class='ident'>slot</span>] <span class='op'>=</span> <span class='ident'>old_pos</span>;
+                    <span class='kw'>if</span> <span class='ident'>slot</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>slots</span>.<span class='ident'>len</span>() {
+                        <span class='self'>self</span>.<span class='ident'>slots</span>[<span class='ident'>slot</span>] <span class='op'>=</span> <span class='ident'>old_pos</span>;
+                    }
                 }
             }
         }
-        <span class='boolval'>false</span>
+        <span class='ident'>matched</span>
     }
 
     <span class='kw'>fn</span> <span class='ident'>step</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>ip</span>: <span class='ident'>InstPtr</span>, <span class='kw-2'>mut</span> <span class='ident'>at</span>: <span class='ident'>InputAt</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
@@ -545,21 +567,22 @@
             <span class='comment'>// in place.</span>
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>prog</span>[<span class='ident'>ip</span>] {
                 <span class='ident'>Match</span>(<span class='ident'>slot</span>) <span class='op'>=&gt;</span> {
-                    <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>set_match</span>(<span class='ident'>slot</span>);
+                    <span class='kw'>if</span> <span class='ident'>slot</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>matches</span>.<span class='ident'>len</span>() {
+                        <span class='self'>self</span>.<span class='ident'>matches</span>[<span class='ident'>slot</span>] <span class='op'>=</span> <span class='boolval'>true</span>;
+                    }
                     <span class='kw'>return</span> <span class='boolval'>true</span>;
                 }
                 <span class='ident'>Save</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>inst</span>.<span class='ident'>slot</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>captures</span>.<span class='ident'>len</span>() {
+                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>old_pos</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>slots</span>.<span class='ident'>get</span>(<span class='ident'>inst</span>.<span class='ident'>slot</span>) {
                         <span class='comment'>// If this path doesn&#39;t work out, then we save the old</span>
                         <span class='comment'>// capture index (if one exists) in an alternate</span>
                         <span class='comment'>// job. If the next path fails, then the alternate</span>
                         <span class='comment'>// job is popped and the old capture index is restored.</span>
-                        <span class='kw'>let</span> <span class='ident'>old_pos</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>captures</span>[<span class='ident'>inst</span>.<span class='ident'>slot</span>];
                         <span class='self'>self</span>.<span class='ident'>m</span>.<span class='ident'>jobs</span>.<span class='ident'>push</span>(<span class='ident'>Job</span>::<span class='ident'>SaveRestore</span> {
                             <span class='ident'>slot</span>: <span class='ident'>inst</span>.<span class='ident'>slot</span>,
                             <span class='ident'>old_pos</span>: <span class='ident'>old_pos</span>,
                         });
-                        <span class='self'>self</span>.<span class='ident'>search</span>.<span class='ident'>captures</span>[<span class='ident'>inst</span>.<span class='ident'>slot</span>] <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>at</span>.<span class='ident'>pos</span>());
+                        <span class='self'>self</span>.<span class='ident'>slots</span>[<span class='ident'>inst</span>.<span class='ident'>slot</span>] <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>at</span>.<span class='ident'>pos</span>());
                     }
                     <span class='ident'>ip</span> <span class='op'>=</span> <span class='ident'>inst</span>.<span class='ident'>goto</span>;
                 }

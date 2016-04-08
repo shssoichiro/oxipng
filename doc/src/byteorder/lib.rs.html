@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/byteorder-0.4.2/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/byteorder-0.5.1/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -820,6 +821,18 @@
 <span id="777">777</span>
 <span id="778">778</span>
 <span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 This crate provides convenience methods for encoding and decoding numbers
@@ -868,7 +881,7 @@ assert_eq!(wtr, vec![5, 2, 0, 3]);
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>::<span class='ident'>copy_nonoverlapping</span>;
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;no-std&quot;</span>))]</span>
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>new</span>::{<span class='ident'>ReadBytesExt</span>, <span class='ident'>WriteBytesExt</span>, <span class='ident'>Error</span>, <span class='prelude-ty'>Result</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>new</span>::{<span class='ident'>ReadBytesExt</span>, <span class='ident'>WriteBytesExt</span>};
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;no-std&quot;</span>))]</span>
 <span class='kw'>mod</span> <span class='ident'>new</span>;
@@ -1089,6 +1102,18 @@ assert_eq!(wtr, vec![5, 2, 0, 3]);
 <span class='doccomment'>/// Note that this type has no value constructor. It is used purely at the</span>
 <span class='doccomment'>/// type level.</span>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span> <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>LittleEndian</span> {}
+
+<span class='doccomment'>/// Defines network byte order serialization.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Network byte order is defined by [RFC 1700][1] to be big-endian, and is</span>
+<span class='doccomment'>/// referred to in several protocol specifications.  This type is an alias of</span>
+<span class='doccomment'>/// BigEndian.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// [1]: https://tools.ietf.org/html/rfc1700</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Note that this type has no value constructor. It is used purely at the</span>
+<span class='doccomment'>/// type level.</span>
+<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>NetworkEndian</span> <span class='op'>=</span> <span class='ident'>BigEndian</span>;
 
 <span class='doccomment'>/// Defines system native-endian serialization.</span>
 <span class='doccomment'>///</span>

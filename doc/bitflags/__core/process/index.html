@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `process` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, process">
+
+    <title>bitflags::__core::process - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'process', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>process</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-8324' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/index.html?gotosrc=8324' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Working with processes.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Child.html'
+                                  title='bitflags::__core::process::Child'>Child</a></td>
+                           <td class='docblock short'>
+                                <p>Representation of a running or exited child process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ChildStderr.html'
+                                  title='bitflags::__core::process::ChildStderr'>ChildStderr</a></td>
+                           <td class='docblock short'>
+                                <p>A handle to a child process&#39;s stderr</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ChildStdin.html'
+                                  title='bitflags::__core::process::ChildStdin'>ChildStdin</a></td>
+                           <td class='docblock short'>
+                                <p>A handle to a child process&#39;s stdin</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ChildStdout.html'
+                                  title='bitflags::__core::process::ChildStdout'>ChildStdout</a></td>
+                           <td class='docblock short'>
+                                <p>A handle to a child process&#39;s stdout</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Command.html'
+                                  title='bitflags::__core::process::Command'>Command</a></td>
+                           <td class='docblock short'>
+                                <p>The <code>Command</code> type acts as a process builder, providing fine-grained control
+over how a new process should be spawned. A default configuration can be
+generated using <code>Command::new(program)</code>, where <code>program</code> gives a path to the
+program to be executed. Additional builder methods allow the configuration
+to be changed (for example, by adding arguments) prior to spawning:</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ExitStatus.html'
+                                  title='bitflags::__core::process::ExitStatus'>ExitStatus</a></td>
+                           <td class='docblock short'>
+                                <p>Describes the result of a process after it has terminated.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Output.html'
+                                  title='bitflags::__core::process::Output'>Output</a></td>
+                           <td class='docblock short'>
+                                <p>The output of a finished process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Stdio.html'
+                                  title='bitflags::__core::process::Stdio'>Stdio</a></td>
+                           <td class='docblock short'>
+                                <p>Describes what to do with a standard I/O stream for a child process.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.exit.html'
+                                  title='bitflags::__core::process::exit'>exit</a></td>
+                           <td class='docblock short'>
+                                <p>Terminates the current process with the specified exit code.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `decode_utf16` fn in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, decode_utf16">
+
+    <title>bitflags::__core::char::decode_utf16 - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>char</a></p><script>window.sidebarCurrent = {name: 'decode_utf16', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a href='index.html'>char</a>::<wbr><a class='fn' href=''>decode_utf16</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-282' class='srclink' href='https://doc.rust-lang.org/nightly/rustc_unicode/char/fn.decode_utf16.html?gotosrc=282' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn decode_utf16&lt;I&gt;(iter: I) -&gt; <a class='struct' href='../../../bitflags/__core/char/struct.DecodeUtf16.html' title='bitflags::__core::char::DecodeUtf16'>DecodeUtf16</a>&lt;I::<a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIter</a>&gt; <span class='where'>where I: <a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a>&gt;</span></pre><div class='stability'><em class='stab unstable'>Unstable (<code>decode_utf16</code>)<p>: recently exposed</p>
+</em></div><div class='docblock'><p>Create an iterator over the UTF-16 encoded code points in <code>iter</code>,
+returning unpaired surrogates as <code>Err</code>s.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>Basic usage:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>decode_utf16</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>::<span class='ident'>decode_utf16</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// 𝄞mus&lt;invalid&gt;ic&lt;invalid&gt;</span>
+    <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>0xD834</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x006d</span>, <span class='number'>0x0075</span>,
+             <span class='number'>0x0073</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x0069</span>, <span class='number'>0x0063</span>,
+             <span class='number'>0xD834</span>];
+
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>decode_utf16</span>(<span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>()).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>(),
+               <span class='macro'>vec</span><span class='macro'>!</span>[<span class='prelude-val'>Ok</span>(<span class='string'>&#39;𝄞&#39;</span>),
+                    <span class='prelude-val'>Ok</span>(<span class='string'>&#39;m&#39;</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&#39;u&#39;</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&#39;s&#39;</span>),
+                    <span class='prelude-val'>Err</span>(<span class='number'>0xDD1E</span>),
+                    <span class='prelude-val'>Ok</span>(<span class='string'>&#39;i&#39;</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&#39;c&#39;</span>),
+                    <span class='prelude-val'>Err</span>(<span class='number'>0xD834</span>)]);
+}</pre>
+
+<p>A lossy decoder can be obtained by replacing <code>Err</code> results with the replacement character:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>decode_utf16</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>::{<span class='ident'>decode_utf16</span>, <span class='ident'>REPLACEMENT_CHARACTER</span>};
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// 𝄞mus&lt;invalid&gt;ic&lt;invalid&gt;</span>
+    <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>0xD834</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x006d</span>, <span class='number'>0x0075</span>,
+             <span class='number'>0x0073</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x0069</span>, <span class='number'>0x0063</span>,
+             <span class='number'>0xD834</span>];
+
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>decode_utf16</span>(<span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>())
+                   .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>r</span><span class='op'>|</span> <span class='ident'>r</span>.<span class='ident'>unwrap_or</span>(<span class='ident'>REPLACEMENT_CHARACTER</span>))
+                   .<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>(),
+               <span class='string'>&quot;𝄞mus�ic�&quot;</span>);
+}</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

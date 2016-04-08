@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/clap-1.5.5/src/args/arg_matches.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/args/arg_matches.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>arg_matches.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -323,288 +324,878 @@
 <span id="280">280</span>
 <span id="281">281</span>
 <span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
 </pre><pre class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::{<span class='ident'>OsString</span>, <span class='ident'>OsStr</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>Map</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>Cow</span>;
+
+<span class='kw'>use</span> <span class='ident'>vec_map</span>;
 
 <span class='kw'>use</span> <span class='ident'>args</span>::<span class='ident'>SubCommand</span>;
 <span class='kw'>use</span> <span class='ident'>args</span>::<span class='ident'>MatchedArg</span>;
+<span class='kw'>use</span> <span class='ident'>INVALID_UTF8</span>;
 
 <span class='doccomment'>/// Used to get information about the arguments that where supplied to the program at runtime by</span>
-<span class='doccomment'>/// the user. To get a new instance of this struct you use `.get_matches()` of the `App` struct.</span>
-<span class='doccomment'>///</span>
+<span class='doccomment'>/// the user. New instances of this struct are obtained by using the `App::get_matches` family of</span>
+<span class='doccomment'>/// methods.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Examples</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```no_run</span>
 <span class='doccomment'>/// # use clap::{App, Arg};</span>
 <span class='doccomment'>/// let matches = App::new(&quot;MyApp&quot;)</span>
-<span class='doccomment'>/// // adding of arguments and configuration goes here...</span>
-<span class='doccomment'>/// #                    .arg(Arg::with_name(&quot;config&quot;)</span>
-<span class='doccomment'>/// #                               .long(&quot;config&quot;)</span>
-<span class='doccomment'>/// #                               .required(true)</span>
-<span class='doccomment'>/// #                               .takes_value(true))</span>
-<span class='doccomment'>/// #                    .arg(Arg::with_name(&quot;debug&quot;)</span>
-<span class='doccomment'>/// #                                   .short(&quot;d&quot;)</span>
-<span class='doccomment'>/// #                                   .multiple(true))</span>
-<span class='doccomment'>///                     .get_matches();</span>
-<span class='doccomment'>/// // if you had an argument named &quot;output&quot; that takes a value</span>
-<span class='doccomment'>/// if let Some(o) = matches.value_of(&quot;output&quot;) {</span>
-<span class='doccomment'>///     println!(&quot;Value for output: {}&quot;, o);</span>
+<span class='doccomment'>///     .arg(Arg::with_name(&quot;out&quot;)</span>
+<span class='doccomment'>///         .long(&quot;output&quot;)</span>
+<span class='doccomment'>///         .required(true)</span>
+<span class='doccomment'>///         .takes_value(true))</span>
+<span class='doccomment'>///     .arg(Arg::with_name(&quot;debug&quot;)</span>
+<span class='doccomment'>///         .short(&quot;d&quot;)</span>
+<span class='doccomment'>///         .multiple(true))</span>
+<span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+<span class='doccomment'>///         .short(&quot;c&quot;)</span>
+<span class='doccomment'>///         .takes_value(true))</span>
+<span class='doccomment'>///     .get_matches(); // builds the instance of ArgMatches</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// // to get information about the &quot;cfg&quot; argument we created, such as the value supplied we use</span>
+<span class='doccomment'>/// // various ArgMatches methods, such as ArgMatches::value_of</span>
+<span class='doccomment'>/// if let Some(c) = matches.value_of(&quot;cfg&quot;) {</span>
+<span class='doccomment'>///     println!(&quot;Value for -c: {}&quot;, c);</span>
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// // If you have a required argument you can call .unwrap() because the program will exit long</span>
-<span class='doccomment'>/// // before this point if the user didn&#39;t specify it at runtime.</span>
-<span class='doccomment'>/// println!(&quot;Config file: {}&quot;, matches.value_of(&quot;config&quot;).unwrap());</span>
+<span class='doccomment'>/// // The ArgMatches::value_of method returns an Option because the user may not have supplied</span>
+<span class='doccomment'>/// // that argument at runtime. But if we specified that the argument was &quot;required&quot; as we did</span>
+<span class='doccomment'>/// // with the &quot;out&quot; argument, we can safely unwrap because `clap` verifies that was actually</span>
+<span class='doccomment'>/// // used at runtime.</span>
+<span class='doccomment'>/// println!(&quot;Value for --output: {}&quot;, matches.value_of(&quot;out&quot;).unwrap());</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// // You can check the presence of an argument</span>
-<span class='doccomment'>/// if matches.is_present(&quot;debug&quot;) {</span>
+<span class='doccomment'>/// if matches.is_present(&quot;out&quot;) {</span>
 <span class='doccomment'>///     // Another way to check if an argument was present, or if it occurred multiple times is to</span>
 <span class='doccomment'>///     // use occurrences_of() which returns 0 if an argument isn&#39;t found at runtime, or the</span>
 <span class='doccomment'>///     // number of times that it occurred, if it was. To allow an argument to appear more than</span>
 <span class='doccomment'>///     // once, you must use the .multiple(true) method, otherwise it will only return 1 or 0.</span>
 <span class='doccomment'>///     if matches.occurrences_of(&quot;debug&quot;) &gt; 2 {</span>
-<span class='doccomment'>///         println!(&quot;Debug mode is REALLY on&quot;);</span>
+<span class='doccomment'>///         println!(&quot;Debug mode is REALLY on, don&#39;t be crazy&quot;);</span>
 <span class='doccomment'>///     } else {</span>
 <span class='doccomment'>///         println!(&quot;Debug mode kind of on&quot;);</span>
 <span class='doccomment'>///     }</span>
 <span class='doccomment'>/// }</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// // You can get the sub-matches of a particular subcommand (in this case &quot;test&quot;)</span>
-<span class='doccomment'>/// // If &quot;test&quot; had it&#39;s own &quot;-l&quot; flag you could check for it&#39;s presence accordingly</span>
-<span class='doccomment'>/// if let Some(ref matches) = matches.subcommand_matches(&quot;test&quot;) {</span>
-<span class='doccomment'>///     if matches.is_present(&quot;list&quot;) {</span>
-<span class='doccomment'>///         println!(&quot;Printing testing lists...&quot;);</span>
-<span class='doccomment'>///     } else {</span>
-<span class='doccomment'>///         println!(&quot;Not printing testing lists...&quot;);</span>
-<span class='doccomment'>///     }</span>
-<span class='doccomment'>/// }</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='doccomment'>/// ```</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='kw'>pub</span> <span class='ident'>args</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>MatchedArg</span><span class='op'>&gt;</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='ident'>subcommand</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SubCommand</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>subcommand</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SubCommand</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='kw'>pub</span> <span class='ident'>usage</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Creates a new instance of `ArgMatches`. This ins&#39;t called directly, but</span>
-    <span class='doccomment'>/// through the `.get_matches()` method of `App`</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Examples</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
-    <span class='doccomment'>/// # use clap::{App, Arg};</span>
-    <span class='doccomment'>/// let matches = App::new(&quot;myprog&quot;).get_matches();</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='ident'>ArgMatches</span> {
             <span class='ident'>args</span>: <span class='ident'>HashMap</span>::<span class='ident'>new</span>(),
             <span class='ident'>subcommand</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>usage</span>: <span class='prelude-val'>None</span>,
         }
     }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> { <span class='ident'>ArgMatches</span> { ..<span class='ident'>Default</span>::<span class='ident'>default</span>() } }
 
     <span class='doccomment'>/// Gets the value of a specific option or positional argument (i.e. an argument that takes</span>
     <span class='doccomment'>/// an additional value at runtime). If the option wasn&#39;t present at runtime</span>
     <span class='doccomment'>/// it returns `None`.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// *NOTE:* If getting a value for an option or positional argument that allows multiples,</span>
-    <span class='doccomment'>/// prefer `values_of()` as `value_of()` will only return the _*first*_ value.</span>
+    <span class='doccomment'>/// prefer `values_of()` as `value_of()` will only return the *first* value.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Panics</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This method will `panic!` if the value contains invalid UTF-8 code points.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```rust</span>
     <span class='doccomment'>/// # use clap::{App, Arg};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .arg(Arg::with_name(&quot;output&quot;)</span>
-    <span class='doccomment'>/// #         .takes_value(true))</span>
-    <span class='doccomment'>/// #     .get_matches();</span>
-    <span class='doccomment'>/// if let Some(o) = matches.value_of(&quot;output&quot;) {</span>
-    <span class='doccomment'>///        println!(&quot;Value for output: {}&quot;, o);</span>
-    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// let m = App::new(&quot;myapp&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;output&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![&quot;myapp&quot;, &quot;something&quot;]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert_eq!(m.value_of(&quot;output&quot;), Some(&quot;something&quot;));</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>value_of</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>) {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>vals</span>) <span class='op'>=</span> <span class='ident'>arg</span>.<span class='ident'>values</span> {
-                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>val</span>) <span class='op'>=</span> <span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>nth</span>(<span class='number'>0</span>) {
-                    <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>val</span>[..]);
-                }
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>value_of</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()) {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>nth</span>(<span class='number'>0</span>) {
+                <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>to_str</span>().<span class='ident'>expect</span>(<span class='ident'>INVALID_UTF8</span>));
             }
         }
         <span class='prelude-val'>None</span>
     }
 
-    <span class='doccomment'>/// Gets the values of a specific option or positional argument in a vector (i.e. an argument</span>
-    <span class='doccomment'>/// that takes multiple values at runtime). If the option wasn&#39;t present at runtime it</span>
-    <span class='doccomment'>/// returns `None`</span>
+    <span class='doccomment'>/// Gets the lossy value of a specific argument. If the argument wasn&#39;t present at runtime</span>
+    <span class='doccomment'>/// it returns `None`. A lossy value is one which contains invalid UTF-8 code points, those</span>
+    <span class='doccomment'>/// invalid points will be replaced with `\u{FFFD}`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// *NOTE:* If getting a value for an option or positional argument that allows multiples,</span>
+    <span class='doccomment'>/// prefer `values_of_lossy()` as `value_of_lossy()` will only return the *first* value.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```ignore</span>
     <span class='doccomment'>/// # use clap::{App, Arg};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .arg(Arg::with_name(&quot;output&quot;).takes_value(true)).get_matches();</span>
-    <span class='doccomment'>/// // If the program had option &quot;-c&quot; that took a value and was run</span>
-    <span class='doccomment'>/// // via &quot;myapp -o some -o other -o file&quot;</span>
-    <span class='doccomment'>/// // values_of() would return a [&amp;str; 3] (&quot;some&quot;, &quot;other&quot;, &quot;file&quot;)</span>
-    <span class='doccomment'>/// if let Some(os) = matches.values_of(&quot;output&quot;) {</span>
-    <span class='doccomment'>///        for o in os {</span>
-    <span class='doccomment'>///            println!(&quot;A value for output: {}&quot;, o);</span>
-    <span class='doccomment'>///        }</span>
-    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// use std::ffi::OsString;</span>
+    <span class='doccomment'>/// use std::os::unix::ffi::OsStrExt;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let m = App::new(&quot;utf8&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::from_usage(&quot;&lt;arg&gt; &#39;some arg&#39;&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![OsString::from(&quot;myprog&quot;),</span>
+    <span class='doccomment'>///                             // &quot;Hi {0xe9}!&quot;</span>
+    <span class='doccomment'>///                             OsString::from_vec(vec![b&#39;H&#39;, b&#39;i&#39;, b&#39; &#39;, 0xe9, b&#39;!&#39;])]);</span>
+    <span class='doccomment'>/// assert_eq!(&amp;*m.value_of_lossy(&quot;arg&quot;).unwrap(), &quot;Hi \u{FFFD}!&quot;);</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>values_of</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>) {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>vals</span>) <span class='op'>=</span> <span class='ident'>arg</span>.<span class='ident'>values</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>());
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>value_of_lossy</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>str</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()) {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>nth</span>(<span class='number'>0</span>) {
+                <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>to_string_lossy</span>());
             }
         }
         <span class='prelude-val'>None</span>
     }
 
-    <span class='doccomment'>/// Returns if an argument was present at runtime.</span>
+    <span class='doccomment'>/// Gets the OS version of a string value of a specific argument. If the option wasn&#39;t present</span>
+    <span class='doccomment'>/// at runtime it returns `None`. An OS value on Unix-like systems is any series of bytes,</span>
+    <span class='doccomment'>/// regardless of whether or not they contain valid UTF-8 code points. Since `String`s in Rust</span>
+    <span class='doccomment'>/// are guaranteed to be valid UTF-8, a valid filename on a Unix system as an argument value may</span>
+    <span class='doccomment'>/// contain invalid UTF-8 code points.</span>
     <span class='doccomment'>///</span>
+    <span class='doccomment'>/// *NOTE:* If getting a value for an option or positional argument that allows multiples,</span>
+    <span class='doccomment'>/// prefer `values_of_os()` as `value_of_os()` will only return the *first* value.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```ignore</span>
     <span class='doccomment'>/// # use clap::{App, Arg};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .arg(Arg::with_name(&quot;output&quot;).takes_value(true)).get_matches();</span>
-    <span class='doccomment'>/// if matches.is_present(&quot;output&quot;) {</span>
-    <span class='doccomment'>///        println!(&quot;The output argument was used!&quot;);</span>
-    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// use std::ffi::OsString;</span>
+    <span class='doccomment'>/// use std::os::unix::ffi::OsStrExt;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let m = App::new(&quot;utf8&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::from_usage(&quot;&lt;arg&gt; &#39;some arg&#39;&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![OsString::from(&quot;myprog&quot;),</span>
+    <span class='doccomment'>///                             // &quot;Hi {0xe9}!&quot;</span>
+    <span class='doccomment'>///                             OsString::from_vec(vec![b&#39;H&#39;, b&#39;i&#39;, b&#39; &#39;, 0xe9, b&#39;!&#39;])]);</span>
+    <span class='doccomment'>/// assert_eq!(&amp;*m.value_of_os(&quot;arg&quot;).unwrap().as_bytes(), [b&#39;H&#39;, b&#39;i&#39;, b&#39; &#39;, 0xe9, b&#39;!&#39;]);</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_present</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>value_of_os</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>OsStr</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()).<span class='ident'>map_or</span>(<span class='prelude-val'>None</span>, <span class='op'>|</span><span class='ident'>arg</span><span class='op'>|</span> <span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>nth</span>(<span class='number'>0</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>as_os_str</span>()))
+    }
+
+    <span class='doccomment'>/// Gets an Iterator of values of a specific argument (i.e. an argument that takes multiple</span>
+    <span class='doccomment'>/// values at runtime). If the option wasn&#39;t present at runtime it returns `None`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Panics</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This method will panic if any of the values contain invalid UTF-8 code points.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;output&quot;)</span>
+    <span class='doccomment'>///         .multiple(true)</span>
+    <span class='doccomment'>///         .short(&quot;o&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;-o&quot;, &quot;val1&quot;, &quot;val2&quot;, &quot;val3&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>/// let vals: Vec&lt;&amp;str&gt; = m.values_of(&quot;output&quot;).unwrap().collect();</span>
+    <span class='doccomment'>/// assert_eq!(vals, [&quot;val1&quot;, &quot;val2&quot;, &quot;val3&quot;]);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>values_of</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()) {
+            <span class='kw'>fn</span> <span class='ident'>to_str_slice</span>(<span class='ident'>o</span>: <span class='kw-2'>&amp;</span><span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> { <span class='ident'>o</span>.<span class='ident'>to_str</span>().<span class='ident'>expect</span>(<span class='ident'>INVALID_UTF8</span>) }
+            <span class='kw'>let</span> <span class='ident'>to_str_slice</span>: <span class='kw'>fn</span>(<span class='kw-2'>&amp;</span><span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>to_str_slice</span>; <span class='comment'>// coerce to fn pointer</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Values</span> { <span class='ident'>iter</span>: <span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>map</span>(<span class='ident'>to_str_slice</span>) });
+        }
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='doccomment'>/// Gets the lossy values of a specific argument If the option wasn&#39;t present at runtime</span>
+    <span class='doccomment'>/// it returns `None`. A lossy value is one which contains invalid UTF-8 code points, those</span>
+    <span class='doccomment'>/// invalid points will be replaced with `\u{FFFD}`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```ignore</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// use std::ffi::OsString;</span>
+    <span class='doccomment'>/// use std::os::unix::ffi::OsStrExt;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let m = App::new(&quot;utf8&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::from_usage(&quot;&lt;arg&gt; &#39;some arg&#39;&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![OsString::from(&quot;myprog&quot;),</span>
+    <span class='doccomment'>///                             // &quot;Hi {0xe9}!&quot;</span>
+    <span class='doccomment'>///                             OsString::from_vec(vec![b&#39;H&#39;, b&#39;i&#39;, b&#39; &#39;, 0xe9, b&#39;!&#39;])]);</span>
+    <span class='doccomment'>/// let itr = m.values_of_lossy(&quot;arg&quot;).unwrap();</span>
+    <span class='doccomment'>/// assert_eq!(&amp;*itr.next().unwrap(), &quot;Hi&quot;);</span>
+    <span class='doccomment'>/// assert_eq!(&amp;*itr.next().unwrap(), &quot;\u{FFFD}!&quot;);</span>
+    <span class='doccomment'>/// assert_eq!(itr.next(), None);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>values_of_lossy</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()) {
+            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>()
+                           .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>to_string_lossy</span>().<span class='ident'>into_owned</span>())
+                           .<span class='ident'>collect</span>());
+        }
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='doccomment'>/// Gets the OS version of a string value of a specific argument If the option wasn&#39;t present</span>
+    <span class='doccomment'>/// at runtime it returns `None`. An OS value on Unix-like systems is any series of bytes,</span>
+    <span class='doccomment'>/// regardless of whether or not they contain valid UTF-8 code points. Since `String`s in Rust</span>
+    <span class='doccomment'>/// are guaranteed to be valid UTF-8, a valid filename as an argument value on Linux (for</span>
+    <span class='doccomment'>/// example) may contain invalid UTF-8 code points.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```ignore</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// use std::ffi::OsString;</span>
+    <span class='doccomment'>/// use std::os::unix::ffi::OsStrExt;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let m = App::new(&quot;utf8&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::from_usage(&quot;&lt;arg&gt; &#39;some arg&#39;&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![OsString::from(&quot;myprog&quot;),</span>
+    <span class='doccomment'>///                                 // &quot;Hi&quot;</span>
+    <span class='doccomment'>///                                 OsString::from_vec(vec![b&#39;H&#39;, b&#39;i&#39;]),</span>
+    <span class='doccomment'>///                                 // &quot;{0xe9}!&quot;</span>
+    <span class='doccomment'>///                                 OsString::from_vec(vec![0xe9, b&#39;!&#39;])]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let itr = m.values_of_os(&quot;arg&quot;).unwrap();</span>
+    <span class='doccomment'>/// assert_eq!(itr.next(), Some(&amp;*OsString::from(&quot;Hi&quot;)));</span>
+    <span class='doccomment'>/// assert_eq!(itr.next(), Some(&amp;*OsString::from_vec(vec![0xe9, b&#39;!&#39;])));</span>
+    <span class='doccomment'>/// assert_eq!(itr.next(), None);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>values_of_os</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>OsValues</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>fn</span> <span class='ident'>to_str_slice</span>(<span class='ident'>o</span>: <span class='kw-2'>&amp;</span><span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>OsStr</span> { <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>o</span> }
+        <span class='kw'>let</span> <span class='ident'>to_str_slice</span>: <span class='kw'>fn</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsStr</span> <span class='op'>=</span> <span class='ident'>to_str_slice</span>; <span class='comment'>// coerce to fn pointer</span>
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()) {
+            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>OsValues</span> { <span class='ident'>iter</span>: <span class='ident'>arg</span>.<span class='ident'>vals</span>.<span class='ident'>values</span>().<span class='ident'>map</span>(<span class='ident'>to_str_slice</span>) });
+        }
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='doccomment'>/// Returns `true` if an argument was present at runtime, otherwise `false`.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;debug&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;d&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;-d&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(m.is_present(&quot;debug&quot;));</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_present</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>sc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>subcommand</span> {
-            <span class='kw'>if</span> <span class='ident'>sc</span>.<span class='ident'>name</span> <span class='op'>==</span> <span class='ident'>name</span> {
+            <span class='kw'>if</span> <span class='ident'>sc</span>.<span class='ident'>name</span> <span class='op'>==</span> <span class='ident'>name</span>.<span class='ident'>as_ref</span>() {
                 <span class='kw'>return</span> <span class='boolval'>true</span>;
             }
         }
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>contains_key</span>(<span class='ident'>name</span>) {
-            <span class='kw'>return</span> <span class='boolval'>true</span>;
-        }
-        <span class='boolval'>false</span>
+        <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>contains_key</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>())
     }
 
-    <span class='doccomment'>/// Returns the number of occurrences of an option, flag, or positional argument at runtime.</span>
-    <span class='doccomment'>/// If an argument isn&#39;t present it will return `0`. Can be used on arguments which *don&#39;t*</span>
-    <span class='doccomment'>/// allow multiple occurrences, but will obviously only return `0` or `1`.</span>
+    <span class='doccomment'>/// Returns the number of times an argument was used at runtime. If an argument isn&#39;t present</span>
+    <span class='doccomment'>/// it will return `0`.</span>
     <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** This returns the number of times the argument was used, *not* the number of</span>
+    <span class='doccomment'>/// values. For example, `-o val1 val2 val3 -o val4` would return `2`.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```rust</span>
     <span class='doccomment'>/// # use clap::{App, Arg};</span>
-    <span class='doccomment'>/// # let matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .arg(Arg::with_name(&quot;output&quot;).takes_value(true)).get_matches();</span>
-    <span class='doccomment'>/// if matches.occurrences_of(&quot;debug&quot;) &gt; 1 {</span>
-    <span class='doccomment'>///     println!(&quot;Debug mode is REALLY on&quot;);</span>
-    <span class='doccomment'>/// } else {</span>
-    <span class='doccomment'>///     println!(&quot;Debug mode kind of on&quot;);</span>
-    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// let m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;debug&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;d&quot;)</span>
+    <span class='doccomment'>///         .multiple(true))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;-d&quot;, &quot;-d&quot;, &quot;-d&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert_eq!(m.occurrences_of(&quot;debug&quot;), 3);</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>occurrences_of</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>u8</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>arg</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>) {
-            <span class='kw'>return</span> <span class='ident'>arg</span>.<span class='ident'>occurrences</span>;
-        }
-        <span class='number'>0</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This next example shows that counts actual uses of the argument, not just `-`&#39;s</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;debug&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;d&quot;)</span>
+    <span class='doccomment'>///         .multiple(true))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;flag&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;f&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;-ddfd&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert_eq!(m.occurrences_of(&quot;debug&quot;), 3);</span>
+    <span class='doccomment'>/// assert_eq!(m.occurrences_of(&quot;flag&quot;), 1);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>occurrences_of</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+        <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>get</span>(<span class='ident'>name</span>.<span class='ident'>as_ref</span>()).<span class='ident'>map_or</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>a</span><span class='op'>|</span> <span class='ident'>a</span>.<span class='ident'>occurs</span>)
     }
 
-    <span class='doccomment'>/// Returns the `ArgMatches` for a particular subcommand or None if the subcommand wasn&#39;t</span>
-    <span class='doccomment'>/// present at runtime.</span>
-    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Because subcommands are essentially &quot;sub-apps&quot; they have their own `ArgMatches` as well.</span>
+    <span class='doccomment'>/// This method returns the `ArgMatches` for a particular subcommand or None if the subcommand</span>
+    <span class='doccomment'>/// wasn&#39;t present at runtime.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// ```rust</span>
     <span class='doccomment'>/// # use clap::{App, Arg, SubCommand};</span>
-    <span class='doccomment'>/// # let app_matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .subcommand(SubCommand::with_name(&quot;test&quot;)).get_matches();</span>
-    <span class='doccomment'>/// if let Some(matches) = app_matches.subcommand_matches(&quot;test&quot;) {</span>
-    <span class='doccomment'>///     // Use matches as normal</span>
+    <span class='doccomment'>/// let app_m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;debug&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;d&quot;))</span>
+    <span class='doccomment'>///     .subcommand(SubCommand::with_name(&quot;test&quot;)</span>
+    <span class='doccomment'>///         .arg(Arg::with_name(&quot;opt&quot;)</span>
+    <span class='doccomment'>///             .long(&quot;option&quot;)</span>
+    <span class='doccomment'>///             .takes_value(true)))</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;-d&quot;, &quot;test&quot;, &quot;--option&quot;, &quot;val&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// // Both parent commands, and child subcommands can have arguments present at the same times</span>
+    <span class='doccomment'>/// assert!(app_m.is_present(&quot;debug&quot;));</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// // Get the subcommand&#39;s ArgMatches instance</span>
+    <span class='doccomment'>/// if let Some(sub_m) = app_m.subcommand_matches(&quot;test&quot;) {</span>
+    <span class='doccomment'>///     // Use the struct like normal</span>
+    <span class='doccomment'>///     assert_eq!(sub_m.value_of(&quot;opt&quot;), Some(&quot;val&quot;));</span>
     <span class='doccomment'>/// }</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>subcommand_matches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;na</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;na</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ArgMatches</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>sc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>subcommand</span> {
-            <span class='kw'>if</span> <span class='ident'>sc</span>.<span class='ident'>name</span> <span class='op'>!=</span> <span class='ident'>name</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>None</span>;
-            }
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>matches</span>);
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>subcommand_matches</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>subcommand</span> {
+            <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>name</span> <span class='op'>==</span> <span class='ident'>name</span>.<span class='ident'>as_ref</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>.<span class='ident'>matches</span>) }
         }
         <span class='prelude-val'>None</span>
     }
 
-    <span class='doccomment'>/// Returns the name of the subcommand used of the parent `App`, or `None` if one wasn&#39;t found</span>
+    <span class='doccomment'>/// Because subcommands are essentially &quot;sub-apps&quot; they have their own `ArgMatches` as well.</span>
+    <span class='doccomment'>/// But simply getting the sub-`ArgMatches` doesn&#39;t help much if we don&#39;t also know which</span>
+    <span class='doccomment'>/// subcommand was actually used. This method returns the name of the subcommand that was used</span>
+    <span class='doccomment'>/// at runtime, or `None` if one wasn&#39;t.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// *NOTE*: Only a single subcommand may be present per `App` at runtime, does *NOT* check for</span>
-    <span class='doccomment'>/// the name of sub-subcommand&#39;s names</span>
+    <span class='doccomment'>/// *NOTE*: Subcommands form a hierarchy, where multiple subcommands can be used at runtime,</span>
+    <span class='doccomment'>/// but only a single subcommand from any group of sibling commands may used at once.</span>
     <span class='doccomment'>///</span>
+    <span class='doccomment'>/// An ASCII art depiction may help explain this better...Using a fictional version of `git` as</span>
+    <span class='doccomment'>/// the demo subject. Imagine the following are all subcommands of `git` (note, the author is</span>
+    <span class='doccomment'>/// aware these aren&#39;t actually all subcommands in the real `git` interface, but it makes</span>
+    <span class='doccomment'>/// explaination easier)</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```notrust</span>
+    <span class='doccomment'>///              Top Level App (git)                         TOP</span>
+    <span class='doccomment'>///                              |</span>
+    <span class='doccomment'>///       -----------------------------------------</span>
+    <span class='doccomment'>///      /             |                \          \</span>
+    <span class='doccomment'>///   clone          push              add       commit      LEVEL 1</span>
+    <span class='doccomment'>///     |           /    \            /    \       |</span>
+    <span class='doccomment'>///    url      origin   remote    ref    name   message     LEVEL 2</span>
+    <span class='doccomment'>///             /                  /\</span>
+    <span class='doccomment'>///          path            remote  local                   LEVEL 3</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Given the above fictional subcommand hierarchy, valid runtime uses would be (not an all</span>
+    <span class='doccomment'>/// inclusive list, and not including argument options per command for brevity and clarity):</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```ignore</span>
+    <span class='doccomment'>/// $ git clone url</span>
+    <span class='doccomment'>/// $ git push origin path</span>
+    <span class='doccomment'>/// $ git add ref local</span>
+    <span class='doccomment'>/// $ git commit message</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Notice only one command per &quot;level&quot; may be used. You could not, for example, do `$ git</span>
+    <span class='doccomment'>/// clone url push origin path`</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```no_run</span>
     <span class='doccomment'>/// # use clap::{App, Arg, SubCommand};</span>
-    <span class='doccomment'>/// # let app_matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .subcommand(SubCommand::with_name(&quot;test&quot;)).get_matches();</span>
-    <span class='doccomment'>/// match app_matches.subcommand_name() {</span>
-    <span class='doccomment'>///     Some(&quot;test&quot;)   =&gt; {}, // test was used</span>
-    <span class='doccomment'>///     Some(&quot;config&quot;) =&gt; {}, // config was used</span>
+    <span class='doccomment'>///  let app_m = App::new(&quot;git&quot;)</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;clone&quot;))</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;push&quot;))</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;commit&quot;))</span>
+    <span class='doccomment'>///      .get_matches();</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match app_m.subcommand_name() {</span>
+    <span class='doccomment'>///     Some(&quot;clone&quot;)  =&gt; {}, // clone was used</span>
+    <span class='doccomment'>///     Some(&quot;push&quot;)   =&gt; {}, // push was used</span>
+    <span class='doccomment'>///     Some(&quot;commit&quot;) =&gt; {}, // commit was used</span>
     <span class='doccomment'>///     _              =&gt; {}, // Either no subcommand or one not tested for...</span>
     <span class='doccomment'>/// }</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>subcommand_name</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>sc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>subcommand</span> {
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>name</span>[..]);
-        }
-        <span class='prelude-val'>None</span>
+        <span class='self'>self</span>.<span class='ident'>subcommand</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>sc</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>name</span>[..])
     }
 
-    <span class='doccomment'>/// Returns the name and `ArgMatches` of the subcommand used at runtime or (&quot;&quot;, None) if one</span>
-    <span class='doccomment'>/// wasn&#39;t found.</span>
-    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This brings together `ArgMatches::subcommand_matches` and `ArgMatches::subcommand_name` by</span>
+    <span class='doccomment'>/// returning a tuple with both pieces of information.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```no_run</span>
     <span class='doccomment'>/// # use clap::{App, Arg, SubCommand};</span>
-    <span class='doccomment'>/// # let app_matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .subcommand(SubCommand::with_name(&quot;test&quot;)).get_matches();</span>
-    <span class='doccomment'>/// match app_matches.subcommand() {</span>
-    <span class='doccomment'>///     (&quot;test&quot;, Some(matches))   =&gt; {}, // test was used</span>
-    <span class='doccomment'>///     (&quot;config&quot;, Some(matches)) =&gt; {}, // config was used</span>
-    <span class='doccomment'>///     _                         =&gt; {}, // Either no subcommand or one not tested for...</span>
+    <span class='doccomment'>///  let app_m = App::new(&quot;git&quot;)</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;clone&quot;))</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;push&quot;))</span>
+    <span class='doccomment'>///      .subcommand(SubCommand::with_name(&quot;commit&quot;))</span>
+    <span class='doccomment'>///      .get_matches();</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match app_m.subcommand() {</span>
+    <span class='doccomment'>///     (&quot;clone&quot;,  Some(sub_m)) =&gt; {}, // clone was used</span>
+    <span class='doccomment'>///     (&quot;push&quot;,   Some(sub_m)) =&gt; {}, // push was used</span>
+    <span class='doccomment'>///     (&quot;commit&quot;, Some(sub_m)) =&gt; {}, // commit was used</span>
+    <span class='doccomment'>///     _                       =&gt; {}, // Either no subcommand or one not tested for...</span>
     <span class='doccomment'>/// }</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>subcommand</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ArgMatches</span><span class='op'>&gt;</span>) {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>sc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>subcommand</span> {
-            <span class='kw'>return</span> (<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>name</span>[..], <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>matches</span>));
-        }
-        (<span class='string'>&quot;&quot;</span>, <span class='prelude-val'>None</span>)
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Another useful scenario is when you want to support third party, or external, subcommands.</span>
+    <span class='doccomment'>/// In these cases you can&#39;t know the subcommand name ahead of time, so use a variable instead</span>
+    <span class='doccomment'>/// with pattern matching!</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, AppSettings};</span>
+    <span class='doccomment'>/// // Assume there is an external subcommand named &quot;subcmd&quot;</span>
+    <span class='doccomment'>/// let app_m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .setting(AppSettings::AllowExternalSubcommands)</span>
+    <span class='doccomment'>///     .get_matches_from(vec![</span>
+    <span class='doccomment'>///         &quot;myprog&quot;, &quot;subcmd&quot;, &quot;--option&quot;, &quot;value&quot;, &quot;-fff&quot;, &quot;--flag&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// // All trailing arguments will be stored under the subcommand&#39;s sub-matches using a value</span>
+    <span class='doccomment'>/// // of the runtime subcommand name (in this case &quot;subcmd&quot;)</span>
+    <span class='doccomment'>/// match app_m.subcommand() {</span>
+    <span class='doccomment'>///     (external, Some(sub_m)) =&gt; {</span>
+    <span class='doccomment'>///          let ext_args: Vec&lt;&amp;str&gt; = sub_m.values_of(external).unwrap().collect();</span>
+    <span class='doccomment'>///          assert_eq!(ext_args, [&quot;--option&quot;, &quot;value&quot;, &quot;-fff&quot;, &quot;--flag&quot;]);</span>
+    <span class='doccomment'>///     },</span>
+    <span class='doccomment'>///     _ =&gt; {},</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>subcommand</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ArgMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>) {
+        <span class='self'>self</span>.<span class='ident'>subcommand</span>.<span class='ident'>as_ref</span>().<span class='ident'>map_or</span>((<span class='string'>&quot;&quot;</span>, <span class='prelude-val'>None</span>), <span class='op'>|</span><span class='ident'>sc</span><span class='op'>|</span> (<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>name</span>[..], <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>sc</span>.<span class='ident'>matches</span>)))
     }
 
     <span class='doccomment'>/// Returns a string slice of the usage statement for the `App` (or `SubCommand`)</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```no_run</span>
     <span class='doccomment'>/// # use clap::{App, Arg, SubCommand};</span>
-    <span class='doccomment'>/// # let app_matches = App::new(&quot;myapp&quot;)</span>
-    <span class='doccomment'>/// #     .subcommand(SubCommand::with_name(&quot;test&quot;)).get_matches();</span>
-    <span class='doccomment'>/// println!(&quot;{}&quot;,app_matches.usage());</span>
+    <span class='doccomment'>/// let app_m = App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .subcommand(SubCommand::with_name(&quot;test&quot;))</span>
+    <span class='doccomment'>///     .get_matches();</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// println!(&quot;{}&quot;, app_m.usage());</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>usage</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>usage</span> {
-            <span class='kw'>return</span> <span class='kw-2'>&amp;</span><span class='ident'>u</span>[..];
-        }
-
-        <span class='comment'>// Should be un-reachable</span>
-        <span class='string'>&quot;&quot;</span>
+        <span class='self'>self</span>.<span class='ident'>usage</span>.<span class='ident'>as_ref</span>().<span class='ident'>map_or</span>(<span class='string'>&quot;&quot;</span>, <span class='op'>|</span><span class='ident'>u</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>u</span>[..])
     }
+}
+
+
+<span class='comment'>// The following were taken and adapated from vec_map source</span>
+<span class='comment'>// repo: https://github.com/contain-rs/vec-map</span>
+<span class='comment'>// commit: be5e1fa3c26e351761b33010ddbdaf5f05dbcc33</span>
+<span class='comment'>// license: MIT - Copyright (c) 2015 The Rust Project Developers</span>
+
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_debug_implementations</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='ident'>iter</span>: <span class='ident'>Map</span><span class='op'>&lt;</span><span class='ident'>vec_map</span>::<span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>OsString</span><span class='op'>&gt;</span>, <span class='kw'>fn</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>;
+
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next</span>() }
+    <span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>) { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>size_hint</span>() }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>DoubleEndedIterator</span> <span class='kw'>for</span> <span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>next_back</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next_back</span>() }
+}
+
+<span class='doccomment'>/// An iterator over the key-value pairs of a map.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span>:<span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='ident'>front</span>: <span class='ident'>usize</span>,
+    <span class='ident'>back</span>: <span class='ident'>usize</span>,
+    <span class='ident'>iter</span>: <span class='ident'>slice</span>::<span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>V</span><span class='op'>&gt;&gt;</span>
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>V</span>;
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>V</span><span class='op'>&gt;</span> {
+        <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>front</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>back</span> {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>elem</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next</span>() {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=</span> <span class='ident'>elem</span>.<span class='ident'>as_ref</span>() {
+                    <span class='self'>self</span>.<span class='ident'>front</span> <span class='op'>+=</span> <span class='number'>1</span>;
+                    <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>x</span>);
+                }
+            }
+            <span class='self'>self</span>.<span class='ident'>front</span> <span class='op'>+=</span> <span class='number'>1</span>;
+        }
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>) {
+        (<span class='number'>0</span>, <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>back</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>front</span>))
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>DoubleEndedIterator</span> <span class='kw'>for</span> <span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>next_back</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>V</span><span class='op'>&gt;</span> {
+        <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>front</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>back</span> {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>elem</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next_back</span>() {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=</span> <span class='ident'>elem</span>.<span class='ident'>as_ref</span>() {
+                    <span class='self'>self</span>.<span class='ident'>back</span> <span class='op'>-=</span> <span class='number'>1</span>;
+                    <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>x</span>);
+                }
+            }
+            <span class='self'>self</span>.<span class='ident'>back</span> <span class='op'>-=</span> <span class='number'>1</span>;
+        }
+        <span class='prelude-val'>None</span>
+    }
+}
+
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_debug_implementations</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>OsValues</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='ident'>iter</span>: <span class='ident'>Map</span><span class='op'>&lt;</span><span class='ident'>vec_map</span>::<span class='ident'>Values</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>OsString</span><span class='op'>&gt;</span>, <span class='kw'>fn</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsString</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsStr</span><span class='op'>&gt;</span>
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>OsValues</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsStr</span>;
+
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsStr</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next</span>() }
+    <span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>) { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>size_hint</span>() }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>DoubleEndedIterator</span> <span class='kw'>for</span> <span class='ident'>OsValues</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>next_back</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>OsStr</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>iter</span>.<span class='ident'>next_back</span>() }
 }
 </pre>
 </section>

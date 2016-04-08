@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>regex_syntax</a>::<wbr><a class='struct' href=''>ExprBuilder</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-960' class='srclink' href='../src/regex_syntax/lib.rs.html.html#241-244' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1600' class='srclink' href='../src/regex_syntax/lib.rs.html#310-313' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ExprBuilder {
     // some fields omitted
 }</pre><div class='docblock'><p>A builder for configuring regular expression parsing.</p>
@@ -67,6 +68,16 @@ as the maximum nesting depth.</p>
 <div class='docblock'><p>Set the default value for the greedy swap (<code>U</code>) flag.</p>
 </div><h4 id='method.ignore_whitespace' class='method'><code>fn <a href='#method.ignore_whitespace' class='fnname'>ignore_whitespace</a>(self, yes: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
 <div class='docblock'><p>Set the default value for the ignore whitespace (<code>x</code>) flag.</p>
+</div><h4 id='method.unicode' class='method'><code>fn <a href='#method.unicode' class='fnname'>unicode</a>(self, yes: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
+<div class='docblock'><p>Set the default value for the Unicode (<code>u</code>) flag.</p>
+
+<p>If <code>yes</code> is false, then <code>allow_bytes</code> is set to true.</p>
+</div><h4 id='method.allow_bytes' class='method'><code>fn <a href='#method.allow_bytes' class='fnname'>allow_bytes</a>(self, yes: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
+<div class='docblock'><p>Whether the Unicode flag can be used or not. By default, the flag is
+enabled but it cannot be toggled.</p>
+
+<p>When disabled, use of the <code>u</code> flag will cause the parser to return an
+error.</p>
 </div><h4 id='method.nest_limit' class='method'><code>fn <a href='#method.nest_limit' class='fnname'>nest_limit</a>(self, limit: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
 <div class='docblock'><p>Set the nesting limit for regular expression parsing.</p>
 
@@ -74,8 +85,8 @@ as the maximum nesting depth.</p>
 <code>StackExhausted</code> error.</p>
 </div><h4 id='method.parse' class='method'><code>fn <a href='#method.parse' class='fnname'>parse</a>(self, s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='../regex_syntax/type.Result.html' title='regex_syntax::Result'>Result</a>&lt;<a class='enum' href='../regex_syntax/enum.Expr.html' title='regex_syntax::Expr'>Expr</a>&gt;</code></h4>
 <div class='docblock'><p>Parse a string as a regular expression using the current configuraiton.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../regex_syntax/struct.ExprBuilder.html' title='regex_syntax::ExprBuilder'>ExprBuilder</a></code></h4>
 <h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>

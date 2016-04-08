@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.55/src/set.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/set.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>set.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -356,6 +357,42 @@
 <span id="313">313</span>
 <span id="314">314</span>
 <span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -372,10 +409,20 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>vec</span>;
 
-<span class='kw'>use</span> <span class='ident'>syntax</span>::<span class='ident'>Expr</span>;
-
-<span class='kw'>use</span> <span class='ident'>exec</span>::{<span class='ident'>Exec</span>, <span class='ident'>ExecBuilder</span>, <span class='ident'>Search</span>};
+<span class='kw'>use</span> <span class='ident'>exec</span>::{<span class='ident'>Exec</span>, <span class='ident'>ExecBuilder</span>};
+<span class='kw'>use</span> <span class='ident'>re_trait</span>::<span class='ident'>RegularExpression</span>;
 <span class='kw'>use</span> <span class='ident'>Error</span>;
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>define_set</span> {
+    (
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>:<span class='ident'>ident</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches</span>:<span class='ident'>ident</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span>:<span class='ident'>ident</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_into_iter</span>:<span class='ident'>ident</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>exec_build</span>:<span class='ident'>expr</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>text_ty</span>:<span class='ident'>ty</span>,
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>as_bytes</span>:<span class='ident'>expr</span>
+    ) <span class='op'>=&gt;</span> {
 
 <span class='doccomment'>/// Match multiple (possibly overlapping) regular expressions in a single scan.</span>
 <span class='doccomment'>///</span>
@@ -404,8 +451,7 @@
 <span class='doccomment'>/// domains) might work:</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use regex::RegexSet;</span>
-<span class='doccomment'>///</span>
+<span class='doccomment'>/// # use regex::RegexSet;</span>
 <span class='doccomment'>/// let set = RegexSet::new(&amp;[</span>
 <span class='doccomment'>///     r&quot;[a-z]+@[a-z]+\.(com|org|net)&quot;,</span>
 <span class='doccomment'>///     r&quot;[a-z]+\.(com|org|net)&quot;,</span>
@@ -460,9 +506,9 @@
 <span class='doccomment'>/// search takes `O(mn)` time, where `m` is proportional to the size of the</span>
 <span class='doccomment'>/// regex set and `n` is proportional to the length of the search text.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RegexSet</span>(<span class='ident'>Exec</span>);
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>(<span class='ident'>Exec</span>);
 
-<span class='kw'>impl</span> <span class='ident'>RegexSet</span> {
+<span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span> {
     <span class='doccomment'>/// Create a new regex set with the given regular expressions.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This takes an iterator of `S`, where `S` is something that can produce</span>
@@ -474,18 +520,14 @@
     <span class='doccomment'>/// Create a new regex set from an iterator of strings:</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use regex::RegexSet;</span>
-    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # use regex::RegexSet;</span>
     <span class='doccomment'>/// let set = RegexSet::new(&amp;[r&quot;\w+&quot;, r&quot;\d+&quot;]).unwrap();</span>
     <span class='doccomment'>/// assert!(set.is_match(&quot;foo&quot;));</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span><span class='op'>&lt;</span><span class='ident'>I</span>, <span class='ident'>S</span><span class='op'>&gt;</span>(<span class='ident'>exprs</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>RegexSet</span>, <span class='ident'>Error</span><span class='op'>&gt;</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span><span class='op'>&lt;</span><span class='ident'>I</span>, <span class='ident'>S</span><span class='op'>&gt;</span>(<span class='ident'>exprs</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>, <span class='ident'>Error</span><span class='op'>&gt;</span>
             <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;</span>, <span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>S</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>exec</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>ExecBuilder</span>::<span class='ident'>new_many</span>(<span class='ident'>exprs</span>).<span class='ident'>build</span>());
-        <span class='kw'>if</span> <span class='ident'>exec</span>.<span class='ident'>regex_strings</span>().<span class='ident'>len</span>() <span class='op'>&lt;</span> <span class='number'>2</span> {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>InvalidSet</span>);
-        }
-        <span class='prelude-val'>Ok</span>(<span class='ident'>RegexSet</span>(<span class='ident'>exec</span>))
+        <span class='kw'>let</span> <span class='ident'>exec</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>exec_build</span>(<span class='ident'>exprs</span>));
+        <span class='prelude-val'>Ok</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>(<span class='ident'>exec</span>))
     }
 
     <span class='doccomment'>/// Returns true if and only if one of the regexes in this set matches</span>
@@ -507,15 +549,13 @@
     <span class='doccomment'>/// Tests whether a set matches some text:</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use regex::RegexSet;</span>
-    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # use regex::RegexSet;</span>
     <span class='doccomment'>/// let set = RegexSet::new(&amp;[r&quot;\w+&quot;, r&quot;\d+&quot;]).unwrap();</span>
     <span class='doccomment'>/// assert!(set.is_match(&quot;foo&quot;));</span>
     <span class='doccomment'>/// assert!(!set.is_match(&quot;☃&quot;));</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_match</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>search</span> <span class='op'>=</span> <span class='ident'>Search</span> { <span class='ident'>captures</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [], <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [] };
-        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>exec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>search</span>, <span class='ident'>text</span>, <span class='number'>0</span>)
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_match</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>text_ty</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>searcher</span>().<span class='ident'>is_match_at</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>as_bytes</span>(<span class='ident'>text</span>), <span class='number'>0</span>)
     }
 
     <span class='doccomment'>/// Returns the set of regular expressions that match in the given text.</span>
@@ -536,8 +576,7 @@
     <span class='doccomment'>/// Tests which regular expressions match the given text:</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use regex::RegexSet;</span>
-    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # use regex::RegexSet;</span>
     <span class='doccomment'>/// let set = RegexSet::new(&amp;[</span>
     <span class='doccomment'>///     r&quot;\w+&quot;,</span>
     <span class='doccomment'>///     r&quot;\d+&quot;,</span>
@@ -555,17 +594,12 @@
     <span class='doccomment'>/// assert!(!matches.matched(5));</span>
     <span class='doccomment'>/// assert!(matches.matched(6));</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matches</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>SetMatches</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='boolval'>false</span>; <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>matches</span>().<span class='ident'>len</span>()];
-        <span class='kw'>let</span> <span class='ident'>matched_any</span> <span class='op'>=</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>search</span> <span class='op'>=</span> <span class='ident'>Search</span> {
-                <span class='ident'>captures</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [],
-                <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>matches</span>
-            };
-            <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>exec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>search</span>, <span class='ident'>text</span>, <span class='number'>0</span>)
-        };
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matches</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>text_ty</span>) <span class='op'>-&gt;</span> <span class='ident'>SetMatches</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>matches</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='boolval'>false</span>; <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>regex_strings</span>().<span class='ident'>len</span>()];
+        <span class='kw'>let</span> <span class='ident'>any</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>searcher</span>().<span class='ident'>many_matches_at</span>(
+            <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>matches</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>as_bytes</span>(<span class='ident'>text</span>), <span class='number'>0</span>);
         <span class='ident'>SetMatches</span> {
-            <span class='ident'>matched_any</span>: <span class='ident'>matched_any</span>,
+            <span class='ident'>matched_any</span>: <span class='ident'>any</span>,
             <span class='ident'>matches</span>: <span class='ident'>matches</span>,
         }
     }
@@ -576,20 +610,14 @@
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>RegexSet</span> {
-    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;RegexSet({:?})&quot;</span>, <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>regex_strings</span>())
-    }
-}
-
 <span class='doccomment'>/// A set of matches returned by a regex set.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SetMatches</span> {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches</span> {
     <span class='ident'>matched_any</span>: <span class='ident'>bool</span>,
     <span class='ident'>matches</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>SetMatches</span> {
+<span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches</span> {
     <span class='doccomment'>/// Whether this set contains any matches.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matched_any</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>matched_any</span>
@@ -613,22 +641,22 @@
     }
 
     <span class='doccomment'>/// Returns an iterator over indexes in the regex that matched.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>SetMatchesIter</span> {
-        <span class='ident'>SetMatchesIter</span>((<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>matches</span>).<span class='ident'>into_iter</span>().<span class='ident'>enumerate</span>())
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span>((<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>matches</span>).<span class='ident'>into_iter</span>().<span class='ident'>enumerate</span>())
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>IntoIterator</span> <span class='kw'>for</span> <span class='ident'>SetMatches</span> {
-    <span class='kw'>type</span> <span class='ident'>IntoIter</span> <span class='op'>=</span> <span class='ident'>SetMatchesIntoIter</span>;
+<span class='kw'>impl</span> <span class='ident'>IntoIterator</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches</span> {
+    <span class='kw'>type</span> <span class='ident'>IntoIter</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_into_iter</span>;
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='ident'>usize</span>;
 
     <span class='kw'>fn</span> <span class='ident'>into_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>IntoIter</span> {
-        <span class='ident'>SetMatchesIntoIter</span>(<span class='self'>self</span>.<span class='ident'>matches</span>.<span class='ident'>into_iter</span>().<span class='ident'>enumerate</span>())
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_into_iter</span>(<span class='self'>self</span>.<span class='ident'>matches</span>.<span class='ident'>into_iter</span>().<span class='ident'>enumerate</span>())
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>IntoIterator</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>SetMatches</span> {
-    <span class='kw'>type</span> <span class='ident'>IntoIter</span> <span class='op'>=</span> <span class='ident'>SetMatchesIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>;
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>IntoIterator</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches</span> {
+    <span class='kw'>type</span> <span class='ident'>IntoIter</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>;
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='ident'>usize</span>;
 
     <span class='kw'>fn</span> <span class='ident'>into_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>IntoIter</span> {
@@ -637,9 +665,9 @@
 }
 
 <span class='doccomment'>/// An owned iterator over the set of matches from a regex set.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SetMatchesIntoIter</span>(<span class='ident'>iter</span>::<span class='ident'>Enumerate</span><span class='op'>&lt;</span><span class='ident'>vec</span>::<span class='ident'>IntoIter</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;&gt;</span>);
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_into_iter</span>(<span class='ident'>iter</span>::<span class='ident'>Enumerate</span><span class='op'>&lt;</span><span class='ident'>vec</span>::<span class='ident'>IntoIter</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;&gt;</span>);
 
-<span class='kw'>impl</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>SetMatchesIntoIter</span> {
+<span class='kw'>impl</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_into_iter</span> {
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='ident'>usize</span>;
 
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
@@ -657,9 +685,9 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The lifetime `&#39;a` refers to the lifetime of a `SetMatches` value.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SetMatchesIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>iter</span>::<span class='ident'>Enumerate</span><span class='op'>&lt;</span><span class='ident'>slice</span>::<span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>bool</span><span class='op'>&gt;&gt;</span>);
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>iter</span>::<span class='ident'>Enumerate</span><span class='op'>&lt;</span><span class='ident'>slice</span>::<span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>bool</span><span class='op'>&gt;&gt;</span>);
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>SetMatchesIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty_set_matches_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='ident'>usize</span>;
 
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
@@ -670,6 +698,51 @@
                 <span class='prelude-val'>Some</span>((<span class='ident'>i</span>, <span class='kw-2'>&amp;</span><span class='boolval'>true</span>)) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>i</span>),
             }
         }
+    }
+}
+
+<span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Exec</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>exec</span>: <span class='ident'>Exec</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>(<span class='ident'>exec</span>)
+    }
+}
+
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>as_bytes_str</span>(<span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>] { <span class='ident'>text</span>.<span class='ident'>as_bytes</span>() }
+<span class='kw'>fn</span> <span class='ident'>as_bytes_bytes</span>(<span class='ident'>text</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>] { <span class='ident'>text</span> }
+
+<span class='macro'>define_set</span><span class='macro'>!</span> {
+    <span class='ident'>RegexSet</span>,
+    <span class='ident'>SetMatches</span>,
+    <span class='ident'>SetMatchesIter</span>,
+    <span class='ident'>SetMatchesIntoIter</span>,
+    <span class='op'>|</span><span class='ident'>exprs</span><span class='op'>|</span> <span class='ident'>ExecBuilder</span>::<span class='ident'>new_many</span>(<span class='ident'>exprs</span>).<span class='ident'>build</span>(),
+    <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
+    <span class='ident'>as_bytes_str</span>
+}
+
+<span class='macro'>define_set</span><span class='macro'>!</span> {
+    <span class='ident'>RegexSetBytes</span>,
+    <span class='ident'>SetMatchesBytes</span>,
+    <span class='ident'>SetMatchesIterBytes</span>,
+    <span class='ident'>SetMatchesIntoIterBytes</span>,
+    <span class='op'>|</span><span class='ident'>exprs</span><span class='op'>|</span> <span class='ident'>ExecBuilder</span>::<span class='ident'>new_many</span>(<span class='ident'>exprs</span>).<span class='ident'>only_utf8</span>(<span class='boolval'>false</span>).<span class='ident'>build</span>(),
+    <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>],
+    <span class='ident'>as_bytes_bytes</span>
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>RegexSet</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;RegexSet({:?})&quot;</span>, <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>regex_strings</span>())
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>RegexSetBytes</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;RegexSet({:?})&quot;</span>, <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>regex_strings</span>())
     }
 }
 </pre>

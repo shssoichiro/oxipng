@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/crossbeam-0.2.8/src/sync/seg_queue.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/crossbeam-0.2.9/src/sync/seg_queue.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>seg_queue.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -283,6 +284,7 @@
 <span id="240">240</span>
 <span id="241">241</span>
 <span id="242">242</span>
+<span id="243">243</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomic</span>::<span class='ident'>Ordering</span>::{<span class='ident'>Acquire</span>, <span class='ident'>Release</span>, <span class='ident'>Relaxed</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomic</span>::{<span class='ident'>AtomicBool</span>, <span class='ident'>AtomicUsize</span>};
@@ -387,6 +389,7 @@
                             <span class='kw'>loop</span> {
                                 <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>next</span>) <span class='op'>=</span> <span class='ident'>head</span>.<span class='ident'>next</span>.<span class='ident'>load</span>(<span class='ident'>Acquire</span>, <span class='kw-2'>&amp;</span><span class='ident'>guard</span>) {
                                     <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>store_shared</span>(<span class='prelude-val'>Some</span>(<span class='ident'>next</span>), <span class='ident'>Release</span>);
+                                    <span class='ident'>guard</span>.<span class='ident'>unlinked</span>(<span class='ident'>head</span>);
                                     <span class='kw'>break</span>
                                 }
                             }

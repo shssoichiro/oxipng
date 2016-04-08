@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `env` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, env">
+
+    <title>bitflags::__core::env - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'env', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>env</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2774' class='srclink' href='https://doc.rust-lang.org/nightly/std/env/index.html?gotosrc=2774' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Inspection and manipulation of the process&#39;s environment.</p>
+
+<p>This module contains methods to inspect various aspects such as
+environment variables, process arguments, the current directory, and various
+other important directories.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='consts/index.html'
+                                  title='bitflags::__core::env::consts'>consts</a></td>
+                           <td class='docblock short'>
+                                <p>Constants associated with the current target</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Args.html'
+                                  title='bitflags::__core::env::Args'>Args</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator over the arguments of a process, yielding a <code>String</code> value
+for each argument.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ArgsOs.html'
+                                  title='bitflags::__core::env::ArgsOs'>ArgsOs</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator over the arguments of a process, yielding an <code>OsString</code> value
+for each argument.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.JoinPathsError.html'
+                                  title='bitflags::__core::env::JoinPathsError'>JoinPathsError</a></td>
+                           <td class='docblock short'>
+                                <p>Error type returned from <code>std::env::join_paths</code> when paths fail to be
+joined.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SplitPaths.html'
+                                  title='bitflags::__core::env::SplitPaths'>SplitPaths</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator over <code>PathBuf</code> instances for parsing an environment variable
+according to platform-specific conventions.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Vars.html'
+                                  title='bitflags::__core::env::Vars'>Vars</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator over a snapshot of the environment variables of this process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.VarsOs.html'
+                                  title='bitflags::__core::env::VarsOs'>VarsOs</a></td>
+                           <td class='docblock short'>
+                                <p>An iterator over a snapshot of the environment variables of this process.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.VarError.html'
+                                  title='bitflags::__core::env::VarError'>VarError</a></td>
+                           <td class='docblock short'>
+                                <p>Possible errors from the <code>env::var</code> method.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.args.html'
+                                  title='bitflags::__core::env::args'>args</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the arguments which this program was started with (normally passed
+via the command line).</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.args_os.html'
+                                  title='bitflags::__core::env::args_os'>args_os</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the arguments which this program was started with (normally passed
+via the command line).</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.current_dir.html'
+                                  title='bitflags::__core::env::current_dir'>current_dir</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the current working directory as a <code>PathBuf</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.current_exe.html'
+                                  title='bitflags::__core::env::current_exe'>current_exe</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the full filesystem path of the current running executable.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.home_dir.html'
+                                  title='bitflags::__core::env::home_dir'>home_dir</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the path of the current user&#39;s home directory if known.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.join_paths.html'
+                                  title='bitflags::__core::env::join_paths'>join_paths</a></td>
+                           <td class='docblock short'>
+                                <p>Joins a collection of <code>Path</code>s appropriately for the <code>PATH</code>
+environment variable.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.remove_var.html'
+                                  title='bitflags::__core::env::remove_var'>remove_var</a></td>
+                           <td class='docblock short'>
+                                <p>Removes an environment variable from the environment of the currently running process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.set_current_dir.html'
+                                  title='bitflags::__core::env::set_current_dir'>set_current_dir</a></td>
+                           <td class='docblock short'>
+                                <p>Changes the current working directory to the specified path, returning
+whether the change was completed successfully or not.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.set_var.html'
+                                  title='bitflags::__core::env::set_var'>set_var</a></td>
+                           <td class='docblock short'>
+                                <p>Sets the environment variable <code>k</code> to the value <code>v</code> for the currently running
+process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.split_paths.html'
+                                  title='bitflags::__core::env::split_paths'>split_paths</a></td>
+                           <td class='docblock short'>
+                                <p>Parses input according to platform conventions for the <code>PATH</code>
+environment variable.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.temp_dir.html'
+                                  title='bitflags::__core::env::temp_dir'>temp_dir</a></td>
+                           <td class='docblock short'>
+                                <p>Returns the path of a temporary directory.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.var.html'
+                                  title='bitflags::__core::env::var'>var</a></td>
+                           <td class='docblock short'>
+                                <p>Fetches the environment variable <code>key</code> from the current process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.var_os.html'
+                                  title='bitflags::__core::env::var_os'>var_os</a></td>
+                           <td class='docblock short'>
+                                <p>Fetches the environment variable <code>key</code> from the current process, returning
+<code>None</code> if the variable isn&#39;t set.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.vars.html'
+                                  title='bitflags::__core::env::vars'>vars</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an iterator of (variable, value) pairs of strings, for all the
+environment variables of the current process.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.vars_os.html'
+                                  title='bitflags::__core::env::vars_os'>vars_os</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an iterator of (variable, value) pairs of OS strings, for all the
+environment variables of the current process.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

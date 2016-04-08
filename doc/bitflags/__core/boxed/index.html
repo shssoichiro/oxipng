@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `boxed` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, boxed">
+
+    <title>bitflags::__core::boxed - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'boxed', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>boxed</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-72' class='srclink' href='https://doc.rust-lang.org/nightly/alloc/boxed/index.html?gotosrc=72' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>A pointer type for heap allocation.</p>
+
+<p><code>Box&lt;T&gt;</code>, casually referred to as a &#39;box&#39;, provides the simplest form of
+heap allocation in Rust. Boxes provide ownership for this allocation, and
+drop their contents when they go out of scope.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>Creating a box:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='number'>5</span>);</pre>
+
+<p>Creating a recursive data structure:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
+<span class='kw'>enum</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='ident'>Cons</span>(<span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>),
+    <span class='ident'>Nil</span>,
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>list</span>: <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>List</span>::<span class='ident'>Cons</span>(<span class='number'>1</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>List</span>::<span class='ident'>Cons</span>(<span class='number'>2</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>List</span>::<span class='ident'>Nil</span>))));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>list</span>);
+}</pre>
+
+<p>This will print <code>Cons(1, Cons(2, Nil))</code>.</p>
+
+<p>Recursive structures must be boxed, because if the definition of <code>Cons</code>
+looked like this:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='ident'>Cons</span>(<span class='ident'>T</span>, <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>),</pre>
+
+<p>It wouldn&#39;t work. This is because the size of a <code>List</code> depends on how many
+elements are in the list, and so we don&#39;t know how much memory to allocate
+for a <code>Cons</code>. By introducing a <code>Box</code>, which has a defined size, we know how
+big <code>Cons</code> needs to be.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Box.html'
+                                  title='bitflags::__core::boxed::Box'>Box</a></td>
+                           <td class='docblock short'>
+                                <p>A pointer type for heap allocation.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.ExchangeHeapSingleton.html'
+                                  title='bitflags::__core::boxed::ExchangeHeapSingleton'>ExchangeHeapSingleton</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>This the singleton type used solely for <code>boxed::HEAP</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='struct' href='struct.IntermediateBox.html'
+                                  title='bitflags::__core::boxed::IntermediateBox'>IntermediateBox</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p><code>IntermediateBox</code> represents uninitialized backing storage for <code>Box</code>.</p>
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class='unstable module-item'>
+                           <td><a class='constant' href='constant.HEAP.html'
+                                  title='bitflags::__core::boxed::HEAP'>HEAP</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>A value that represents the heap. This is the default place that the <code>box</code>
+keyword allocates into when no place is supplied.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class='unstable module-item'>
+                           <td><a class='trait' href='trait.FnBox.html'
+                                  title='bitflags::__core::boxed::FnBox'>FnBox</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p><code>FnBox</code> is a version of the <code>FnOnce</code> intended for use with boxed
+closure objects. The idea is that where one would normally store a
+<code>Box&lt;FnOnce()&gt;</code> in a data structure, you should use
+<code>Box&lt;FnBox()&gt;</code>. The two traits behave essentially the same, except
+that a <code>FnBox</code> closure can only be called if it is boxed. (Note
+that <code>FnBox</code> may be deprecated in the future if <code>Box&lt;FnOnce()&gt;</code>
+closures become directly usable.)</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

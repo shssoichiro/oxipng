@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.55/src/prog.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/prog.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>prog.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
@@ -459,6 +460,8 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>Ordering</span>;
@@ -468,12 +471,8 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
 
-<span class='kw'>use</span> <span class='ident'>backtrack</span>::<span class='ident'>BacktrackCache</span>;
-<span class='kw'>use</span> <span class='ident'>char</span>::<span class='ident'>Char</span>;
-<span class='kw'>use</span> <span class='ident'>dfa</span>::<span class='ident'>DfaCache</span>;
-<span class='kw'>use</span> <span class='ident'>literals</span>::<span class='ident'>Literals</span>;
-<span class='kw'>use</span> <span class='ident'>nfa</span>::<span class='ident'>NfaCache</span>;
-<span class='kw'>use</span> <span class='ident'>pool</span>::{<span class='ident'>Pool</span>, <span class='ident'>PoolGuard</span>};
+<span class='kw'>use</span> <span class='ident'>input</span>::<span class='ident'>Char</span>;
+<span class='kw'>use</span> <span class='ident'>literals</span>::<span class='ident'>LiteralSearcher</span>;
 
 <span class='doccomment'>/// InstPtr represents the index of an instruction in a regex program.</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>InstPtr</span> <span class='op'>=</span> <span class='ident'>usize</span>;
@@ -482,19 +481,44 @@
 <span class='doccomment'>/// instructions.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Program</span> {
+    <span class='doccomment'>/// A sequence of instructions that represents an NFA.</span>
     <span class='kw'>pub</span> <span class='ident'>insts</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Inst</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// Pointers to each Match instruction in the sequence.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This is always length 1 unless this program represents a regex set.</span>
     <span class='kw'>pub</span> <span class='ident'>matches</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>InstPtr</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// The ordered sequence of all capture groups extracted from the AST.</span>
+    <span class='doccomment'>/// Unnamed groups are `None`.</span>
     <span class='kw'>pub</span> <span class='ident'>captures</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
+    <span class='doccomment'>/// Pointers to all named capture groups into `captures`.</span>
     <span class='kw'>pub</span> <span class='ident'>capture_name_idx</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>usize</span><span class='op'>&gt;&gt;</span>,
+    <span class='doccomment'>/// A pointer to the start instruction. This can vary depending on how</span>
+    <span class='doccomment'>/// the program was compiled. For example, programs for use with the DFA</span>
+    <span class='doccomment'>/// engine have a `.*?` inserted at the beginning of unanchored regular</span>
+    <span class='doccomment'>/// expressions. The actual starting point of the program is after the</span>
+    <span class='doccomment'>/// `.*?`.</span>
     <span class='kw'>pub</span> <span class='ident'>start</span>: <span class='ident'>InstPtr</span>,
+    <span class='doccomment'>/// A set of equivalence classes for discriminating bytes in the compiled</span>
+    <span class='doccomment'>/// program.</span>
     <span class='kw'>pub</span> <span class='ident'>byte_classes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// When true, this program can only match valid UTF-8.</span>
+    <span class='kw'>pub</span> <span class='ident'>only_utf8</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// When true, this program uses byte range instructions instead of Unicode</span>
+    <span class='doccomment'>/// range instructions.</span>
     <span class='kw'>pub</span> <span class='ident'>is_bytes</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// When true, the program is compiled for DFA matching. For example, this</span>
+    <span class='doccomment'>/// implies `is_bytes` and also inserts a preceding `.*?` for unanchored</span>
+    <span class='doccomment'>/// regexes.</span>
     <span class='kw'>pub</span> <span class='ident'>is_dfa</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// When true, the program matches text in reverse (for use only in the</span>
+    <span class='doccomment'>/// DFA).</span>
     <span class='kw'>pub</span> <span class='ident'>is_reverse</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// Whether the regex must match from the start of the input.</span>
     <span class='kw'>pub</span> <span class='ident'>is_anchored_start</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// Whether the regex must match at the end of the input.</span>
     <span class='kw'>pub</span> <span class='ident'>is_anchored_end</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>prefixes</span>: <span class='ident'>Literals</span>,
-    <span class='kw'>pub</span> <span class='ident'>cache</span>: <span class='ident'>EngineCache</span>,
+    <span class='doccomment'>/// A possibly empty machine for very quickly matching prefix literals.</span>
+    <span class='kw'>pub</span> <span class='ident'>prefixes</span>: <span class='ident'>LiteralSearcher</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>Program</span> {
@@ -508,13 +532,13 @@
             <span class='ident'>capture_name_idx</span>: <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>HashMap</span>::<span class='ident'>new</span>()),
             <span class='ident'>start</span>: <span class='number'>0</span>,
             <span class='ident'>byte_classes</span>: <span class='macro'>vec</span><span class='macro'>!</span>[],
+            <span class='ident'>only_utf8</span>: <span class='boolval'>true</span>,
             <span class='ident'>is_bytes</span>: <span class='boolval'>false</span>,
             <span class='ident'>is_dfa</span>: <span class='boolval'>false</span>,
             <span class='ident'>is_reverse</span>: <span class='boolval'>false</span>,
             <span class='ident'>is_anchored_start</span>: <span class='boolval'>false</span>,
             <span class='ident'>is_anchored_end</span>: <span class='boolval'>false</span>,
-            <span class='ident'>prefixes</span>: <span class='ident'>Literals</span>::<span class='ident'>empty</span>(),
-            <span class='ident'>cache</span>: <span class='ident'>EngineCache</span>::<span class='ident'>new</span>(),
+            <span class='ident'>prefixes</span>: <span class='ident'>LiteralSearcher</span>::<span class='ident'>empty</span>(),
         }
     }
 
@@ -550,19 +574,17 @@
         <span class='self'>self</span>.<span class='ident'>is_dfa</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>is_reverse</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>is_anchored_start</span>
     }
 
-    <span class='doccomment'>/// Retrieve cached state for NFA execution.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cache_nfa</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PoolGuard</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>NfaCache</span><span class='op'>&gt;&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>cache</span>.<span class='ident'>nfa</span>.<span class='ident'>get</span>()
+    <span class='doccomment'>/// Returns true if this program uses Byte instructions instead of</span>
+    <span class='doccomment'>/// Char/Range instructions.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>uses_bytes</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>is_bytes</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>is_dfa</span> <span class='op'>||</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>only_utf8</span>
     }
 
-    <span class='doccomment'>/// Retrieve cached state for backtracking execution.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cache_backtrack</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PoolGuard</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>BacktrackCache</span><span class='op'>&gt;&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>cache</span>.<span class='ident'>backtrack</span>.<span class='ident'>get</span>()
-    }
-
-    <span class='doccomment'>/// Retrieve cached state for DFA execution.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cache_dfa</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PoolGuard</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>DfaCache</span><span class='op'>&gt;&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>cache</span>.<span class='ident'>dfa</span>.<span class='ident'>get</span>()
+    <span class='doccomment'>/// Returns true if this program exclusively matches valid UTF-8 bytes.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// That is, if an invalid UTF-8 byte is seen, then no match is possible.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>only_utf8</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>only_utf8</span>
     }
 
     <span class='doccomment'>/// Return the approximate heap usage of this instruction sequence in</span>
@@ -601,29 +623,28 @@
             <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='kw-2'>&amp;</span><span class='ident'>escaped</span>).<span class='ident'>into_owned</span>()
         }
 
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;--------------------------------&quot;</span>));
         <span class='kw'>for</span> (<span class='ident'>pc</span>, <span class='ident'>inst</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>enumerate</span>() {
             <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>inst</span> {
                 <span class='ident'>Match</span>(<span class='ident'>slot</span>) <span class='op'>=&gt;</span> {
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} Match({:?})&quot;</span>, <span class='ident'>pc</span>, <span class='ident'>slot</span>))
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} Match({:?})&quot;</span>, <span class='ident'>pc</span>, <span class='ident'>slot</span>))
                 }
                 <span class='ident'>Save</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:04} Save({})&quot;</span>, <span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>slot</span>);
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
                 }
                 <span class='ident'>Split</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} Split({}, {})&quot;</span>,
-                                  <span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto1</span>, <span class='ident'>inst</span>.<span class='ident'>goto2</span>));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} Split({}, {})&quot;</span>,
+                                <span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto1</span>, <span class='ident'>inst</span>.<span class='ident'>goto2</span>));
                 }
                 <span class='ident'>EmptyLook</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>inst</span>.<span class='ident'>look</span>);
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
-                                  <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
+                                <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
                 }
                 <span class='ident'>Char</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>inst</span>.<span class='ident'>c</span>);
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
-                                  <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
+                                <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
                 }
                 <span class='ident'>Ranges</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>ranges</span> <span class='op'>=</span> <span class='ident'>inst</span>.<span class='ident'>ranges</span>
@@ -632,20 +653,23 @@
                         .<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>()
                         .<span class='ident'>join</span>(<span class='string'>&quot;, &quot;</span>);
                     <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>ranges</span>);
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
-                                  <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
+                                <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
                 }
                 <span class='ident'>Bytes</span>(<span class='kw-2'>ref</span> <span class='ident'>inst</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(
                         <span class='string'>&quot;Bytes({}, {})&quot;</span>,
                         <span class='ident'>visible_byte</span>(<span class='ident'>inst</span>.<span class='ident'>start</span>),
                         <span class='ident'>visible_byte</span>(<span class='ident'>inst</span>.<span class='ident'>end</span>));
-                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
-                                  <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:04} {}&quot;</span>,
+                                <span class='ident'>pc</span>, <span class='ident'>with_goto</span>(<span class='ident'>pc</span>, <span class='ident'>inst</span>.<span class='ident'>goto</span>, <span class='ident'>s</span>)));
                 }
             }
+            <span class='kw'>if</span> <span class='ident'>pc</span> <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>start</span> {
+                <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot; (start)&quot;</span>));
+            }
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;\n&quot;</span>));
         }
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;--------------------------------&quot;</span>));
         <span class='prelude-val'>Ok</span>(())
     }
 }
@@ -654,39 +678,6 @@
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Inst</span>;
     <span class='kw'>type</span> <span class='ident'>IntoIter</span> <span class='op'>=</span> <span class='ident'>slice</span>::<span class='ident'>Iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>Inst</span><span class='op'>&gt;</span>;
     <span class='kw'>fn</span> <span class='ident'>into_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>IntoIter</span> { <span class='self'>self</span>.<span class='ident'>iter</span>() }
-}
-
-<span class='doccomment'>/// EngineCache maintains reusable allocations for each matching engine</span>
-<span class='doccomment'>/// available to a particular program.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// The allocations are created lazily, so we don&#39;t pay for caches that</span>
-<span class='doccomment'>/// aren&#39;t used.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// N.B. These are all behind a pointer because it&#39;s fewer bytes to memcpy.</span>
-<span class='doccomment'>/// These caches are pushed/popped from the pool a lot, and a smaller</span>
-<span class='doccomment'>/// footprint can have an impact on matching small inputs. See, for example,</span>
-<span class='doccomment'>/// the hard_32 benchmark.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EngineCache</span> {
-    <span class='ident'>nfa</span>: <span class='ident'>Pool</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>NfaCache</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>backtrack</span>: <span class='ident'>Pool</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>BacktrackCache</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>dfa</span>: <span class='ident'>Pool</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>DfaCache</span><span class='op'>&gt;&gt;</span>,
-}
-
-<span class='kw'>impl</span> <span class='ident'>EngineCache</span> {
-    <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='ident'>EngineCache</span> {
-            <span class='ident'>nfa</span>: <span class='ident'>Pool</span>::<span class='ident'>new</span>(<span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='op'>||</span> <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>NfaCache</span>::<span class='ident'>new</span>()))),
-            <span class='ident'>backtrack</span>: <span class='ident'>Pool</span>::<span class='ident'>new</span>(<span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='op'>||</span> <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>BacktrackCache</span>::<span class='ident'>new</span>()))),
-            <span class='ident'>dfa</span>: <span class='ident'>Pool</span>::<span class='ident'>new</span>(<span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='op'>||</span> <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>DfaCache</span>::<span class='ident'>new</span>()))),
-        }
-    }
-}
-
-<span class='kw'>impl</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>EngineCache</span> {
-    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EngineCache</span> {
-        <span class='ident'>EngineCache</span>::<span class='ident'>new</span>()
-    }
 }
 
 <span class='doccomment'>/// Inst is an instruction code in a Regex program.</span>
@@ -783,6 +774,10 @@
     <span class='ident'>WordBoundary</span>,
     <span class='doccomment'>/// Word character on both sides or non-word character on both sides.</span>
     <span class='ident'>NotWordBoundary</span>,
+    <span class='doccomment'>/// ASCII word boundary.</span>
+    <span class='ident'>WordBoundaryAscii</span>,
+    <span class='doccomment'>/// Not ASCII word boundary.</span>
+    <span class='ident'>NotWordBoundaryAscii</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>InstEmptyLook</span> {
@@ -795,10 +790,21 @@
             <span class='ident'>EndLine</span> <span class='op'>=&gt;</span> <span class='ident'>c2</span>.<span class='ident'>is_none</span>() <span class='op'>||</span> <span class='ident'>c2</span> <span class='op'>==</span> <span class='string'>&#39;\n&#39;</span>,
             <span class='ident'>StartText</span> <span class='op'>=&gt;</span> <span class='ident'>c1</span>.<span class='ident'>is_none</span>(),
             <span class='ident'>EndText</span> <span class='op'>=&gt;</span> <span class='ident'>c2</span>.<span class='ident'>is_none</span>(),
-            <span class='kw-2'>ref</span> <span class='ident'>wbty</span> <span class='op'>=&gt;</span> {
+            <span class='ident'>WordBoundary</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> (<span class='ident'>w1</span>, <span class='ident'>w2</span>) <span class='op'>=</span> (<span class='ident'>c1</span>.<span class='ident'>is_word_char</span>(), <span class='ident'>c2</span>.<span class='ident'>is_word_char</span>());
-                (<span class='op'>*</span><span class='ident'>wbty</span> <span class='op'>==</span> <span class='ident'>WordBoundary</span> <span class='op'>&amp;&amp;</span> <span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>)
-                <span class='op'>||</span> (<span class='op'>*</span><span class='ident'>wbty</span> <span class='op'>==</span> <span class='ident'>NotWordBoundary</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span>(<span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>))
+                <span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>
+            }
+            <span class='ident'>NotWordBoundary</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>let</span> (<span class='ident'>w1</span>, <span class='ident'>w2</span>) <span class='op'>=</span> (<span class='ident'>c1</span>.<span class='ident'>is_word_char</span>(), <span class='ident'>c2</span>.<span class='ident'>is_word_char</span>());
+                <span class='op'>!</span>(<span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>)
+            }
+            <span class='ident'>WordBoundaryAscii</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>let</span> (<span class='ident'>w1</span>, <span class='ident'>w2</span>) <span class='op'>=</span> (<span class='ident'>c1</span>.<span class='ident'>is_word_byte</span>(), <span class='ident'>c2</span>.<span class='ident'>is_word_byte</span>());
+                <span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>
+            }
+            <span class='ident'>NotWordBoundaryAscii</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>let</span> (<span class='ident'>w1</span>, <span class='ident'>w2</span>) <span class='op'>=</span> (<span class='ident'>c1</span>.<span class='ident'>is_word_byte</span>(), <span class='ident'>c2</span>.<span class='ident'>is_word_byte</span>());
+                <span class='op'>!</span>(<span class='ident'>w1</span> <span class='op'>^</span> <span class='ident'>w2</span>)
             }
         }
     }
@@ -826,7 +832,6 @@
 
 <span class='kw'>impl</span> <span class='ident'>InstRanges</span> {
     <span class='doccomment'>/// Tests whether the given input character matches this instruction.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span> <span class='comment'>// About ~5-15% more throughput then `#[inline]`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matches</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>c</span>: <span class='ident'>Char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='comment'>// This speeds up the `match_class_unicode` benchmark by checking</span>
         <span class='comment'>// some common cases quickly without binary search. e.g., Matching</span>

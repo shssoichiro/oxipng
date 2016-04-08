@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>mem</a>::<wbr><a href='index.html'>epoch</a>::<wbr><a class='struct' href=''>Guard</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-368' class='srclink' href='../../../src/crossbeam/mem/epoch/mod.rs.html.html#400-402' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-185' class='srclink' href='../../../src/crossbeam/mem/epoch/guard.rs.html#10-12' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>#[must_use]
 pub struct Guard {
     // some fields omitted
@@ -59,7 +60,7 @@ destruction, it unpins the epoch.</p>
 structure and should be collected when sufficient epochs have passed.</p>
 </div><h4 id='method.migrate_garbage' class='method'><code>fn <a href='#method.migrate_garbage' class='fnname'>migrate_garbage</a>(&amp;self)</code></h4>
 <div class='docblock'><p>Move the thread-local garbage into the global set of garbage.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../../crossbeam/mem/epoch/struct.Guard.html' title='crossbeam::mem::epoch::Guard'>Guard</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../../crossbeam/mem/epoch/struct.Guard.html' title='crossbeam::mem::epoch::Guard'>Guard</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

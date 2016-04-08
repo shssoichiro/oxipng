@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>byteorder</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-0' class='srclink' href='../src/byteorder/lib.rs.html.html#1-779' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/byteorder/lib.rs.html#1-791' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This crate provides convenience methods for encoding and decoding numbers
 in either big-endian or little-endian order.</p>
 
@@ -81,72 +82,57 @@ implement <code>Read</code> and <code>Write</code>.</p>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>wtr</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>5</span>, <span class='number'>2</span>, <span class='number'>0</span>, <span class='number'>3</span>]);</pre>
 </div><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.BigEndian.html'
-                               title='byteorder::BigEndian'>BigEndian</a></td>
-                        <td class='docblock short'>
-                             <p>Defines big-endian serialization.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.Error.html'
-                               title='byteorder::Error'>Error</a></td>
-                        <td class='docblock short'>
-                             <p>An error type for reading bytes.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.LittleEndian.html'
-                               title='byteorder::LittleEndian'>LittleEndian</a></td>
-                        <td class='docblock short'>
-                             <p>Defines little-endian serialization.</p>
-                        </td>
-                    </tr>
-                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.BigEndian.html'
+                                  title='byteorder::BigEndian'>BigEndian</a></td>
+                           <td class='docblock short'>
+                                <p>Defines big-endian serialization.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.LittleEndian.html'
+                                  title='byteorder::LittleEndian'>LittleEndian</a></td>
+                           <td class='docblock short'>
+                                <p>Defines little-endian serialization.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.ByteOrder.html'
-                               title='byteorder::ByteOrder'>ByteOrder</a></td>
-                        <td class='docblock short'>
-                             <p>ByteOrder describes types that can serialize integers as bytes.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.ReadBytesExt.html'
-                               title='byteorder::ReadBytesExt'>ReadBytesExt</a></td>
-                        <td class='docblock short'>
-                             <p>Extends <code>Read</code> with methods for reading numbers. (For <code>std::io</code>.)</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.WriteBytesExt.html'
-                               title='byteorder::WriteBytesExt'>WriteBytesExt</a></td>
-                        <td class='docblock short'>
-                             <p>Extends <code>Write</code> with methods for writing numbers. (For <code>std::io</code>.)</p>
-                        </td>
-                    </tr>
-                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ByteOrder.html'
+                                  title='byteorder::ByteOrder'>ByteOrder</a></td>
+                           <td class='docblock short'>
+                                <p>ByteOrder describes types that can serialize integers as bytes.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ReadBytesExt.html'
+                                  title='byteorder::ReadBytesExt'>ReadBytesExt</a></td>
+                           <td class='docblock short'>
+                                <p>Extends <code>Read</code> with methods for reading numbers. (For <code>std::io</code>.)</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.WriteBytesExt.html'
+                                  title='byteorder::WriteBytesExt'>WriteBytesExt</a></td>
+                           <td class='docblock short'>
+                                <p>Extends <code>Write</code> with methods for writing numbers. (For <code>std::io</code>.)</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='type' href='type.NativeEndian.html'
-                               title='byteorder::NativeEndian'>NativeEndian</a></td>
-                        <td class='docblock short'>
-                             <p>Defines system native-endian serialization.</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='type' href='type.Result.html'
-                               title='byteorder::Result'>Result</a></td>
-                        <td class='docblock short'>
-                             <p>A short-hand for <code>result::Result&lt;T, byteorder::Error&gt;</code>.</p>
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.NativeEndian.html'
+                                  title='byteorder::NativeEndian'>NativeEndian</a></td>
+                           <td class='docblock short'>
+                                <p>Defines system native-endian serialization.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.NetworkEndian.html'
+                                  title='byteorder::NetworkEndian'>NetworkEndian</a></td>
+                           <td class='docblock short'>
+                                <p>Defines network byte order serialization.</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

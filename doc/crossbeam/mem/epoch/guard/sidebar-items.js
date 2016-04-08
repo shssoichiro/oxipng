@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["pin","Pin the current epoch."]],"struct":[["Guard","An RAII-style guard for pinning the current epoch."]]});

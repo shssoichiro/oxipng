@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Drain","A draining VecDeque iterator"],["IntoIter","A by-value VecDeque iterator"],["Iter","`VecDeque` iterator."],["IterMut","`VecDeque` mutable iterator."],["VecDeque","`VecDeque` is a growable ring buffer, which can be used as a double-ended queue efficiently."]]});

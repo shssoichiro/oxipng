@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `MetadataExt` trait in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, MetadataExt">
+
+    <title>bitflags::__core::os::macos::fs::MetadataExt - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../../index.html'>bitflags</a>::<wbr><a href='../../../index.html'>__core</a>::<wbr><a href='../../index.html'>os</a>::<wbr><a href='../index.html'>macos</a>::<wbr><a href='index.html'>fs</a></p><script>window.sidebarCurrent = {name: 'MetadataExt', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../../../../index.html'>bitflags</a>::<wbr><a href='../../../index.html'>__core</a>::<wbr><a href='../../index.html'>os</a>::<wbr><a href='../index.html'>macos</a>::<wbr><a href='index.html'>fs</a>::<wbr><a class='trait' href=''>MetadataExt</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-6597' class='srclink' href='https://doc.rust-lang.org/nightly/std/os/macos/fs/trait.MetadataExt.html?gotosrc=6597' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait MetadataExt {
+    fn <a href='#tymethod.as_raw_stat' class='fnname'>as_raw_stat</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../../../bitflags/__core/os/macos/raw/struct.stat.html' title='bitflags::__core::os::macos::raw::stat'>stat</a>;
+    fn <a href='#tymethod.st_dev' class='fnname'>st_dev</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_ino' class='fnname'>st_ino</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_mode' class='fnname'>st_mode</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_nlink' class='fnname'>st_nlink</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_uid' class='fnname'>st_uid</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_gid' class='fnname'>st_gid</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_rdev' class='fnname'>st_rdev</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_size' class='fnname'>st_size</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_atime' class='fnname'>st_atime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_atime_nsec' class='fnname'>st_atime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_mtime' class='fnname'>st_mtime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_mtime_nsec' class='fnname'>st_mtime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_ctime' class='fnname'>st_ctime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_ctime_nsec' class='fnname'>st_ctime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_birthtime' class='fnname'>st_birthtime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_birthtime_nsec' class='fnname'>st_birthtime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>;
+    fn <a href='#tymethod.st_blksize' class='fnname'>st_blksize</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_blocks' class='fnname'>st_blocks</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>;
+    fn <a href='#tymethod.st_flags' class='fnname'>st_flags</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_gen' class='fnname'>st_gen</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_lspare' class='fnname'>st_lspare</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>;
+    fn <a href='#tymethod.st_qspare' class='fnname'>st_qspare</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>; 2]</a>;
+}</pre><div class='docblock'><p>OS-specific extension methods for <code>fs::Metadata</code></p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.as_raw_stat' class='method stab  deprecated'><code>fn <a href='#tymethod.as_raw_stat' class='fnname'>as_raw_stat</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../../../bitflags/__core/os/macos/raw/struct.stat.html' title='bitflags::__core::os::macos::raw::stat'>stat</a></code></h3><div class='stability'><em class='stab  deprecated'>Deprecated since 1.8.0<p>: deprecated in favor of the accessor methods of this trait</p>
+</em></div><div class='docblock'><p>Gain a reference to the underlying <code>stat</code> structure which contains
+the raw information returned by the OS.</p>
+
+<p>The contents of the returned <code>stat</code> are <strong>not</strong> consistent across
+Unix platforms. The <code>os::unix::fs::MetadataExt</code> trait contains the
+cross-Unix abstractions contained within the raw stat.</p>
+</div><h3 id='tymethod.st_dev' class='method stab '><code>fn <a href='#tymethod.st_dev' class='fnname'>st_dev</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_ino' class='method stab '><code>fn <a href='#tymethod.st_ino' class='fnname'>st_ino</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_mode' class='method stab '><code>fn <a href='#tymethod.st_mode' class='fnname'>st_mode</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_nlink' class='method stab '><code>fn <a href='#tymethod.st_nlink' class='fnname'>st_nlink</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_uid' class='method stab '><code>fn <a href='#tymethod.st_uid' class='fnname'>st_uid</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_gid' class='method stab '><code>fn <a href='#tymethod.st_gid' class='fnname'>st_gid</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_rdev' class='method stab '><code>fn <a href='#tymethod.st_rdev' class='fnname'>st_rdev</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_size' class='method stab '><code>fn <a href='#tymethod.st_size' class='fnname'>st_size</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_atime' class='method stab '><code>fn <a href='#tymethod.st_atime' class='fnname'>st_atime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_atime_nsec' class='method stab '><code>fn <a href='#tymethod.st_atime_nsec' class='fnname'>st_atime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_mtime' class='method stab '><code>fn <a href='#tymethod.st_mtime' class='fnname'>st_mtime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_mtime_nsec' class='method stab '><code>fn <a href='#tymethod.st_mtime_nsec' class='fnname'>st_mtime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_ctime' class='method stab '><code>fn <a href='#tymethod.st_ctime' class='fnname'>st_ctime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_ctime_nsec' class='method stab '><code>fn <a href='#tymethod.st_ctime_nsec' class='fnname'>st_ctime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_birthtime' class='method stab '><code>fn <a href='#tymethod.st_birthtime' class='fnname'>st_birthtime</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_birthtime_nsec' class='method stab '><code>fn <a href='#tymethod.st_birthtime_nsec' class='fnname'>st_birthtime_nsec</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_blksize' class='method stab '><code>fn <a href='#tymethod.st_blksize' class='fnname'>st_blksize</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_blocks' class='method stab '><code>fn <a href='#tymethod.st_blocks' class='fnname'>st_blocks</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_flags' class='method stab '><code>fn <a href='#tymethod.st_flags' class='fnname'>st_flags</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_gen' class='method stab '><code>fn <a href='#tymethod.st_gen' class='fnname'>st_gen</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_lspare' class='method stab '><code>fn <a href='#tymethod.st_lspare' class='fnname'>st_lspare</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.8.0</span></h3><h3 id='tymethod.st_qspare' class='method stab '><code>fn <a href='#tymethod.st_qspare' class='fnname'>st_qspare</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>; 2]</a></code><span class="since">1.8.0</span></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                         src="../../../../../implementors/std/os/macos/fs/trait.MetadataExt.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../../jquery.js"></script>
+    <script src="../../../../../main.js"></script>
+    
+    <script defer src="../../../../../search-index.js"></script>
+</body>
+</html>

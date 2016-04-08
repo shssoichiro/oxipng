@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content enum">
 <h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>clap</a>::<wbr><a class='enum' href=''>AppSettings</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-282' class='srclink' href='../src/clap/app/settings.rs.html.html#95-291' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-340' class='srclink' href='../src/clap/app/settings.rs.html#83-457' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum AppSettings {
     SubcommandsNegateReqs,
     SubcommandRequired,
@@ -59,27 +60,67 @@
     Hidden,
     TrailingVarArg,
     NoBinaryName,
+    AllowExternalSubcommands,
+    StrictUtf8,
+    AllowInvalidUtf8,
+    AllowLeadingHyphen,
+    HidePossibleValuesInHelp,
+    NextLineHelp,
+    DeriveDisplayOrder,
     // some variants omitted
 }</pre><div class='docblock'><p>Application level settings, which affect how <code>App</code> operates</p>
+
+<p><strong>NOTE:</strong> When these settings are used, they apply only to current command, and are <em>not</em>
+propagated down or up through child or parent subcommands</p>
 </div><h2 class='variants'>Variants</h2>
-<table class='variants_table'><tr><td id='variant.SubcommandsNegateReqs'><code>SubcommandsNegateReqs</code></td><td><div class='docblock'><p>Allows subcommands to override all requirements of the parent (this command). For example
-if you had a subcommand or even top level application which had a required arguments that
-are only required as long as there is no subcommand present.</p>
+<table class='variants_table'><tr><td id='variant.SubcommandsNegateReqs'><code>SubcommandsNegateReqs</code></td><td><div class='docblock'><p>Allows subcommands to override all requirements of the parent command. For example
+if you had a subcommand or top level application which had a required argument that
+are only required as long as there is no subcommand present, using this setting would allow
+you set those arguments to <code>required(true)</code> and yet receive no error so long as the user
+uses a valid subcommand instead.</p>
 
 <p><strong>NOTE:</strong> This defaults to false (using subcommand does <em>not</em> negate requirements)</p>
 
 <h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>This first example shows that it is an error to not use a required argument</p>
+
 <pre class='rust rust-example-rendered'>
-<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
-    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandsNegateReqs</span>)</pre>
+<span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandsNegateReqs</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;opt&quot;</span>).<span class='ident'>required</span>(<span class='boolval'>true</span>))
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;myprog&quot;</span>
+    ]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>err</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>err</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>kind</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>MissingRequiredArgument</span>);</pre>
+
+<p>This next example shows that it is no longer error to not use a required argument if a
+valid subcommand is used.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>noerr</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandsNegateReqs</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;opt&quot;</span>).<span class='ident'>required</span>(<span class='boolval'>true</span>))
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;myprog&quot;</span>, <span class='string'>&quot;test&quot;</span>
+    ]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>noerr</span>.<span class='ident'>is_ok</span>());</pre>
 </div></td><td></td></tr><tr><td id='variant.SubcommandRequired'><code>SubcommandRequired</code></td><td><div class='docblock'><p>Allows specifying that if no subcommand is present at runtime, error and exit gracefully</p>
 
 <p><strong>NOTE:</strong> This defaults to false (subcommands do <em>not</em> need to be present)</p>
 
 <h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
-<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
-    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandRequired</span>)</pre>
+<span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>SubcommandRequired</span>)
+    .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;myprog&quot;</span>,
+    ]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>err</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>err</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>kind</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>MissingSubcommand</span>);</pre>
 </div></td><td></td></tr><tr><td id='variant.ArgRequiredElseHelp'><code>ArgRequiredElseHelp</code></td><td><div class='docblock'><p>Specifies that the help text should be displayed (and then exit gracefully), if no
 arguments are present at runtime (i.e. an empty run such as, <code>$ myprog</code>.</p>
 
@@ -89,11 +130,11 @@ arguments are present at runtime (i.e. an empty run such as, <code>$ myprog</cod
 <pre class='rust rust-example-rendered'>
 <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>ArgRequiredElseHelp</span>)</pre>
-</div></td><td></td></tr><tr><td id='variant.GlobalVersion'><code>GlobalVersion</code></td><td><div class='docblock'><p>Uses version of the current command for all subcommands. (Defaults to false; subcommands
-have independant version strings)</p>
+</div></td><td></td></tr><tr><td id='variant.GlobalVersion'><code>GlobalVersion</code></td><td><div class='docblock'><p>Specifies to version of the current command for all child subcommands. (Defaults to false;
+subcommands have independant version strings from their parents)</p>
 
-<p><strong>NOTE:</strong> The version for the current command and this setting must be set <strong>prior</strong> to
-adding any subcommands</p>
+<p><strong>NOTE:</strong> The version for the current command <strong>and</strong> this setting must be set <strong>prior</strong> to
+adding any child subcommands</p>
 
 <h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
@@ -102,26 +143,27 @@ adding any subcommands</p>
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>GlobalVersion</span>)
     .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
     .<span class='ident'>get_matches</span>();
-<span class='comment'>// running `myprog test --version` will display</span>
+<span class='comment'>// running `$ myprog test --version` will display</span>
 <span class='comment'>// &quot;myprog-test v1.1&quot;</span></pre>
 </div></td><td></td></tr><tr><td id='variant.VersionlessSubcommands'><code>VersionlessSubcommands</code></td><td><div class='docblock'><p>Disables <code>-V</code> and <code>--version</code> for all subcommands (Defaults to false; subcommands have
 version flags)</p>
 
 <p><strong>NOTE:</strong> This setting must be set <strong>prior</strong> adding any subcommands</p>
 
-<p><strong>NOTE:</strong> Do not set this value to false, it will have undesired results!</p>
-
 <h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
-<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+<span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>version</span>(<span class='string'>&quot;v1.1&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>VersionlessSubcommands</span>)
     .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>))
-    .<span class='ident'>get_matches</span>();
-<span class='comment'>// running `myprog test --version` will display unknown argument error</span></pre>
-</div></td><td></td></tr><tr><td id='variant.UnifiedHelpMessage'><code>UnifiedHelpMessage</code></td><td><div class='docblock'><p>By default the auto-generated help message groups flags, options, and positional arguments
-separately. This setting disable that and groups flags and options together presenting a
-more unified help message (a la getopts or docopt style).</p>
+    .<span class='ident'>get_matches_from_safe</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;myprog&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;-V&quot;</span>
+    ]);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>kind</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>UnknownArgument</span>);</pre>
+</div></td><td></td></tr><tr><td id='variant.UnifiedHelpMessage'><code>UnifiedHelpMessage</code></td><td><div class='docblock'><p>Groups flags and options together presenting a more unified help message (a la <code>getopts</code> or
+<code>docopt</code> style). The default is the auto-generated help message groups flags, options
+separately.</p>
 
 <p><strong>NOTE:</strong> This setting is cosmetic only and does not affect any functionality.</p>
 
@@ -136,8 +178,7 @@ exiting</p>
 
 <p>This is most useful when writing an application which is run from a GUI shortcut, or on
 Windows where a user tries to open the binary by double-clicking instead of using the
-command line (i.e. set <code>.arg_required_else_help(true)</code> and <code>.wait_on_error(true)</code> to
-display the help in such a case).</p>
+command line.</p>
 
 <p><strong>NOTE:</strong> This setting is <strong>not</strong> recursive with subcommands, meaning if you wish this
 behavior for all subcommands, you must set this on each command (needing this is extremely
@@ -151,11 +192,11 @@ rare)</p>
 subcommands are present at runtime (i.e. an empty run such as, <code>$ myprog</code>.</p>
 
 <p><strong>NOTE:</strong> This should <em>not</em> be used with <code>.subcommand_required()</code> as they do the same
-thing, except one prints the help text, and one prints an error.</p>
+thing, except this prints the help text, and the other prints an error.</p>
 
 <p><strong>NOTE:</strong> If the user specifies arguments at runtime, but no subcommand the help text will
 still be displayed and exit. If this is <em>not</em> the desired result, consider using
-<code>.arg_required_else_help()</code></p>
+<code>ArgRequiredElseHelp</code> instead.</p>
 
 <h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
@@ -168,12 +209,12 @@ still be displayed and exit. If this is <em>not</em> the desired result, conside
 <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>subcommand</span>(<span class='ident'>SubCommand</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;test&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>Hidden</span>))</pre>
-</div></td><td></td></tr><tr><td id='variant.TrailingVarArg'><code>TrailingVarArg</code></td><td><div class='docblock'><p>Specifies that the final positional argument is a vararg and that <code>clap</code> should not attempt
-to parse any further args.</p>
+</div></td><td></td></tr><tr><td id='variant.TrailingVarArg'><code>TrailingVarArg</code></td><td><div class='docblock'><p>Specifies that the final positional argument is a &quot;VarArg&quot; and that <code>clap</code> should not
+attempt to parse any further args.</p>
 
 <p>The values of the trailing positional argument will contain all args from itself on.</p>
 
-<p><strong>NOTE:</strong> The final positional argument <strong>must</strong> have <code>.multiple(true)</code> or usage token
+<p><strong>NOTE:</strong> The final positional argument <strong>must</strong> have <code>.multiple(true)</code> or the usage string
 equivalent.</p>
 
 <h1 id='examples-9' class='section-header'><a href='#examples-9'>Examples</a></h1>
@@ -181,31 +222,148 @@ equivalent.</p>
 <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>TrailingVarArg</span>)
     .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>from_usage</span>(<span class='string'>&quot;&lt;cmd&gt;... &#39;commands to run&#39;&quot;</span>))
-    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;myprog&quot;</span>, <span class='string'>&quot;some_command&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;set&quot;</span>]);
+    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;myprog&quot;</span>, <span class='string'>&quot;arg1&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;val1&quot;</span>]);
 
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>values_of</span>(<span class='string'>&quot;cmd&quot;</span>).<span class='ident'>unwrap</span>(), <span class='kw-2'>&amp;</span>[<span class='string'>&quot;some_command&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;set&quot;</span>]);</pre>
+<span class='kw'>let</span> <span class='ident'>trail</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>values_of</span>(<span class='string'>&quot;cmd&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>trail</span>, [<span class='string'>&quot;arg1&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;val1&quot;</span>]);</pre>
 </div></td><td></td></tr><tr><td id='variant.NoBinaryName'><code>NoBinaryName</code></td><td><div class='docblock'><p>Specifies that the parser should not assume the first argument passed is the binary name.
 This is normally the case when using a &quot;daemon&quot; style mode, or an interactive CLI where one
 one would not normally type the binary or program name for each command.</p>
-
-<p><strong>NOTE:</strong> This should only be used when you absolutely know it&#39;s what you need. 99% of the
-cases out there don&#39;t need this setting.</p>
 
 <h1 id='examples-10' class='section-header'><a href='#examples-10'>Examples</a></h1>
 <pre class='rust rust-example-rendered'>
 <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>NoBinaryName</span>)
     .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>from_usage</span>(<span class='string'>&quot;&lt;cmd&gt;... &#39;commands to run&#39;&quot;</span>))
-    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;some_command&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;set&quot;</span>]);
+    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;command&quot;</span>, <span class='string'>&quot;set&quot;</span>]);
 
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>values_of</span>(<span class='string'>&quot;cmd&quot;</span>).<span class='ident'>unwrap</span>(), <span class='kw-2'>&amp;</span>[<span class='string'>&quot;some_command&quot;</span>, <span class='string'>&quot;-r&quot;</span>, <span class='string'>&quot;set&quot;</span>]);</pre>
-</div></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='associatedtype.Err' class='type'><code>type Err = <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
-<h4 id='method.from_str' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#method.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self, Self::Err&gt;</code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h4>
+<span class='kw'>let</span> <span class='ident'>cmds</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>values_of</span>(<span class='string'>&quot;cmd&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cmds</span>, [<span class='string'>&quot;command&quot;</span>, <span class='string'>&quot;set&quot;</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.AllowExternalSubcommands'><code>AllowExternalSubcommands</code></td><td><div class='docblock'><p>Specifies that an unexpected argument positional arguments which would otherwise cause a
+<code>ErrorKind::UnknownArgument</code> error, should instead be treated as a subcommand in the
+<code>ArgMatches</code> struct.</p>
+
+<p><strong>NOTE:</strong> Use this setting with caution, as a truly unexpected argument (i.e. one that is
+<em>NOT</em> an external subcommand) will not cause an error and instead be treatd as a potential
+subcommand. You shoud inform the user appropriatly.</p>
+
+<h1 id='examples-11' class='section-header'><a href='#examples-11'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Assume there is an external subcommand named &quot;subcmd&quot;</span>
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>AllowExternalSubcommands</span>)
+    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;myprog&quot;</span>, <span class='string'>&quot;subcmd&quot;</span>, <span class='string'>&quot;--option&quot;</span>, <span class='string'>&quot;value&quot;</span>, <span class='string'>&quot;-fff&quot;</span>, <span class='string'>&quot;--flag&quot;</span>
+    ]);
+
+<span class='comment'>// All trailing arguments will be stored under the subcommand&#39;s sub-matches using a value</span>
+<span class='comment'>// of the runtime subcommand name (in this case &quot;subcmd&quot;)</span>
+<span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>subcommand</span>() {
+    (<span class='ident'>external</span>, <span class='prelude-val'>Some</span>(<span class='ident'>ext_m</span>)) <span class='op'>=&gt;</span> {
+         <span class='kw'>let</span> <span class='ident'>ext_args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>ext_m</span>.<span class='ident'>values_of</span>(<span class='ident'>external</span>).<span class='ident'>unwrap</span>().<span class='ident'>collect</span>();
+         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ext_args</span>, [<span class='string'>&quot;--option&quot;</span>, <span class='string'>&quot;value&quot;</span>, <span class='string'>&quot;-fff&quot;</span>, <span class='string'>&quot;--flag&quot;</span>]);
+    },
+    _ <span class='op'>=&gt;</span> {},
+}</pre>
+</div></td><td></td></tr><tr><td id='variant.StrictUtf8'><code>StrictUtf8</code></td><td><div class='docblock'><p>Specifies that any invalid UTF-8 code points should be treated as an error and fail
+with a <code>ErrorKind::InvalidUtf8</code> error.</p>
+
+<p><strong>NOTE:</strong> This rule only applies to argument values, as flags, options, and subcommands
+themselves only allow valid UTF-8 code points.</p>
+
+<h1 id='platform-specific' class='section-header'><a href='#platform-specific'>Platform Specific</a></h1>
+<p>Non Windows systems only</p>
+
+<h1 id='examples-12' class='section-header'><a href='#examples-12'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsString</span>;
+
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>StrictUtf8</span>)
+    .<span class='ident'>arg_from_usage</span>(<span class='string'>&quot;&lt;arg&gt; &#39;some positional arg&#39;&quot;</span>)
+    .<span class='ident'>get_matches_from_safe</span>(
+        <span class='macro'>vec</span><span class='macro'>!</span>[
+            <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;myprog&quot;</span>),
+            <span class='ident'>OsString</span>::<span class='ident'>from_vec</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xe9</span>])]);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>unwrap_err</span>().<span class='ident'>kind</span>, <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidUtf8</span>);
+}</pre>
+</div></td><td></td></tr><tr><td id='variant.AllowInvalidUtf8'><code>AllowInvalidUtf8</code></td><td><div class='docblock'><p>Specifies that any invalid UTF-8 code points should <em>not</em> be treated as an error. This is
+the default behavior of <code>clap</code></p>
+
+<p><strong>NOTE:</strong> Using argument values with invalid UTF-8 code points requires using Either
+<code>ArgMatches::os_value(s)_of</code> or <code>ArgMatches::lossy_value(s)_of</code> for those particular
+arguments which may contain invalid UTF-8 values</p>
+
+<p><strong>NOTE:</strong> This rule only applies to  argument values, as flags, options, and subcommands
+themselves only allow valid UTF-8 code points.</p>
+
+<h1 id='platform-specific-1' class='section-header'><a href='#platform-specific-1'>Platform Specific</a></h1>
+<p>Non Windows systems only</p>
+
+<h1 id='examples-13' class='section-header'><a href='#examples-13'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsString</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>unix</span>::<span class='ident'>ffi</span>::<span class='ident'>OsStrExt</span>;
+
+<span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>StrictUtf8</span>)
+    .<span class='ident'>arg_from_usage</span>(<span class='string'>&quot;&lt;arg&gt; &#39;some positional arg&#39;&quot;</span>)
+    .<span class='ident'>get_matches_from_safe</span>(
+        <span class='macro'>vec</span><span class='macro'>!</span>[
+            <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;myprog&quot;</span>),
+            <span class='ident'>OsString</span>::<span class='ident'>from_vec</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xe9</span>])]);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>is_ok</span>());
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>r</span>.<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>value_of_os</span>(<span class='string'>&quot;arg&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>as_bytes</span>(), <span class='kw-2'>&amp;</span>[<span class='number'>0xe9</span>]);</pre>
+</div></td><td></td></tr><tr><td id='variant.AllowLeadingHyphen'><code>AllowLeadingHyphen</code></td><td><div class='docblock'><p>Specifies that leading hyphens are allowed in argument <em>values</em>, such as negative numbers
+<code>-10</code></p>
+
+<p><strong>NOTE:</strong> This can only be set application wide and not on a per argument basis.</p>
+
+<p><strong>NOTE:</strong> Use this setting with caution as it silences certain circumstances which would
+otherwise be an error (such as accidentally forgetting to specify a value for leading
+option)</p>
+
+<h1 id='examples-14' class='section-header'><a href='#examples-14'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Imagine you needed to represent negative numbers as well, such as -10</span>
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;nums&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>AllowLeadingHyphen</span>)
+    .<span class='ident'>arg</span>(<span class='ident'>Arg</span>::<span class='ident'>with_name</span>(<span class='string'>&quot;neg&quot;</span>).<span class='ident'>index</span>(<span class='number'>1</span>))
+    .<span class='ident'>get_matches_from</span>(<span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;nums&quot;</span>, <span class='string'>&quot;-20&quot;</span>
+    ]);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>value_of</span>(<span class='string'>&quot;neg&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;-20&quot;</span>));</pre>
+</div></td><td></td></tr><tr><td id='variant.HidePossibleValuesInHelp'><code>HidePossibleValuesInHelp</code></td><td><div class='docblock'><p>Tells <code>clap</code> <em>not</em> to print possible values when displaying help information. This can be
+useful if there are many values, or they are explained elsewhere.</p>
+</div></td><td></td></tr><tr><td id='variant.NextLineHelp'><code>NextLineHelp</code></td><td><div class='docblock'><p>Places the help string for all arguments on the line after the argument</p>
+
+<p><strong>NOTE:</strong> This setting is cosmetic only and does not affect any functionality.</p>
+
+<h1 id='examples-15' class='section-header'><a href='#examples-15'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>NextLineHelp</span>)
+    .<span class='ident'>get_matches</span>();</pre>
+</div></td><td></td></tr><tr><td id='variant.DeriveDisplayOrder'><code>DeriveDisplayOrder</code></td><td><div class='docblock'><p>Displays the arguments and subcommands in the help message in the order that they were
+declared in, vice alphabetically which is the default.</p>
+
+<h1 id='examples-16' class='section-header'><a href='#examples-16'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>DeriveDisplayOrder</span>)
+    .<span class='ident'>get_matches</span>();</pre>
+</div></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='associatedtype.Err' class='type'><code>type <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#associatedtype.Err' class='type'>Err</a> = <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<h4 id='method.from_str' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#tymethod.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self, Self::Err&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h4>
 <h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

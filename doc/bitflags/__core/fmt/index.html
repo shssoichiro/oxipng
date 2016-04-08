@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `fmt` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, fmt">
+
+    <title>bitflags::__core::fmt - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'fmt', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>fmt</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2393' class='srclink' href='https://doc.rust-lang.org/nightly/collections/fmt/index.html?gotosrc=2393' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Utilities for formatting and printing strings</p>
+
+<p>This module contains the runtime support for the <code>format!</code> syntax extension.
+This macro is implemented in the compiler to emit calls to this module in
+order to format arguments at runtime into strings and streams.</p>
+
+<h1 id='usage' class='section-header'><a href='#usage'>Usage</a></h1>
+<p>The <code>format!</code> macro is intended to be familiar to those coming from C&#39;s
+printf/fprintf functions or Python&#39;s <code>str.format</code> function. In its current
+revision, the <code>format!</code> macro returns a <code>String</code> type which is the result of
+the formatting. In the future it will also be able to pass in a stream to
+format arguments directly while performing minimal allocations.</p>
+
+<p>Some examples of the <code>format!</code> extension are:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Hello&quot;</span>);                 <span class='comment'>// =&gt; &quot;Hello&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Hello, {}!&quot;</span>, <span class='string'>&quot;world&quot;</span>);   <span class='comment'>// =&gt; &quot;Hello, world!&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;The number is {}&quot;</span>, <span class='number'>1</span>);   <span class='comment'>// =&gt; &quot;The number is 1&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, (<span class='number'>3</span>, <span class='number'>4</span>));          <span class='comment'>// =&gt; &quot;(3, 4)&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{value}&quot;</span>, <span class='ident'>value</span><span class='op'>=</span><span class='number'>4</span>);      <span class='comment'>// =&gt; &quot;4&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} {}&quot;</span>, <span class='number'>1</span>, <span class='number'>2</span>);           <span class='comment'>// =&gt; &quot;1 2&quot;</span></pre>
+
+<p>From these, you can see that the first argument is a format string. It is
+required by the compiler for this to be a string literal; it cannot be a
+variable passed in (in order to perform validity checking). The compiler
+will then parse the format string and determine if the list of arguments
+provided is suitable to pass to this format string.</p>
+
+<h2 id='positional-parameters' class='section-header'><a href='#positional-parameters'>Positional parameters</a></h2>
+<p>Each formatting argument is allowed to specify which value argument it&#39;s
+referencing, and if omitted it is assumed to be &quot;the next argument&quot;. For
+example, the format string <code>{} {} {}</code> would take three parameters, and they
+would be formatted in the same order as they&#39;re given. The format string
+<code>{2} {1} {0}</code>, however, would format arguments in reverse order.</p>
+
+<p>Things can get a little tricky once you start intermingling the two types of
+positional specifiers. The &quot;next argument&quot; specifier can be thought of as an
+iterator over the argument. Each time a &quot;next argument&quot; specifier is seen,
+the iterator advances. This leads to behavior like this:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{1} {} {0} {}&quot;</span>, <span class='number'>1</span>, <span class='number'>2</span>); <span class='comment'>// =&gt; &quot;2 1 1 2&quot;</span></pre>
+
+<p>The internal iterator over the argument has not been advanced by the time
+the first <code>{}</code> is seen, so it prints the first argument. Then upon reaching
+the second <code>{}</code>, the iterator has advanced forward to the second argument.
+Essentially, parameters which explicitly name their argument do not affect
+parameters which do not name an argument in terms of positional specifiers.</p>
+
+<p>A format string is required to use all of its arguments, otherwise it is a
+compile-time error. You may refer to the same argument more than once in the
+format string, although it must always be referred to with the same type.</p>
+
+<h2 id='named-parameters' class='section-header'><a href='#named-parameters'>Named parameters</a></h2>
+<p>Rust itself does not have a Python-like equivalent of named parameters to a
+function, but the <code>format!</code> macro is a syntax extension which allows it to
+leverage named parameters. Named parameters are listed at the end of the
+argument list and have the syntax:</p>
+
+<pre><code class="language-text">identifier &#39;=&#39; expression
+</code></pre>
+
+<p>For example, the following <code>format!</code> expressions all use named argument:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{argument}&quot;</span>, <span class='ident'>argument</span> <span class='op'>=</span> <span class='string'>&quot;test&quot;</span>);   <span class='comment'>// =&gt; &quot;test&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{name} {}&quot;</span>, <span class='number'>1</span>, <span class='ident'>name</span> <span class='op'>=</span> <span class='number'>2</span>);        <span class='comment'>// =&gt; &quot;2 1&quot;</span>
+<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{a} {c} {b}&quot;</span>, <span class='ident'>a</span><span class='op'>=</span><span class='string'>&quot;a&quot;</span>, <span class='ident'>b</span><span class='op'>=</span><span class='string'>&#39;b&#39;</span>, <span class='ident'>c</span><span class='op'>=</span><span class='number'>3</span>);  <span class='comment'>// =&gt; &quot;a 3 b&quot;</span></pre>
+
+<p>It is not valid to put positional parameters (those without names) after
+arguments which have names. Like with positional parameters, it is not
+valid to provide named parameters that are unused by the format string.</p>
+
+<h2 id='argument-types' class='section-header'><a href='#argument-types'>Argument types</a></h2>
+<p>Each argument&#39;s type is dictated by the format string. It is a requirement
+that every argument is only ever referred to by one type. For example, this
+is an invalid format string:</p>
+
+<pre><code class="language-text">{0:x} {0:o}
+</code></pre>
+
+<p>This is invalid because the first argument is both referred to as a
+hexadecimal as well as an
+octal.</p>
+
+<p>There are various parameters which do require a particular type, however.
+Namely, the <code>{:.*}</code> syntax, which sets the number of numbers after the
+decimal in floating-point types:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>formatted_number</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:.*}&quot;</span>, <span class='number'>2</span>, <span class='number'>1.234567</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;1.23&quot;</span>, <span class='ident'>formatted_number</span>)</pre>
+
+<p>If this syntax is used, then the number of characters to print precedes the
+actual object being formatted, and the number of characters must have the
+type <code>usize</code>. Although a <code>usize</code> can be printed with <code>{}</code>, it is invalid to
+reference an argument as such. For example this is another invalid format
+string:</p>
+
+<pre><code class="language-text">{:.*} {0}
+</code></pre>
+
+<h2 id='formatting-traits' class='section-header'><a href='#formatting-traits'>Formatting traits</a></h2>
+<p>When requesting that an argument be formatted with a particular type, you
+are actually requesting that an argument ascribes to a particular trait.
+This allows multiple actual types to be formatted via <code>{:x}</code> (like <code>i8</code> as
+well as <code>isize</code>).  The current mapping of types to traits is:</p>
+
+<ul>
+<li><em>nothing</em> ⇒ <a href="trait.Display.html"><code>Display</code></a></li>
+<li><code>?</code> ⇒ <a href="trait.Debug.html"><code>Debug</code></a></li>
+<li><code>o</code> ⇒ <a href="trait.Octal.html"><code>Octal</code></a></li>
+<li><code>x</code> ⇒ <a href="trait.LowerHex.html"><code>LowerHex</code></a></li>
+<li><code>X</code> ⇒ <a href="trait.UpperHex.html"><code>UpperHex</code></a></li>
+<li><code>p</code> ⇒ <a href="trait.Pointer.html"><code>Pointer</code></a></li>
+<li><code>b</code> ⇒ <a href="trait.Binary.html"><code>Binary</code></a></li>
+<li><code>e</code> ⇒ <a href="trait.LowerExp.html"><code>LowerExp</code></a></li>
+<li><code>E</code> ⇒ <a href="trait.UpperExp.html"><code>UpperExp</code></a></li>
+</ul>
+
+<p>What this means is that any type of argument which implements the
+<code>fmt::Binary</code> trait can then be formatted with <code>{:b}</code>. Implementations
+are provided for these traits for a number of primitive types by the
+standard library as well. If no format is specified (as in <code>{}</code> or <code>{:6}</code>),
+then the format trait used is the <code>Display</code> trait.</p>
+
+<p>When implementing a format trait for your own type, you will have to
+implement a method of the signature:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {</pre>
+
+<p>Your type will be passed as <code>self</code> by-reference, and then the function
+should emit output into the <code>f.buf</code> stream. It is up to each format trait
+implementation to correctly adhere to the requested formatting parameters.
+The values of these parameters will be listed in the fields of the
+<code>Formatter</code> struct. In order to help with this, the <code>Formatter</code> struct also
+provides some helper methods.</p>
+
+<p>Additionally, the return value of this function is <code>fmt::Result</code> which is a
+typedef to <code>Result&lt;(), std::io::Error&gt;</code> (also known as <code>std::io::Result&lt;()&gt;</code>).
+Formatting implementations should ensure that they return errors from <code>write!</code>
+correctly (propagating errors upward).</p>
+
+<p>An example of implementing the formatting traits would look
+like:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
+
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>Vector2D</span> {
+    <span class='ident'>x</span>: <span class='ident'>isize</span>,
+    <span class='ident'>y</span>: <span class='ident'>isize</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>Vector2D</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='comment'>// The `f` value implements the `Write` trait, which is what the</span>
+        <span class='comment'>// write! macro is expecting. Note that this formatting ignores the</span>
+        <span class='comment'>// various flags provided to format strings.</span>
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;({}, {})&quot;</span>, <span class='self'>self</span>.<span class='ident'>x</span>, <span class='self'>self</span>.<span class='ident'>y</span>)
+    }
+}
+
+<span class='comment'>// Different traits allow different forms of output of a type. The meaning</span>
+<span class='comment'>// of this format is to print the magnitude of a vector.</span>
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Binary</span> <span class='kw'>for</span> <span class='ident'>Vector2D</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='kw'>let</span> <span class='ident'>magnitude</span> <span class='op'>=</span> (<span class='self'>self</span>.<span class='ident'>x</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>x</span> <span class='op'>+</span> <span class='self'>self</span>.<span class='ident'>y</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>y</span>) <span class='kw'>as</span> <span class='ident'>f64</span>;
+        <span class='kw'>let</span> <span class='ident'>magnitude</span> <span class='op'>=</span> <span class='ident'>magnitude</span>.<span class='ident'>sqrt</span>();
+
+        <span class='comment'>// Respect the formatting flags by using the helper method</span>
+        <span class='comment'>// `pad_integral` on the Formatter object. See the method</span>
+        <span class='comment'>// documentation for details, and the function `pad` can be used</span>
+        <span class='comment'>// to pad strings.</span>
+        <span class='kw'>let</span> <span class='ident'>decimals</span> <span class='op'>=</span> <span class='ident'>f</span>.<span class='ident'>precision</span>().<span class='ident'>unwrap_or</span>(<span class='number'>3</span>);
+        <span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:.*}&quot;</span>, <span class='ident'>decimals</span>, <span class='ident'>magnitude</span>);
+        <span class='ident'>f</span>.<span class='ident'>pad_integral</span>(<span class='boolval'>true</span>, <span class='string'>&quot;&quot;</span>, <span class='kw-2'>&amp;</span><span class='ident'>string</span>)
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>myvector</span> <span class='op'>=</span> <span class='ident'>Vector2D</span> { <span class='ident'>x</span>: <span class='number'>3</span>, <span class='ident'>y</span>: <span class='number'>4</span> };
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>myvector</span>);       <span class='comment'>// =&gt; &quot;(3, 4)&quot;</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>myvector</span>);     <span class='comment'>// =&gt; &quot;Vector2D {x: 3, y:4}&quot;</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:10.3b}&quot;</span>, <span class='ident'>myvector</span>); <span class='comment'>// =&gt; &quot;     5.000&quot;</span>
+}</pre>
+
+<h3 id='fmtdisplay-vs-fmtdebug' class='section-header'><a href='#fmtdisplay-vs-fmtdebug'><code>fmt::Display</code> vs <code>fmt::Debug</code></a></h3>
+<p>These two formatting traits have distinct purposes:</p>
+
+<ul>
+<li><code>fmt::Display</code> implementations assert that the type can be faithfully
+represented as a UTF-8 string at all times. It is <strong>not</strong> expected that
+all types implement the <code>Display</code> trait.</li>
+<li><code>fmt::Debug</code> implementations should be implemented for <strong>all</strong> public types.
+Output will typically represent the internal state as faithfully as possible.
+The purpose of the <code>Debug</code> trait is to facilitate debugging Rust code. In
+most cases, using <code>#[derive(Debug)]</code> is sufficient and recommended.</li>
+</ul>
+
+<p>Some examples of the output from both traits:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} {:?}&quot;</span>, <span class='number'>3</span>, <span class='number'>4</span>), <span class='string'>&quot;3 4&quot;</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} {:?}&quot;</span>, <span class='string'>&#39;a&#39;</span>, <span class='string'>&#39;b&#39;</span>), <span class='string'>&quot;a &#39;b&#39;&quot;</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} {:?}&quot;</span>, <span class='string'>&quot;foo\n&quot;</span>, <span class='string'>&quot;bar\n&quot;</span>), <span class='string'>&quot;foo\n \&quot;bar\\n\&quot;&quot;</span>);</pre>
+
+<h2 id='related-macros' class='section-header'><a href='#related-macros'>Related macros</a></h2>
+<p>There are a number of related macros in the <code>format!</code> family. The ones that
+are currently implemented are:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>format</span><span class='macro'>!</span>      <span class='comment'>// described above</span>
+<span class='macro'>write</span><span class='macro'>!</span>       <span class='comment'>// first argument is a &amp;mut io::Write, the destination</span>
+<span class='macro'>writeln</span><span class='macro'>!</span>     <span class='comment'>// same as write but appends a newline</span>
+<span class='macro'>print</span><span class='macro'>!</span>       <span class='comment'>// the format string is printed to the standard output</span>
+<span class='macro'>println</span><span class='macro'>!</span>     <span class='comment'>// same as print but appends a newline</span>
+<span class='macro'>format_args</span><span class='macro'>!</span> <span class='comment'>// described below.</span></pre>
+
+<h3 id='write' class='section-header'><a href='#write'><code>write!</code></a></h3>
+<p>This and <code>writeln</code> are two macros which are used to emit the format string
+to a specified stream. This is used to prevent intermediate allocations of
+format strings and instead directly write the output. Under the hood, this
+function is actually invoking the <code>write</code> function defined in this module.
+Example usage is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>w</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+<span class='macro'>write</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>w</span>, <span class='string'>&quot;Hello {}!&quot;</span>, <span class='string'>&quot;world&quot;</span>);</pre>
+
+<h3 id='print' class='section-header'><a href='#print'><code>print!</code></a></h3>
+<p>This and <code>println</code> emit their output to stdout. Similarly to the <code>write!</code>
+macro, the goal of these macros is to avoid intermediate allocations when
+printing output. Example usage is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {}!&quot;</span>, <span class='string'>&quot;world&quot;</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I have a newline {}&quot;</span>, <span class='string'>&quot;character at the end&quot;</span>);</pre>
+
+<h3 id='format_args' class='section-header'><a href='#format_args'><code>format_args!</code></a></h3>
+<p>This is a curious macro which is used to safely pass around
+an opaque object describing the format string. This object
+does not require any heap allocations to create, and it only
+references information on the stack. Under the hood, all of
+the related macros are implemented in terms of this. First
+off, some example usage is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+
+<span class='ident'>fmt</span>::<span class='ident'>format</span>(<span class='macro'>format_args</span><span class='macro'>!</span>(<span class='string'>&quot;this returns {}&quot;</span>, <span class='string'>&quot;String&quot;</span>));
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>some_writer</span> <span class='op'>=</span> <span class='ident'>io</span>::<span class='ident'>stdout</span>();
+<span class='macro'>write</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>some_writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='macro'>format_args</span><span class='macro'>!</span>(<span class='string'>&quot;print with a {}&quot;</span>, <span class='string'>&quot;macro&quot;</span>));
+
+<span class='kw'>fn</span> <span class='ident'>my_fmt_fn</span>(<span class='ident'>args</span>: <span class='ident'>fmt</span>::<span class='ident'>Arguments</span>) {
+    <span class='macro'>write</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>args</span>);
+}
+<span class='ident'>my_fmt_fn</span>(<span class='macro'>format_args</span><span class='macro'>!</span>(<span class='string'>&quot;or a {} too&quot;</span>, <span class='string'>&quot;function&quot;</span>));</pre>
+
+<p>The result of the <code>format_args!</code> macro is a value of type <code>fmt::Arguments</code>.
+This structure can then be passed to the <code>write</code> and <code>format</code> functions
+inside this module in order to process the format string.
+The goal of this macro is to even further prevent intermediate allocations
+when dealing formatting strings.</p>
+
+<p>For example, a logging library could use the standard formatting syntax, but
+it would internally pass around this structure until it has been determined
+where output should go to.</p>
+
+<h1 id='syntax' class='section-header'><a href='#syntax'>Syntax</a></h1>
+<p>The syntax for the formatting language used is drawn from other languages,
+so it should not be too alien. Arguments are formatted with python-like
+syntax, meaning that arguments are surrounded by <code>{}</code> instead of the C-like
+<code>%</code>. The actual grammar for the formatting syntax is:</p>
+
+<pre><code class="language-text">format_string := &lt;text&gt; [ format &lt;text&gt; ] *
+format := &#39;{&#39; [ argument ] [ &#39;:&#39; format_spec ] &#39;}&#39;
+argument := integer | identifier
+
+format_spec := [[fill]align][sign][&#39;#&#39;][0][width][&#39;.&#39; precision][type]
+fill := character
+align := &#39;&lt;&#39; | &#39;^&#39; | &#39;&gt;&#39;
+sign := &#39;+&#39; | &#39;-&#39;
+width := count
+precision := count | &#39;*&#39;
+type := identifier | &#39;&#39;
+count := parameter | integer
+parameter := integer &#39;$&#39;
+</code></pre>
+
+<h1 id='formatting-parameters' class='section-header'><a href='#formatting-parameters'>Formatting Parameters</a></h1>
+<p>Each argument being formatted can be transformed by a number of formatting
+parameters (corresponding to <code>format_spec</code> in the syntax above). These
+parameters affect the string representation of what&#39;s being formatted. This
+syntax draws heavily from Python&#39;s, so it may seem a bit familiar.</p>
+
+<h2 id='fillalignment' class='section-header'><a href='#fillalignment'>Fill/Alignment</a></h2>
+<p>The fill character is provided normally in conjunction with the <code>width</code>
+parameter. This indicates that if the value being formatted is smaller than
+<code>width</code> some extra characters will be printed around it. The extra
+characters are specified by <code>fill</code>, and the alignment can be one of the
+following options:</p>
+
+<ul>
+<li><code>&lt;</code> - the argument is left-aligned in <code>width</code> columns</li>
+<li><code>^</code> - the argument is center-aligned in <code>width</code> columns</li>
+<li><code>&gt;</code> - the argument is right-aligned in <code>width</code> columns</li>
+</ul>
+
+<p>Note that alignment may not be implemented by some types. A good way
+to ensure padding is applied is to format your input, then use this
+resulting string to pad your output.</p>
+
+<h2 id='sign0' class='section-header'><a href='#sign0'>Sign/<code>#</code>/<code>0</code></a></h2>
+<p>These can all be interpreted as flags for a particular formatter.</p>
+
+<ul>
+<li><code>+</code> - This is intended for numeric types and indicates that the sign
+    should always be printed. Positive signs are never printed by
+    default, and the negative sign is only printed by default for the
+    <code>Signed</code> trait. This flag indicates that the correct sign (<code>+</code> or <code>-</code>)
+    should always be printed.</li>
+<li><code>-</code> - Currently not used</li>
+<li><code>#</code> - This flag is indicates that the &quot;alternate&quot; form of printing should
+    be used. The alternate forms are:
+
+<ul>
+<li><code>#?</code> - pretty-print the <code>Debug</code> formatting</li>
+<li><code>#x</code> - precedes the argument with a <code>0x</code></li>
+<li><code>#X</code> - precedes the argument with a <code>0x</code></li>
+<li><code>#b</code> - precedes the argument with a <code>0b</code></li>
+<li><code>#o</code> - precedes the argument with a <code>0o</code></li>
+</ul></li>
+<li><code>0</code> - This is used to indicate for integer formats that the padding should
+    both be done with a <code>0</code> character as well as be sign-aware. A format
+    like <code>{:08}</code> would yield <code>00000001</code> for the integer <code>1</code>, while the
+    same format would yield <code>-0000001</code> for the integer <code>-1</code>. Notice that
+    the negative version has one fewer zero than the positive version.</li>
+</ul>
+
+<h2 id='width' class='section-header'><a href='#width'>Width</a></h2>
+<p>This is a parameter for the &quot;minimum width&quot; that the format should take up.
+If the value&#39;s string does not fill up this many characters, then the
+padding specified by fill/alignment will be used to take up the required
+space.</p>
+
+<p>The default fill/alignment for non-numerics is a space and left-aligned. The
+defaults for numeric formatters is also a space but with right-alignment. If
+the <code>0</code> flag is specified for numerics, then the implicit fill character is
+<code>0</code>.</p>
+
+<p>The value for the width can also be provided as a <code>usize</code> in the list of
+parameters by using the <code>2$</code> syntax indicating that the second argument is a
+<code>usize</code> specifying the width.</p>
+
+<h2 id='precision' class='section-header'><a href='#precision'>Precision</a></h2>
+<p>For non-numeric types, this can be considered a &quot;maximum width&quot;. If the resulting string is
+longer than this width, then it is truncated down to this many characters and only those are
+emitted.</p>
+
+<p>For integral types, this is ignored.</p>
+
+<p>For floating-point types, this indicates how many digits after the decimal point should be
+printed.</p>
+
+<p>There are three possible ways to specify the desired <code>precision</code>:</p>
+
+<ol>
+<li><p>An integer <code>.N</code>:</p>
+
+<p>the integer <code>N</code> itself is the precision.</p></li>
+<li><p>An integer followed by dollar sign <code>.N$</code>:</p>
+
+<p>use format <em>argument</em> <code>N</code> (which must be a <code>usize</code>) as the precision.</p></li>
+<li><p>An asterisk <code>.*</code>:</p>
+
+<p><code>.*</code> means that this <code>{...}</code> is associated with <em>two</em> format inputs rather than one: the
+first input holds the <code>usize</code> precision, and the second holds the value to print.  Note that
+in this case, if one uses the format string <code>{&lt;arg&gt;:&lt;spec&gt;.*}</code>, then the <code>&lt;arg&gt;</code> part refers
+to the <em>value</em> to print, and the <code>precision</code> must come in the input preceding <code>&lt;arg&gt;</code>.</p></li>
+</ol>
+
+<p>For example, these:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Hello {arg 0 (x)} is {arg 1 (0.01) with precision specified inline (5)}</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {0} is {1:.5}&quot;</span>, <span class='string'>&quot;x&quot;</span>, <span class='number'>0.01</span>);
+
+<span class='comment'>// Hello {arg 1 (x)} is {arg 2 (0.01) with precision specified in arg 0 (5)}</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {1} is {2:.0$}&quot;</span>, <span class='number'>5</span>, <span class='string'>&quot;x&quot;</span>, <span class='number'>0.01</span>);
+
+<span class='comment'>// Hello {arg 0 (x)} is {arg 2 (0.01) with precision specified in arg 1 (5)}</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {0} is {2:.1$}&quot;</span>, <span class='string'>&quot;x&quot;</span>, <span class='number'>5</span>, <span class='number'>0.01</span>);
+
+<span class='comment'>// Hello {next arg (x)} is {second of next two args (0.01) with precision</span>
+<span class='comment'>//                          specified in first of next two args (5)}</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {} is {:.*}&quot;</span>,    <span class='string'>&quot;x&quot;</span>, <span class='number'>5</span>, <span class='number'>0.01</span>);
+
+<span class='comment'>// Hello {next arg (x)} is {arg 2 (0.01) with precision</span>
+<span class='comment'>//                          specified in its predecessor (5)}</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello {} is {2:.*}&quot;</span>,   <span class='string'>&quot;x&quot;</span>, <span class='number'>5</span>, <span class='number'>0.01</span>);</pre>
+
+<p>All print the same thing:</p>
+
+<pre><code class="language-text">Hello x is 0.01000
+</code></pre>
+
+<p>While these:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}, `{name:.*}` has 3 fractional digits&quot;</span>, <span class='string'>&quot;Hello&quot;</span>, <span class='number'>3</span>, <span class='ident'>name</span><span class='op'>=</span><span class='number'>1234.56</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}, `{name:.*}` has 3 characters&quot;</span>, <span class='string'>&quot;Hello&quot;</span>, <span class='number'>3</span>, <span class='ident'>name</span><span class='op'>=</span><span class='string'>&quot;1234.56&quot;</span>);</pre>
+
+<p>print two significantly different things:</p>
+
+<pre><code class="language-text">Hello, `1234.560` has 3 fractional digits
+Hello, `123` has 3 characters
+</code></pre>
+
+<h1 id='escaping' class='section-header'><a href='#escaping'>Escaping</a></h1>
+<p>The literal characters <code>{</code> and <code>}</code> may be included in a string by preceding
+them with the same character. For example, the <code>{</code> character is escaped with
+<code>{{</code> and the <code>}</code> character is escaped with <code>}}</code>.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Arguments.html'
+                                  title='bitflags::__core::fmt::Arguments'>Arguments</a></td>
+                           <td class='docblock short'>
+                                <p>This structure represents a safely precompiled version of a format string
+and its arguments. This cannot be generated at runtime because it cannot
+safely be done so, so no constructors are given and the fields are private
+to prevent modification.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DebugList.html'
+                                  title='bitflags::__core::fmt::DebugList'>DebugList</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to help with <code>fmt::Debug</code> implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DebugMap.html'
+                                  title='bitflags::__core::fmt::DebugMap'>DebugMap</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to help with <code>fmt::Debug</code> implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DebugSet.html'
+                                  title='bitflags::__core::fmt::DebugSet'>DebugSet</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to help with <code>fmt::Debug</code> implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DebugStruct.html'
+                                  title='bitflags::__core::fmt::DebugStruct'>DebugStruct</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to help with <code>fmt::Debug</code> implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DebugTuple.html'
+                                  title='bitflags::__core::fmt::DebugTuple'>DebugTuple</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to help with <code>fmt::Debug</code> implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Error.html'
+                                  title='bitflags::__core::fmt::Error'>Error</a></td>
+                           <td class='docblock short'>
+                                <p>The error type which is returned from formatting a message into a stream.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Formatter.html'
+                                  title='bitflags::__core::fmt::Formatter'>Formatter</a></td>
+                           <td class='docblock short'>
+                                <p>A struct to represent both where to emit formatting strings to and how they
+should be formatted. A mutable version of this is passed to all formatting
+traits.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Binary.html'
+                                  title='bitflags::__core::fmt::Binary'>Binary</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>b</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Debug.html'
+                                  title='bitflags::__core::fmt::Debug'>Debug</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>?</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Display.html'
+                                  title='bitflags::__core::fmt::Display'>Display</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for an empty format, <code>{}</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.LowerExp.html'
+                                  title='bitflags::__core::fmt::LowerExp'>LowerExp</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>e</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.LowerHex.html'
+                                  title='bitflags::__core::fmt::LowerHex'>LowerHex</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>x</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Octal.html'
+                                  title='bitflags::__core::fmt::Octal'>Octal</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>o</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Pointer.html'
+                                  title='bitflags::__core::fmt::Pointer'>Pointer</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>p</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.UpperExp.html'
+                                  title='bitflags::__core::fmt::UpperExp'>UpperExp</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>E</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.UpperHex.html'
+                                  title='bitflags::__core::fmt::UpperHex'>UpperHex</a></td>
+                           <td class='docblock short'>
+                                <p>Format trait for the <code>X</code> character.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Write.html'
+                                  title='bitflags::__core::fmt::Write'>Write</a></td>
+                           <td class='docblock short'>
+                                <p>A collection of methods that are required to format a message into a stream.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.format.html'
+                                  title='bitflags::__core::fmt::format'>format</a></td>
+                           <td class='docblock short'>
+                                <p>The format function takes a precompiled format string and a list of
+arguments, to return the resulting formatted string.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.write.html'
+                                  title='bitflags::__core::fmt::write'>write</a></td>
+                           <td class='docblock short'>
+                                <p>The <code>write</code> function takes an output stream, a precompiled format string,
+and a list of arguments. The arguments will be formatted according to the
+specified format string into the output stream provided.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.Result.html'
+                                  title='bitflags::__core::fmt::Result'>Result</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

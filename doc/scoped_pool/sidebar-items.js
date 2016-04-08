@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Pool","A thread-pool providing scoped and unscoped threads."],["Scope","An execution scope, represents a set of jobs running on a Pool."],["WaitGroup","A synchronization primitive for awaiting a set of actions."]]});

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `convert` mod in crate `bitflags`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, convert">
+
+    <title>bitflags::__core::convert - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a></p><script>window.sidebarCurrent = {name: 'convert', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>convert</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-22568' class='srclink' href='https://doc.rust-lang.org/nightly/core/convert/index.html?gotosrc=22568' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Traits for conversions between types.</p>
+
+<p>The traits in this module provide a general way to talk about conversions
+from one type to another. They follow the standard Rust conventions of
+<code>as</code>/<code>into</code>/<code>from</code>.</p>
+
+<p>Like many traits, these are often used as bounds for generic functions, to
+support arguments of multiple types.</p>
+
+<ul>
+<li>Impl the <code>As*</code> traits for reference-to-reference conversions</li>
+<li>Impl the <code>Into</code> trait when you want to consume the value in the conversion</li>
+<li>The <code>From</code> trait is the most flexible, useful for value <em>and</em> reference conversions</li>
+</ul>
+
+<p>As a library author, you should prefer implementing <code>From&lt;T&gt;</code> rather than
+<code>Into&lt;U&gt;</code>, as <code>From</code> provides greater flexibility and offers an equivalent <code>Into</code>
+implementation for free, thanks to a blanket implementation in the standard library.</p>
+
+<p><strong>Note: these traits must not fail</strong>. If the conversion can fail, you must use a dedicated
+method which returns an <code>Option&lt;T&gt;</code> or a <code>Result&lt;T, E&gt;</code>.</p>
+
+<h1 id='generic-impl' class='section-header'><a href='#generic-impl'>Generic impl</a></h1>
+<ul>
+<li><code>AsRef</code> and <code>AsMut</code> auto-dereference if the inner type is a reference</li>
+<li><code>From&lt;U&gt; for T</code> implies <code>Into&lt;T&gt; for U</code></li>
+<li><code>From</code> and <code>Into</code> are reflexive, which means that all types can <code>into()</code>
+themselves and <code>from()</code> themselves</li>
+</ul>
+
+<p>See each trait for usage examples.</p>
+</div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.AsMut.html'
+                                  title='bitflags::__core::convert::AsMut'>AsMut</a></td>
+                           <td class='docblock short'>
+                                <p>A cheap, mutable reference-to-mutable reference conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.AsRef.html'
+                                  title='bitflags::__core::convert::AsRef'>AsRef</a></td>
+                           <td class='docblock short'>
+                                <p>A cheap, reference-to-reference conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.From.html'
+                                  title='bitflags::__core::convert::From'>From</a></td>
+                           <td class='docblock short'>
+                                <p>Construct <code>Self</code> via a conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Into.html'
+                                  title='bitflags::__core::convert::Into'>Into</a></td>
+                           <td class='docblock short'>
+                                <p>A conversion that consumes <code>self</code>, which may or may not be expensive.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "bitflags";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>
