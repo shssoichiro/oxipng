@@ -67,7 +67,7 @@ More advanced options can be found by running `oxipng -h`.
 ## History
 
 Oxipng began as a complete rewrite of the OptiPNG project,
-which is assumed to be dead as no commit has been made to it since March 2014.
+which was assumed to be dead as no commit had been made to it since March 2014.
 The name has been changed to avoid confusion and potential legal issues.
 
 The core goal of rewriting OptiPNG was to implement multithreading,
