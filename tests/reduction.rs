@@ -1274,3 +1274,123 @@ fn small_files() {
                      png::ColorType::Indexed,
                      png::BitDepth::One);
 }
+
+#[test]
+fn palette_should_be_reduced_with_dupes() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_dupes.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 43 * 3);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(&output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 35 * 3);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_should_be_reduced_with_unused() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_unused.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 35 * 3);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(&output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 33 * 3);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_should_be_reduced_with_both() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_both.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 43 * 3);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(&output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert!(png.palette.unwrap().len() == 33 * 3);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}

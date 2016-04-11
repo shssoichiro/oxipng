@@ -1,7 +1,7 @@
 use bit_vec::BitVec;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use crc::crc32;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs::File;
 use std::io::Cursor;
@@ -553,8 +553,202 @@ impl PngData {
     /// Attempt to reduce the number of colors in the palette
     /// Returns true if the palette was reduced, false otherwise
     pub fn reduce_palette(&mut self) -> bool {
-        // TODO: Implement
-        false
+        if self.ihdr_data.color_type != ColorType::Indexed {
+            // Can't reduce if there is no palette
+            return false;
+        }
+        if self.ihdr_data.bit_depth == BitDepth::One {
+            // Gains from 1-bit images will be at most 1 byte
+            // Not worth the CPU time
+            return false;
+        }
+
+        // A palette with RGB slices
+        let palette = self.palette.clone().unwrap();
+        let mut indexed_palette: Vec<&[u8]> = palette.chunks(3).collect();
+        // A map of old indexes to new ones, for any moved
+        let mut index_map: HashMap<u8, u8> = HashMap::new();
+
+        // A list of (original) indices that are duplicates and no longer needed
+        let mut duplicates: Vec<u8> = Vec::new();
+        {
+            // Find duplicate entries in the palette
+            let mut seen: HashMap<&[u8], u8> = HashMap::with_capacity(indexed_palette.len());
+            for (i, color) in indexed_palette.iter().enumerate() {
+                if seen.contains_key(color) {
+                    let index = seen.get(color).unwrap();
+                    duplicates.push(i as u8);
+                    index_map.insert(i as u8, *index);
+                } else {
+                    seen.insert(*color, i as u8);
+                }
+            }
+        }
+
+        // Remove duplicates from the data
+        if !duplicates.is_empty() {
+            self.do_palette_reduction(&mut duplicates, &mut index_map, &mut indexed_palette);
+        }
+
+        // A list of unused palette indices
+        let mut unused: Vec<u8> = Vec::new();
+        {
+            // Find palette entries that are never used
+            let mut seen = HashSet::with_capacity(indexed_palette.len());
+            for line in self.scan_lines() {
+                match self.ihdr_data.bit_depth {
+                    BitDepth::Eight => {
+                        for byte in &line.data {
+                            seen.insert(*byte);
+                        }
+                    }
+                    BitDepth::Four => {
+                        let bitvec = BitVec::from_bytes(&line.data);
+                        let mut current = 0u8;
+                        for (i, bit) in bitvec.iter().enumerate() {
+                            let mod_i = i % 4;
+                            if bit {
+                                current += 2u8.pow(3u32 - mod_i as u32);
+                            }
+                            if mod_i == 3 {
+                                seen.insert(current);
+                                current = 0;
+                            }
+                        }
+                    }
+                    BitDepth::Two => {
+                        let bitvec = BitVec::from_bytes(&line.data);
+                        let mut current = 0u8;
+                        for (i, bit) in bitvec.iter().enumerate() {
+                            let mod_i = i % 2;
+                            if bit {
+                                current += 2u8.pow(1u32 - mod_i as u32);
+                            }
+                            if mod_i == 1 {
+                                seen.insert(current);
+                                current = 0;
+                            }
+                        }
+                    }
+                    _ => unreachable!(),
+                }
+
+                if seen.len() == indexed_palette.len() {
+                    // Exit early if no further possible optimizations
+                    // Check at the end of each line
+                    // Checking after every pixel would be overly expensive
+                    return !duplicates.is_empty();
+                }
+            }
+            for i in 0..indexed_palette.len() as u8 {
+                if !seen.contains(&i) {
+                    unused.push(i);
+                }
+            }
+        }
+
+        // Remove unused palette indices
+        self.do_palette_reduction(&mut unused, &mut index_map, &mut indexed_palette);
+
+        true
+    }
+    fn do_palette_reduction(&mut self,
+                            indices: &mut Vec<u8>,
+                            index_map: &mut HashMap<u8, u8>,
+                            indexed_palette: &mut Vec<&[u8]>) {
+        let mut new_data = Vec::with_capacity(self.raw_data.len());
+        let mut alpha_palette = self.aux_headers.get("tRNS").cloned();
+        let original_len = indexed_palette.len();
+        indices.sort_by(|a, b| b.cmp(a));
+        for idx in indices {
+            for i in (*idx as usize + 1)..original_len {
+                let existing = index_map.entry(i as u8).or_insert(i as u8);
+                if *existing >= *idx {
+                    *existing -= 1;
+                }
+            }
+            indexed_palette.remove(*idx as usize);
+            if let Some(ref mut alpha) = alpha_palette {
+                alpha.remove(*idx as usize);
+            }
+        }
+        if alpha_palette.is_some() {
+            let alpha_header = self.aux_headers.get_mut("tRNS");
+            if let Some(alpha_hdr) = alpha_header {
+                *alpha_hdr = alpha_palette.unwrap();
+            }
+        }
+        // Reassign data bytes to new indices
+        for line in self.scan_lines() {
+            new_data.push(line.filter);
+            match self.ihdr_data.bit_depth {
+                BitDepth::Eight => {
+                    for byte in &line.data {
+                        if let Some(new_idx) = index_map.get(byte) {
+                            new_data.push(*new_idx);
+                        } else {
+                            new_data.push(*byte);
+                        }
+                    }
+                }
+                BitDepth::Four => {
+                    for byte in &line.data {
+                        let upper = *byte >> 4;
+                        let lower = *byte & 0b00001111;
+                        let mut new_byte = 0u8;
+                        if let Some(new_idx) = index_map.get(&upper) {
+                            new_byte = new_byte & (*new_idx << 4);
+                        } else {
+                            new_byte = new_byte & (upper << 4);
+                        }
+                        if let Some(new_idx) = index_map.get(&lower) {
+                            new_byte = new_byte & *new_idx;
+                        } else {
+                            new_byte = new_byte & lower;
+                        }
+                        new_data.push(new_byte);
+                    }
+                }
+                BitDepth::Two => {
+                    for byte in &line.data {
+                        let one = *byte >> 6;
+                        let two = (*byte >> 4) & 0b00000011;
+                        let three = (*byte >> 2) & 0b00000011;
+                        let four = *byte & 0b00000011;
+                        let mut new_byte = 0u8;
+                        if let Some(new_idx) = index_map.get(&one) {
+                            new_byte = new_byte & (*new_idx << 6);
+                        } else {
+                            new_byte = new_byte & (one << 6);
+                        }
+                        if let Some(new_idx) = index_map.get(&two) {
+                            new_byte = new_byte & (*new_idx << 4);
+                        } else {
+                            new_byte = new_byte & (two << 4);
+                        }
+                        if let Some(new_idx) = index_map.get(&three) {
+                            new_byte = new_byte & (*new_idx << 2);
+                        } else {
+                            new_byte = new_byte & (three << 2);
+                        }
+                        if let Some(new_idx) = index_map.get(&four) {
+                            new_byte = new_byte & *new_idx;
+                        } else {
+                            new_byte = new_byte & four;
+                        }
+                        new_data.push(new_byte);
+                    }
+                }
+                _ => unreachable!(),
+            }
+        }
+        index_map.clear();
+        self.raw_data = new_data;
+        let mut new_palette = Vec::with_capacity(indexed_palette.len() * 3);
+        for color in indexed_palette {
+            new_palette.extend_from_slice(color);
+        }
+        self.palette = Some(new_palette);
     }
     /// Attempt to reduce the color type of the image
     /// Returns true if the color type was reduced, false otherwise
@@ -612,7 +806,7 @@ impl PngData {
         }
 
         if self.ihdr_data.color_type == ColorType::Indexed && self.transparency_palette.is_none() &&
-           self.palette.as_ref().map(|x| x.len()).unwrap() > 128 {
+           self.palette.as_ref().map(|x| x.len()).unwrap() > 16 {
             if let Some(data) = reduce_palette_to_grayscale(self) {
                 self.raw_data = data;
                 self.palette = None;

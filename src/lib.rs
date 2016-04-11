@@ -153,6 +153,15 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     let mut something_changed = false;
 
+    if opts.palette_reduction {
+        if png.reduce_palette() {
+            something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        };
+    }
+
     if opts.bit_depth_reduction {
         if png.reduce_bit_depth() {
             something_changed = true;
@@ -164,15 +173,6 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     if opts.color_type_reduction {
         if png.reduce_color_type() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
-        };
-    }
-
-    if opts.palette_reduction {
-        if png.reduce_palette() {
             something_changed = true;
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
