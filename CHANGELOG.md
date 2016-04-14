@@ -1,3 +1,6 @@
+**Version 0.5.0 (unreleased)**
+ - [SEMVER_MINOR] Palette entries can now reduced, on by default ([#11](https://github.com/shssoichiro/oxipng/issues/11))
+
 **Version 0.4.0**
  - Performance optimizations
  - [SEMVER_MAJOR] `-s` automatically infers `--strip safe` ([#31](https://github.com/shssoichiro/oxipng/issues/31))
