@@ -9,7 +9,7 @@ use std::collections::HashSet;
 use std::io::{Write, stderr};
 use std::path::PathBuf;
 
-const VERSION_STRING: &'static str = "0.4.0";
+const VERSION_STRING: &'static str = "0.5.0";
 
 fn main() {
     let mut filter = HashSet::new();
