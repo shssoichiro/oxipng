@@ -301,7 +301,9 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     }
 
     if opts.pretend {
-        writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
+        if opts.verbosity.is_some() {
+            writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
+        }
     } else {
         if opts.backup {
             match copy(in_file,
