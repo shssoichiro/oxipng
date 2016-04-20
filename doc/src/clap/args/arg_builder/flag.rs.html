@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/args/arg_builder/flag.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/args/arg_builder/flag.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>flag.rs.html -- source</title>
@@ -193,19 +193,17 @@
 <span id="149">149</span>
 <span id="150">150</span>
 <span id="151">151</span>
-<span id="152">152</span>
 </pre><pre class='rust '>
 <span class='comment'>// use std::collections::HashSet;</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>::{<span class='ident'>Display</span>, <span class='ident'>Formatter</span>, <span class='prelude-ty'>Result</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>From</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>::<span class='prelude-ty'>Result</span> <span class='kw'>as</span> <span class='ident'>StdResult</span>;
 
 <span class='kw'>use</span> <span class='ident'>vec_map</span>::<span class='ident'>VecMap</span>;
 
 <span class='kw'>use</span> <span class='ident'>Arg</span>;
-<span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>AnyArg</span>, <span class='ident'>HelpWriter</span>};
+<span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>AnyArg</span>, <span class='ident'>DispOrder</span>};
 <span class='kw'>use</span> <span class='ident'>args</span>::<span class='ident'>settings</span>::{<span class='ident'>ArgFlags</span>, <span class='ident'>ArgSettings</span>};
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
@@ -244,11 +242,6 @@
             <span class='ident'>name</span>: <span class='ident'>name</span>,
             ..<span class='ident'>Default</span>::<span class='ident'>default</span>()
         }
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write_help</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>, <span class='ident'>longest</span>: <span class='ident'>usize</span>, <span class='ident'>nlh</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>hw</span> <span class='op'>=</span> <span class='ident'>HelpWriter</span>::<span class='ident'>new</span>(<span class='self'>self</span>, <span class='ident'>longest</span>, <span class='ident'>nlh</span>);
-        <span class='ident'>hw</span>.<span class='ident'>write_to</span>(<span class='ident'>w</span>)
     }
 }
 
@@ -326,6 +319,11 @@
     <span class='kw'>fn</span> <span class='ident'>val_delim</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> { <span class='prelude-val'>None</span> }
     <span class='kw'>fn</span> <span class='ident'>help</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;e</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>help</span> }
     <span class='kw'>fn</span> <span class='ident'>default_val</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='prelude-val'>None</span> }
+    <span class='kw'>fn</span> <span class='ident'>longest_filter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='self'>self</span>.<span class='ident'>long</span>.<span class='ident'>is_some</span>() }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;e</span><span class='op'>&gt;</span> <span class='ident'>DispOrder</span> <span class='kw'>for</span> <span class='ident'>FlagBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;e</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>disp_ord</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='self'>self</span>.<span class='ident'>disp_ord</span> }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>

@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-8404' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Command.html?gotosrc=8404' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-8438' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Command.html?gotosrc=8438' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Command {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>The <code>Command</code> type acts as a process builder, providing fine-grained control
@@ -63,7 +63,8 @@ to be changed (for example, by adding arguments) prior to spawning:</p>
                      .<span class='ident'>arg</span>(<span class='string'>&quot;-c&quot;</span>)
                      .<span class='ident'>arg</span>(<span class='string'>&quot;echo hello&quot;</span>)
                      .<span class='ident'>output</span>()
-                     .<span class='ident'>unwrap_or_else</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;failed to execute process: {}&quot;</span>, <span class='ident'>e</span>) });
+                     .<span class='ident'>expect</span>(<span class='string'>&quot;failed to execute proces&quot;</span>);
+
 <span class='kw'>let</span> <span class='ident'>hello</span> <span class='op'>=</span> <span class='ident'>output</span>.<span class='ident'>stdout</span>;</pre>
 </div></section>
     <section id='search' class="content hidden"></section>

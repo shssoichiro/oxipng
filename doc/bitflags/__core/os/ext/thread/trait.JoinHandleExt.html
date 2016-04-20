@@ -47,16 +47,16 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-13176' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/thread/trait.JoinHandleExt.html?gotosrc=13176' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-13219' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/thread/trait.JoinHandleExt.html?gotosrc=13219' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait JoinHandleExt {
     fn <a href='#tymethod.as_pthread_t' class='fnname'>as_pthread_t</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>;
     fn <a href='#tymethod.into_pthread_t' class='fnname'>into_pthread_t</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>;
-}</pre><div class='stability'><em class='stab unstable'>Unstable (<code>thread_extensions</code>)</em></div><div class='docblock'><p>Unix-specific extensions to <code>std::thread::JoinHandle</code></p>
+}</pre><div class='docblock'><p>Unix-specific extensions to <code>std::thread::JoinHandle</code></p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.as_pthread_t' class='method stab unstable'><code>fn <a href='#tymethod.as_pthread_t' class='fnname'>as_pthread_t</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h3><div class='stability'><em class='stab unstable'>Unstable (<code>thread_extensions</code>)</em></div><div class='docblock'><p>Extracts the raw pthread_t without taking ownership</p>
-</div><h3 id='tymethod.into_pthread_t' class='method stab unstable'><code>fn <a href='#tymethod.into_pthread_t' class='fnname'>into_pthread_t</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h3><div class='stability'><em class='stab unstable'>Unstable (<code>thread_extensions</code>)</em></div><div class='docblock'><p>Consumes the thread, returning the raw pthread_t</p>
+        <h3 id='tymethod.as_pthread_t' class='method stab '><code>fn <a href='#tymethod.as_pthread_t' class='fnname'>as_pthread_t</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h3><div class='docblock'><p>Extracts the raw pthread_t without taking ownership</p>
+</div><h3 id='tymethod.into_pthread_t' class='method stab '><code>fn <a href='#tymethod.into_pthread_t' class='fnname'>into_pthread_t</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h3><div class='docblock'><p>Consumes the thread, returning the raw pthread_t</p>
 
 <p>This function <strong>transfers ownership</strong> of the underlying pthread_t to
 the caller. Callers are then the unique owners of the pthread_t and

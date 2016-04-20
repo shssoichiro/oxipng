@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/re_trait.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/re_trait.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>re_trait.rs.html -- source</title>
@@ -215,6 +215,30 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -244,30 +268,43 @@
 <span class='doccomment'>/// the ability to start the search of a regex anywhere in a haystack, which</span>
 <span class='doccomment'>/// isn&#39;t possible in the current public API.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RegularExpression</span>: <span class='ident'>Sized</span> {
+    <span class='doccomment'>/// The type of the haystack.</span>
     <span class='kw'>type</span> <span class='ident'>Text</span>: ?<span class='ident'>Sized</span>;
 
+    <span class='doccomment'>/// The number of capture slots in the compiled regular expression. This is</span>
+    <span class='doccomment'>/// always two times the number of capture groups (two slots per group).</span>
     <span class='kw'>fn</span> <span class='ident'>slots_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span>;
 
+    <span class='doccomment'>/// Returns the position of the next character after `i`.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// For example, a haystack with type `&amp;[u8]` probably returns `i+1`,</span>
+    <span class='doccomment'>/// whereas a haystack with type `&amp;str` probably returns `i` plus the</span>
+    <span class='doccomment'>/// length of the next UTF-8 sequence.</span>
     <span class='kw'>fn</span> <span class='ident'>next_after_empty</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Text</span>, <span class='ident'>i</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span>;
 
+    <span class='doccomment'>/// Returns the location of the shortest match.</span>
     <span class='kw'>fn</span> <span class='ident'>shortest_match_at</span>(
         <span class='kw-2'>&amp;</span><span class='self'>self</span>,
         <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Text</span>,
         <span class='ident'>start</span>: <span class='ident'>usize</span>,
     ) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>;
 
+    <span class='doccomment'>/// Returns whether the regex matches the text given.</span>
     <span class='kw'>fn</span> <span class='ident'>is_match_at</span>(
         <span class='kw-2'>&amp;</span><span class='self'>self</span>,
         <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Text</span>,
         <span class='ident'>start</span>: <span class='ident'>usize</span>,
     ) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
 
+    <span class='doccomment'>/// Returns the leftmost-first match location if one exists.</span>
     <span class='kw'>fn</span> <span class='ident'>find_at</span>(
         <span class='kw-2'>&amp;</span><span class='self'>self</span>,
         <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Text</span>,
         <span class='ident'>start</span>: <span class='ident'>usize</span>,
     ) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span>;
 
+    <span class='doccomment'>/// Returns the leftmost-first match location if one exists, and also</span>
+    <span class='doccomment'>/// fills in any matching capture slot locations.</span>
     <span class='kw'>fn</span> <span class='ident'>captures_at</span>(
         <span class='kw-2'>&amp;</span><span class='self'>self</span>,
         <span class='ident'>slots</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>Slot</span>],
@@ -275,6 +312,8 @@
         <span class='ident'>start</span>: <span class='ident'>usize</span>,
     ) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span>;
 
+    <span class='doccomment'>/// Returns an iterator over all non-overlapping successive leftmost-first</span>
+    <span class='doccomment'>/// matches.</span>
     <span class='kw'>fn</span> <span class='ident'>find_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span>(
         <span class='self'>self</span>,
         <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>Self</span>::<span class='ident'>Text</span>,
@@ -287,6 +326,8 @@
         }
     }
 
+    <span class='doccomment'>/// Returns an iterator over all non-overlapping successive leftmost-first</span>
+    <span class='doccomment'>/// matches with captures.</span>
     <span class='kw'>fn</span> <span class='ident'>captures_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span>(
         <span class='self'>self</span>,
         <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>Self</span>::<span class='ident'>Text</span>,
@@ -295,6 +336,7 @@
     }
 }
 
+<span class='doccomment'>/// An iterator over all non-overlapping successive leftmost-first matches.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FindMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>RegularExpression</span>, <span class='ident'>R</span>::<span class='ident'>Text</span>: <span class='lifetime'>&#39;t</span> {
     <span class='ident'>re</span>: <span class='ident'>R</span>,
     <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>R</span>::<span class='ident'>Text</span>,
@@ -303,10 +345,12 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>FindMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>RegularExpression</span>, <span class='ident'>R</span>::<span class='ident'>Text</span>: <span class='lifetime'>&#39;t</span> {
+    <span class='doccomment'>/// Return the text being searched.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>text</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>R</span>::<span class='ident'>Text</span> {
         <span class='self'>self</span>.<span class='ident'>text</span>
     }
 
+    <span class='doccomment'>/// Return the underlying regex.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>regex</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>R</span> {
         <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>re</span>
     }
@@ -341,14 +385,18 @@
     }
 }
 
+<span class='doccomment'>/// An iterator over all non-overlapping successive leftmost-first matches with</span>
+<span class='doccomment'>/// captures.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FindCaptures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span>(<span class='ident'>FindMatches</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span>)
     <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>RegularExpression</span>, <span class='ident'>R</span>::<span class='ident'>Text</span>: <span class='lifetime'>&#39;t</span>;
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>FindCaptures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span>, <span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>RegularExpression</span>, <span class='ident'>R</span>::<span class='ident'>Text</span>: <span class='lifetime'>&#39;t</span> {
+    <span class='doccomment'>/// Return the text being searched.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>text</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>R</span>::<span class='ident'>Text</span> {
         <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>text</span>()
     }
 
+    <span class='doccomment'>/// Return the underlying regex.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>regex</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>R</span> {
         <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>regex</span>()
     }

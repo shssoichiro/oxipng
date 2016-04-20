@@ -47,16 +47,22 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6710' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/index.html?gotosrc=6710' title='goto source code'>[src]</a></span></h1>
-<div class='stability'><em class='stab unstable'>Unstable (<code>std_panic</code>)<p>: awaiting feedback</p>
-</em></div><div class='docblock'><p>Panic support in the standard library</p>
+               </span><a id='src-6711' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/index.html?gotosrc=6711' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Panic support in the standard library</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                       <tr class='unstable module-item'>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.AssertUnwindSafe.html'
+                                  title='bitflags::__core::panic::AssertUnwindSafe'>AssertUnwindSafe</a></td>
+                           <td class='docblock short'>
+                                <p>A simple wrapper around a type to assert that it is panic safe.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable deprecated module-item'>
                            <td><a class='struct' href='struct.AssertRecoverSafe.html'
                                   title='bitflags::__core::panic::AssertRecoverSafe'>AssertRecoverSafe</a></td>
                            <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>A simple wrapper around a type to assert that it is panic safe.</p>
+                               [<em class='stab unstable deprecated'>Deprecated</em>] <p>Deprecated, renamed to <code>AssertUnwindSafe</code></p>
                            </td>
                        </tr>
                        <tr class='unstable module-item'>
@@ -74,34 +80,55 @@
                            </td>
                        </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
-                       <tr class='unstable module-item'>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.RefUnwindSafe.html'
+                                  title='bitflags::__core::panic::RefUnwindSafe'>RefUnwindSafe</a></td>
+                           <td class='docblock short'>
+                                <p>A marker trait representing types where a shared reference is considered
+recover safe.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.UnwindSafe.html'
+                                  title='bitflags::__core::panic::UnwindSafe'>UnwindSafe</a></td>
+                           <td class='docblock short'>
+                                <p>A marker trait which represents &quot;panic safe&quot; types in Rust.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable deprecated module-item'>
                            <td><a class='trait' href='trait.RecoverSafe.html'
                                   title='bitflags::__core::panic::RecoverSafe'>RecoverSafe</a></td>
                            <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>A marker trait which represents &quot;panic safe&quot; types in Rust.</p>
-                           </td>
-                       </tr>
-                       <tr class='unstable module-item'>
-                           <td><a class='trait' href='trait.RefRecoverSafe.html'
-                                  title='bitflags::__core::panic::RefRecoverSafe'>RefRecoverSafe</a></td>
-                           <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>A marker trait representing types where a shared reference is considered
-recover safe.</p>
+                               [<em class='stab unstable deprecated'>Deprecated</em>] <p>Deprecated, renamed to UnwindSafe</p>
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                       <tr class='unstable module-item'>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.catch_unwind.html'
+                                  title='bitflags::__core::panic::catch_unwind'>catch_unwind</a></td>
+                           <td class='docblock short'>
+                                <p>Invokes a closure, capturing the cause of an unwinding panic if one occurs.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.resume_unwind.html'
+                                  title='bitflags::__core::panic::resume_unwind'>resume_unwind</a></td>
+                           <td class='docblock short'>
+                                <p>Triggers a panic without invoking the panic handler.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable deprecated module-item'>
                            <td><a class='fn' href='fn.propagate.html'
                                   title='bitflags::__core::panic::propagate'>propagate</a></td>
                            <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>Triggers a panic without invoking the panic handler.</p>
+                               [<em class='stab unstable deprecated'>Deprecated</em>] <p>Deprecated, use resume_unwind instead</p>
                            </td>
                        </tr>
-                       <tr class='unstable module-item'>
+                       <tr class='unstable deprecated module-item'>
                            <td><a class='fn' href='fn.recover.html'
                                   title='bitflags::__core::panic::recover'>recover</a></td>
                            <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>Invokes a closure, capturing the cause of panic if one occurs.</p>
+                               [<em class='stab unstable deprecated'>Deprecated</em>] <p>Deprecated, renamed to <code>catch_unwind</code></p>
                            </td>
                        </tr>
                        <tr class='unstable deprecated module-item'>

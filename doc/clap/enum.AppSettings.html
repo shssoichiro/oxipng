@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-340' class='srclink' href='../src/clap/app/settings.rs.html#83-457' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-403' class='srclink' href='../src/clap/app/settings.rs.html#85-476' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum AppSettings {
     SubcommandsNegateReqs,
     SubcommandRequired,
@@ -67,6 +67,7 @@
     HidePossibleValuesInHelp,
     NextLineHelp,
     DeriveDisplayOrder,
+    ColoredHelp,
     // some variants omitted
 }</pre><div class='docblock'><p>Application level settings, which affect how <code>App</code> operates</p>
 
@@ -356,6 +357,18 @@ declared in, vice alphabetically which is the default.</p>
 <pre class='rust rust-example-rendered'>
 <span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
     .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>DeriveDisplayOrder</span>)
+    .<span class='ident'>get_matches</span>();</pre>
+</div></td><td></td></tr><tr><td id='variant.ColoredHelp'><code>ColoredHelp</code></td><td><div class='docblock'><p>Uses colorized help messages.</p>
+
+<p><strong>NOTE:</strong> Must be compiled with the <code>color</code> cargo feature</p>
+
+<h1 id='platform-specific-2' class='section-header'><a href='#platform-specific-2'>Platform Specific</a></h1>
+<p>This setting only applies to Unix, Linux, and OSX (i.e. non-Windows platforms)</p>
+
+<h1 id='examples-17' class='section-header'><a href='#examples-17'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>App</span>::<span class='ident'>new</span>(<span class='string'>&quot;myprog&quot;</span>)
+    .<span class='ident'>setting</span>(<span class='ident'>AppSettings</span>::<span class='ident'>ColoredHelp</span>)
     .<span class='ident'>get_matches</span>();</pre>
 </div></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../clap/enum.AppSettings.html' title='clap::AppSettings'>AppSettings</a></code></h3><div class='impl-items'><h4 id='associatedtype.Err' class='type'><code>type <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#associatedtype.Err' class='type'>Err</a> = <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <h4 id='method.from_str' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#tymethod.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self, Self::Err&gt;</code></h4>

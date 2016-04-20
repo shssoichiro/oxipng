@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.9/src/unix/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.10/src/unix/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -780,6 +780,13 @@
 <span id="736">736</span>
 <span id="737">737</span>
 <span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Definitions found commonly among almost all Unix derivatives</span>
 <span class='doccomment'>//!</span>
@@ -797,6 +804,7 @@
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>cc_t</span> <span class='op'>=</span> ::<span class='ident'>c_uchar</span>;
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>DIR</span> {}
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>locale_t</span> {}
 
 <span class='macro'>s</span><span class='macro'>!</span> {
     <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>utimbuf</span> {
@@ -926,7 +934,9 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_LAZY</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0x1</span>;
 
 <span class='macro'>cfg_if</span><span class='macro'>!</span> {
-    <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>stdbuild</span>))]</span> {
+    <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>dox</span>)]</span> {
+        <span class='comment'>// on dox builds don&#39;t pull in anything</span>
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>not</span>(<span class='ident'>stdbuild</span>), <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;use_std&quot;</span>))]</span> {
         <span class='comment'>// cargo build, don&#39;t pull in anything extra as the libstd  dep</span>
         <span class='comment'>// already pulls in all libs.</span>
     } <span class='kw'>else</span> <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>target_env</span> <span class='op'>=</span> <span class='string'>&quot;musl&quot;</span>, <span class='ident'>not</span>(<span class='ident'>any</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>,
@@ -936,7 +946,7 @@
     } <span class='kw'>else</span> <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;emscripten&quot;</span>)]</span> {
         <span class='attribute'>#[<span class='ident'>link</span>(<span class='ident'>name</span> <span class='op'>=</span> <span class='string'>&quot;c&quot;</span>)]</span>
         <span class='kw'>extern</span> {}
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>target_vendor</span> <span class='op'>=</span> <span class='string'>&quot;rumprun&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;netbsd&quot;</span>))]</span> {
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>all</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;netbsd&quot;</span>, <span class='ident'>target_vendor</span> <span class='op'>=</span> <span class='string'>&quot;rumprun&quot;</span>))]</span> {
         <span class='comment'>// Since we don&#39;t use -nodefaultlibs on Rumprun, libc is always pulled</span>
         <span class='comment'>// in automatically by the linker. We avoid passing it explicitly, as it</span>
         <span class='comment'>// causes some versions of binutils to crash with an assertion failure.</span>
@@ -1191,7 +1201,6 @@
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ftruncate</span>(<span class='ident'>fd</span>: ::<span class='ident'>c_int</span>, <span class='ident'>length</span>: <span class='ident'>off_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
 
-    <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>, <span class='ident'>link_name</span> <span class='op'>=</span> <span class='string'>&quot;bsd_signal&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='ident'>signum</span>: ::<span class='ident'>c_int</span>, <span class='ident'>handler</span>: <span class='ident'>sighandler_t</span>) <span class='op'>-&gt;</span> <span class='ident'>sighandler_t</span>;
 
     <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>all</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>),
@@ -1289,8 +1298,8 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pthread_sigmask</span>(<span class='ident'>how</span>: ::<span class='ident'>c_int</span>, <span class='ident'>set</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>sigset_t</span>,
                            <span class='ident'>oldset</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>sigset_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pthread_kill</span>(<span class='ident'>thread</span>: ::<span class='ident'>pthread_t</span>, <span class='ident'>sig</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
-
-    <span class='comment'>// #[cfg_attr(target_os = &quot;linux&quot;, link_name = &quot;__xpg_strerror_r&quot;)]</span>
+    <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>all</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>, <span class='ident'>not</span>(<span class='ident'>target_env</span> <span class='op'>=</span> <span class='string'>&quot;musl&quot;</span>)),
+               <span class='ident'>link_name</span> <span class='op'>=</span> <span class='string'>&quot;__xpg_strerror_r&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>strerror_r</span>(<span class='ident'>errnum</span>: ::<span class='ident'>c_int</span>, <span class='ident'>buf</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_char</span>,
                       <span class='ident'>buflen</span>: ::<span class='ident'>size_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
 
@@ -1394,6 +1403,10 @@
                   <span class='ident'>writefds</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>fd_set</span>,
                   <span class='ident'>errorfds</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>fd_set</span>,
                   <span class='ident'>timeout</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>timeval</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
+    <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;netbsd&quot;</span>, <span class='ident'>link_name</span> <span class='op'>=</span> <span class='string'>&quot;__setlocale50&quot;</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>setlocale</span>(<span class='ident'>category</span>: ::<span class='ident'>c_int</span>,
+                     <span class='ident'>locale</span>: <span class='op'>*</span><span class='kw'>const</span> ::<span class='ident'>c_char</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>localeconv</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>lconv</span>;
 }
 
 <span class='comment'>// TODO: get rid of this cfg(not(...))</span>
@@ -1495,6 +1508,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>mkstemps</span>(<span class='ident'>template</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>, <span class='ident'>suffixlen</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>mkdtemp</span>(<span class='ident'>template</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>;
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>futimes</span>(<span class='ident'>fd</span>: ::<span class='ident'>c_int</span>, <span class='ident'>times</span>: <span class='op'>*</span><span class='kw'>const</span> ::<span class='ident'>timeval</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>nl_langinfo</span>(<span class='ident'>item</span>: ::<span class='ident'>nl_item</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>;
 }
 
 <span class='macro'>cfg_if</span><span class='macro'>!</span> {

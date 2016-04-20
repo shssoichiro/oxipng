@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5816' class='srclink' href='https://doc.rust-lang.org/nightly/core/ptr/index.html?gotosrc=5816' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-5826' class='srclink' href='https://doc.rust-lang.org/nightly/core/ptr/index.html?gotosrc=5826' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Raw, unsafe pointers, <code>*const T</code>, and <code>*mut T</code>.</p>
 
 <p><em><a href="../../std/primitive.pointer.html">See also the pointer primitive types</a>.</em></p>
@@ -124,6 +124,14 @@ memory in <code>src</code> unchanged.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
+                           <td><a class='fn' href='fn.read_volatile.html'
+                                  title='bitflags::__core::ptr::read_volatile'>read_volatile</a></td>
+                           <td class='docblock short'>
+                                <p>Performs a volatile read of the value from <code>src</code> without moving it. This
+leaves the memory in <code>src</code> unchanged.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class='fn' href='fn.replace.html'
                                   title='bitflags::__core::ptr::replace'>replace</a></td>
                            <td class='docblock short'>
@@ -156,27 +164,19 @@ dropping the old value.</p>
 bytes of memory starting at <code>dst</code> to <code>val</code>.</p>
                            </td>
                        </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.write_volatile.html'
+                                  title='bitflags::__core::ptr::write_volatile'>write_volatile</a></td>
+                           <td class='docblock short'>
+                                <p>Performs a volatile write of a memory location with the given value without
+reading or dropping the old value.</p>
+                           </td>
+                       </tr>
                        <tr class='unstable module-item'>
                            <td><a class='fn' href='fn.read_and_drop.html'
                                   title='bitflags::__core::ptr::read_and_drop'>read_and_drop</a></td>
                            <td class='docblock short'>
                                [<em class='stab unstable'>Unstable</em>] 
-                           </td>
-                       </tr>
-                       <tr class='unstable module-item'>
-                           <td><a class='fn' href='fn.read_volatile.html'
-                                  title='bitflags::__core::ptr::read_volatile'>read_volatile</a></td>
-                           <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>Performs a volatile read of the value from <code>src</code> without moving it. This
-leaves the memory in <code>src</code> unchanged.</p>
-                           </td>
-                       </tr>
-                       <tr class='unstable module-item'>
-                           <td><a class='fn' href='fn.write_volatile.html'
-                                  title='bitflags::__core::ptr::write_volatile'>write_volatile</a></td>
-                           <td class='docblock short'>
-                               [<em class='stab unstable'>Unstable</em>] <p>Performs a volatile write of a memory location with the given value without
-reading or dropping the old value.</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

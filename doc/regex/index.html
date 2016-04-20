@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/regex/lib.rs.html#11-629' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/regex/lib.rs.html#11-645' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This crate provides a native implementation of regular expressions that is
 heavily based on RE2 both in syntax and in implementation. Notably,
 backreferences and arbitrary lookahead/lookbehind assertions are not
@@ -276,10 +276,10 @@ instead.)</p>
 <p>This implementation executes regular expressions <strong>only</strong> on valid UTF-8
 while exposing match locations as byte indices into the search string.</p>
 
-<p>Currently, only simple case folding is supported. Namely, when matching
-case-insensitively, the characters are first mapped using the
-<a href="ftp://ftp.unicode.org/Public/UNIDATA/CaseFolding.txt">simple case folding</a>
-mapping.</p>
+<p>Only simple case folding is supported. Namely, when matching
+case-insensitively, the characters are first mapped using the <a href="ftp://ftp.unicode.org/Public/UNIDATA/CaseFolding.txt">simple case
+folding</a> mapping
+before matching.</p>
 
 <p>Regular expressions themselves are <strong>only</strong> interpreted as a sequence of
 Unicode scalar values. This means you can use Unicode characters directly
@@ -304,8 +304,11 @@ all Unicode support disabled (e.g., <code>.</code> matches any byte instead of a
 Unicode codepoint). Unicode support can be selectively enabled with the
 <code>u</code> flag. See the <code>bytes</code> module documentation for more details.</p>
 
-<p>Note that Unicode support <em>cannot</em> be selectively disabled on the main
-<code>Regex</code> type that matches on <code>&amp;str</code>.</p>
+<p>Unicode support can also be selectively <em>disabled</em> with the main <code>Regex</code>
+type that matches on <code>&amp;str</code>. For example, <code>(?-u:\b)</code> will match an ASCII
+word boundary. Note though that invalid UTF-8 is not allowed to be matched
+even when the <code>u</code> flag is disabled. For example, <code>(?-u:.)</code> will return an
+error, since <code>.</code> matches <em>any byte</em> when Unicode support is disabled.</p>
 
 <h1 id='syntax' class='section-header'><a href='#syntax'>Syntax</a></h1>
 <p>The syntax supported in this crate is almost in an exact correspondence
@@ -345,14 +348,14 @@ x|y   alternation (x or y, prefer x)
 x*        zero or more of x (greedy)
 x+        one or more of x (greedy)
 x?        zero or one of x (greedy)
-x*?       zero or more of x (ungreedy)
-x+?       one or more of x (ungreedy)
-x??       zero or one of x (ungreedy)
+x*?       zero or more of x (ungreedy/lazy)
+x+?       one or more of x (ungreedy/lazy)
+x??       zero or one of x (ungreedy/lazy)
 x{n,m}    at least n x and at most m x (greedy)
 x{n,}     at least n x (greedy)
 x{n}      exactly n x
-x{n,m}?   at least n x and at most m x (ungreedy)
-x{n,}?    at least n x (ungreedy)
+x{n,m}?   at least n x and at most m x (ungreedy/lazy)
+x{n,}?    at least n x (ungreedy/lazy)
 x{n}?     exactly n x
 </pre>
 
@@ -380,13 +383,14 @@ and <code>(?-x)</code> clears the flag <code>x</code>. Multiple flags can be set
 the same time: <code>(?xy)</code> sets both the <code>x</code> and <code>y</code> flags and <code>(?x-y)</code> sets
 the <code>x</code> flag and clears the <code>y</code> flag.</p>
 
-<p>All flags are by default disabled. They are:</p>
+<p>All flags are by default disabled unless stated otherwise. They are:</p>
 
 <pre class="rust">
 i     case-insensitive
 m     multi-line mode: ^ and $ match begin/end of line
 s     allow . to match \n
 U     swap the meaning of x* and x*?
+u     Unicode support (enabled by default)
 x     ignore whitespace and allow line comments (starting with `#`)
 </pre>
 
@@ -400,6 +404,14 @@ expression:</p>
 
 <p>Notice that the <code>a+</code> matches either <code>a</code> or <code>A</code>, but the <code>b+</code> only matches
 <code>b</code>.</p>
+
+<p>Here is an example that uses an ASCII word boundary instead of a Unicode
+word boundary:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>re</span> <span class='op'>=</span> <span class='ident'>Regex</span>::<span class='ident'>new</span>(<span class='string'>r&quot;(?-u:\b).+(?-u:\b)&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>cap</span> <span class='op'>=</span> <span class='ident'>re</span>.<span class='ident'>captures</span>(<span class='string'>&quot;$$abc$$&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cap</span>.<span class='ident'>at</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;abc&quot;</span>));</pre>
 
 <h2 id='escape-sequences' class='section-header'><a href='#escape-sequences'>Escape sequences</a></h2>
 <pre class="rust">
@@ -466,7 +478,9 @@ at most one new state can be created for each byte of input. This satisfies
 our time complexity guarantees, but can lead to unbounded memory growth
 proportional to the size of the input. As a stopgap, the DFA is only
 allowed to store a fixed number of states. (When the limit is reached, its
-states are wiped and continues on, possibly duplicating previous work.)</p>
+states are wiped and continues on, possibly duplicating previous work. If
+the limit is reached too frequently, it gives up and hands control of to
+another matching engine with fixed memory requirements.)</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>

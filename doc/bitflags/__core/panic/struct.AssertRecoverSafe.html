@@ -47,66 +47,9 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6728' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/struct.AssertRecoverSafe.html?gotosrc=6728' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct AssertRecoverSafe&lt;T&gt;(pub T);</pre><div class='stability'><em class='stab unstable'>Unstable (<code>recover</code>)<p>: awaiting feedback</p>
-</em></div><div class='docblock'><p>A simple wrapper around a type to assert that it is panic safe.</p>
-
-<p>When using <code>recover</code> it may be the case that some of the closed over
-variables are not panic safe. For example if <code>&amp;mut T</code> is captured the
-compiler will generate a warning indicating that it is not panic safe. It
-may not be the case, however, that this is actually a problem due to the
-specific usage of <code>recover</code> if panic safety is specifically taken into
-account. This wrapper struct is useful for a quick and lightweight
-annotation that a variable is indeed panic safe.</p>
-
-<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
-<p>One way to use <code>AssertRecoverSafe</code> is to assert that the entire closure
-itself is recover safe, bypassing all checks for all variables:</p>
-
-<pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>recover</span>, <span class='ident'>std_panic</span>)]</span>
-
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>panic</span>::{<span class='self'>self</span>, <span class='ident'>AssertRecoverSafe</span>};
-
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>variable</span> <span class='op'>=</span> <span class='number'>4</span>;
-
-<span class='comment'>// This code will not compile because the closure captures `&amp;mut variable`</span>
-<span class='comment'>// which is not considered panic safe by default.</span>
-
-<span class='comment'>// panic::recover(|| {</span>
-<span class='comment'>//     variable += 3;</span>
-<span class='comment'>// });</span>
-
-<span class='comment'>// This, however, will compile due to the `AssertRecoverSafe` wrapper</span>
-<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='ident'>AssertRecoverSafe</span>(<span class='op'>||</span> {
-    <span class='ident'>variable</span> <span class='op'>+=</span> <span class='number'>3</span>;
-}));
-<span class='comment'>// ...</span></pre>
-
-<p>Wrapping the entire closure amounts to a blanket assertion that all captured
-variables are recover safe. This has the downside that if new captures are
-added in the future, they will also be considered recover safe. Therefore,
-you may prefer to just wrap individual captures, as shown below. This is
-more annotation, but it ensures that if a new capture is added which is not
-recover safe, you will get a compilation error at that time, which will
-allow you to consider whether that new capture in fact represent a bug or
-not.</p>
-
-<pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>recover</span>, <span class='ident'>std_panic</span>)]</span>
-
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>panic</span>::{<span class='self'>self</span>, <span class='ident'>AssertRecoverSafe</span>};
-
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>variable</span> <span class='op'>=</span> <span class='number'>4</span>;
-<span class='kw'>let</span> <span class='ident'>other_capture</span> <span class='op'>=</span> <span class='number'>3</span>;
-
-<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>AssertRecoverSafe</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>variable</span>);
-    <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='kw'>move</span> <span class='op'>||</span> {
-        <span class='op'>*</span><span class='op'>*</span><span class='ident'>wrapper</span> <span class='op'>+=</span> <span class='ident'>other_capture</span>;
-    })
-};
-<span class='comment'>// ...</span></pre>
+               </span><a id='src-6736' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/struct.AssertRecoverSafe.html?gotosrc=6736' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct AssertRecoverSafe&lt;T&gt;(pub T);</pre><div class='stability'><em class='stab unstable deprecated'>Deprecated since 1.9.0<p>: renamed to <code>AssertUnwindSafe</code></p>
+</em></div><div class='docblock'><p>Deprecated, renamed to <code>AssertUnwindSafe</code></p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

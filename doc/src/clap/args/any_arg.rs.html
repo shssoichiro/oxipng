@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/args/any_arg.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/args/any_arg.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>any_arg.rs.html -- source</title>
@@ -70,6 +70,11 @@
 <span id="26">26</span>
 <span id="27">27</span>
 <span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
 
@@ -98,6 +103,11 @@
     <span class='kw'>fn</span> <span class='ident'>val_names</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>VecMap</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;e</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>;
     <span class='kw'>fn</span> <span class='ident'>help</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;e</span> <span class='ident'>str</span><span class='op'>&gt;</span>;
     <span class='kw'>fn</span> <span class='ident'>default_val</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span><span class='op'>&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>longest_filter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
+}
+
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>DispOrder</span> {
+    <span class='kw'>fn</span> <span class='ident'>disp_ord</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span>;
 }
 </pre>
 </section>

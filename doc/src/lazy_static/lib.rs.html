@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/lazy_static-0.1.15/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/lazy_static-0.1.16/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -198,6 +198,7 @@
 <span id="154">154</span>
 <span id="155">155</span>
 <span id="156">156</span>
+<span id="157">157</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 A macro for declaring lazily evaluated statics.
@@ -269,7 +270,7 @@ The `Deref` implementation uses a hidden static variable that is guarded by a at
 
 */</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;nightly&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>const_fn</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;nightly&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>const_fn</span>, <span class='ident'>core_intrinsics</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;dylib&quot;</span>]</span>
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
@@ -309,7 +310,7 @@ The `Deref` implementation uses a hidden static variable that is guarded by a at
                         });
                         <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>DATA</span>.<span class='number'>0</span>.<span class='ident'>get</span>() {
                             <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
-                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>loop</span> { <span class='comment'>/* unreachable */</span> },
+                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> ::<span class='ident'>std</span>::<span class='ident'>intrinsics</span>::<span class='ident'>unreachable</span>(),
                         }
                     }
 
@@ -317,6 +318,7 @@ The `Deref` implementation uses a hidden static variable that is guarded by a at
                     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;nightly&quot;</span>))]</span>
                     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>__stability</span>() <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> {
                         <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>transmute</span>;
+                        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 
                         <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>DATA</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> <span class='op'>=</span> <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;
                         <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>ONCE</span>: <span class='ident'>Once</span> <span class='op'>=</span> <span class='ident'>ONCE_INIT</span>;

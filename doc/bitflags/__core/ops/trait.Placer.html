@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-21879' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.Placer.html?gotosrc=21879' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-21889' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.Placer.html?gotosrc=21889' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Placer&lt;Data&gt; <span class='where'>where Data: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span> {
     type <a href='#associatedtype.Place' class='type'>Place</a>: <a class='trait' href='../../../bitflags/__core/ops/trait.InPlace.html' title='bitflags::__core::ops::InPlace'>InPlace</a>&lt;Data&gt;;
     fn <a href='#tymethod.make_place' class='fnname'>make_place</a>(self) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.Placer.html' title='bitflags::__core::ops::Placer'>Place</a>;
@@ -85,8 +85,9 @@ uninitialized state for <code>Data</code>.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;'a, T&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Placer.html' title='bitflags::__core::ops::Placer'>Placer</a>&lt;T&gt; for <a class='struct' href='../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></li>
-<li><code>impl&lt;'a, T&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Placer.html' title='bitflags::__core::ops::Placer'>Placer</a>&lt;T&gt; for <a class='struct' href='../../../bitflags/__core/collections/linked_list/struct.BackPlace.html' title='bitflags::__core::collections::linked_list::BackPlace'>BackPlace</a>&lt;'a, T&gt;</code></li>
+    <li><code>impl&lt;'a, T&gt; Placer for <a class='struct' href='../../../bitflags/__core/collections/linked_list/struct.FrontPlace.html' title='bitflags::__core::collections::linked_list::FrontPlace'>FrontPlace</a>&lt;'a, T&gt;</code></li>
+<li><code>impl&lt;'a, T&gt; Placer for <a class='struct' href='../../../bitflags/__core/collections/linked_list/struct.BackPlace.html' title='bitflags::__core::collections::linked_list::BackPlace'>BackPlace</a>&lt;'a, T&gt;</code></li>
+<li><code>impl&lt;T&gt; Placer for <a class='struct' href='../../../bitflags/__core/boxed/struct.ExchangeHeapSingleton.html' title='bitflags::__core::boxed::ExchangeHeapSingleton'>ExchangeHeapSingleton</a></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/ops/trait.Placer.js">
                  </script></section>

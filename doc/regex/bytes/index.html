@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-12' class='srclink' href='../../src/regex/lib.rs.html#592-594' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-12' class='srclink' href='../../src/regex/lib.rs.html#608-610' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Match regular expressions on arbitrary bytes.</p>
 
 <p>This module provides a nearly identical API to the one found in the
@@ -106,9 +106,9 @@ regular expressions with a few changes that make sense for matching arbitrary
 bytes:</p>
 
 <ol>
-<li>A new flag, <code>u</code>, is available for switching to Unicode mode.</li>
-<li>By default, <code>u</code> is disabled, which roughly corresponds to &quot;ASCII compatible&quot;
-mode.</li>
+<li>The <code>u</code> flag is <em>disabled</em> by default, but can be selectively enabled. (The
+opposite is true for the main <code>Regex</code> type.) Disabling the <code>u</code> flag is said to
+invoke &quot;ASCII compatible&quot; mode.</li>
 <li>In ASCII compatible mode, neither Unicode codepoints nor Unicode character
 classes are allowed.</li>
 <li>In ASCII compatible mode, Perl character classes (<code>\w</code>, <code>\d</code> and <code>\s</code>)

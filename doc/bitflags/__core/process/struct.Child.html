@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-8336' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Child.html?gotosrc=8336' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-8370' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Child.html?gotosrc=8370' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Child {
     pub stdin: <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.ChildStdin.html' title='bitflags::__core::process::ChildStdin'>ChildStdin</a>&gt;,
     pub stdout: <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.ChildStdout.html' title='bitflags::__core::process::ChildStdout'>ChildStdout</a>&gt;,
@@ -66,10 +66,10 @@ process and can itself be constructed using a builder-style interface.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>child</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;/bin/cat&quot;</span>)
                         .<span class='ident'>arg</span>(<span class='string'>&quot;file.txt&quot;</span>)
                         .<span class='ident'>spawn</span>()
-                        .<span class='ident'>unwrap_or_else</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;failed to execute child: {}&quot;</span>, <span class='ident'>e</span>) });
+                        .<span class='ident'>expect</span>(<span class='string'>&quot;failed to execute child&quot;</span>);
 
 <span class='kw'>let</span> <span class='ident'>ecode</span> <span class='op'>=</span> <span class='ident'>child</span>.<span class='ident'>wait</span>()
-                 .<span class='ident'>unwrap_or_else</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;failed to wait on child: {}&quot;</span>, <span class='ident'>e</span>) });
+                 .<span class='ident'>expect</span>(<span class='string'>&quot;failed to wait on child&quot;</span>);
 
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ecode</span>.<span class='ident'>success</span>());</pre>
 

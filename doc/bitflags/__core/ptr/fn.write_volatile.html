@@ -47,14 +47,19 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5860' class='srclink' href='https://doc.rust-lang.org/nightly/core/ptr/fn.write_volatile.html?gotosrc=5860' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub unsafe fn write_volatile&lt;T&gt;(dst: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.pointer.html'>*mut T</a>, src: T)</pre><div class='stability'><em class='stab unstable'>Unstable (<code>volatile</code>)<p>: recently added</p>
-</em></div><div class='docblock'><p>Performs a volatile write of a memory location with the given value without
+               </span><a id='src-5870' class='srclink' href='https://doc.rust-lang.org/nightly/core/ptr/fn.write_volatile.html?gotosrc=5870' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub unsafe fn write_volatile&lt;T&gt;(dst: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.pointer.html'>*mut T</a>, src: T)</pre><span class="since">1.9.0</span><div class='docblock'><p>Performs a volatile write of a memory location with the given value without
 reading or dropping the old value.</p>
 
 <p>Volatile operations are intended to act on I/O memory, and are guaranteed
 to not be elided or reordered by the compiler across other volatile
-operations. See the LLVM documentation on [<a href="http://llvm.org/docs/LangRef.html#volatile-memory-accesses">volatile</a>].</p>
+operations.</p>
+
+<h1 id='notes' class='section-header'><a href='#notes'>Notes</a></h1>
+<p>Rust does not currently have a rigorously and formally defined memory model,
+so the precise semantics of what &quot;volatile&quot; means here is subject to change
+over time. That being said, the semantics will almost always end up pretty
+similar to <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf">C11&#39;s definition of volatile</a>.</p>
 
 <h1 id='safety' class='section-header'><a href='#safety'>Safety</a></h1>
 <p>This operation is marked unsafe because it accepts a raw pointer.</p>
@@ -65,6 +70,19 @@ that should be dropped.</p>
 
 <p>This is appropriate for initializing uninitialized memory, or overwriting
 memory that has previously been <code>read</code> from.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>Basic usage:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>0</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>i32</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='number'>12</span>;
+
+<span class='kw'>unsafe</span> {
+    <span class='ident'>std</span>::<span class='ident'>ptr</span>::<span class='ident'>write_volatile</span>(<span class='ident'>y</span>, <span class='ident'>z</span>);
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>std</span>::<span class='ident'>ptr</span>::<span class='ident'>read_volatile</span>(<span class='ident'>y</span>));
+}</pre>
 </div></section>
     <section id='search' class="content hidden"></section>
 

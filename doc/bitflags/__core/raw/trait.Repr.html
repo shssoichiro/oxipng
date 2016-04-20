@@ -47,23 +47,25 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-30557' class='srclink' href='https://doc.rust-lang.org/nightly/core/raw/trait.Repr.html?gotosrc=30557' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-30574' class='srclink' href='https://doc.rust-lang.org/nightly/core/raw/trait.Repr.html?gotosrc=30574' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub unsafe trait Repr&lt;T&gt; {
     fn <a href='#method.repr' class='fnname'>repr</a>(&amp;self) -&gt; T { ... }
-}</pre><div class='stability'><em class='stab unstable'>Unstable (<code>raw</code>)</em></div><div class='docblock'><p>This trait is meant to map equivalences between raw structs and their
+}</pre><div class='stability'><em class='stab unstable deprecated'>Deprecated since 1.9.0<p>: use raw accessors/constructors in <code>slice</code> module</p>
+</em></div><div class='docblock'><p>This trait is meant to map equivalences between raw structs and their
 corresponding rust values.</p>
 </div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
-        <h3 id='method.repr' class='method stab unstable'><code>fn <a href='#method.repr' class='fnname'>repr</a>(&amp;self) -&gt; T</code></h3><div class='stability'><em class='stab unstable'>Unstable (<code>raw</code>)</em></div><div class='docblock'><p>This function &quot;unwraps&quot; a rust value (without consuming it) into its raw
+        <h3 id='method.repr' class='method stab unstable deprecated'><code>fn <a href='#method.repr' class='fnname'>repr</a>(&amp;self) -&gt; T</code></h3><div class='stability'><em class='stab unstable deprecated'>Deprecated since 1.9.0<p>: use raw accessors/constructors in <code>slice</code> module</p>
+</em></div><div class='docblock'><p>This function &quot;unwraps&quot; a rust value (without consuming it) into its raw
 struct representation. This can be used to read/write different values
 for the struct. This is a safe method because by default it does not
 enable write-access to the fields of the return value in safe code.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl <a class='trait' href='../../../bitflags/__core/raw/trait.Repr.html' title='bitflags::__core::raw::Repr'>Repr</a>&lt;<a class='struct' href='../../../bitflags/__core/raw/struct.Slice.html' title='bitflags::__core::raw::Slice'>Slice</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>&gt;&gt; for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
-<li><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/raw/trait.Repr.html' title='bitflags::__core::raw::Repr'>Repr</a>&lt;<a class='struct' href='../../../bitflags/__core/raw/struct.Slice.html' title='bitflags::__core::raw::Slice'>Slice</a>&lt;T&gt;&gt; for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>[</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
+    <li><code>impl Repr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+<li><code>impl&lt;T&gt; Repr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>[</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/raw/trait.Repr.js">
                  </script></section>

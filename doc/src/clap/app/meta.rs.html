@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/app/meta.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/app/meta.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>meta.rs.html -- source</title>
@@ -100,6 +100,9 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_debug_implementations</span>)]</span>
@@ -114,6 +117,7 @@
     <span class='kw'>pub</span> <span class='ident'>usage</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='kw'>pub</span> <span class='ident'>help_str</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
     <span class='kw'>pub</span> <span class='ident'>disp_ord</span>: <span class='ident'>usize</span>,
+    <span class='kw'>pub</span> <span class='ident'>template</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span>  <span class='ident'>str</span><span class='op'>&gt;</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>AppMeta</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> {
@@ -129,6 +133,7 @@
             <span class='ident'>bin_name</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>help_str</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>disp_ord</span>: <span class='number'>999</span>,
+            <span class='ident'>template</span>: <span class='prelude-val'>None</span>,
         }
     }
 }
@@ -156,6 +161,7 @@
             <span class='ident'>bin_name</span>: <span class='self'>self</span>.<span class='ident'>bin_name</span>.<span class='ident'>clone</span>(),
             <span class='ident'>help_str</span>: <span class='self'>self</span>.<span class='ident'>help_str</span>,
             <span class='ident'>disp_ord</span>: <span class='self'>self</span>.<span class='ident'>disp_ord</span>,
+            <span class='ident'>template</span>: <span class='self'>self</span>.<span class='ident'>template</span>,
         }
     }
 }

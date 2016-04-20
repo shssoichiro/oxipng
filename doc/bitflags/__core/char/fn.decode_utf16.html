@@ -47,17 +47,14 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-282' class='srclink' href='https://doc.rust-lang.org/nightly/rustc_unicode/char/fn.decode_utf16.html?gotosrc=282' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn decode_utf16&lt;I&gt;(iter: I) -&gt; <a class='struct' href='../../../bitflags/__core/char/struct.DecodeUtf16.html' title='bitflags::__core::char::DecodeUtf16'>DecodeUtf16</a>&lt;I::<a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIter</a>&gt; <span class='where'>where I: <a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a>&gt;</span></pre><div class='stability'><em class='stab unstable'>Unstable (<code>decode_utf16</code>)<p>: recently exposed</p>
-</em></div><div class='docblock'><p>Create an iterator over the UTF-16 encoded code points in <code>iter</code>,
+               </span><a id='src-308' class='srclink' href='https://doc.rust-lang.org/nightly/rustc_unicode/char/fn.decode_utf16.html?gotosrc=308' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn decode_utf16&lt;I&gt;(iter: I) -&gt; <a class='struct' href='../../../bitflags/__core/char/struct.DecodeUtf16.html' title='bitflags::__core::char::DecodeUtf16'>DecodeUtf16</a>&lt;I::<a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIter</a>&gt; <span class='where'>where I: <a class='trait' href='../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a>&lt;Item=<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a>&gt;</span></pre><span class="since">1.9.0</span><div class='docblock'><p>Create an iterator over the UTF-16 encoded code points in <code>iter</code>,
 returning unpaired surrogates as <code>Err</code>s.</p>
 
 <h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
 <p>Basic usage:</p>
 
 <pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>decode_utf16</span>)]</span>
-
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>::<span class='ident'>decode_utf16</span>;
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -66,7 +63,9 @@ returning unpaired surrogates as <code>Err</code>s.</p>
              <span class='number'>0x0073</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x0069</span>, <span class='number'>0x0063</span>,
              <span class='number'>0xD834</span>];
 
-    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>decode_utf16</span>(<span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>()).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>(),
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>decode_utf16</span>(<span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>())
+                           .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>r</span><span class='op'>|</span> <span class='ident'>r</span>.<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>e</span>.<span class='ident'>unpaired_surrogate</span>()))
+                           .<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>(),
                <span class='macro'>vec</span><span class='macro'>!</span>[<span class='prelude-val'>Ok</span>(<span class='string'>&#39;𝄞&#39;</span>),
                     <span class='prelude-val'>Ok</span>(<span class='string'>&#39;m&#39;</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&#39;u&#39;</span>), <span class='prelude-val'>Ok</span>(<span class='string'>&#39;s&#39;</span>),
                     <span class='prelude-val'>Err</span>(<span class='number'>0xDD1E</span>),
@@ -77,8 +76,6 @@ returning unpaired surrogates as <code>Err</code>s.</p>
 <p>A lossy decoder can be obtained by replacing <code>Err</code> results with the replacement character:</p>
 
 <pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>decode_utf16</span>)]</span>
-
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>::{<span class='ident'>decode_utf16</span>, <span class='ident'>REPLACEMENT_CHARACTER</span>};
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {

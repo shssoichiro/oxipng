@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/app/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/app/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -987,6 +987,24 @@
 <span id="943">943</span>
 <span id="944">944</span>
 <span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>settings</span>;
@@ -994,6 +1012,7 @@
 <span class='kw'>mod</span> <span class='ident'>macros</span>;
 <span class='kw'>mod</span> <span class='ident'>parser</span>;
 <span class='kw'>mod</span> <span class='ident'>meta</span>;
+<span class='kw'>mod</span> <span class='ident'>help</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>settings</span>::<span class='ident'>AppSettings</span>;
 
@@ -1011,8 +1030,9 @@
 <span class='kw'>use</span> <span class='ident'>yaml_rust</span>::<span class='ident'>Yaml</span>;
 <span class='kw'>use</span> <span class='ident'>vec_map</span>::<span class='ident'>VecMap</span>;
 
-<span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>Arg</span>, <span class='ident'>HelpWriter</span>, <span class='ident'>ArgSettings</span>, <span class='ident'>AnyArg</span>, <span class='ident'>ArgGroup</span>, <span class='ident'>ArgMatches</span>, <span class='ident'>ArgMatcher</span>};
+<span class='kw'>use</span> <span class='ident'>args</span>::{<span class='ident'>Arg</span>, <span class='ident'>ArgSettings</span>, <span class='ident'>AnyArg</span>, <span class='ident'>ArgGroup</span>, <span class='ident'>ArgMatches</span>, <span class='ident'>ArgMatcher</span>};
 <span class='kw'>use</span> <span class='ident'>app</span>::<span class='ident'>parser</span>::<span class='ident'>Parser</span>;
+<span class='kw'>use</span> <span class='ident'>app</span>::<span class='ident'>help</span>::<span class='ident'>Help</span>;
 <span class='kw'>use</span> <span class='ident'>errors</span>::<span class='ident'>Error</span>;
 <span class='kw'>use</span> <span class='ident'>errors</span>::<span class='prelude-ty'>Result</span> <span class='kw'>as</span> <span class='ident'>ClapResult</span>;
 
@@ -1100,9 +1120,15 @@
         <span class='ident'>App</span>::<span class='ident'>from</span>(<span class='ident'>yaml</span>)
     }
 
-    <span class='doccomment'>/// Sets a string of author(s) that will be displayed to the user when they request the help</span>
-    <span class='doccomment'>/// information with `--help` or `-h`.</span>
+    <span class='doccomment'>/// Sets a string of author(s) that will be displayed to the user when they </span>
+    <span class='doccomment'>/// request the help information with `--help` or `-h`.</span>
     <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Pro-tip:** If you turn on unstable features you can use `clap`s </span>
+    <span class='doccomment'>/// convienience macro `crate_authors!` to automatically set your</span>
+    <span class='doccomment'>/// application&#39;s author to the same thing as your crate at compile time. </span>
+    <span class='doccomment'>/// See the `examples/`</span>
+    <span class='doccomment'>/// directory for more information</span>
+    <span class='doccomment'>///    </span>
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```no_run</span>
@@ -1298,6 +1324,39 @@
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>version_short</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='self'>self</span>.<span class='ident'>p</span>.<span class='ident'>version_short</span>(<span class='ident'>s</span>.<span class='ident'>as_ref</span>());
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Sets the help template to be used, overriding the default format.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Tags arg given inside curly brackets:</span>
+    <span class='doccomment'>/// Valid tags are:</span>
+    <span class='doccomment'>///     * `{bin}`         - Binary name.</span>
+    <span class='doccomment'>///     * `{version}`     - Version number.</span>
+    <span class='doccomment'>///     * `{author}`      - Author information.</span>
+    <span class='doccomment'>///     * `{usage}`       - Automatically generated or given usage string.</span>
+    <span class='doccomment'>///     * `{all-args}`    - Help for all arguments (options, flags, positionals arguments,</span>
+    <span class='doccomment'>///                         and subcommands) including titles.</span>
+    <span class='doccomment'>///     * `{unified}`     - Unified help for options and flags.</span>
+    <span class='doccomment'>///     * `{flags}`       - Help for flags.</span>
+    <span class='doccomment'>///     * `{options}`     - Help for options.</span>
+    <span class='doccomment'>///     * `{positionals}` - Help for positionals arguments.</span>
+    <span class='doccomment'>///     * `{subcommands}` - Help for subcommands.</span>
+    <span class='doccomment'>///     * `{after-help}`  - Help for flags.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .version(&quot;1.0&quot;)</span>
+    <span class='doccomment'>///     .template(&quot;{bin} ({version}) - {usage}&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// **NOTE:**The template system is, on purpose, very simple. Therefore the tags have to writen</span>
+    <span class='doccomment'>/// in the lowercase and without spacing.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>template</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='self'>self</span>.<span class='ident'>p</span>.<span class='ident'>meta</span>.<span class='ident'>template</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>s</span>.<span class='ident'>into</span>());
         <span class='self'>self</span>
     }
 
@@ -1618,7 +1677,7 @@
     <span class='doccomment'>/// app.write_help(&amp;mut out).ok().expect(&quot;failed to write to stdout&quot;);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write_help</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='ident'>ClapResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>p</span>.<span class='ident'>write_help</span>(<span class='ident'>w</span>)
+        <span class='ident'>Help</span>::<span class='ident'>write_app_help</span>(<span class='ident'>w</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>)
     }
 
     <span class='doccomment'>/// Starts the parsing process, upon a failed parse an error will be displayed to the user and</span>
@@ -1792,30 +1851,6 @@
 
         <span class='ident'>e</span>.<span class='ident'>exit</span>()
     }
-
-    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write_self_help</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>, <span class='ident'>longest</span>: <span class='ident'>usize</span>, <span class='ident'>nlh</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Write</span>
-    {
-        <span class='kw'>let</span> <span class='ident'>hw</span> <span class='op'>=</span> <span class='ident'>HelpWriter</span>::<span class='ident'>new</span>(<span class='self'>self</span>, <span class='ident'>longest</span>, <span class='ident'>nlh</span>);
-        <span class='ident'>hw</span>.<span class='ident'>write_to</span>(<span class='ident'>w</span>)
-
-        <span class='comment'>// try!(write!(w, &quot;    {}&quot;, self.p.meta.name));</span>
-        <span class='comment'>// write_spaces!((longest_sc + 4) - (self.p.meta.name.len()), w);</span>
-        <span class='comment'>// if let Some(a) = self.p.meta.about {</span>
-        <span class='comment'>//     if a.contains(&quot;{n}&quot;) {</span>
-        <span class='comment'>//         let mut ab = a.split(&quot;{n}&quot;);</span>
-        <span class='comment'>//         while let Some(part) = ab.next() {</span>
-        <span class='comment'>//             try!(write!(w, &quot;{}\n&quot;, part));</span>
-        <span class='comment'>//             write_spaces!(longest_sc + 8, w);</span>
-        <span class='comment'>//             try!(write!(w, &quot;{}&quot;, ab.next().unwrap_or(&quot;&quot;)));</span>
-        <span class='comment'>//         }</span>
-        <span class='comment'>//     } else {</span>
-        <span class='comment'>//         try!(write!(w, &quot;{}&quot;, a));</span>
-        <span class='comment'>//     }</span>
-        <span class='comment'>// }</span>
-        <span class='comment'>// write!(w, &quot;\n&quot;)</span>
-    }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
@@ -1926,6 +1961,7 @@
     <span class='kw'>fn</span> <span class='ident'>takes_value</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
     <span class='kw'>fn</span> <span class='ident'>help</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;e</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>p</span>.<span class='ident'>meta</span>.<span class='ident'>about</span> }
     <span class='kw'>fn</span> <span class='ident'>default_val</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='prelude-val'>None</span> }
+    <span class='kw'>fn</span> <span class='ident'>longest_filter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;e</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>App</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span>, <span class='lifetime'>&#39;e</span><span class='op'>&gt;</span> {

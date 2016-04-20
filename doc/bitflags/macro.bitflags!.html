@@ -47,11 +47,20 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5' class='srclink' href='../src/bitflags/lib.rs.html#147-364' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-5' class='srclink' href='../src/bitflags/lib.rs.html#184-496' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>bitflags</span> {
+    ($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>pub</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
+        $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>
+    }) <span class='op'>=&gt;</span> { ... };
     ($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
         $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>
+    }) <span class='op'>=&gt;</span> { ... };
+    (<span class='kw-2'>@</span><span class='ident'>_impl</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
+        $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>
+    }) <span class='op'>=&gt;</span> { ... };
+    ($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>pub</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
+        $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>,
     }) <span class='op'>=&gt;</span> { ... };
     ($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
         $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>,
@@ -65,6 +74,7 @@ type errors may occur at compile time.</p>
 
 <h1 id='example' class='section-header'><a href='#example'>Example</a></h1>
 <pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;assignment_operators&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>augmented_assignments</span>, <span class='ident'>op_assign_traits</span>))]</span>
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bitflags</span>;
 
@@ -92,6 +102,7 @@ type errors may occur at compile time.</p>
 implementations:</p>
 
 <pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;assignment_operators&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>augmented_assignments</span>, <span class='ident'>op_assign_traits</span>))]</span>
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bitflags</span>;
 
@@ -126,6 +137,33 @@ implementations:</p>
     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>FLAG_B</span>), <span class='string'>&quot;FLAG_B&quot;</span>);
 }</pre>
 
+<h1 id='visibility' class='section-header'><a href='#visibility'>Visibility</a></h1>
+<p>The generated struct and its associated flag constants are not exported
+out of the current module by default. A definition can be exported out of
+the current module by adding <code>pub</code> before <code>flags</code>:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bitflags</span>;
+
+<span class='kw'>mod</span> <span class='ident'>example</span> {
+    <span class='macro'>bitflags</span><span class='macro'>!</span> {
+        <span class='kw'>pub</span> <span class='ident'>flags</span> <span class='ident'>Flags1</span>: <span class='ident'>u32</span> {
+            <span class='kw'>const</span> <span class='ident'>FLAG_A</span>   <span class='op'>=</span> <span class='number'>0b00000001</span>,
+        }
+    }
+    <span class='macro'>bitflags</span><span class='macro'>!</span> {
+        <span class='ident'>flags</span> <span class='ident'>Flags2</span>: <span class='ident'>u32</span> {
+            <span class='kw'>const</span> <span class='ident'>FLAG_B</span>   <span class='op'>=</span> <span class='number'>0b00000010</span>,
+        }
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>flag1</span> <span class='op'>=</span> <span class='ident'>example</span>::<span class='ident'>FLAG_A</span>;
+    <span class='kw'>let</span> <span class='ident'>flag2</span> <span class='op'>=</span> <span class='ident'>example</span>::<span class='ident'>FLAG_B</span>; <span class='comment'>// error: const `FLAG_B` is private</span>
+}</pre>
+
 <h1 id='attributes' class='section-header'><a href='#attributes'>Attributes</a></h1>
 <p>Attributes can be attached to the generated <code>struct</code> by placing them
 before the <code>flags</code> keyword.</p>
@@ -146,12 +184,15 @@ internal struct.</p>
 <p>The following operator traits are implemented for the generated <code>struct</code>:</p>
 
 <ul>
-<li><code>BitOr</code>: union</li>
-<li><code>BitAnd</code>: intersection</li>
-<li><code>BitXor</code>: toggle</li>
-<li><code>Sub</code>: set difference</li>
+<li><code>BitOr</code> and <code>BitOrAssign</code>: union</li>
+<li><code>BitAnd</code> and <code>BitAndAssign</code>: intersection</li>
+<li><code>BitXor</code> and <code>BitXorAssign</code>: toggle</li>
+<li><code>Sub</code> and <code>SubAssign</code>: set difference</li>
 <li><code>Not</code>: set complement</li>
 </ul>
+
+<p>As long as the assignment operators are unstable rust feature they are only
+available with the crate feature <code>assignment_ops</code> enabled.</p>
 
 <h1 id='methods-1' class='section-header'><a href='#methods-1'>Methods</a></h1>
 <p>The following methods are defined for the generated <code>struct</code>:</p>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/re_unicode.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/re_unicode.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>re_unicode.rs.html -- source</title>
@@ -1166,6 +1166,33 @@
 <span id="1122">1122</span>
 <span id="1123">1123</span>
 <span id="1124">1124</span>
+<span id="1125">1125</span>
+<span id="1126">1126</span>
+<span id="1127">1127</span>
+<span id="1128">1128</span>
+<span id="1129">1129</span>
+<span id="1130">1130</span>
+<span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2110,6 +2137,33 @@
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_empty</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span>
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>Captures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>f</span>.<span class='ident'>debug_tuple</span>(<span class='string'>&quot;Captures&quot;</span>).<span class='ident'>field</span>(<span class='kw-2'>&amp;</span><span class='ident'>CapturesDebug</span>(<span class='self'>self</span>)).<span class='ident'>finish</span>()
+    }
+}
+
+<span class='kw'>struct</span> <span class='ident'>CapturesDebug</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;t</span>: <span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;c</span> <span class='ident'>Captures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span>);
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;t</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>CapturesDebug</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>, <span class='lifetime'>&#39;t</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='comment'>// We&#39;d like to show something nice here, even if it means an</span>
+        <span class='comment'>// allocation to build a reverse index.</span>
+        <span class='kw'>let</span> <span class='ident'>slot_to_name</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span>
+            <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>named_groups</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span>(<span class='ident'>a</span>, <span class='ident'>b</span>)<span class='op'>|</span> (<span class='ident'>b</span>, <span class='ident'>a</span>)).<span class='ident'>collect</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>f</span>.<span class='ident'>debug_map</span>();
+        <span class='kw'>for</span> (<span class='ident'>slot</span>, <span class='ident'>m</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>iter_pos</span>().<span class='ident'>enumerate</span>() {
+            <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>map</span>(<span class='op'>|</span>(<span class='ident'>s</span>, <span class='ident'>e</span>)<span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>text</span>[<span class='ident'>s</span>..<span class='ident'>e</span>]);
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>name</span>) <span class='op'>=</span> <span class='ident'>slot_to_name</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>slot</span>) {
+                <span class='ident'>map</span>.<span class='ident'>entry</span>(<span class='kw-2'>&amp;</span><span class='ident'>name</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>);
+            } <span class='kw'>else</span> {
+                <span class='ident'>map</span>.<span class='ident'>entry</span>(<span class='kw-2'>&amp;</span><span class='ident'>slot</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>);
+            }
+        }
+        <span class='ident'>map</span>.<span class='ident'>finish</span>()
     }
 }
 

@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-32096' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.Searcher.html?gotosrc=32096' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-32127' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.Searcher.html?gotosrc=32127' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub unsafe trait Searcher&lt;'a&gt; {
     fn <a href='#tymethod.haystack' class='fnname'>haystack</a>(&amp;self) -&gt; &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>;
     fn <a href='#tymethod.next' class='fnname'>next</a>(&amp;mut self) -&gt; <a class='enum' href='../../../../bitflags/__core/str/pattern/enum.SearchStep.html' title='bitflags::__core::str::pattern::SearchStep'>SearchStep</a>;
@@ -105,7 +105,11 @@ might produce the stream
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl&lt;'a&gt; Searcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharSearcher.html' title='bitflags::__core::str::pattern::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; Searcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharSliceSearcher.html' title='bitflags::__core::str::pattern::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; Searcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharPredicateSearcher.html' title='bitflags::__core::str::pattern::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='../../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; Searcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.StrSearcher.html' title='bitflags::__core::str::pattern::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+</ul><script type="text/javascript" async
                          src="../../../../implementors/core/str/pattern/trait.Searcher.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

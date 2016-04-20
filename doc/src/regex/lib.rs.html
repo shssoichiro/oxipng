@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -671,6 +671,22 @@
 <span id="627">627</span>
 <span id="628">628</span>
 <span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -936,10 +952,10 @@
 <span class='doccomment'>//! This implementation executes regular expressions **only** on valid UTF-8</span>
 <span class='doccomment'>//! while exposing match locations as byte indices into the search string.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Currently, only simple case folding is supported. Namely, when matching</span>
-<span class='doccomment'>//! case-insensitively, the characters are first mapped using the</span>
-<span class='doccomment'>//! [simple case folding](ftp://ftp.unicode.org/Public/UNIDATA/CaseFolding.txt)</span>
-<span class='doccomment'>//! mapping.</span>
+<span class='doccomment'>//! Only simple case folding is supported. Namely, when matching</span>
+<span class='doccomment'>//! case-insensitively, the characters are first mapped using the [simple case</span>
+<span class='doccomment'>//! folding](ftp://ftp.unicode.org/Public/UNIDATA/CaseFolding.txt) mapping</span>
+<span class='doccomment'>//! before matching.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Regular expressions themselves are **only** interpreted as a sequence of</span>
 <span class='doccomment'>//! Unicode scalar values. This means you can use Unicode characters directly</span>
@@ -973,8 +989,11 @@
 <span class='doccomment'>//! Unicode codepoint). Unicode support can be selectively enabled with the</span>
 <span class='doccomment'>//! `u` flag. See the `bytes` module documentation for more details.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Note that Unicode support *cannot* be selectively disabled on the main</span>
-<span class='doccomment'>//! `Regex` type that matches on `&amp;str`.</span>
+<span class='doccomment'>//! Unicode support can also be selectively *disabled* with the main `Regex`</span>
+<span class='doccomment'>//! type that matches on `&amp;str`. For example, `(?-u:\b)` will match an ASCII</span>
+<span class='doccomment'>//! word boundary. Note though that invalid UTF-8 is not allowed to be matched</span>
+<span class='doccomment'>//! even when the `u` flag is disabled. For example, `(?-u:.)` will return an</span>
+<span class='doccomment'>//! error, since `.` matches *any byte* when Unicode support is disabled.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! # Syntax</span>
 <span class='doccomment'>//!</span>
@@ -1018,14 +1037,14 @@
 <span class='doccomment'>//! x*        zero or more of x (greedy)</span>
 <span class='doccomment'>//! x+        one or more of x (greedy)</span>
 <span class='doccomment'>//! x?        zero or one of x (greedy)</span>
-<span class='doccomment'>//! x*?       zero or more of x (ungreedy)</span>
-<span class='doccomment'>//! x+?       one or more of x (ungreedy)</span>
-<span class='doccomment'>//! x??       zero or one of x (ungreedy)</span>
+<span class='doccomment'>//! x*?       zero or more of x (ungreedy/lazy)</span>
+<span class='doccomment'>//! x+?       one or more of x (ungreedy/lazy)</span>
+<span class='doccomment'>//! x??       zero or one of x (ungreedy/lazy)</span>
 <span class='doccomment'>//! x{n,m}    at least n x and at most m x (greedy)</span>
 <span class='doccomment'>//! x{n,}     at least n x (greedy)</span>
 <span class='doccomment'>//! x{n}      exactly n x</span>
-<span class='doccomment'>//! x{n,m}?   at least n x and at most m x (ungreedy)</span>
-<span class='doccomment'>//! x{n,}?    at least n x (ungreedy)</span>
+<span class='doccomment'>//! x{n,m}?   at least n x and at most m x (ungreedy/lazy)</span>
+<span class='doccomment'>//! x{n,}?    at least n x (ungreedy/lazy)</span>
 <span class='doccomment'>//! x{n}?     exactly n x</span>
 <span class='doccomment'>//! &lt;/pre&gt;</span>
 <span class='doccomment'>//!</span>
@@ -1055,13 +1074,14 @@
 <span class='doccomment'>//! the same time: `(?xy)` sets both the `x` and `y` flags and `(?x-y)` sets</span>
 <span class='doccomment'>//! the `x` flag and clears the `y` flag.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! All flags are by default disabled. They are:</span>
+<span class='doccomment'>//! All flags are by default disabled unless stated otherwise. They are:</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! &lt;pre class=&quot;rust&quot;&gt;</span>
 <span class='doccomment'>//! i     case-insensitive</span>
 <span class='doccomment'>//! m     multi-line mode: ^ and $ match begin/end of line</span>
 <span class='doccomment'>//! s     allow . to match \n</span>
 <span class='doccomment'>//! U     swap the meaning of x* and x*?</span>
+<span class='doccomment'>//! u     Unicode support (enabled by default)</span>
 <span class='doccomment'>//! x     ignore whitespace and allow line comments (starting with `#`)</span>
 <span class='doccomment'>//! &lt;/pre&gt;</span>
 <span class='doccomment'>//!</span>
@@ -1079,6 +1099,18 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Notice that the `a+` matches either `a` or `A`, but the `b+` only matches</span>
 <span class='doccomment'>//! `b`.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Here is an example that uses an ASCII word boundary instead of a Unicode</span>
+<span class='doccomment'>//! word boundary:</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```rust</span>
+<span class='doccomment'>//! # extern crate regex; use regex::Regex;</span>
+<span class='doccomment'>//! # fn main() {</span>
+<span class='doccomment'>//! let re = Regex::new(r&quot;(?-u:\b).+(?-u:\b)&quot;).unwrap();</span>
+<span class='doccomment'>//! let cap = re.captures(&quot;$$abc$$&quot;).unwrap();</span>
+<span class='doccomment'>//! assert_eq!(cap.at(0), Some(&quot;abc&quot;));</span>
+<span class='doccomment'>//! # }</span>
+<span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Escape sequences</span>
 <span class='doccomment'>//!</span>
@@ -1150,11 +1182,11 @@
 <span class='doccomment'>//! our time complexity guarantees, but can lead to unbounded memory growth</span>
 <span class='doccomment'>//! proportional to the size of the input. As a stopgap, the DFA is only</span>
 <span class='doccomment'>//! allowed to store a fixed number of states. (When the limit is reached, its</span>
-<span class='doccomment'>//! states are wiped and continues on, possibly duplicating previous work.)</span>
+<span class='doccomment'>//! states are wiped and continues on, possibly duplicating previous work. If</span>
+<span class='doccomment'>//! the limit is reached too frequently, it gives up and hands control of to</span>
+<span class='doccomment'>//! another matching engine with fixed memory requirements.)</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-
-<span class='comment'>// #![deny(missing_docs)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(<span class='ident'>missing_docs</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;pattern&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>pattern</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
@@ -1163,7 +1195,7 @@
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>aho_corasick</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>memchr</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>mempool</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>thread_local</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>quickcheck</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>regex_syntax</span> <span class='kw'>as</span> <span class='ident'>syntax</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>utf8_ranges</span>;
@@ -1241,21 +1273,21 @@ The supported syntax is pretty much the same as the syntax for Unicode
 regular expressions with a few changes that make sense for matching arbitrary
 bytes:
 
-1. A new flag, `u`, is available for switching to Unicode mode.
-2. By default, `u` is disabled, which roughly corresponds to &quot;ASCII compatible&quot;
-mode.
-3. In ASCII compatible mode, neither Unicode codepoints nor Unicode character
+1. The `u` flag is *disabled* by default, but can be selectively enabled. (The
+opposite is true for the main `Regex` type.) Disabling the `u` flag is said to
+invoke &quot;ASCII compatible&quot; mode.
+2. In ASCII compatible mode, neither Unicode codepoints nor Unicode character
 classes are allowed.
-4. In ASCII compatible mode, Perl character classes (`\w`, `\d` and `\s`)
+3. In ASCII compatible mode, Perl character classes (`\w`, `\d` and `\s`)
 revert to their typical ASCII definition. `\w` maps to `[[:word:]]`, `\d` maps
 to `[[:digit:]]` and `\s` maps to `[[:space:]]`.
-5. In ASCII compatible mode, word boundaries use the ASCII compatible `\w` to
+4. In ASCII compatible mode, word boundaries use the ASCII compatible `\w` to
 determine whether a byte is a word byte or not.
-6. Hexadecimal notation can be used to specify arbitrary bytes instead of
+5. Hexadecimal notation can be used to specify arbitrary bytes instead of
 Unicode codepoints. For example, in ASCII compatible mode, `\xFF` matches the
 literal byte `\xFF`, while in Unicode mode, `\xFF` is a Unicode codepoint that
 matches its UTF-8 encoding of `\xC3\xBF`. Similarly for octal notation.
-7. `.` matches any *byte* except for `\n` instead of any codepoint. When the
+6. `.` matches any *byte* except for `\n` instead of any codepoint. When the
 `s` flag is enabled, `.` matches any byte.
 
 # Performance

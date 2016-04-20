@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-7226' class='srclink' href='https://doc.rust-lang.org/nightly/std/path/enum.Component.html?gotosrc=7226' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-7260' class='srclink' href='https://doc.rust-lang.org/nightly/std/path/enum.Component.html?gotosrc=7260' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Component&lt;'a&gt; {
     Prefix(<a class='struct' href='../../../bitflags/__core/path/struct.PrefixComponent.html' title='bitflags::__core::path::PrefixComponent'>PrefixComponent</a>&lt;'a&gt;),
     RootDir,
@@ -59,7 +59,7 @@
 <p>See the module documentation for an in-depth explanation of components and
 their role in the API.</p>
 </div><h2 class='variants'>Variants</h2>
-<table class='variants_table'><tr><td id='variant.Prefix'><code>Prefix</code></td><td><div class='docblock'><p>A Windows path prefix, e.g. <code>C:</code> or <code>\server\share</code>.</p>
+<table class='variants_table'><tr><td id='variant.Prefix'><code>Prefix</code></td><td><div class='docblock'><p>A Windows path prefix, e.g. <code>C:</code> or <code>\\server\share</code>.</p>
 
 <p>Does not occur on Unix.</p>
 </div></td><td></td></tr><tr><td id='variant.RootDir'><code>RootDir</code></td><td><div class='docblock'><p>The root directory component, appears after any prefix and before anything else</p>

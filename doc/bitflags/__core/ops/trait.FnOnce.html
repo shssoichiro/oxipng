@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-21792' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html?gotosrc=21792' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-21802' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html?gotosrc=21802' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait FnOnce&lt;Args&gt; {
     type <a href='#associatedtype.Output' class='type'>Output</a>;
     extern "rust-call" fn <a href='#tymethod.call_once' class='fnname'>call_once</a>(self, args: Args) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>Output</a>;
@@ -63,7 +63,9 @@
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl&lt;'a, A, R&gt; FnOnce for <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/boxed/trait.FnBox.html' title='bitflags::__core::boxed::FnBox'>FnBox</a>&lt;A, Output=R&gt; + 'a + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a>&gt;</code></li>
+<li><code>impl&lt;'a, A, R&gt; FnOnce for <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/boxed/trait.FnBox.html' title='bitflags::__core::boxed::FnBox'>FnBox</a>&lt;A, Output=R&gt; + 'a&gt;</code></li>
+</ul><script type="text/javascript" async
                          src="../../../implementors/core/ops/trait.FnOnce.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

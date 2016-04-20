@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.63/src/compile.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/compile.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>compile.rs.html -- source</title>
@@ -1103,6 +1103,33 @@
 <span id="1059">1059</span>
 <span id="1060">1060</span>
 <span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
+<span id="1078">1078</span>
+<span id="1079">1079</span>
+<span id="1080">1080</span>
+<span id="1081">1081</span>
+<span id="1082">1082</span>
+<span id="1083">1083</span>
+<span id="1084">1084</span>
+<span id="1085">1085</span>
+<span id="1086">1086</span>
+<span id="1087">1087</span>
+<span id="1088">1088</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2016 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1119,7 +1146,10 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
 
-<span class='kw'>use</span> <span class='ident'>syntax</span>::{<span class='ident'>Expr</span>, <span class='ident'>Repeater</span>, <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>, <span class='ident'>ByteClass</span>, <span class='ident'>ByteRange</span>};
+<span class='kw'>use</span> <span class='ident'>syntax</span>::{
+    <span class='ident'>Expr</span>, <span class='ident'>Repeater</span>, <span class='ident'>CharClass</span>, <span class='ident'>ClassRange</span>, <span class='ident'>ByteClass</span>, <span class='ident'>ByteRange</span>,
+    <span class='ident'>is_word_byte</span>,
+};
 <span class='kw'>use</span> <span class='ident'>utf8_ranges</span>::{<span class='ident'>Utf8Range</span>, <span class='ident'>Utf8Sequence</span>, <span class='ident'>Utf8Sequences</span>};
 
 <span class='kw'>use</span> <span class='ident'>prog</span>::{
@@ -1371,14 +1401,22 @@
             <span class='ident'>EndText</span> <span class='op'>=&gt;</span> {
                 <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>EndText</span>)
             }
-            <span class='ident'>WordBoundary</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>WordBoundary</span>),
+            <span class='ident'>WordBoundary</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>compiled</span>.<span class='ident'>has_unicode_word_boundary</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+                <span class='self'>self</span>.<span class='ident'>byte_classes</span>.<span class='ident'>set_word_boundary</span>();
+                <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>WordBoundary</span>)
+            }
             <span class='ident'>NotWordBoundary</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>compiled</span>.<span class='ident'>has_unicode_word_boundary</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+                <span class='self'>self</span>.<span class='ident'>byte_classes</span>.<span class='ident'>set_word_boundary</span>();
                 <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>NotWordBoundary</span>)
             }
             <span class='ident'>WordBoundaryAscii</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>byte_classes</span>.<span class='ident'>set_word_boundary</span>();
                 <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>WordBoundaryAscii</span>)
             }
             <span class='ident'>NotWordBoundaryAscii</span> <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>byte_classes</span>.<span class='ident'>set_word_boundary</span>();
                 <span class='self'>self</span>.<span class='ident'>c_empty_look</span>(<span class='ident'>prog</span>::<span class='ident'>EmptyLook</span>::<span class='ident'>NotWordBoundaryAscii</span>)
             }
             <span class='ident'>Group</span> { <span class='kw-2'>ref</span> <span class='ident'>e</span>, <span class='ident'>i</span>: <span class='prelude-val'>None</span>, <span class='ident'>name</span>: <span class='prelude-val'>None</span> } <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>c</span>(<span class='ident'>e</span>),
@@ -2106,11 +2144,27 @@
         <span class='self'>self</span>.<span class='number'>0</span>[<span class='ident'>end</span> <span class='kw'>as</span> <span class='ident'>usize</span>] <span class='op'>=</span> <span class='boolval'>true</span>;
     }
 
+    <span class='kw'>fn</span> <span class='ident'>set_word_boundary</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// We need to mark all ranges of bytes whose pairs result in</span>
+        <span class='comment'>// evaluating \b differently.</span>
+        <span class='kw'>let</span> <span class='ident'>iswb</span> <span class='op'>=</span> <span class='ident'>is_word_byte</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b1</span>: <span class='ident'>u16</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b2</span>: <span class='ident'>u16</span>;
+        <span class='kw'>while</span> <span class='ident'>b1</span> <span class='op'>&lt;=</span> <span class='number'>255</span> {
+            <span class='ident'>b2</span> <span class='op'>=</span> <span class='ident'>b1</span> <span class='op'>+</span> <span class='number'>1</span>;
+            <span class='kw'>while</span> <span class='ident'>b2</span> <span class='op'>&lt;=</span> <span class='number'>255</span> <span class='op'>&amp;&amp;</span> <span class='ident'>iswb</span>(<span class='ident'>b1</span> <span class='kw'>as</span> <span class='ident'>u8</span>) <span class='op'>==</span> <span class='ident'>iswb</span>(<span class='ident'>b2</span> <span class='kw'>as</span> <span class='ident'>u8</span>) {
+                <span class='ident'>b2</span> <span class='op'>+=</span> <span class='number'>1</span>;
+            }
+            <span class='self'>self</span>.<span class='ident'>set_range</span>(<span class='ident'>b1</span> <span class='kw'>as</span> <span class='ident'>u8</span>, (<span class='ident'>b2</span> <span class='op'>-</span> <span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);
+            <span class='ident'>b1</span> <span class='op'>=</span> <span class='ident'>b2</span>;
+        }
+    }
+
     <span class='kw'>fn</span> <span class='ident'>byte_classes</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
         <span class='comment'>// N.B. If you&#39;re debugging the DFA, it&#39;s useful to simply return</span>
         <span class='comment'>// `(0..256).collect()`, which effectively removes the byte classes</span>
         <span class='comment'>// and makes the transitions easier to read.</span>
-        <span class='comment'>// return (0..256).collect();</span>
+        <span class='comment'>// (0usize..256).map(|x| x as u8).collect()</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>byte_classes</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>; <span class='number'>256</span>];
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>class</span> <span class='op'>=</span> <span class='number'>0u8</span>;
         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>256</span> {

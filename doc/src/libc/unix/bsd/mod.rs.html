@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.9/src/unix/bsd/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.10/src/unix/bsd/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -397,6 +397,15 @@
 <span id="353">353</span>
 <span id="354">354</span>
 <span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>dox</span>::<span class='ident'>mem</span>;
 
@@ -521,6 +530,14 @@
         <span class='ident'>__fsid_val</span>: [::<span class='ident'>int32_t</span>; <span class='number'>2</span>],
     }
 }
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_ALL</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_COLLATE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>1</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_CTYPE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>2</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_MONETARY</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>3</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_NUMERIC</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>4</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_TIME</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>5</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_MESSAGES</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>6</span>;
 
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FIOCLEX</span>: ::<span class='ident'>c_ulong</span> <span class='op'>=</span> <span class='number'>0x20006601</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FIONBIO</span>: ::<span class='ident'>c_ulong</span> <span class='op'>=</span> <span class='number'>0x8004667e</span>;
@@ -682,6 +699,7 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>WNOHANG</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>1</span>;
 
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_NOW</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0x2</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_DEFAULT</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_void</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>2isize</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_void</span>;
 
 <span class='macro'>f</span><span class='macro'>!</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>FD_CLR</span>(<span class='ident'>fd</span>: ::<span class='ident'>c_int</span>, <span class='ident'>set</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>fd_set</span>) <span class='op'>-&gt;</span> () {

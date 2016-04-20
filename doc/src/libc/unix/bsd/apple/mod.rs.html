@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.9/src/unix/bsd/apple/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.10/src/unix/bsd/apple/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -1057,6 +1057,124 @@
 <span id="1013">1013</span>
 <span id="1014">1014</span>
 <span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
+<span id="1078">1078</span>
+<span id="1079">1079</span>
+<span id="1080">1080</span>
+<span id="1081">1081</span>
+<span id="1082">1082</span>
+<span id="1083">1083</span>
+<span id="1084">1084</span>
+<span id="1085">1085</span>
+<span id="1086">1086</span>
+<span id="1087">1087</span>
+<span id="1088">1088</span>
+<span id="1089">1089</span>
+<span id="1090">1090</span>
+<span id="1091">1091</span>
+<span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
+<span id="1119">1119</span>
+<span id="1120">1120</span>
+<span id="1121">1121</span>
+<span id="1122">1122</span>
+<span id="1123">1123</span>
+<span id="1124">1124</span>
+<span id="1125">1125</span>
+<span id="1126">1126</span>
+<span id="1127">1127</span>
+<span id="1128">1128</span>
+<span id="1129">1129</span>
+<span id="1130">1130</span>
+<span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Apple (ios/darwin)-specific definitions</span>
 <span class='doccomment'>//!</span>
@@ -1078,6 +1196,7 @@
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>fsfilcnt_t</span> <span class='op'>=</span> ::<span class='ident'>c_uint</span>;
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>speed_t</span> <span class='op'>=</span> ::<span class='ident'>c_ulong</span>;
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>tcflag_t</span> <span class='op'>=</span> ::<span class='ident'>c_ulong</span>;
+<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>nl_item</span> <span class='op'>=</span> ::<span class='ident'>c_int</span>;
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>timezone</span> {}
 
@@ -1317,7 +1436,116 @@
         <span class='kw'>pub</span> <span class='ident'>trailers</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>iovec</span>,
         <span class='kw'>pub</span> <span class='ident'>trl_cnt</span>: ::<span class='ident'>c_int</span>,
     }
+
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>lconv</span> {
+        <span class='kw'>pub</span> <span class='ident'>decimal_point</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>thousands_sep</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>grouping</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_curr_symbol</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>currency_symbol</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>mon_decimal_point</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>mon_thousands_sep</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>mon_grouping</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>positive_sign</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>negative_sign</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_frac_digits</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>frac_digits</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>p_cs_precedes</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>p_sep_by_space</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>n_cs_precedes</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>n_sep_by_space</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>p_sign_posn</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>n_sign_posn</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_p_cs_precedes</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_n_cs_precedes</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_p_sep_by_space</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_n_sep_by_space</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_p_sign_posn</span>: ::<span class='ident'>c_char</span>,
+        <span class='kw'>pub</span> <span class='ident'>int_n_sign_posn</span>: ::<span class='ident'>c_char</span>,
+    }
 }
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_COLLATE_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>0</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_CTYPE_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>1</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_MESSAGES_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>2</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_MONETARY_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>3</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_NUMERIC_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>4</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_TIME_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='number'>5</span>);
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LC_ALL_MASK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>LC_COLLATE_MASK</span>
+                               <span class='op'>|</span> <span class='ident'>LC_CTYPE_MASK</span>
+                               <span class='op'>|</span> <span class='ident'>LC_MESSAGES_MASK</span>
+                               <span class='op'>|</span> <span class='ident'>LC_MONETARY_MASK</span>
+                               <span class='op'>|</span> <span class='ident'>LC_NUMERIC_MASK</span>
+                               <span class='op'>|</span> <span class='ident'>LC_TIME_MASK</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CODESET</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>0</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>D_T_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>1</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>D_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>2</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>T_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>3</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>T_FMT_AMPM</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>4</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>AM_STR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>5</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PM_STR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>6</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_1</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>7</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_2</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>8</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_3</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>9</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_4</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>10</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_5</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>11</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_6</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>12</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DAY_7</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>13</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_1</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>14</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_2</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>15</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_3</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>16</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_4</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>17</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_5</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>18</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_6</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>19</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABDAY_7</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>20</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_1</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>21</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_2</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>22</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_3</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>23</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_4</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>24</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_5</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>25</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_6</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>26</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_7</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>27</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_8</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>28</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_9</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>29</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_10</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>30</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_11</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>31</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MON_12</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>32</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_1</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>33</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_2</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>34</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_3</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>35</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_4</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>36</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_5</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>37</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_6</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>38</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_7</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>39</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_8</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>40</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_9</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>41</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_10</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>42</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_11</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>43</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ABMON_12</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>44</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ERA</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>45</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ERA_D_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>46</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ERA_D_T_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>47</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ERA_T_FMT</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>48</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ALT_DIGITS</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>49</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RADIXCHAR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>50</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>THOUSEP</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>51</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>YESEXPR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>52</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NOEXPR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>53</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>YESSTR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>54</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NOSTR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>55</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CRNCYSTR</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>56</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>D_MD_ORDER</span>: ::<span class='ident'>nl_item</span> <span class='op'>=</span> <span class='number'>57</span>;
 
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EXIT_FAILURE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>1</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EXIT_SUCCESS</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -2060,6 +2288,14 @@
                    <span class='ident'>name</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>c_char</span>,
                    <span class='ident'>termp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>termios</span>,
                    <span class='ident'>winp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ::<span class='ident'>winsize</span>) <span class='op'>-&gt;</span> ::<span class='ident'>pid_t</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>duplocale</span>(<span class='ident'>base</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>locale_t</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>freelocale</span>(<span class='ident'>loc</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>localeconv_l</span>(<span class='ident'>loc</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>lconv</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>newlocale</span>(<span class='ident'>mask</span>: ::<span class='ident'>c_int</span>,
+                     <span class='ident'>locale</span>: <span class='op'>*</span><span class='kw'>const</span> ::<span class='ident'>c_char</span>,
+                     <span class='ident'>base</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>locale_t</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>uselocale</span>(<span class='ident'>loc</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> ::<span class='ident'>locale_t</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>querylocale</span>(<span class='ident'>mask</span>: ::<span class='ident'>c_int</span>, <span class='ident'>loc</span>: ::<span class='ident'>locale_t</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> ::<span class='ident'>c_char</span>;
 }
 
 <span class='macro'>cfg_if</span><span class='macro'>!</span> {

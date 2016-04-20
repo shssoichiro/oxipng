@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-32122' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.DoubleEndedSearcher.html?gotosrc=32122' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-32153' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.DoubleEndedSearcher.html?gotosrc=32153' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait DoubleEndedSearcher&lt;'a&gt;: <a class='trait' href='../../../../bitflags/__core/str/pattern/trait.ReverseSearcher.html' title='bitflags::__core::str::pattern::ReverseSearcher'>ReverseSearcher</a>&lt;'a&gt; { }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>pattern</code>)<p>: API not fully fleshed out and ready to be stabilized</p>
 </em></div><div class='docblock'><p>A marker trait to express that a <code>ReverseSearcher</code>
 can be used for a <code>DoubleEndedIterator</code> implementation.</p>
@@ -74,7 +74,10 @@ the pattern <code>&quot;aa&quot;</code> in the haystack <code>&quot;aaa&quot;</c
 </div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl&lt;'a&gt; DoubleEndedSearcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharSearcher.html' title='bitflags::__core::str::pattern::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; DoubleEndedSearcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharSliceSearcher.html' title='bitflags::__core::str::pattern::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; DoubleEndedSearcher for <a class='struct' href='../../../../bitflags/__core/str/pattern/struct.CharPredicateSearcher.html' title='bitflags::__core::str::pattern::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='../../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></span></code></li>
+</ul><script type="text/javascript" async
                          src="../../../../implementors/core/str/pattern/trait.DoubleEndedSearcher.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

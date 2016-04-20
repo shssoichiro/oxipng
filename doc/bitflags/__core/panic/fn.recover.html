@@ -47,47 +47,9 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6784' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/fn.recover.html?gotosrc=6784' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn recover&lt;F, R&gt;(f: F) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;R, <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/any/trait.Any.html' title='bitflags::__core::any::Any'>Any</a> + 'static + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a>&gt;&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/panic/trait.RecoverSafe.html' title='bitflags::__core::panic::RecoverSafe'>RecoverSafe</a> + <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; R</span></pre><div class='stability'><em class='stab unstable'>Unstable (<code>recover</code>)<p>: awaiting feedback</p>
-</em></div><div class='docblock'><p>Invokes a closure, capturing the cause of panic if one occurs.</p>
-
-<p>This function will return <code>Ok</code> with the closure&#39;s result if the closure
-does not panic, and will return <code>Err(cause)</code> if the closure panics. The
-<code>cause</code> returned is the object with which panic was originally invoked.</p>
-
-<p>It is currently undefined behavior to unwind from Rust code into foreign
-code, so this function is particularly useful when Rust is called from
-another language (normally C). This can run arbitrary Rust code, capturing a
-panic and allowing a graceful handling of the error.</p>
-
-<p>It is <strong>not</strong> recommended to use this function for a general try/catch
-mechanism. The <code>Result</code> type is more appropriate to use for functions that
-can fail on a regular basis.</p>
-
-<p>The closure provided is required to adhere to the <code>RecoverSafe</code> to ensure
-that all captured variables are safe to cross this recover boundary. The
-purpose of this bound is to encode the concept of <a href="https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md">exception safety</a> in
-the type system. Most usage of this function should not need to worry about
-this bound as programs are naturally panic safe without <code>unsafe</code> code. If it
-becomes a problem the associated <code>AssertRecoverSafe</code> wrapper type in this
-module can be used to quickly assert that the usage here is indeed exception
-safe.</p>
-
-<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
-<pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>recover</span>, <span class='ident'>std_panic</span>)]</span>
-
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>panic</span>;
-
-<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='op'>||</span> {
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;hello!&quot;</span>);
-});
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_ok</span>());
-
-<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>panic</span>::<span class='ident'>recover</span>(<span class='op'>||</span> {
-    <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;oh no!&quot;</span>);
-});
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());</pre>
+               </span><a id='src-6821' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/fn.recover.html?gotosrc=6821' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn recover&lt;F, R&gt;(f: F) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;R, <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/any/trait.Any.html' title='bitflags::__core::any::Any'>Any</a> + 'static + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a>&gt;&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/panic/trait.UnwindSafe.html' title='bitflags::__core::panic::UnwindSafe'>UnwindSafe</a> + <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; R</span></pre><div class='stability'><em class='stab unstable deprecated'>Deprecated since 1.9.0<p>: renamed to <code>catch_unwind</code></p>
+</em></div><div class='docblock'><p>Deprecated, renamed to <code>catch_unwind</code></p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

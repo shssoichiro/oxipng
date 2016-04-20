@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.2.5/src/app/settings.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/app/settings.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>settings.rs.html -- source</title>
@@ -552,34 +552,56 @@
 <span id="508">508</span>
 <span id="509">509</span>
 <span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ascii</span>::<span class='ident'>AsciiExt</span>;
 
 <span class='macro'>bitflags</span><span class='macro'>!</span> {
     <span class='ident'>flags</span> <span class='ident'>Flags</span>: <span class='ident'>u32</span> {
-        <span class='kw'>const</span> <span class='ident'>SC_NEGATE_REQS</span>       <span class='op'>=</span> <span class='number'>0b0000000000000000000001</span>,
-        <span class='kw'>const</span> <span class='ident'>SC_REQUIRED</span>          <span class='op'>=</span> <span class='number'>0b0000000000000000000010</span>,
-        <span class='kw'>const</span> <span class='ident'>A_REQUIRED_ELSE_HELP</span> <span class='op'>=</span> <span class='number'>0b0000000000000000000100</span>,
-        <span class='kw'>const</span> <span class='ident'>GLOBAL_VERSION</span>       <span class='op'>=</span> <span class='number'>0b0000000000000000001000</span>,
-        <span class='kw'>const</span> <span class='ident'>VERSIONLESS_SC</span>       <span class='op'>=</span> <span class='number'>0b0000000000000000010000</span>,
-        <span class='kw'>const</span> <span class='ident'>UNIFIED_HELP</span>         <span class='op'>=</span> <span class='number'>0b0000000000000000100000</span>,
-        <span class='kw'>const</span> <span class='ident'>WAIT_ON_ERROR</span>        <span class='op'>=</span> <span class='number'>0b0000000000000001000000</span>,
-        <span class='kw'>const</span> <span class='ident'>SC_REQUIRED_ELSE_HELP</span><span class='op'>=</span> <span class='number'>0b0000000000000010000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NEEDS_LONG_HELP</span>      <span class='op'>=</span> <span class='number'>0b0000000000000100000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NEEDS_LONG_VERSION</span>   <span class='op'>=</span> <span class='number'>0b0000000000001000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NEEDS_SC_HELP</span>        <span class='op'>=</span> <span class='number'>0b0000000000010000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>DISABLE_VERSION</span>      <span class='op'>=</span> <span class='number'>0b0000000000100000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>               <span class='op'>=</span> <span class='number'>0b0000000001000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>TRAILING_VARARG</span>      <span class='op'>=</span> <span class='number'>0b0000000010000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NO_BIN_NAME</span>          <span class='op'>=</span> <span class='number'>0b0000000100000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>ALLOW_UNK_SC</span>         <span class='op'>=</span> <span class='number'>0b0000001000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>UTF8_STRICT</span>          <span class='op'>=</span> <span class='number'>0b0000010000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>UTF8_NONE</span>            <span class='op'>=</span> <span class='number'>0b0000100000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>LEADING_HYPHEN</span>       <span class='op'>=</span> <span class='number'>0b0001000000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NO_POS_VALUES</span>        <span class='op'>=</span> <span class='number'>0b0010000000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NEXT_LINE_HELP</span>       <span class='op'>=</span> <span class='number'>0b0100000000000000000000</span>,
-        <span class='kw'>const</span> <span class='ident'>DERIVE_DISP_ORDER</span>    <span class='op'>=</span> <span class='number'>0b1000000000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>SC_NEGATE_REQS</span>       <span class='op'>=</span> <span class='number'>0b00000000000000000000001</span>,
+        <span class='kw'>const</span> <span class='ident'>SC_REQUIRED</span>          <span class='op'>=</span> <span class='number'>0b00000000000000000000010</span>,
+        <span class='kw'>const</span> <span class='ident'>A_REQUIRED_ELSE_HELP</span> <span class='op'>=</span> <span class='number'>0b00000000000000000000100</span>,
+        <span class='kw'>const</span> <span class='ident'>GLOBAL_VERSION</span>       <span class='op'>=</span> <span class='number'>0b00000000000000000001000</span>,
+        <span class='kw'>const</span> <span class='ident'>VERSIONLESS_SC</span>       <span class='op'>=</span> <span class='number'>0b00000000000000000010000</span>,
+        <span class='kw'>const</span> <span class='ident'>UNIFIED_HELP</span>         <span class='op'>=</span> <span class='number'>0b00000000000000000100000</span>,
+        <span class='kw'>const</span> <span class='ident'>WAIT_ON_ERROR</span>        <span class='op'>=</span> <span class='number'>0b00000000000000001000000</span>,
+        <span class='kw'>const</span> <span class='ident'>SC_REQUIRED_ELSE_HELP</span><span class='op'>=</span> <span class='number'>0b00000000000000010000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEEDS_LONG_HELP</span>      <span class='op'>=</span> <span class='number'>0b00000000000000100000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEEDS_LONG_VERSION</span>   <span class='op'>=</span> <span class='number'>0b00000000000001000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEEDS_SC_HELP</span>        <span class='op'>=</span> <span class='number'>0b00000000000010000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>DISABLE_VERSION</span>      <span class='op'>=</span> <span class='number'>0b00000000000100000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>               <span class='op'>=</span> <span class='number'>0b00000000001000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>TRAILING_VARARG</span>      <span class='op'>=</span> <span class='number'>0b00000000010000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NO_BIN_NAME</span>          <span class='op'>=</span> <span class='number'>0b00000000100000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>ALLOW_UNK_SC</span>         <span class='op'>=</span> <span class='number'>0b00000001000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>UTF8_STRICT</span>          <span class='op'>=</span> <span class='number'>0b00000010000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>UTF8_NONE</span>            <span class='op'>=</span> <span class='number'>0b00000100000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>LEADING_HYPHEN</span>       <span class='op'>=</span> <span class='number'>0b00001000000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NO_POS_VALUES</span>        <span class='op'>=</span> <span class='number'>0b00010000000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEXT_LINE_HELP</span>       <span class='op'>=</span> <span class='number'>0b00100000000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>DERIVE_DISP_ORDER</span>    <span class='op'>=</span> <span class='number'>0b01000000000000000000000</span>,
+        <span class='kw'>const</span> <span class='ident'>COLORED_HELP</span>         <span class='op'>=</span> <span class='number'>0b10000000000000000000000</span>,
     }
 }
 
@@ -626,6 +648,7 @@
         <span class='ident'>AllowLeadingHyphen</span> <span class='op'>=&gt;</span> <span class='ident'>LEADING_HYPHEN</span>,
         <span class='ident'>HidePossibleValuesInHelp</span> <span class='op'>=&gt;</span> <span class='ident'>NO_POS_VALUES</span>,
         <span class='ident'>NextLineHelp</span> <span class='op'>=&gt;</span> <span class='ident'>NEXT_LINE_HELP</span>,
+        <span class='ident'>ColoredHelp</span> <span class='op'>=&gt;</span> <span class='ident'>COLORED_HELP</span>,
         <span class='ident'>DeriveDisplayOrder</span> <span class='op'>=&gt;</span> <span class='ident'>DERIVE_DISP_ORDER</span>
     }
 }
@@ -1001,6 +1024,23 @@
     <span class='doccomment'>///     .get_matches();</span>
     <span class='doccomment'>/// ```</span>
     <span class='ident'>DeriveDisplayOrder</span>,
+    <span class='doccomment'>/// Uses colorized help messages.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** Must be compiled with the `color` cargo feature</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Platform Specific</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This setting only applies to Unix, Linux, and OSX (i.e. non-Windows platforms)</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```no_run</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, SubCommand, AppSettings};</span>
+    <span class='doccomment'>/// App::new(&quot;myprog&quot;)</span>
+    <span class='doccomment'>///     .setting(AppSettings::ColoredHelp)</span>
+    <span class='doccomment'>///     .get_matches();</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='ident'>ColoredHelp</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='ident'>NeedsLongVersion</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
@@ -1033,6 +1073,7 @@
             <span class='string'>&quot;hidepossiblevaluesinhelp&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>AppSettings</span>::<span class='ident'>HidePossibleValuesInHelp</span>),
             <span class='string'>&quot;nextlinehelp&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>AppSettings</span>::<span class='ident'>NextLineHelp</span>),
             <span class='string'>&quot;derivedisplayorder&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>AppSettings</span>::<span class='ident'>DeriveDisplayOrder</span>),
+            <span class='string'>&quot;coloredhelp&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>AppSettings</span>::<span class='ident'>ColoredHelp</span>),
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;unknown AppSetting, cannot convert from str&quot;</span>.<span class='ident'>to_owned</span>()),
         }
     }
@@ -1059,6 +1100,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;allowinvalidutf8&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='ident'>AppSettings</span>::<span class='ident'>AllowInvalidUtf8</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;allowleadinghyphen&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='ident'>AppSettings</span>::<span class='ident'>AllowLeadingHyphen</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;hidepossiblevaluesinhelp&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='ident'>AppSettings</span>::<span class='ident'>HidePossibleValuesInHelp</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;coloredhelp&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='ident'>AppSettings</span>::<span class='ident'>ColoredHelp</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;hidden&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='ident'>AppSettings</span>::<span class='ident'>Hidden</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='string'>&quot;hahahaha&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>AppSettings</span><span class='op'>&gt;</span>().<span class='ident'>is_err</span>());
     }
