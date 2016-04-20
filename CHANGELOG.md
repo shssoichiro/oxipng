@@ -1,5 +1,7 @@
 **Version 0.5.0 (unreleased)**
  - [SEMVER_MINOR] Palette entries can now reduced, on by default ([#11](https://github.com/shssoichiro/oxipng/issues/11))
+ - Don't report that we are in pretend mode if verbosity is set to none
+ - Add cargo bench suite ([#7](https://github.com/shssoichiro/oxipng/issues/7))
 
 **Version 0.4.0**
  - Performance optimizations

@@ -9,6 +9,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
 exclude = [
   "tests/*",
+  "bench/*",
 ]
 
 [lib]
