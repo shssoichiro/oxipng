@@ -207,3 +207,13 @@ fn bench_deflate_1_bits_strategy_3(b: &mut Bencher) {
         deflate::deflate(png.raw_data.as_ref(), 9, 9, 3, 15).ok();
     });
 }
+
+#[bench]
+fn bench_inflate_generic(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png"));
+    let png = png::PngData::new(&input).unwrap();
+
+    b.iter(|| {
+        deflate::inflate(png.idat_data.as_ref()).ok();
+    });
+}
