@@ -151,45 +151,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
     }
 
-    let mut something_changed = false;
-
-    if opts.palette_reduction {
-        if png.reduce_palette() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
-        };
-    }
-
-    if opts.bit_depth_reduction {
-        if png.reduce_bit_depth() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
-        };
-    }
-
-    if opts.color_type_reduction {
-        if png.reduce_color_type() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
-        };
-    }
-
-    if something_changed && opts.verbosity.is_some() {
-        report_reduction(&png);
-    }
-
-    if let Some(interlacing) = opts.interlace {
-        if png.change_interlacing(interlacing) {
-            png.ihdr_data.interlaced = interlacing;
-            something_changed = true;
-        }
-    }
+    let something_changed = perform_reductions(&mut png, &opts);
 
     if opts.idat_recoding || something_changed {
         // Use 1 thread on single-core, otherwise use threads = 1.5x CPU cores
@@ -270,29 +232,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         }
     }
 
-    match opts.strip.clone() {
-        // Strip headers
-        png::Headers::None => (),
-        png::Headers::Some(hdrs) => {
-            for hdr in &hdrs {
-                png.aux_headers.remove(hdr);
-            }
-        }
-        png::Headers::Safe => {
-            const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
-                                                          "bKGD", "hIST", "pHYs", "sPLT"];
-            let mut preserved = HashMap::new();
-            for (hdr, contents) in &png.aux_headers {
-                if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
-                    preserved.insert(hdr.clone(), contents.clone());
-                }
-            }
-            png.aux_headers = preserved;
-        }
-        png::Headers::All => {
-            png.aux_headers = HashMap::new();
-        }
-    }
+    perform_strip(&mut png, &opts);
 
     let output_data = png.output();
     if file_original_size <= output_data.len() && !opts.force && opts.interlace.is_none() {
@@ -381,6 +321,50 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     Ok(())
 }
 
+fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
+    let mut something_changed = false;
+
+    if opts.palette_reduction {
+        if png.reduce_palette() {
+            something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        };
+    }
+
+    if opts.bit_depth_reduction {
+        if png.reduce_bit_depth() {
+            something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        };
+    }
+
+    if opts.color_type_reduction {
+        if png.reduce_color_type() {
+            something_changed = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        };
+    }
+
+    if something_changed && opts.verbosity.is_some() {
+        report_reduction(&png);
+    }
+
+    if let Some(interlacing) = opts.interlace {
+        if png.change_interlacing(interlacing) {
+            png.ihdr_data.interlaced = interlacing;
+            something_changed = true;
+        }
+    }
+
+    something_changed
+}
+
 fn report_reduction(png: &png::PngData) {
     if let Some(palette) = png.palette.clone() {
         writeln!(&mut stderr(),
@@ -395,5 +379,31 @@ fn report_reduction(png: &png::PngData) {
                  png.ihdr_data.bit_depth,
                  png.ihdr_data.color_type)
             .ok();
+    }
+}
+
+fn perform_strip(png: &mut png::PngData, opts: &Options) {
+    match opts.strip.clone() {
+        // Strip headers
+        png::Headers::None => (),
+        png::Headers::Some(hdrs) => {
+            for hdr in &hdrs {
+                png.aux_headers.remove(hdr);
+            }
+        }
+        png::Headers::Safe => {
+            const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
+                                                          "bKGD", "hIST", "pHYs", "sPLT"];
+            let mut preserved = HashMap::new();
+            for (hdr, contents) in &png.aux_headers {
+                if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
+                    preserved.insert(hdr.clone(), contents.clone());
+                }
+            }
+            png.aux_headers = preserved;
+        }
+        png::Headers::All => {
+            png.aux_headers = HashMap::new();
+        }
     }
 }
