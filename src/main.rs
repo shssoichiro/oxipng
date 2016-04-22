@@ -6,6 +6,7 @@ use clap::{App, Arg, ArgMatches};
 use oxipng::png;
 use regex::Regex;
 use std::collections::HashSet;
+use std::fs::DirBuilder;
 use std::io::{Write, stderr};
 use std::path::PathBuf;
 
@@ -410,7 +411,12 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
     if let Some(x) = matches.value_of("output_dir") {
         let path = PathBuf::from(x);
         if !path.exists() {
-
+            match DirBuilder::new()
+                      .recursive(true)
+                      .create(&path) {
+                Ok(_) => (),
+                Err(x) => return Err(format!("Could not create output directory {}", x)),
+            };
         } else if !path.is_dir() {
             return Err(format!("{} is an existing file (not a directory), cannot create directory",
                                x));

@@ -1,3 +1,6 @@
+**Version 0.5.1 (unreleased)**
+ - Fix issue where output directory would not be created if it did not exist
+
 **Version 0.5.0**
  - [SEMVER_MINOR] Palette entries can now reduced, on by default ([#11](https://github.com/shssoichiro/oxipng/issues/11))
  - Don't report that we are in pretend mode if verbosity is set to none
