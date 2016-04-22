@@ -3,6 +3,7 @@ extern crate byteorder;
 extern crate crc;
 extern crate libc;
 extern crate libz_sys;
+extern crate miniz_sys;
 extern crate num_cpus;
 extern crate scoped_pool;
 
@@ -15,7 +16,8 @@ use std::sync::{Arc, Mutex};
 
 pub mod deflate {
     pub mod deflate;
-    pub mod stream;
+    pub mod libz_stream;
+    pub mod miniz_stream;
 }
 pub mod png;
 
