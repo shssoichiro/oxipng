@@ -463,3 +463,21 @@ fn interlaced_0_to_1_other_filter_mode() {
 
     remove_file(output).ok();
 }
+
+#[test]
+fn preserve_attrs() {
+    let input = PathBuf::from("tests/files/preserve_attrs.png");
+    let mut opts = get_opts(&input);
+    opts.preserve_attrs = true;
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
+
+    // TODO: Actually check permissions
+}

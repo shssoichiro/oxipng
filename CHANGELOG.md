@@ -1,6 +1,7 @@
-**Version 0.5.1 (unreleased)**
+**Version 0.6.0 (unreleased)**
  - Fix issue where output directory would not be created if it did not exist
  - Use miniz for compression strategies where it outperforms zlib
+ - [SEMVER_MINOR] Partially implement -p / --preserve, as far as stable Rust will allow for now
 
 **Version 0.5.0**
  - [SEMVER_MINOR] Palette entries can now reduced, on by default ([#11](https://github.com/shssoichiro/oxipng/issues/11))

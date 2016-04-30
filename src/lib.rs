@@ -275,6 +275,51 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                     return Err(format!("Unable to write to file {}", opts.out_file.display()))
                 }
             };
+
+            if opts.preserve_attrs {
+                match File::open(filepath) {
+                    Ok(f) => {
+                        match f.metadata() {
+                            Ok(metadata) => {
+                                // TODO: Implement full permission changing on Unix
+                                // Not available in stable, requires block cfg statements
+                                // See https://github.com/rust-lang/rust/issues/15701
+                                {
+                                    match out_file.metadata() {
+                                        Ok(out_meta) => {
+                                            let readonly = metadata.permissions()
+                                                                   .readonly();
+                                            out_meta.permissions()
+                                                    .set_readonly(readonly);
+                                        }
+                                        Err(_) => {
+                                            if opts.verbosity.is_some() {
+                                                writeln!(&mut stderr(),
+                                                         "Failed to set permissions on output file")
+                                                    .ok();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                if opts.verbosity.is_some() {
+                                    writeln!(&mut stderr(),
+                                             "Failed to read permissions on input file")
+                                        .ok();
+                                }
+                            }
+                        }
+                    }
+                    Err(_) => {
+                        if opts.verbosity.is_some() {
+                            writeln!(&mut stderr(), "Failed to read permissions on input file")
+                                .ok();
+                        }
+                    }
+                };
+            }
+
             let mut buffer = BufWriter::new(out_file);
             match buffer.write_all(&output_data) {
                 Ok(_) => {
