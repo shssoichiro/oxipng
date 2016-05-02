@@ -21,9 +21,6 @@ name = "oxipng"
 path = "src/main.rs"
 doc = false
 
-[profile.release]
-debug = true
-
 [dependencies]
 bit-vec = "^0.4.2"
 byteorder = "^0.5.0"

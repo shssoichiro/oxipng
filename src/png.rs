@@ -1073,12 +1073,12 @@ fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8>
             filtered.extend_from_slice(data);
         }
         1 => {
-            for (i, byte) in data.iter().enumerate() {
-                filtered.push(match i.checked_sub(bpp) {
-                    Some(x) => byte.wrapping_sub(data[x]),
-                    None => *byte,
-                });
-            }
+            filtered.extend_from_slice(&data[0..bpp]);
+            filtered.extend_from_slice(&data.iter()
+                                            .skip(bpp)
+                                            .zip(data.iter())
+                                            .map(|(cur, last)| cur.wrapping_sub(*last))
+                                            .collect::<Vec<u8>>());
         }
         2 => {
             if last_line.is_empty() {
