@@ -56,7 +56,7 @@ fn test_it_converts(input: &Path,
                     bit_depth_in: png::BitDepth,
                     color_type_out: png::ColorType,
                     bit_depth_out: png::BitDepth) {
-    let png = png::PngData::new(input).unwrap();
+    let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == color_type_in);
     assert!(png.ihdr_data.bit_depth == bit_depth_in);
@@ -68,7 +68,7 @@ fn test_it_converts(input: &Path,
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(output) {
+    let png = match png::PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();

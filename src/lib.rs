@@ -90,7 +90,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
         writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
     }
     let in_file = Path::new(filepath);
-    let mut png = match png::PngData::new(&in_file) {
+    let mut png = match png::PngData::new(&in_file, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => return Err(x),
     };

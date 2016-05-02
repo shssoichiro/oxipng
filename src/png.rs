@@ -4,8 +4,7 @@ use crc::crc32;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs::File;
-use std::io::Cursor;
-use std::io::prelude::*;
+use std::io::{Cursor, Read, Write};
 use std::iter::Iterator;
 use std::path::Path;
 
@@ -292,7 +291,7 @@ pub struct IhdrData {
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
-    pub fn new(filepath: &Path) -> Result<PngData, String> {
+    pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, String> {
         let mut file = match File::open(filepath) {
             Ok(f) => f,
             Err(_) => return Err("Failed to open file for reading".to_owned()),
@@ -314,7 +313,7 @@ impl PngData {
         let mut aux_headers: HashMap<String, Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
         loop {
-            let header = parse_next_header(byte_data.as_ref(), &mut byte_offset);
+            let header = parse_next_header(byte_data.as_ref(), &mut byte_offset, fix_errors);
             let header = match header {
                 Ok(x) => x,
                 Err(x) => return Err(x),
@@ -1574,7 +1573,8 @@ fn file_header_is_valid(bytes: &[u8]) -> bool {
 }
 
 fn parse_next_header(byte_data: &[u8],
-                     byte_offset: &mut usize)
+                     byte_offset: &mut usize,
+                     fix_errors: bool)
                      -> Result<Option<(String, Vec<u8>)>, String> {
     let mut rdr = Cursor::new(byte_data.iter()
                                        .skip(*byte_offset)
@@ -1615,8 +1615,9 @@ fn parse_next_header(byte_data: &[u8],
     };
     *byte_offset += 4;
     header_bytes.extend(data.clone());
-    if crc32::checksum_ieee(header_bytes.as_ref()) != crc {
-        return Err(format!("Corrupt data chunk found--CRC Mismatch in {}", header));
+    if !fix_errors && crc32::checksum_ieee(header_bytes.as_ref()) != crc {
+        return Err(format!("Corrupt data chunk found--CRC Mismatch in {}\nThis may be recoverable by using --fix",
+                           header));
     }
 
     Ok(Some((header, data)))

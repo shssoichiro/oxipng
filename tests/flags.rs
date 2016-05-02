@@ -56,7 +56,7 @@ fn test_it_converts(input: &Path,
                     bit_depth_in: png::BitDepth,
                     color_type_out: png::ColorType,
                     bit_depth_out: png::BitDepth) {
-    let png = png::PngData::new(input).unwrap();
+    let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == color_type_in);
     assert!(png.ihdr_data.bit_depth == bit_depth_in);
@@ -67,7 +67,7 @@ fn test_it_converts(input: &Path,
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(output) {
+    let png = match png::PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -111,7 +111,7 @@ fn strip_headers_list() {
     opts.strip = png::Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.aux_headers.contains_key("tEXt"));
     assert!(png.aux_headers.contains_key("iTXt"));
@@ -123,7 +123,7 @@ fn strip_headers_list() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -152,7 +152,7 @@ fn strip_headers_safe() {
     opts.strip = png::Headers::Safe;
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.aux_headers.contains_key("tEXt"));
     assert!(png.aux_headers.contains_key("iTXt"));
@@ -164,7 +164,7 @@ fn strip_headers_safe() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -193,7 +193,7 @@ fn strip_headers_all() {
     opts.strip = png::Headers::All;
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.aux_headers.contains_key("tEXt"));
     assert!(png.aux_headers.contains_key("iTXt"));
@@ -205,7 +205,7 @@ fn strip_headers_all() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -234,7 +234,7 @@ fn strip_headers_none() {
     opts.strip = png::Headers::None;
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.aux_headers.contains_key("tEXt"));
     assert!(png.aux_headers.contains_key("iTXt"));
@@ -246,7 +246,7 @@ fn strip_headers_none() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -275,7 +275,7 @@ fn interlacing_0_to_1() {
     opts.interlace = Some(1);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.interlaced == 0);
 
@@ -285,7 +285,7 @@ fn interlacing_0_to_1() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -312,7 +312,7 @@ fn interlacing_1_to_0() {
     opts.interlace = Some(0);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.interlaced == 1);
 
@@ -322,7 +322,7 @@ fn interlacing_1_to_0() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -349,7 +349,7 @@ fn interlacing_0_to_1_small_files() {
     opts.interlace = Some(1);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.interlaced == 0);
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
@@ -361,7 +361,7 @@ fn interlacing_0_to_1_small_files() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -390,7 +390,7 @@ fn interlacing_1_to_0_small_files() {
     opts.interlace = Some(0);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.interlaced == 1);
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
@@ -402,7 +402,7 @@ fn interlacing_1_to_0_small_files() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -434,7 +434,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     opts.filter = filter;
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.interlaced == 0);
 
@@ -444,7 +444,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -480,4 +480,37 @@ fn preserve_attrs() {
                      png::BitDepth::Eight);
 
     // TODO: Actually check permissions
+}
+
+#[test]
+fn fix_errors() {
+    let input = PathBuf::from("tests/files/fix_errors.png");
+    let mut opts = get_opts(&input);
+    opts.fix_errors = true;
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
+
+    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output, false) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
+    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+
+    // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
+    remove_file(output).ok();
 }

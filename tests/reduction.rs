@@ -56,7 +56,7 @@ fn test_it_converts(input: &Path,
                     bit_depth_in: png::BitDepth,
                     color_type_out: png::ColorType,
                     bit_depth_out: png::BitDepth) {
-    let png = png::PngData::new(input).unwrap();
+    let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == color_type_in);
     assert!(png.ihdr_data.bit_depth == bit_depth_in);
@@ -68,7 +68,7 @@ fn test_it_converts(input: &Path,
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(output) {
+    let png = match png::PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -1281,7 +1281,7 @@ fn palette_should_be_reduced_with_dupes() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
@@ -1293,7 +1293,7 @@ fn palette_should_be_reduced_with_dupes() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
@@ -1321,7 +1321,7 @@ fn palette_should_be_reduced_with_unused() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
@@ -1333,7 +1333,7 @@ fn palette_should_be_reduced_with_unused() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
@@ -1361,7 +1361,7 @@ fn palette_should_be_reduced_with_both() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    let png = png::PngData::new(&input).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
     assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
@@ -1373,7 +1373,7 @@ fn palette_should_be_reduced_with_both() {
     };
     assert!(output.exists());
 
-    let png = match png::PngData::new(&output) {
+    let png = match png::PngData::new(&output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
