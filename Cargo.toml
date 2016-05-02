@@ -1,6 +1,6 @@
 [package]
 name = "oxipng"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 description = "A lossless PNG compression optimizer"
 license = "MIT"
