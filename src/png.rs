@@ -1149,13 +1149,14 @@ fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u
             }
         }
         2 => {
-            for (i, byte) in data.iter().enumerate() {
-                if last_line.is_empty() {
-                    unfiltered.push(*byte);
-                } else {
-                    unfiltered.push(byte.wrapping_add(last_line[i]));
-                };
-            }
+            if last_line.is_empty() {
+                unfiltered.extend_from_slice(data);
+            } else {
+                unfiltered.extend_from_slice(&data.iter()
+                                                  .zip(last_line.iter())
+                                                  .map(|(cur, last)| cur.wrapping_add(*last))
+                                                  .collect::<Vec<u8>>());
+            };
         }
         3 => {
             for (i, byte) in data.iter().enumerate() {
