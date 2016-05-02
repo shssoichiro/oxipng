@@ -1,5 +1,6 @@
 **Version 0.6.1 (unreleased)**
  - Minor compression improvement on interlaced images
+ - Performance optimizations
 
 **Version 0.6.0**
  - Fix issue where output directory would not be created if it did not exist
