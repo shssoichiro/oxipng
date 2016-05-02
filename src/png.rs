@@ -466,37 +466,45 @@ impl PngData {
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
-            if last_pass == line.pass {
-                match filter {
-                    0 | 1 | 2 | 3 | 4 => {
+            match filter {
+                0 | 1 | 2 | 3 | 4 => {
+                    if last_pass == line.pass || filter <= 1 {
                         filtered.push(filter);
-                        filtered.extend(filter_line(filter, bpp, &line.data, &last_line));
+                        filtered.extend_from_slice(&filter_line(filter,
+                                                                bpp,
+                                                                &line.data,
+                                                                &last_line));
+                    } else {
+                        // Avoid vertical filtering on first line of each interlacing pass
+                        filtered.push(0);
+                        filtered.extend_from_slice(&filter_line(0, bpp, &line.data, &last_line));
                     }
-                    5 => {
-                        // Heuristically guess best filter per line
-                        // Uses MSAD algorithm mentioned in libpng reference docs
-                        // http://www.libpng.org/pub/png/book/chapter09.html
-                        let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
-                        for filter in 0..5 {
-                            trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
-                        }
-                        let (best_filter, best_line) = trials.iter()
-                                                             .min_by_key(|x| {
-                                                                 x.1.iter().fold(0u64, |acc, &x| {
-                                                                     let signed = x as i8;
-                                                                     acc +
-                                                                     (signed as i16).abs() as u64
-                                                                 })
-                                                             })
-                                                             .unwrap();
-                        filtered.push(*best_filter);
-                        filtered.extend_from_slice(best_line);
-                    }
-                    _ => unreachable!(),
                 }
-            } else {
-                filtered.push(0);
-                filtered.extend(filter_line(0, bpp, &line.data, &last_line));
+                5 => {
+                    // Heuristically guess best filter per line
+                    // Uses MSAD algorithm mentioned in libpng reference docs
+                    // http://www.libpng.org/pub/png/book/chapter09.html
+                    let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
+                    // Avoid vertical filtering on first line of each interlacing pass
+                    for filter in if last_pass == line.pass {
+                        0..5
+                    } else {
+                        0..2
+                    } {
+                        trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
+                    }
+                    let (best_filter, best_line) = trials.iter()
+                                                         .min_by_key(|x| {
+                                                             x.1.iter().fold(0u64, |acc, &x| {
+                                                                 let signed = x as i8;
+                                                                 acc + (signed as i16).abs() as u64
+                                                             })
+                                                         })
+                                                         .unwrap();
+                    filtered.push(*best_filter);
+                    filtered.extend_from_slice(best_line);
+                }
+                _ => unreachable!(),
             }
             last_line = line.data.clone();
             last_pass = line.pass;
