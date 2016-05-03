@@ -58,8 +58,8 @@ fn test_it_converts(input: &Path,
                     bit_depth_out: png::BitDepth) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == color_type_in);
-    assert!(png.ihdr_data.bit_depth == bit_depth_in);
+    assert_eq!(png.ihdr_data.color_type, color_type_in);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
@@ -75,15 +75,15 @@ fn test_it_converts(input: &Path,
         }
     };
 
-    assert!(png.ihdr_data.color_type == color_type_out);
-    assert!(png.ihdr_data.bit_depth == bit_depth_out);
+    assert_eq!(png.ihdr_data.color_type, color_type_out);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
 
     let old_png = image::open(input).unwrap();
     let new_png = image::open(output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }

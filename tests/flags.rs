@@ -58,8 +58,8 @@ fn test_it_converts(input: &Path,
                     bit_depth_out: png::BitDepth) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == color_type_in);
-    assert!(png.ihdr_data.bit_depth == bit_depth_in);
+    assert_eq!(png.ihdr_data.color_type, color_type_in);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
@@ -75,15 +75,15 @@ fn test_it_converts(input: &Path,
         }
     };
 
-    assert!(png.ihdr_data.color_type == color_type_out);
-    assert!(png.ihdr_data.bit_depth == bit_depth_out);
+    assert_eq!(png.ihdr_data.color_type, color_type_out);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
 
     let old_png = image::open(input).unwrap();
     let new_png = image::open(output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -139,8 +139,8 @@ fn strip_headers_list() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -180,8 +180,8 @@ fn strip_headers_safe() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -221,8 +221,8 @@ fn strip_headers_all() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -262,8 +262,8 @@ fn strip_headers_none() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -277,7 +277,7 @@ fn interlacing_0_to_1() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.interlaced == 0);
+    assert_eq!(png.ihdr_data.interlaced, 0);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -293,14 +293,14 @@ fn interlacing_0_to_1() {
         }
     };
 
-    assert!(png.ihdr_data.interlaced == 1);
+    assert_eq!(png.ihdr_data.interlaced, 1);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -314,7 +314,7 @@ fn interlacing_1_to_0() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.interlaced == 1);
+    assert_eq!(png.ihdr_data.interlaced, 1);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -330,14 +330,14 @@ fn interlacing_1_to_0() {
         }
     };
 
-    assert!(png.ihdr_data.interlaced == 0);
+    assert_eq!(png.ihdr_data.interlaced, 0);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -351,9 +351,9 @@ fn interlacing_0_to_1_small_files() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.interlaced == 0);
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -369,16 +369,16 @@ fn interlacing_0_to_1_small_files() {
         }
     };
 
-    assert!(png.ihdr_data.interlaced == 1);
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::One);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -392,9 +392,9 @@ fn interlacing_1_to_0_small_files() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.interlaced == 1);
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -410,16 +410,16 @@ fn interlacing_1_to_0_small_files() {
         }
     };
 
-    assert!(png.ihdr_data.interlaced == 0);
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::One);
+    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::One);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -436,7 +436,7 @@ fn interlaced_0_to_1_other_filter_mode() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.interlaced == 0);
+    assert_eq!(png.ihdr_data.interlaced, 0);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -452,14 +452,14 @@ fn interlaced_0_to_1_other_filter_mode() {
         }
     };
 
-    assert!(png.ihdr_data.interlaced == 1);
+    assert_eq!(png.ihdr_data.interlaced, 1);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -491,8 +491,8 @@ fn fix_errors() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == png::ColorType::RGBA);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::RGBA);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -508,8 +508,8 @@ fn fix_errors() {
         }
     };
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Grayscale);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Grayscale);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
 
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
     remove_file(output).ok();

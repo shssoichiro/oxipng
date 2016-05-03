@@ -58,9 +58,9 @@ fn test_it_converts(input: &Path,
                     bit_depth_out: png::BitDepth) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == color_type_in);
-    assert!(png.ihdr_data.bit_depth == bit_depth_in);
-    assert!(png.ihdr_data.interlaced == 0);
+    assert_eq!(png.ihdr_data.color_type, color_type_in);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
+    assert_eq!(png.ihdr_data.interlaced, 0);
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
@@ -76,15 +76,15 @@ fn test_it_converts(input: &Path,
         }
     };
 
-    assert!(png.ihdr_data.color_type == color_type_out);
-    assert!(png.ihdr_data.bit_depth == bit_depth_out);
+    assert_eq!(png.ihdr_data.color_type, color_type_out);
+    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
 
     let old_png = image::open(input).unwrap();
     let new_png = image::open(output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -1283,9 +1283,9 @@ fn palette_should_be_reduced_with_dupes() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 43 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 43 * 3);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -1301,16 +1301,16 @@ fn palette_should_be_reduced_with_dupes() {
         }
     };
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 35 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 35 * 3);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -1323,9 +1323,9 @@ fn palette_should_be_reduced_with_unused() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 35 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 35 * 3);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -1341,16 +1341,16 @@ fn palette_should_be_reduced_with_unused() {
         }
     };
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 33 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 33 * 3);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -1363,9 +1363,9 @@ fn palette_should_be_reduced_with_both() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 43 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 43 * 3);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -1381,16 +1381,16 @@ fn palette_should_be_reduced_with_both() {
         }
     };
 
-    assert!(png.ihdr_data.color_type == png::ColorType::Indexed);
-    assert!(png.ihdr_data.bit_depth == png::BitDepth::Eight);
-    assert!(png.palette.unwrap().len() == 33 * 3);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.palette.unwrap().len(), 33 * 3);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
