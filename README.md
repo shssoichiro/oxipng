@@ -61,8 +61,20 @@ it if you have a good reason.
 Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
 will never affect rendering of the image. "All" removes all metadata that is not critical
 to the image. You can also pass a comma-separated list of specific metadata chunks to remove.
+`-s` can be used as a shorthand for `--strip safe`.
 
 More advanced options can be found by running `oxipng -h`.
+
+## Library Usage
+
+Although intended to be used as an executable, oxipng can also be used as a library in
+other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.toml,
+then `extern crate oxipng` in your project. You should then have access to all of the library
+functions [documented here](https://shssoichiro.github.io/oxipng/doc/oxipng/). The simplest
+method of usage involves creating an
+[Options struct](https://shssoichiro.github.io/oxipng/doc/oxipng/struct.Options.html) and
+passing it, along with an input filename, into the
+[optimize function](https://shssoichiro.github.io/oxipng/doc/oxipng/fn.optimize.html).
 
 ## History
 
