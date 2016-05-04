@@ -134,21 +134,150 @@ impl Default for Options {
 
 /// Perform optimization on the input file using the options provided
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
-    type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
-
-    // Decode PNG from file
+    // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
     }
+
     let in_file = Path::new(filepath);
+    let original_size = in_file.metadata().unwrap().len() as usize;
     let mut png = match png::PngData::new(&in_file, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => return Err(x),
     };
 
+    // Run the optimizer on the decoded PNG.
+    let optimized_output = optimize_png(&mut png, original_size, opts);
+
+    if is_fully_optimized(original_size, optimized_output.len(), opts) {
+        writeln!(&mut stderr(), "File already optimized").ok();
+        return Ok(());
+    }
+
+    if opts.pretend {
+        if opts.verbosity.is_some() {
+            writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
+        }
+    } else {
+        if opts.backup {
+            match copy(in_file,
+                       in_file.with_extension(format!("bak.{}",
+                                                      in_file.extension()
+                                                             .unwrap()
+                                                             .to_str()
+                                                             .unwrap()))) {
+                Ok(x) => x,
+                Err(_) => {
+                    return Err(format!("Unable to write to backup file at {}",
+                                       opts.out_file.display()))
+                }
+            };
+        }
+
+        if opts.stdout {
+            let mut buffer = BufWriter::new(stdout());
+            match buffer.write_all(&optimized_output) {
+                Ok(_) => (),
+                Err(_) => return Err("Unable to write to stdout".to_owned()),
+            }
+        } else {
+            let out_file = match File::create(&opts.out_file) {
+                Ok(x) => x,
+                Err(_) => {
+                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                }
+            };
+
+            if opts.preserve_attrs {
+                match File::open(filepath) {
+                    Ok(f) => {
+                        match f.metadata() {
+                            Ok(metadata) => {
+                                // TODO: Implement full permission changing on Unix
+                                // Not available in stable, requires block cfg statements
+                                // See https://github.com/rust-lang/rust/issues/15701
+                                {
+                                    match out_file.metadata() {
+                                        Ok(out_meta) => {
+                                            let readonly = metadata.permissions()
+                                                                   .readonly();
+                                            out_meta.permissions()
+                                                    .set_readonly(readonly);
+                                        }
+                                        Err(_) => {
+                                            if opts.verbosity.is_some() {
+                                                writeln!(&mut stderr(),
+                                                         "Failed to set permissions on output file")
+                                                    .ok();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                if opts.verbosity.is_some() {
+                                    writeln!(&mut stderr(),
+                                             "Failed to read permissions on input file")
+                                        .ok();
+                                }
+                            }
+                        }
+                    }
+                    Err(_) => {
+                        if opts.verbosity.is_some() {
+                            writeln!(&mut stderr(), "Failed to read permissions on input file")
+                                .ok();
+                        }
+                    }
+                };
+            }
+
+            let mut buffer = BufWriter::new(out_file);
+            match buffer.write_all(&optimized_output) {
+                Ok(_) => {
+                    if opts.verbosity.is_some() {
+                        writeln!(&mut stderr(), "Output: {}", opts.out_file.display()).ok();
+                    }
+                }
+                Err(_) => {
+                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Perform optimization on the input file using the options provided
+pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, String> {
+    // Read in the file and try to decode as PNG.
+    if opts.verbosity.is_some() {
+        writeln!(&mut stderr(), "Processing from memory");
+    }
+    let original_size = data.len() as usize;
+    let mut png = match png::PngData::from_slice(&data, opts.fix_errors) {
+        Ok(x) => x,
+        Err(x) => return Err(x),
+    };
+
+    // Run the optimizer on the decoded PNG.
+    let optimized_output = optimize_png(&mut png, original_size, opts);
+
+    match is_fully_optimized(original_size, optimized_output.len(), opts) {
+        true => {
+            writeln!(&mut stderr(), "Image already optimized").ok();
+            Ok(data.to_vec())
+        },
+        false => Ok(optimized_output)
+    }
+}
+
+/// Perform optimization on the input file using the options provided
+fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Options) -> Vec<u8> {
+    type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
+
     // Print png info
     let idat_original_size = png.idat_data.len();
-    let file_original_size = filepath.metadata().unwrap().len() as usize;
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(),
                  "    {}x{} pixels, PNG format",
@@ -285,103 +414,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     perform_strip(&mut png, &opts);
 
-    let output_data = png.output();
-    if file_original_size <= output_data.len() && !opts.force && opts.interlace.is_none() {
-        writeln!(&mut stderr(), "File already optimized").ok();
-        return Ok(());
-    }
+    let output = png.output();
 
-    if opts.pretend {
-        if opts.verbosity.is_some() {
-            writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
-        }
-    } else {
-        if opts.backup {
-            match copy(in_file,
-                       in_file.with_extension(format!("bak.{}",
-                                                      in_file.extension()
-                                                             .unwrap()
-                                                             .to_str()
-                                                             .unwrap()))) {
-                Ok(x) => x,
-                Err(_) => {
-                    return Err(format!("Unable to write to backup file at {}",
-                                       opts.out_file.display()))
-                }
-            };
-        }
-
-        if opts.stdout {
-            let mut buffer = BufWriter::new(stdout());
-            match buffer.write_all(&output_data) {
-                Ok(_) => (),
-                Err(_) => return Err("Unable to write to stdout".to_owned()),
-            }
-        } else {
-            let out_file = match File::create(&opts.out_file) {
-                Ok(x) => x,
-                Err(_) => {
-                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
-                }
-            };
-
-            if opts.preserve_attrs {
-                match File::open(filepath) {
-                    Ok(f) => {
-                        match f.metadata() {
-                            Ok(metadata) => {
-                                // TODO: Implement full permission changing on Unix
-                                // Not available in stable, requires block cfg statements
-                                // See https://github.com/rust-lang/rust/issues/15701
-                                {
-                                    match out_file.metadata() {
-                                        Ok(out_meta) => {
-                                            let readonly = metadata.permissions()
-                                                                   .readonly();
-                                            out_meta.permissions()
-                                                    .set_readonly(readonly);
-                                        }
-                                        Err(_) => {
-                                            if opts.verbosity.is_some() {
-                                                writeln!(&mut stderr(),
-                                                         "Failed to set permissions on output file")
-                                                    .ok();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Err(_) => {
-                                if opts.verbosity.is_some() {
-                                    writeln!(&mut stderr(),
-                                             "Failed to read permissions on input file")
-                                        .ok();
-                                }
-                            }
-                        }
-                    }
-                    Err(_) => {
-                        if opts.verbosity.is_some() {
-                            writeln!(&mut stderr(), "Failed to read permissions on input file")
-                                .ok();
-                        }
-                    }
-                };
-            }
-
-            let mut buffer = BufWriter::new(out_file);
-            match buffer.write_all(&output_data) {
-                Ok(_) => {
-                    if opts.verbosity.is_some() {
-                        writeln!(&mut stderr(), "Output: {}", opts.out_file.display()).ok();
-                    }
-                }
-                Err(_) => {
-                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
-                }
-            }
-        }
-    }
     if opts.verbosity.is_some() {
         if idat_original_size >= png.idat_data.len() {
             writeln!(&mut stderr(),
@@ -396,25 +430,26 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                      png.idat_data.len() - idat_original_size)
                 .ok();
         }
-        if file_original_size >= output_data.len() {
+        if file_original_size >= output.len() {
             writeln!(&mut stderr(),
                      "    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                     output_data.len(),
-                     file_original_size - output_data.len(),
-                     (file_original_size - output_data.len()) as f64 / file_original_size as f64 *
+                     output.len(),
+                     file_original_size - output.len(),
+                     (file_original_size - output.len()) as f64 / file_original_size as f64 *
                      100f64)
                 .ok();
         } else {
             writeln!(&mut stderr(),
                      "    file size = {} bytes ({} bytes = {:.2}% increase)",
-                     output_data.len(),
-                     output_data.len() - file_original_size,
-                     (output_data.len() - file_original_size) as f64 / file_original_size as f64 *
+                     output.len(),
+                     output.len() - file_original_size,
+                     (output.len() - file_original_size) as f64 / file_original_size as f64 *
                      100f64)
                 .ok();
         }
     }
-    Ok(())
+
+    output
 }
 
 fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
@@ -502,4 +537,8 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
             png.aux_headers = HashMap::new();
         }
     }
+}
+
+fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
+    return original_size <= optimized_size && !opts.force && opts.interlace.is_none()
 }
