@@ -10,43 +10,15 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> oxipng::Options {
+    let mut options = oxipng::Options::default();
+    options.out_file = input.with_extension("out.png").to_owned();
+    options.verbosity = None;
+    options.force = true;
     let mut filter = HashSet::new();
     filter.insert(0);
-    let mut compression = HashSet::new();
-    compression.insert(9);
-    let mut memory = HashSet::new();
-    memory.insert(9);
-    let mut strategies = HashSet::new();
-    for i in 0..4 {
-        strategies.insert(i);
-    }
+    options.filter = filter;
 
-    oxipng::Options {
-        backup: false,
-        out_file: input.with_extension("out.png").to_owned(),
-        out_dir: None,
-        stdout: false,
-        pretend: false,
-        recursive: false,
-        fix_errors: false,
-        force: true,
-        clobber: true,
-        create: true,
-        preserve_attrs: false,
-        verbosity: None,
-        filter: filter,
-        interlace: None,
-        compression: compression,
-        memory: memory,
-        strategies: strategies,
-        window: 15,
-        bit_depth_reduction: true,
-        color_type_reduction: true,
-        palette_reduction: true,
-        idat_recoding: true,
-        strip: png::Headers::None,
-        use_heuristics: false,
-    }
+    options
 }
 
 fn test_it_converts(input: &Path,

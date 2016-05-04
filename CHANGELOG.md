@@ -2,6 +2,7 @@
  - Minor compression improvement on interlaced images
  - Performance optimizations
  - [SEMVER_MINOR] Move default Options into a Default impl
+ - [SEMVER_MINOR] Add option for setting number of threads ([#39](https://github.com/shssoichiro/oxipng/issues/39))
 
 **Version 0.6.0**
  - Fix issue where output directory would not be created if it did not exist

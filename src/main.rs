@@ -172,6 +172,23 @@ fn main() {
                      .help("Strip safely-removable metadata objects")
                      .short("s")
                      .conflicts_with("strip"))
+            .arg(Arg::with_name("threads")
+                     .help("Set number of threads to use - default 1.5x CPU cores")
+                     .long("threads")
+                     .short("t")
+                     .takes_value(true)
+                     .validator(|x| {
+                         match x.parse::<usize>() {
+                             Ok(val) => {
+                                 if val > 0 {
+                                     Ok(())
+                                 } else {
+                                     Err("Thread count must be >= 1".to_owned())
+                                 }
+                             }
+                             Err(_) => Err("Thread count must be >= 1".to_owned()),
+                         }
+                     }))
             .after_help("Optimization levels:
     -o 0		=>	--zc 3 --nz				(0 or 1 trials)
     -o 1		=>	--zc 9					(1 trial, determined heuristically)
@@ -476,6 +493,10 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
 
     if matches.is_present("strip-safe") {
         opts.strip = png::Headers::Safe;
+    }
+
+    if let Some(x) = matches.value_of("threads") {
+        opts.threads = x.parse::<usize>().unwrap();
     }
 
     Ok(())

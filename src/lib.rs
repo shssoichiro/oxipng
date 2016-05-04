@@ -79,6 +79,8 @@ pub struct Options {
     /// Whether to use heuristics to pick the best filter and compression
     /// Intended for use with `-o 1` from the CLI interface
     pub use_heuristics: bool,
+    /// Number of threads to use, defaults to 1.5x CPU cores, rounded down
+    pub threads: usize,
 }
 
 impl Default for Options {
@@ -95,6 +97,10 @@ impl Default for Options {
         for i in 0..4 {
             strategies.insert(i);
         }
+
+        // Default to 1 thread on single-core, otherwise use threads = 1.5x CPU cores
+        let num_cpus = num_cpus::get();
+        let thread_count = num_cpus + (num_cpus >> 1);
 
         Options {
             backup: false,
@@ -121,6 +127,7 @@ impl Default for Options {
             idat_recoding: true,
             strip: png::Headers::None,
             use_heuristics: false,
+            threads: thread_count,
         }
     }
 }
@@ -200,9 +207,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     let something_changed = perform_reductions(&mut png, &opts);
 
     if opts.idat_recoding || something_changed {
-        // Use 1 thread on single-core, otherwise use threads = 1.5x CPU cores
-        let num_cpus = num_cpus::get();
-        let thread_count = num_cpus + (num_cpus >> 1);
+        let thread_count = opts.threads;
         let pool = Pool::new(thread_count);
         // Go through selected permutations and determine the best
         let best: Arc<Mutex<Option<TrialWithData>>> = Arc::new(Mutex::new(None));
