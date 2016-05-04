@@ -1,4 +1,4 @@
-**Version 0.7.0 (unreleased)**
+**Version 0.7.0**
  - Minor compression improvement on interlaced images
  - Performance optimizations
  - [SEMVER_MINOR] Move default Options into a Default impl

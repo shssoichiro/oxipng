@@ -170,7 +170,7 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomic</span>::{<span class='self'>self</span>, <span class='ident'>AtomicUsize</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomic</span>::<span class='ident'>Ordering</span>::<span class='ident'>Relaxed</span>;
 
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>EpochState</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>EpochState</span>;
     <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>CachePadded</span>;
     <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>epoch</span>::<span class='ident'>participants</span>::<span class='ident'>Participants</span>;
 
@@ -212,7 +212,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>imp</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>EpochState</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>EpochState</span>;
     <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>CachePadded</span>;
     <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>epoch</span>::<span class='ident'>participants</span>::<span class='ident'>Participants</span>;
 

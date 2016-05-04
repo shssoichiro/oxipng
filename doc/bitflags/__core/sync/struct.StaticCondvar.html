@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-10108' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/condvar/struct.StaticCondvar.html?gotosrc=10108' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-9986' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/condvar/struct.StaticCondvar.html?gotosrc=9986' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct StaticCondvar {
     // some fields omitted
 }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
@@ -63,7 +63,49 @@ in static initializers for other structures.</p>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>StaticCondvar</span>, <span class='ident'>CONDVAR_INIT</span>};
 
 <span class='kw'>static</span> <span class='ident'>CVAR</span>: <span class='ident'>StaticCondvar</span> <span class='op'>=</span> <span class='ident'>CONDVAR_INIT</span>;</pre>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/sync/struct.StaticCondvar.html' title='bitflags::__core::sync::StaticCondvar'>StaticCondvar</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>const fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.StaticCondvar.html' title='bitflags::__core::sync::StaticCondvar'>StaticCondvar</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Creates a new condition variable</p>
+</div><h4 id='method.wait' class='method'><code>fn <a href='#method.wait' class='fnname'>wait</a>&lt;T&gt;(&amp;'static self, guard: <a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;&gt;&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Blocks the current thread until this condition variable receives a
+notification.</p>
+
+<p>See <code>Condvar::wait</code>.</p>
+</div><h4 id='method.wait_timeout' class='method'><code>fn <a href='#method.wait_timeout' class='fnname'>wait_timeout</a>&lt;T&gt;(&amp;'static self, guard: <a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, timeout: <a class='struct' href='../../../bitflags/__core/time/struct.Duration.html' title='bitflags::__core::time::Duration'>Duration</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.WaitTimeoutResult.html' title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a>, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.WaitTimeoutResult.html' title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a>&gt;&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Waits on this condition variable for a notification, timing out after a
+specified duration.</p>
+
+<p>See <code>Condvar::wait_timeout</code>.</p>
+</div><h4 id='method.wait_timeout_with' class='method'><code>fn <a href='#method.wait_timeout_with' class='fnname'>wait_timeout_with</a>&lt;T, F&gt;(&amp;'static self, guard: <a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, dur: <a class='struct' href='../../../bitflags/__core/time/struct.Duration.html' title='bitflags::__core::time::Duration'>Duration</a>, f: F) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.WaitTimeoutResult.html' title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a>, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/sync/struct.MutexGuard.html' title='bitflags::__core::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.WaitTimeoutResult.html' title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a>&gt;&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(<a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;&amp;mut T, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;&amp;mut T&gt;&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></span></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Waits on this condition variable for a notification, timing out after a
+specified duration.</p>
+
+<p>The implementation will repeatedly wait while the duration has not
+passed and the function returns <code>false</code>.</p>
+
+<p>See <code>Condvar::wait_timeout_with</code>.</p>
+</div><h4 id='method.notify_one' class='method'><code>fn <a href='#method.notify_one' class='fnname'>notify_one</a>(&amp;'static self)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Wakes up one blocked thread on this condvar.</p>
+
+<p>See <code>Condvar::notify_one</code>.</p>
+</div><h4 id='method.notify_all' class='method'><code>fn <a href='#method.notify_all' class='fnname'>notify_all</a>(&amp;'static self)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Wakes up all blocked threads on this condvar.</p>
+
+<p>See <code>Condvar::notify_all</code>.</p>
+</div><h4 id='method.destroy' class='method'><code>unsafe fn <a href='#method.destroy' class='fnname'>destroy</a>(&amp;'static self)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>static_condvar</code>)<p>: may be merged with Condvar in the future</p>
+</em></div><div class='docblock'><p>Deallocates all resources associated with this static condvar.</p>
+
+<p>This method is unsafe to call as there is no guarantee that there are no
+active users of the condvar, and this also doesn&#39;t prevent any future
+users of the condvar. This method is required to be called to not leak
+memory on all platforms.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

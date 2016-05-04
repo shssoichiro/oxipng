@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4892' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/trait.Read.html?gotosrc=4892' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4830' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/trait.Read.html?gotosrc=4830' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Read {
     fn <a href='#tymethod.read' class='fnname'>read</a>(&amp;mut self, buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, <a class='struct' href='../../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;;
 
@@ -361,7 +361,26 @@ calls to <code>read</code> may succeed.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;'a&gt; Read for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;'a [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
+    <li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a></code></li>
+<li><code>impl&lt;'a&gt; Read for &amp;'a <a class='struct' href='../../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a></code></li>
+<li><code>impl&lt;R&gt; Read for <a class='struct' href='../../../../bitflags/__core/io/struct.BufReader.html' title='bitflags::__core::io::BufReader'>BufReader</a>&lt;R&gt; <span class='where'>where R: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a></span></code></li>
+<li><code>impl&lt;T&gt; Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Cursor.html' title='bitflags::__core::io::Cursor'>Cursor</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>&gt;</span></code></li>
+<li><code>impl&lt;'a, R&gt; Read for &amp;'a mut R <span class='where'>where R: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a> + ?<a class='trait' href='../../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;R&gt; Read for <a class='struct' href='../../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;R&gt; <span class='where'>where R: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a> + ?<a class='trait' href='../../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;'a&gt; Read for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;'a [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Empty.html' title='bitflags::__core::io::Empty'>Empty</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Repeat.html' title='bitflags::__core::io::Repeat'>Repeat</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Stdin.html' title='bitflags::__core::io::Stdin'>Stdin</a></code></li>
+<li><code>impl&lt;'a&gt; Read for <a class='struct' href='../../../../bitflags/__core/io/struct.StdinLock.html' title='bitflags::__core::io::StdinLock'>StdinLock</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;T, U&gt; Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Chain.html' title='bitflags::__core::io::Chain'>Chain</a>&lt;T, U&gt; <span class='where'>where U: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a>, T: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a></span></code></li>
+<li><code>impl&lt;T&gt; Read for <a class='struct' href='../../../../bitflags/__core/io/struct.Take.html' title='bitflags::__core::io::Take'>Take</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/io/trait.Read.html' title='bitflags::__core::io::Read'>Read</a></span></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/net/struct.TcpStream.html' title='bitflags::__core::net::TcpStream'>TcpStream</a></code></li>
+<li><code>impl&lt;'a&gt; Read for &amp;'a <a class='struct' href='../../../../bitflags/__core/net/struct.TcpStream.html' title='bitflags::__core::net::TcpStream'>TcpStream</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/os/ext/net/struct.UnixStream.html' title='bitflags::__core::os::ext::net::UnixStream'>UnixStream</a></code></li>
+<li><code>impl&lt;'a&gt; Read for &amp;'a <a class='struct' href='../../../../bitflags/__core/os/ext/net/struct.UnixStream.html' title='bitflags::__core::os::ext::net::UnixStream'>UnixStream</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/process/struct.ChildStdout.html' title='bitflags::__core::process::ChildStdout'>ChildStdout</a></code></li>
+<li><code>impl Read for <a class='struct' href='../../../../bitflags/__core/process/struct.ChildStderr.html' title='bitflags::__core::process::ChildStderr'>ChildStderr</a></code></li>
+<li><code>impl&lt;'a&gt; Read for &amp;'a FileDesc</code></li>
 </ul><script type="text/javascript" async
                          src="../../../../implementors/std/io/trait.Read.js">
                  </script></section>

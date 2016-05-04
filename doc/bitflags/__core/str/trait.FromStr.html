@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-32710' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html?gotosrc=32710' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-32608' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html?gotosrc=32608' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait FromStr {
     type <a href='#associatedtype.Err' class='type'>Err</a>;
     fn <a href='#tymethod.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;Self, Self::<a class='trait' href='../../../bitflags/__core/str/trait.FromStr.html' title='bitflags::__core::str::FromStr'>Err</a>&gt;;
@@ -82,18 +82,26 @@ inside <code>Err</code>. The error type is specific to implementation of the tra
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
-<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+    <li><code>impl FromStr for <a class='enum' href='../../../bitflags/__core/net/enum.IpAddr.html' title='bitflags::__core::net::IpAddr'>IpAddr</a></code></li>
+<li><code>impl FromStr for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></li>
+<li><code>impl FromStr for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></code></li>
+<li><code>impl FromStr for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV4.html' title='bitflags::__core::net::SocketAddrV4'>SocketAddrV4</a></code></li>
+<li><code>impl FromStr for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV6.html' title='bitflags::__core::net::SocketAddrV6'>SocketAddrV6</a></code></li>
+<li><code>impl FromStr for <a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a></code></li>
 <li><code>impl FromStr for <a class='struct' href='../../../bitflags/__core/string/struct.String.html' title='bitflags::__core::string::String'>String</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f32.html'>f32</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f64.html'>f64</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl FromStr for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/str/trait.FromStr.js">
                  </script></section>

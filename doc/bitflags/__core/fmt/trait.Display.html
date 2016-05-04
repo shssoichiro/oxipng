@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-35549' class='srclink' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html?gotosrc=35549' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-35425' class='srclink' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html?gotosrc=35425' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Display {
     fn <a href='#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;;
 }</pre><div class='docblock'><p>Format trait for an empty format, <code>{}</code>.</p>
@@ -84,35 +84,63 @@ output, and so cannot be derived.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f64.html'>f64</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f32.html'>f32</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+    <li><code>impl Display for <a class='enum' href='../../../bitflags/__core/env/enum.VarError.html' title='bitflags::__core::env::VarError'>VarError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/env/struct.JoinPathsError.html' title='bitflags::__core::env::JoinPathsError'>JoinPathsError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/ffi/struct.NulError.html' title='bitflags::__core::ffi::NulError'>NulError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/ffi/struct.IntoStringError.html' title='bitflags::__core::ffi::IntoStringError'>IntoStringError</a></code></li>
+<li><code>impl&lt;W&gt; Display for <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;W&gt;</code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a></code></li>
+<li><code>impl Display for <a class='enum' href='../../../bitflags/__core/io/enum.CharsError.html' title='bitflags::__core::io::CharsError'>CharsError</a></code></li>
+<li><code>impl Display for <a class='enum' href='../../../bitflags/__core/net/enum.IpAddr.html' title='bitflags::__core::net::IpAddr'>IpAddr</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></code></li>
+<li><code>impl Display for <a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV4.html' title='bitflags::__core::net::SocketAddrV4'>SocketAddrV4</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV6.html' title='bitflags::__core::net::SocketAddrV6'>SocketAddrV6</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/net/struct.AddrParseError.html' title='bitflags::__core::net::AddrParseError'>AddrParseError</a></code></li>
+<li><code>impl&lt;'a&gt; Display for <a class='struct' href='../../../bitflags/__core/path/struct.Display.html' title='bitflags::__core::path::Display'>Display</a>&lt;'a&gt;</code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/path/struct.StripPrefixError.html' title='bitflags::__core::path::StripPrefixError'>StripPrefixError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/process/struct.ExitStatus.html' title='bitflags::__core::process::ExitStatus'>ExitStatus</a></code></li>
+<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/sync/mpsc/struct.SendError.html' title='bitflags::__core::sync::mpsc::SendError'>SendError</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Display for <a class='enum' href='../../../bitflags/__core/sync/mpsc/enum.TrySendError.html' title='bitflags::__core::sync::mpsc::TrySendError'>TrySendError</a>&lt;T&gt;</code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/sync/mpsc/struct.RecvError.html' title='bitflags::__core::sync::mpsc::RecvError'>RecvError</a></code></li>
+<li><code>impl Display for <a class='enum' href='../../../bitflags/__core/sync/mpsc/enum.TryRecvError.html' title='bitflags::__core::sync::mpsc::TryRecvError'>TryRecvError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/time/struct.SystemTimeError.html' title='bitflags::__core::time::SystemTimeError'>SystemTimeError</a></code></li>
+<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Display for <a class='enum' href='../../../bitflags/__core/sync/enum.TryLockError.html' title='bitflags::__core::sync::TryLockError'>TryLockError</a>&lt;T&gt;</code></li>
 <li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
-<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/string/struct.String.html' title='bitflags::__core::string::String'>String</a></code></li>
-<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/num/struct.ParseIntError.html' title='bitflags::__core::num::ParseIntError'>ParseIntError</a></code></li>
-<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a></span></code></li>
-<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/sync/struct.Arc.html' title='bitflags::__core::sync::Arc'>Arc</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
-<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a></code></li>
-<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/str/struct.ParseBoolError.html' title='bitflags::__core::str::ParseBoolError'>ParseBoolError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/char/struct.DecodeUtf16Error.html' title='bitflags::__core::char::DecodeUtf16Error'>DecodeUtf16Error</a></code></li>
 <li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/rc/struct.Rc.html' title='bitflags::__core::rc::Rc'>Rc</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
 <li><code>impl Display for <a class='struct' href='../../../bitflags/__core/string/struct.FromUtf8Error.html' title='bitflags::__core::string::FromUtf8Error'>FromUtf8Error</a></code></li>
 <li><code>impl Display for <a class='struct' href='../../../bitflags/__core/string/struct.FromUtf16Error.html' title='bitflags::__core::string::FromUtf16Error'>FromUtf16Error</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/string/struct.String.html' title='bitflags::__core::string::String'>String</a></code></li>
 <li><code>impl Display for <a class='enum' href='../../../bitflags/__core/string/enum.ParseError.html' title='bitflags::__core::string::ParseError'>ParseError</a></code></li>
 <li><code>impl&lt;'a, B&gt; Display for <a class='enum' href='../../../bitflags/__core/borrow/enum.Cow.html' title='bitflags::__core::borrow::Cow'>Cow</a>&lt;'a, B&gt; <span class='where'>where B: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + <a class='trait' href='../../../bitflags/__core/borrow/trait.ToOwned.html' title='bitflags::__core::borrow::ToOwned'>ToOwned</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a>, B::<a class='trait' href='../../../bitflags/__core/borrow/trait.ToOwned.html' title='bitflags::__core::borrow::ToOwned'>Owned</a>: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a></span></code></li>
+<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a></span></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/num/struct.ParseFloatError.html' title='bitflags::__core::num::ParseFloatError'>ParseFloatError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/num/struct.ParseIntError.html' title='bitflags::__core::num::ParseIntError'>ParseIntError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/str/struct.ParseBoolError.html' title='bitflags::__core::str::ParseBoolError'>ParseBoolError</a></code></li>
+<li><code>impl Display for <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
 <li><code>impl&lt;'a&gt; Display for <a class='struct' href='../../../bitflags/__core/fmt/struct.Arguments.html' title='bitflags::__core::fmt::Arguments'>Arguments</a>&lt;'a&gt;</code></li>
 <li><code>impl Display for <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a></code></li>
+<li><code>impl&lt;'a, T&gt; Display for &amp;'a T <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;'a, T&gt; Display for &amp;'a mut T <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f32.html'>f32</a></code></li>
+<li><code>impl Display for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.f64.html'>f64</a></code></li>
+<li><code>impl&lt;T&gt; Display for <a class='struct' href='../../../bitflags/__core/sync/struct.Arc.html' title='bitflags::__core::sync::Arc'>Arc</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/fmt/trait.Display.js">
                  </script></section>

@@ -47,12 +47,36 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-3702' class='srclink' href='https://doc.rust-lang.org/nightly/std/fs/struct.DirBuilder.html?gotosrc=3702' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-3678' class='srclink' href='https://doc.rust-lang.org/nightly/std/fs/struct.DirBuilder.html?gotosrc=3678' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct DirBuilder {
     // some fields omitted
 }</pre><span class="since">1.6.0</span><div class='docblock'><p>A builder used to create directories in various manners.</p>
 
 <p>This builder also supports platform-specific options.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/fs/struct.DirBuilder.html' title='bitflags::__core::fs::DirBuilder'>DirBuilder</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../bitflags/__core/fs/struct.DirBuilder.html' title='bitflags::__core::fs::DirBuilder'>DirBuilder</a></code></h4>
+<div class='docblock'><p>Creates a new set of options with default mode/security settings for all
+platforms and also non-recursive.</p>
+</div><h4 id='method.recursive' class='method'><code>fn <a href='#method.recursive' class='fnname'>recursive</a>(&amp;mut self, recursive: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.DirBuilder.html' title='bitflags::__core::fs::DirBuilder'>DirBuilder</a></code></h4>
+<div class='docblock'><p>Indicate that directories create should be created recursively, creating
+all parent directories if they do not exist with the same security and
+permissions settings.</p>
+
+<p>This option defaults to <code>false</code></p>
+</div><h4 id='method.create' class='method'><code>fn <a href='#method.create' class='fnname'>create</a>&lt;P&gt;(&amp;self, path: P) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='../../../bitflags/__core/path/struct.Path.html' title='bitflags::__core::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Create the specified directory with the options configured in this
+builder.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::{<span class='self'>self</span>, <span class='ident'>DirBuilder</span>};
+
+<span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='string'>&quot;/tmp/foo/bar/baz&quot;</span>;
+<span class='ident'>DirBuilder</span>::<span class='ident'>new</span>()
+    .<span class='ident'>recursive</span>(<span class='boolval'>true</span>)
+    .<span class='ident'>create</span>(<span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>fs</span>::<span class='ident'>metadata</span>(<span class='ident'>path</span>).<span class='ident'>unwrap</span>().<span class='ident'>is_dir</span>());</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/fs/trait.DirBuilderExt.html' title='bitflags::__core::os::ext::fs::DirBuilderExt'>DirBuilderExt</a> for <a class='struct' href='../../../bitflags/__core/fs/struct.DirBuilder.html' title='bitflags::__core::fs::DirBuilder'>DirBuilder</a></code></h3><div class='impl-items'><h4 id='method.mode' class='method'><code>fn <a href='../../../bitflags/__core/os/ext/fs/trait.DirBuilderExt.html#tymethod.mode' class='fnname'>mode</a>(&amp;mut self, mode: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.DirBuilder.html' title='bitflags::__core::fs::DirBuilder'>DirBuilder</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

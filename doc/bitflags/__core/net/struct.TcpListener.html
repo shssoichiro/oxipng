@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5880' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/tcp/struct.TcpListener.html?gotosrc=5880' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-5794' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/tcp/struct.TcpListener.html?gotosrc=5794' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct TcpListener(_);</pre><span class="since">1.0.0</span><div class='docblock'><p>A structure representing a socket server.</p>
 
 <h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
@@ -76,6 +76,75 @@
 
 <span class='comment'>// close the socket server</span>
 <span class='ident'>drop</span>(<span class='ident'>listener</span>);</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code></h3><div class='impl-items'><h4 id='method.bind' class='method'><code>fn <a href='#method.bind' class='fnname'>bind</a>&lt;A&gt;(addr: A) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt; <span class='where'>where A: <a class='trait' href='../../../bitflags/__core/net/trait.ToSocketAddrs.html' title='bitflags::__core::net::ToSocketAddrs'>ToSocketAddrs</a></span></code></h4>
+<div class='docblock'><p>Creates a new <code>TcpListener</code> which will be bound to the specified
+address.</p>
+
+<p>The returned listener is ready for accepting connections.</p>
+
+<p>Binding with a port number of 0 will request that the OS assigns a port
+to this listener. The port allocated can be queried via the
+<code>local_addr</code> method.</p>
+
+<p>The address type can be any implementor of <code>ToSocketAddrs</code> trait. See
+its documentation for concrete examples.</p>
+</div><h4 id='method.local_addr' class='method'><code>fn <a href='#method.local_addr' class='fnname'>local_addr</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Returns the local socket address of this listener.</p>
+</div><h4 id='method.try_clone' class='method'><code>fn <a href='#method.try_clone' class='fnname'>try_clone</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a new independently owned handle to the underlying socket.</p>
+
+<p>The returned <code>TcpListener</code> is a reference to the same socket that this
+object references. Both handles can be used to accept incoming
+connections and options set on one listener will affect the other.</p>
+</div><h4 id='method.accept' class='method'><code>fn <a href='#method.accept' class='fnname'>accept</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>(</a><a class='struct' href='../../../bitflags/__core/net/struct.TcpStream.html' title='bitflags::__core::net::TcpStream'>TcpStream</a>, <a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>)</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Accept a new incoming connection from this listener.</p>
+
+<p>This function will block the calling thread until a new TCP connection
+is established. When established, the corresponding <code>TcpStream</code> and the
+remote peer&#39;s address will be returned.</p>
+</div><h4 id='method.incoming' class='method'><code>fn <a href='#method.incoming' class='fnname'>incoming</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Incoming.html' title='bitflags::__core::net::Incoming'>Incoming</a></code></h4>
+<div class='docblock'><p>Returns an iterator over the connections being received on this
+listener.</p>
+
+<p>The returned iterator will never return <code>None</code> and will also not yield
+the peer&#39;s <code>SocketAddr</code> structure.</p>
+</div><h4 id='method.set_ttl' class='method'><code>fn <a href='#method.set_ttl' class='fnname'>set_ttl</a>(&amp;self, ttl: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Sets the value for the <code>IP_TTL</code> option on this socket.</p>
+
+<p>This value sets the time-to-live field that is used in every packet sent
+from this socket.</p>
+</div><h4 id='method.ttl' class='method'><code>fn <a href='#method.ttl' class='fnname'>ttl</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Gets the value of the <code>IP_TTL</code> option for this socket.</p>
+
+<p>For more information about this option, see <a href="#method.set_ttl"><code>set_ttl</code></a>.</p>
+</div><h4 id='method.set_only_v6' class='method'><code>fn <a href='#method.set_only_v6' class='fnname'>set_only_v6</a>(&amp;self, only_v6: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Sets the value for the <code>IPV6_V6ONLY</code> option on this socket.</p>
+
+<p>If this is set to <code>true</code> then the socket is restricted to sending and
+receiving IPv6 packets only. In this case two IPv4 and IPv6 applications
+can bind the same port at the same time.</p>
+
+<p>If this is set to <code>false</code> then the socket can be used to send and
+receive packets from an IPv4-mapped IPv6 address.</p>
+</div><h4 id='method.only_v6' class='method'><code>fn <a href='#method.only_v6' class='fnname'>only_v6</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Gets the value of the <code>IPV6_V6ONLY</code> option for this socket.</p>
+
+<p>For more information about this option, see <a href="#method.set_only_v6"><code>set_only_v6</code></a>.</p>
+</div><h4 id='method.take_error' class='method'><code>fn <a href='#method.take_error' class='fnname'>take_error</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Get the value of the <code>SO_ERROR</code> option on this socket.</p>
+
+<p>This will retrieve the stored error in the underlying socket, clearing
+the field in the process. This can be useful for checking errors between
+calls.</p>
+</div><h4 id='method.set_nonblocking' class='method'><code>fn <a href='#method.set_nonblocking' class='fnname'>set_nonblocking</a>(&amp;self, nonblocking: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Moves this TCP stream into or out of nonblocking mode.</p>
+
+<p>On Unix this corresponds to calling fcntl, and on Windows this
+corresponds to calling ioctlsocket.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/prelude/trait.AsRawFd.html' title='bitflags::__core::os::ext::prelude::AsRawFd'>AsRawFd</a> for <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code></h3><div class='impl-items'><h4 id='method.as_raw_fd' class='method'><code>fn <a href='../../../bitflags/__core/os/ext/prelude/trait.AsRawFd.html#tymethod.as_raw_fd' class='fnname'>as_raw_fd</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/prelude/trait.FromRawFd.html' title='bitflags::__core::os::ext::prelude::FromRawFd'>FromRawFd</a> for <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code><span class="since">1.1.0</span></h3><div class='impl-items'><h4 id='method.from_raw_fd' class='method'><code>unsafe fn <a href='../../../bitflags/__core/os/ext/prelude/trait.FromRawFd.html#tymethod.from_raw_fd' class='fnname'>from_raw_fd</a>(fd: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/prelude/trait.IntoRawFd.html' title='bitflags::__core::os::ext::prelude::IntoRawFd'>IntoRawFd</a> for <a class='struct' href='../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code><span class="since">1.4.0</span></h3><div class='impl-items'><h4 id='method.into_raw_fd' class='method'><code>fn <a href='../../../bitflags/__core/os/ext/prelude/trait.IntoRawFd.html#tymethod.into_raw_fd' class='fnname'>into_raw_fd</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

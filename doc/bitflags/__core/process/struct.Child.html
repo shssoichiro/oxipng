@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-8370' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Child.html?gotosrc=8370' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-8260' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Child.html?gotosrc=8260' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Child {
     pub stdin: <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.ChildStdin.html' title='bitflags::__core::process::ChildStdin'>ChildStdin</a>&gt;,
     pub stdout: <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.ChildStdout.html' title='bitflags::__core::process::ChildStdout'>ChildStdout</a>&gt;,
@@ -88,7 +88,50 @@ parent process wait until the child has actually exited before continuing.</p>
                              <td id='structfield.stdout'><code>stdout</code></td><td><div class='docblock'><p>The handle for reading from the child&#39;s stdout, if it has been captured</p>
 </div></td></tr><tr class='stab '>
                              <td id='structfield.stderr'><code>stderr</code></td><td><div class='docblock'><p>The handle for reading from the child&#39;s stderr, if it has been captured</p>
-</div></td></tr></table></section>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/process/struct.Child.html' title='bitflags::__core::process::Child'>Child</a></code></h3><div class='impl-items'><h4 id='method.kill' class='method'><code>fn <a href='#method.kill' class='fnname'>kill</a>(&amp;mut self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Forces the child to exit. This is equivalent to sending a
+SIGKILL on unix platforms.</p>
+</div><h4 id='method.id' class='method'><code>fn <a href='#method.id' class='fnname'>id</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code><span class="since">1.3.0</span></h4>
+<div class='docblock'><p>Returns the OS-assigned process identifier associated with this child.</p>
+</div><h4 id='method.wait' class='method'><code>fn <a href='#method.wait' class='fnname'>wait</a>(&amp;mut self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.ExitStatus.html' title='bitflags::__core::process::ExitStatus'>ExitStatus</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Waits for the child to exit completely, returning the status that it
+exited with. This function will continue to have the same return value
+after it has been called at least once.</p>
+
+<p>The stdin handle to the child process, if any, will be closed
+before waiting. This helps avoid deadlock: it ensures that the
+child does not block waiting for input from the parent, while
+the parent waits for the child to exit.</p>
+</div><h4 id='method.wait_with_output' class='method'><code>fn <a href='#method.wait_with_output' class='fnname'>wait_with_output</a>(self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/process/struct.Output.html' title='bitflags::__core::process::Output'>Output</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Simultaneously waits for the child to exit and collect all remaining
+output on the stdout/stderr handles, returning an <code>Output</code>
+instance.</p>
+
+<p>The stdin handle to the child process, if any, will be closed
+before waiting. This helps avoid deadlock: it ensures that the
+child does not block waiting for input from the parent, while
+the parent waits for the child to exit.</p>
+
+<p>By default, stdin, stdout and stderr are inherited from the parent.
+In order to capture the output into this <code>Result&lt;Output&gt;</code> it is
+necessary to create new pipes between parent and child. Use
+<code>stdout(Stdio::piped())</code> or <code>stderr(Stdio::piped())</code>, respectively.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>process</span>::{<span class='ident'>Command</span>, <span class='ident'>Stdio</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>child</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;/bin/cat&quot;</span>)
+                        .<span class='ident'>arg</span>(<span class='string'>&quot;file.txt&quot;</span>)
+                        .<span class='ident'>stdout</span>(<span class='ident'>Stdio</span>::<span class='ident'>piped</span>())
+                        .<span class='ident'>spawn</span>()
+                        .<span class='ident'>expect</span>(<span class='string'>&quot;failed to execute child&quot;</span>);
+
+<span class='kw'>let</span> <span class='ident'>ecode</span> <span class='op'>=</span> <span class='ident'>child</span>.<span class='ident'>wait_with_output</span>()
+                 .<span class='ident'>expect</span>(<span class='string'>&quot;failed to wait on child&quot;</span>);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ecode</span>.<span class='ident'>status</span>.<span class='ident'>success</span>());</pre>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

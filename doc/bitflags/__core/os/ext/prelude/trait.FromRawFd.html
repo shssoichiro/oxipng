@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-12922' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/io/trait.FromRawFd.html?gotosrc=12922' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-12674' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/io/trait.FromRawFd.html?gotosrc=12674' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait FromRawFd {
     unsafe fn <a href='#tymethod.from_raw_fd' class='fnname'>from_raw_fd</a>(fd: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>) -&gt; Self;
 }</pre><div class='docblock'><p>A trait to express the ability to construct an object from a raw file
@@ -70,7 +70,15 @@ unsafety in code that relies on it being true.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/net/struct.TcpStream.html' title='bitflags::__core::net::TcpStream'>TcpStream</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/net/struct.TcpListener.html' title='bitflags::__core::net::TcpListener'>TcpListener</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/net/struct.UdpSocket.html' title='bitflags::__core::net::UdpSocket'>UdpSocket</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.UnixStream.html' title='bitflags::__core::os::ext::net::UnixStream'>UnixStream</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.UnixListener.html' title='bitflags::__core::os::ext::net::UnixListener'>UnixListener</a></code></li>
+<li><code>impl FromRawFd for <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.UnixDatagram.html' title='bitflags::__core::os::ext::net::UnixDatagram'>UnixDatagram</a></code></li>
+</ul><script type="text/javascript" async
                          src="../../../../../implementors/std/sys/ext/io/trait.FromRawFd.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

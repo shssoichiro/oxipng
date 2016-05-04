@@ -2255,7 +2255,7 @@
     <span class='kw'>fn</span> <span class='ident'>bits</span>() <span class='op'>-&gt;</span> <span class='ident'>usize</span>;
     <span class='doccomment'>/// How many bytes it has</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>bytes</span>() <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='ident'>Self</span>::<span class='ident'>bits</span>() <span class='op'>/</span> <span class='number'>8</span> }
+    <span class='kw'>fn</span> <span class='ident'>bytes</span>() <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='kw'>Self</span>::<span class='ident'>bits</span>() <span class='op'>/</span> <span class='number'>8</span> }
     <span class='doccomment'>/// Convert a byte into this type (lowest-order bits set)</span>
     <span class='kw'>fn</span> <span class='ident'>from_byte</span>(<span class='ident'>byte</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>;
     <span class='doccomment'>/// Count the number of 1&#39;s in the bitwise repr</span>
@@ -3419,7 +3419,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>BitVec</span>, <span class='ident'>Iter</span>};
+    <span class='kw'>use</span> <span class='kw'>super</span>::{<span class='ident'>BitVec</span>, <span class='ident'>Iter</span>};
 
     <span class='comment'>// This is stupid, but I want to differentiate from a &quot;random&quot; 32</span>
     <span class='kw'>const</span> <span class='ident'>U32_BITS</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>32</span>;

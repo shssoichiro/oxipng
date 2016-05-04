@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-32050' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.Pattern.html?gotosrc=32050' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-31956' class='srclink' href='https://doc.rust-lang.org/nightly/core/str/pattern/trait.Pattern.html?gotosrc=31956' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Pattern&lt;'a&gt; {
     type <a href='#associatedtype.Searcher' class='type'>Searcher</a>: <a class='trait' href='../../../../bitflags/__core/str/pattern/trait.Searcher.html' title='bitflags::__core::str::pattern::Searcher'>Searcher</a>&lt;'a&gt;;
     fn <a href='#tymethod.into_searcher' class='fnname'>into_searcher</a>(self, haystack: &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>) -&gt; Self::<a class='trait' href='../../../../bitflags/__core/str/pattern/trait.Pattern.html' title='bitflags::__core::str::pattern::Pattern'>Searcher</a>;
@@ -90,9 +90,12 @@ occurrences of the pattern in a string.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;'a, 'b&gt; Pattern for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+    <li><code>impl&lt;'a&gt; Pattern for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a></code></li>
 <li><code>impl&lt;'a, 'b&gt; Pattern for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;'b [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></li>
-<li><code>impl&lt;'a&gt; Pattern for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a></code></li>
+<li><code>impl&lt;'a, F&gt; Pattern for F <span class='where'>where F: <a class='trait' href='../../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b, 'c&gt; Pattern for &amp;'c &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; Pattern for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; Pattern for &amp;'b <a class='struct' href='../../../../bitflags/__core/string/struct.String.html' title='bitflags::__core::string::String'>String</a></code></li>
 </ul><script type="text/javascript" async
                          src="../../../../implementors/core/str/pattern/trait.Pattern.js">
                  </script></section>

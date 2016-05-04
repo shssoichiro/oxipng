@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-14662' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html?gotosrc=14662' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-14576' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html?gotosrc=14576' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait BitAnd&lt;RHS = Self&gt; {
     type <a href='#associatedtype.Output' class='type'>Output</a>;
     fn <a href='#tymethod.bitand' class='fnname'>bitand</a>(self, rhs: RHS) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.BitAnd.html' title='bitflags::__core::ops::BitAnd'>Output</a>;
@@ -85,60 +85,63 @@ calling <code>bitand</code>, and therefore, <code>main</code> prints <code>Bitwi
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
-<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
-<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
+    <li><code>impl&lt;'a, 'b, T, S&gt; BitAnd for &amp;'a <a class='struct' href='../../../bitflags/__core/collections/struct.HashSet.html' title='bitflags::__core::collections::HashSet'>HashSet</a>&lt;T, S&gt; <span class='where'>where S: <a class='trait' href='../../../bitflags/__core/hash/trait.BuildHasher.html' title='bitflags::__core::hash::BuildHasher'>BuildHasher</a> + <a class='trait' href='../../../bitflags/__core/default/trait.Default.html' title='bitflags::__core::default::Default'>Default</a>, T: <a class='trait' href='../../../bitflags/__core/cmp/trait.Eq.html' title='bitflags::__core::cmp::Eq'>Eq</a> + <a class='trait' href='../../../bitflags/__core/hash/trait.Hash.html' title='bitflags::__core::hash::Hash'>Hash</a> + <a class='trait' href='../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a></span></code></li>
 <li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a>&gt;</code></li>
-<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>&gt;</code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a></code></li>
+<li><code>impl BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
+<li><code>impl&lt;'a&gt; BitAnd for <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
+<li><code>impl&lt;'a, 'b&gt; BitAnd for &amp;'b <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a></code></li>
 <li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u16.html'>u16</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.isize.html'>isize</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i16.html'>i16</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>&gt;</code></li>
+<li><code>impl BitAnd for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i64.html'>i64</a>&gt;</code></li>
+<li><code>impl&lt;'a, 'b, T&gt; BitAnd for &amp;'a <a class='struct' href='../../../bitflags/__core/collections/btree_set/struct.BTreeSet.html' title='bitflags::__core::collections::btree_set::BTreeSet'>BTreeSet</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a> + <a class='trait' href='../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a></span></code></li>
+<li><code>impl&lt;E&gt; BitAnd for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/enum_set/struct.EnumSet.html' title='collections::enum_set::EnumSet'>EnumSet</a>&lt;E&gt; <span class='where'>where E: <a class='trait' href='https://doc.rust-lang.org/nightly/collections/enum_set/trait.CLike.html' title='collections::enum_set::CLike'>CLike</a></span></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/ops/trait.BitAnd.js">
                  </script></section>

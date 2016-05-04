@@ -47,12 +47,17 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-10052' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/barrier/struct.BarrierWaitResult.html?gotosrc=10052' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-9930' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/barrier/struct.BarrierWaitResult.html?gotosrc=9930' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct BarrierWaitResult(_);</pre><span class="since">1.0.0</span><div class='docblock'><p>A result returned from wait.</p>
 
 <p>Currently this opaque structure only has one method, <code>.is_leader()</code>. Only
 one thread will receive a result that will return <code>true</code> from this function.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/sync/struct.BarrierWaitResult.html' title='bitflags::__core::sync::BarrierWaitResult'>BarrierWaitResult</a></code></h3><div class='impl-items'><h4 id='method.is_leader' class='method'><code>fn <a href='#method.is_leader' class='fnname'>is_leader</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns whether this thread from <code>wait</code> is the &quot;leader thread&quot;.</p>
+
+<p>Only one thread will have <code>true</code> returned from their result, all other
+threads will have <code>false</code> returned.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

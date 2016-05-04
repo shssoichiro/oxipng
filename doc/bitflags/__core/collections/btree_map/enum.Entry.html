@@ -47,8 +47,8 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-993' class='srclink' href='https://doc.rust-lang.org/nightly/collections/btree/map/enum.Entry.html?gotosrc=993' title='goto source code'>[src]</a></span></h1>
-<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
+               </span><a id='src-1028' class='srclink' href='https://doc.rust-lang.org/nightly/collections/btree/map/enum.Entry.html?gotosrc=1028' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
     Vacant(<a class='struct' href='../../../../bitflags/__core/collections/btree_map/struct.VacantEntry.html' title='bitflags::__core::collections::btree_map::VacantEntry'>VacantEntry</a>&lt;'a, K, V&gt;),
     Occupied(<a class='struct' href='../../../../bitflags/__core/collections/btree_map/struct.OccupiedEntry.html' title='bitflags::__core::collections::btree_map::OccupiedEntry'>OccupiedEntry</a>&lt;'a, K, V&gt;),
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single entry in a map, which may either be vacant or occupied.</p>

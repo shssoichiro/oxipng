@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Alignment","Possible alignments that can be requested as part of a formatting directive."],["Count",""],["Position",""]],"struct":[["Argument",""],["FormatSpec",""]]});

@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6812' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/fn.catch_unwind.html?gotosrc=6812' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-6708' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/fn.catch_unwind.html?gotosrc=6708' title='goto source code'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn catch_unwind&lt;F, R&gt;(f: F) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;R, <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../bitflags/__core/any/trait.Any.html' title='bitflags::__core::any::Any'>Any</a> + 'static + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a>&gt;&gt; <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/panic/trait.UnwindSafe.html' title='bitflags::__core::panic::UnwindSafe'>UnwindSafe</a> + <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; R</span></pre><span class="since">1.9.0</span><div class='docblock'><p>Invokes a closure, capturing the cause of an unwinding panic if one occurs.</p>
 
 <p>This function will return <code>Ok</code> with the closure&#39;s result if the closure

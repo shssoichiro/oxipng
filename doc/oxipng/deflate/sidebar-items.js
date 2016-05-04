@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["deflate",""],["stream",""]]});
+initSidebarItems({"mod":[["deflate",""],["libz_stream",""],["miniz_stream",""]]});

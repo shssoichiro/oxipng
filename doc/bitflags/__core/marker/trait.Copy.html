@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-12955' class='srclink' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html?gotosrc=12955' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-12869' class='srclink' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html?gotosrc=12869' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Copy: <a class='trait' href='../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> { }</pre><div class='docblock'><p>Types that can be copied by simply copying bits (i.e. <code>memcpy</code>).</p>
 
 <p>By default, variable bindings have &#39;move semantics.&#39; In other
@@ -141,31 +141,115 @@ change: that second example would fail to compile if we made <code>Foo</code> no
 </div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;T, E&gt; Copy for <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;T, E&gt; <span class='where'>where E: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a>, T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
-<li><code>impl&lt;T&gt; Copy for <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
-<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
-<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/num/enum.FpCategory.html' title='bitflags::__core::num::FpCategory'>FpCategory</a></code></li>
-<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/thread/enum.LocalKeyState.html' title='bitflags::__core::thread::LocalKeyState'>LocalKeyState</a></code></li>
-<li><code>impl&lt;T&gt; Copy for <a class='enum' href='../../../bitflags/__core/collections/enum.Bound.html' title='bitflags::__core::collections::Bound'>Bound</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+    <li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/thread/enum.LocalKeyState.html' title='bitflags::__core::thread::LocalKeyState'>LocalKeyState</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/fs/struct.FileType.html' title='bitflags::__core::fs::FileType'>FileType</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/io/enum.ErrorKind.html' title='bitflags::__core::io::ErrorKind'>ErrorKind</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/io/enum.SeekFrom.html' title='bitflags::__core::io::SeekFrom'>SeekFrom</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/net/enum.IpAddr.html' title='bitflags::__core::net::IpAddr'>IpAddr</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/net/enum.Ipv6MulticastScope.html' title='bitflags::__core::net::Ipv6MulticastScope'>Ipv6MulticastScope</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/net/enum.SocketAddr.html' title='bitflags::__core::net::SocketAddr'>SocketAddr</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV4.html' title='bitflags::__core::net::SocketAddrV4'>SocketAddrV4</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/net/struct.SocketAddrV6.html' title='bitflags::__core::net::SocketAddrV6'>SocketAddrV6</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/net/enum.Shutdown.html' title='bitflags::__core::net::Shutdown'>Shutdown</a></code></li>
+<li><code>impl&lt;'a&gt; Copy for <a class='enum' href='../../../bitflags/__core/path/enum.Prefix.html' title='bitflags::__core::path::Prefix'>Prefix</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a&gt; Copy for <a class='struct' href='../../../bitflags/__core/path/struct.PrefixComponent.html' title='bitflags::__core::path::PrefixComponent'>PrefixComponent</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a&gt; Copy for <a class='enum' href='../../../bitflags/__core/path/enum.Component.html' title='bitflags::__core::path::Component'>Component</a>&lt;'a&gt;</code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/process/struct.ExitStatus.html' title='bitflags::__core::process::ExitStatus'>ExitStatus</a></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/sync/mpsc/struct.SendError.html' title='bitflags::__core::sync::mpsc::SendError'>SendError</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/sync/mpsc/struct.RecvError.html' title='bitflags::__core::sync::mpsc::RecvError'>RecvError</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/sync/mpsc/enum.TryRecvError.html' title='bitflags::__core::sync::mpsc::TryRecvError'>TryRecvError</a></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='enum' href='../../../bitflags/__core/sync/mpsc/enum.TrySendError.html' title='bitflags::__core::sync::mpsc::TrySendError'>TrySendError</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/sync/struct.WaitTimeoutResult.html' title='bitflags::__core::sync::WaitTimeoutResult'>WaitTimeoutResult</a></code></li>
 <li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/sync/atomic/enum.Ordering.html' title='bitflags::__core::sync::atomic::Ordering'>Ordering</a></code></li>
-<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/str/pattern/enum.SearchStep.html' title='bitflags::__core::str::pattern::SearchStep'>SearchStep</a></code></li>
-<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a></code></li>
-<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/str/struct.CharRange.html' title='bitflags::__core::str::CharRange'>CharRange</a></code></li>
-<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/marker/struct.PhantomData.html' title='bitflags::__core::marker::PhantomData'>PhantomData</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
-<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/boxed/struct.ExchangeHeapSingleton.html' title='bitflags::__core::boxed::ExchangeHeapSingleton'>ExchangeHeapSingleton</a></code></li>
-<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/string/enum.ParseError.html' title='bitflags::__core::string::ParseError'>ParseError</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/time/struct.Duration.html' title='bitflags::__core::time::Duration'>Duration</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/time/struct.Instant.html' title='bitflags::__core::time::Instant'>Instant</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/time/struct.SystemTime.html' title='bitflags::__core::time::SystemTime'>SystemTime</a></code></li>
+<li><code>impl Copy for utimbuf</code></li>
+<li><code>impl Copy for timeval</code></li>
+<li><code>impl Copy for timespec</code></li>
+<li><code>impl Copy for rlimit</code></li>
+<li><code>impl Copy for rusage</code></li>
+<li><code>impl Copy for in_addr</code></li>
+<li><code>impl Copy for in6_addr</code></li>
+<li><code>impl Copy for ip_mreq</code></li>
+<li><code>impl Copy for ipv6_mreq</code></li>
+<li><code>impl Copy for hostent</code></li>
+<li><code>impl Copy for iovec</code></li>
+<li><code>impl Copy for pollfd</code></li>
+<li><code>impl Copy for winsize</code></li>
+<li><code>impl Copy for sockaddr</code></li>
+<li><code>impl Copy for sockaddr_in6</code></li>
+<li><code>impl Copy for sockaddr_un</code></li>
+<li><code>impl Copy for passwd</code></li>
+<li><code>impl Copy for ifaddrs</code></li>
+<li><code>impl Copy for fd_set</code></li>
+<li><code>impl Copy for tm</code></li>
+<li><code>impl Copy for utsname</code></li>
+<li><code>impl Copy for msghdr</code></li>
+<li><code>impl Copy for fsid_t</code></li>
+<li><code>impl Copy for glob_t</code></li>
+<li><code>impl Copy for sockaddr_storage</code></li>
+<li><code>impl Copy for addrinfo</code></li>
+<li><code>impl Copy for mach_timebase_info</code></li>
+<li><code>impl Copy for stat</code></li>
+<li><code>impl Copy for dirent</code></li>
+<li><code>impl Copy for pthread_mutex_t</code></li>
+<li><code>impl Copy for pthread_mutexattr_t</code></li>
+<li><code>impl Copy for pthread_cond_t</code></li>
+<li><code>impl Copy for pthread_rwlock_t</code></li>
+<li><code>impl Copy for siginfo_t</code></li>
+<li><code>impl Copy for sigaction</code></li>
+<li><code>impl Copy for stack_t</code></li>
+<li><code>impl Copy for fstore_t</code></li>
+<li><code>impl Copy for radvisory</code></li>
+<li><code>impl Copy for statvfs</code></li>
+<li><code>impl Copy for Dl_info</code></li>
+<li><code>impl Copy for sockaddr_in</code></li>
+<li><code>impl Copy for statfs</code></li>
+<li><code>impl Copy for kevent</code></li>
+<li><code>impl Copy for kevent64_s</code></li>
+<li><code>impl Copy for dqblk</code></li>
+<li><code>impl Copy for termios</code></li>
+<li><code>impl Copy for flock</code></li>
+<li><code>impl Copy for sf_hdtr</code></li>
+<li><code>impl Copy for lconv</code></li>
+<li><code>impl Copy for pthread_attr_t</code></li>
 <li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/boxed/struct.ExchangeHeapSingleton.html' title='bitflags::__core::boxed::ExchangeHeapSingleton'>ExchangeHeapSingleton</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/any/struct.TypeId.html' title='bitflags::__core::any::TypeId'>TypeId</a></code></li>
 <li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/raw/struct.Slice.html' title='bitflags::__core::raw::Slice'>Slice</a>&lt;T&gt;</code></li>
 <li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/raw/struct.TraitObject.html' title='bitflags::__core::raw::TraitObject'>TraitObject</a></code></li>
-<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/ptr/struct.Shared.html' title='bitflags::__core::ptr::Shared'>Shared</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
-<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/cell/enum.BorrowState.html' title='bitflags::__core::cell::BorrowState'>BorrowState</a></code></li>
-<li><code>impl&lt;'a&gt; Copy for <a class='struct' href='../../../bitflags/__core/fmt/struct.Arguments.html' title='bitflags::__core::fmt::Arguments'>Arguments</a>&lt;'a&gt;</code></li>
-<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a></code></li>
-<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/any/struct.TypeId.html' title='bitflags::__core::any::TypeId'>TypeId</a></code></li>
 <li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/ops/struct.RangeFull.html' title='bitflags::__core::ops::RangeFull'>RangeFull</a></code></li>
 <li><code>impl&lt;Idx&gt; Copy for <a class='struct' href='../../../bitflags/__core/ops/struct.RangeTo.html' title='bitflags::__core::ops::RangeTo'>RangeTo</a>&lt;Idx&gt; <span class='where'>where Idx: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
 <li><code>impl&lt;Idx&gt; Copy for <a class='enum' href='../../../bitflags/__core/ops/enum.RangeInclusive.html' title='bitflags::__core::ops::RangeInclusive'>RangeInclusive</a>&lt;Idx&gt; <span class='where'>where Idx: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
 <li><code>impl&lt;Idx&gt; Copy for <a class='struct' href='../../../bitflags/__core/ops/struct.RangeToInclusive.html' title='bitflags::__core::ops::RangeToInclusive'>RangeToInclusive</a>&lt;Idx&gt; <span class='where'>where Idx: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/marker/struct.PhantomData.html' title='bitflags::__core::marker::PhantomData'>PhantomData</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/str/pattern/enum.SearchStep.html' title='bitflags::__core::str::pattern::SearchStep'>SearchStep</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/cell/enum.BorrowState.html' title='bitflags::__core::cell::BorrowState'>BorrowState</a></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/string/enum.ParseError.html' title='bitflags::__core::string::ParseError'>ParseError</a></code></li>
+<li><code>impl&lt;T, E&gt; Copy for <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;T, E&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a>, E: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/ptr/struct.Shared.html' title='bitflags::__core::ptr::Shared'>Shared</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='struct' href='../../../bitflags/__core/num/struct.Wrapping.html' title='bitflags::__core::num::Wrapping'>Wrapping</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl Copy for <a class='enum' href='../../../bitflags/__core/num/enum.FpCategory.html' title='bitflags::__core::num::FpCategory'>FpCategory</a></code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/core/nonzero/struct.NonZero.html' title='core::nonzero::NonZero'>NonZero</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/nonzero/trait.Zeroable.html' title='core::nonzero::Zeroable'>Zeroable</a></span></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/str/struct.CharRange.html' title='bitflags::__core::str::CharRange'>CharRange</a></code></li>
+<li><code>impl Copy for <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a></code></li>
+<li><code>impl&lt;'a&gt; Copy for <a class='struct' href='../../../bitflags/__core/fmt/struct.Arguments.html' title='bitflags::__core::fmt::Arguments'>Arguments</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;E&gt; Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/enum_set/struct.EnumSet.html' title='collections::enum_set::EnumSet'>EnumSet</a>&lt;E&gt;</code></li>
+<li><code>impl&lt;T&gt; Copy for <a class='enum' href='../../../bitflags/__core/collections/enum.Bound.html' title='bitflags::__core::collections::Bound'>Bound</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a></span></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/distributions/normal/struct.StandardNormal.html' title='rand::distributions::normal::StandardNormal'>StandardNormal</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/distributions/normal/struct.Normal.html' title='rand::distributions::normal::Normal'>Normal</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/distributions/normal/struct.LogNormal.html' title='rand::distributions::normal::LogNormal'>LogNormal</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/distributions/exponential/struct.Exp1.html' title='rand::distributions::exponential::Exp1'>Exp1</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/distributions/exponential/struct.Exp.html' title='rand::distributions::exponential::Exp'>Exp</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/isaac/struct.IsaacRng.html' title='rand::isaac::IsaacRng'>IsaacRng</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/isaac/struct.Isaac64Rng.html' title='rand::isaac::Isaac64Rng'>Isaac64Rng</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/chacha/struct.ChaChaRng.html' title='rand::chacha::ChaChaRng'>ChaChaRng</a></code></li>
+<li><code>impl Copy for <a class='struct' href='https://doc.rust-lang.org/nightly/rand/reseeding/struct.ReseedWithDefault.html' title='rand::reseeding::ReseedWithDefault'>ReseedWithDefault</a></code></li>
 </ul><script type="text/javascript" async
                          src="../../../implementors/core/marker/trait.Copy.js">
                  </script></section>

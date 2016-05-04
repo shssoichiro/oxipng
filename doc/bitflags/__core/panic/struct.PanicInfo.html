@@ -47,12 +47,24 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-15681' class='srclink' href='https://doc.rust-lang.org/nightly/std/panicking/struct.PanicInfo.html?gotosrc=15681' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-15220' class='srclink' href='https://doc.rust-lang.org/nightly/std/panicking/struct.PanicInfo.html?gotosrc=15220' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct PanicInfo&lt;'a&gt; {
     // some fields omitted
 }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
 </em></div><div class='docblock'><p>A struct providing information about a panic.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='struct' href='../../../bitflags/__core/panic/struct.PanicInfo.html' title='bitflags::__core::panic::PanicInfo'>PanicInfo</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.payload' class='method'><code>fn <a href='#method.payload' class='fnname'>payload</a>(&amp;self) -&gt; &amp;<a class='trait' href='../../../bitflags/__core/any/trait.Any.html' title='bitflags::__core::any::Any'>Any</a> + 'static + <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
+</em></div><div class='docblock'><p>Returns the payload associated with the panic.</p>
+
+<p>This will commonly, but not always, be a <code>&amp;&#39;static str</code> or <code>String</code>.</p>
+</div><h4 id='method.location' class='method'><code>fn <a href='#method.location' class='fnname'>location</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../../../bitflags/__core/panic/struct.Location.html' title='bitflags::__core::panic::Location'>Location</a>&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
+</em></div><div class='docblock'><p>Returns information about the location from which the panic originated,
+if available.</p>
+
+<p>This method will currently always return <code>Some</code>, but this may change
+in future versions.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

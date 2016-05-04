@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.10/src/dox.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.11/src/dox.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>dox.rs.html -- source</title>
@@ -230,7 +230,7 @@
     <span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;div&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>RHS</span><span class='op'>&gt;</span> {
         <span class='kw'>type</span> <span class='ident'>Output</span>;
-        <span class='kw'>fn</span> <span class='ident'>div</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span>;
+        <span class='kw'>fn</span> <span class='ident'>div</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>::<span class='ident'>Output</span>;
     }
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_div</span> {
@@ -246,7 +246,7 @@
     <span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;shl&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Shl</span><span class='op'>&lt;</span><span class='ident'>RHS</span><span class='op'>&gt;</span> {
         <span class='kw'>type</span> <span class='ident'>Output</span>;
-        <span class='kw'>fn</span> <span class='ident'>shl</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span>;
+        <span class='kw'>fn</span> <span class='ident'>shl</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>::<span class='ident'>Output</span>;
     }
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_shl</span> {
@@ -262,7 +262,7 @@
     <span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;mul&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Mul</span><span class='op'>&lt;</span><span class='ident'>RHS</span><span class='op'>=</span><span class='kw'>Self</span><span class='op'>&gt;</span> {
         <span class='kw'>type</span> <span class='ident'>Output</span>;
-        <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span>;
+        <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>::<span class='ident'>Output</span>;
     }
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_mul</span> {
@@ -278,7 +278,7 @@
     <span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;sub&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='ident'>RHS</span><span class='op'>=</span><span class='kw'>Self</span><span class='op'>&gt;</span> {
         <span class='kw'>type</span> <span class='ident'>Output</span>;
-        <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span>;
+        <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>::<span class='ident'>Output</span>;
     }
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_sub</span> {
@@ -294,7 +294,7 @@
     <span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;bitor&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Bitor</span><span class='op'>&lt;</span><span class='ident'>RHS</span><span class='op'>=</span><span class='kw'>Self</span><span class='op'>&gt;</span> {
         <span class='kw'>type</span> <span class='ident'>Output</span>;
-        <span class='kw'>fn</span> <span class='ident'>bitor</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span>;
+        <span class='kw'>fn</span> <span class='ident'>bitor</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>RHS</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>::<span class='ident'>Output</span>;
     }
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_bitor</span> {

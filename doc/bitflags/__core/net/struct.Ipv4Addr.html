@@ -47,11 +47,98 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5304' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv4Addr.html?gotosrc=5304' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-5234' class='srclink' href='https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv4Addr.html?gotosrc=5234' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Ipv4Addr {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>Representation of an IPv4 address.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(a: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>, b: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>, c: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>, d: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a>) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h4>
+<div class='docblock'><p>Creates a new IPv4 address from four eight-bit octets.</p>
+
+<p>The result will represent the IP address <code>a</code>.<code>b</code>.<code>c</code>.<code>d</code>.</p>
+</div><h4 id='method.octets' class='method'><code>fn <a href='#method.octets' class='fnname'>octets</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>; 4]</a></code></h4>
+<div class='docblock'><p>Returns the four eight-bit integers that make up this address.</p>
+</div><h4 id='method.is_unspecified' class='method'><code>fn <a href='#method.is_unspecified' class='fnname'>is_unspecified</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>ip</code>)<p>: extra functionality has not been scrutinized to the level that it should be stable</p>
+</em></div><div class='docblock'><p>Returns true for the special &#39;unspecified&#39; address 0.0.0.0.</p>
+</div><h4 id='method.is_loopback' class='method'><code>fn <a href='#method.is_loopback' class='fnname'>is_loopback</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if this is a loopback address (127.0.0.0/8).</p>
+
+<p>This property is defined by RFC 6890</p>
+</div><h4 id='method.is_private' class='method'><code>fn <a href='#method.is_private' class='fnname'>is_private</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if this is a private address.</p>
+
+<p>The private address ranges are defined in RFC1918 and include:</p>
+
+<ul>
+<li>10.0.0.0/8</li>
+<li>172.16.0.0/12</li>
+<li>192.168.0.0/16</li>
+</ul>
+</div><h4 id='method.is_link_local' class='method'><code>fn <a href='#method.is_link_local' class='fnname'>is_link_local</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if the address is link-local (169.254.0.0/16).</p>
+
+<p>This property is defined by RFC 6890</p>
+</div><h4 id='method.is_global' class='method'><code>fn <a href='#method.is_global' class='fnname'>is_global</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>ip</code>)<p>: extra functionality has not been scrutinized to the level that it should be stable</p>
+</em></div><div class='docblock'><p>Returns true if the address appears to be globally routable.
+See <a href="http://goo.gl/RaZ7lg">iana-ipv4-special-registry</a>.</p>
+
+<p>The following return false:</p>
+
+<ul>
+<li>private address (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)</li>
+<li>the loopback address (127.0.0.0/8)</li>
+<li>the link-local address (169.254.0.0/16)</li>
+<li>the broadcast address (255.255.255.255/32)</li>
+<li>test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)</li>
+<li>the unspecified address (0.0.0.0)</li>
+</ul>
+</div><h4 id='method.is_multicast' class='method'><code>fn <a href='#method.is_multicast' class='fnname'>is_multicast</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if this is a multicast address.</p>
+
+<p>Multicast addresses have a most significant octet between 224 and 239,
+and is defined by RFC 5771</p>
+</div><h4 id='method.is_broadcast' class='method'><code>fn <a href='#method.is_broadcast' class='fnname'>is_broadcast</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if this is a broadcast address.</p>
+
+<p>A broadcast address has all octets set to 255 as defined in RFC 919.</p>
+</div><h4 id='method.is_documentation' class='method'><code>fn <a href='#method.is_documentation' class='fnname'>is_documentation</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.7.0</span></h4>
+<div class='docblock'><p>Returns true if this address is in a range designated for documentation.</p>
+
+<p>This is defined in RFC 5737:</p>
+
+<ul>
+<li>192.0.2.0/24 (TEST-NET-1)</li>
+<li>198.51.100.0/24 (TEST-NET-2)</li>
+<li>203.0.113.0/24 (TEST-NET-3)</li>
+</ul>
+</div><h4 id='method.to_ipv6_compatible' class='method'><code>fn <a href='#method.to_ipv6_compatible' class='fnname'>to_ipv6_compatible</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></code></h4>
+<div class='docblock'><p>Converts this address to an IPv4-compatible IPv6 address.</p>
+
+<p>a.b.c.d becomes ::a.b.c.d</p>
+</div><h4 id='method.to_ipv6_mapped' class='method'><code>fn <a href='#method.to_ipv6_mapped' class='fnname'>to_ipv6_mapped</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv6Addr.html' title='bitflags::__core::net::Ipv6Addr'>Ipv6Addr</a></code></h4>
+<div class='docblock'><p>Converts this address to an IPv4-mapped IPv6 address.</p>
+
+<p>a.b.c.d becomes ::ffff:a.b.c.d</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='../../../bitflags/__core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='../../../bitflags/__core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.PartialEq.html' title='bitflags::__core::cmp::PartialEq'>PartialEq</a>&lt;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>&gt; for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.Eq.html' title='bitflags::__core::cmp::Eq'>Eq</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/hash/trait.Hash.html' title='bitflags::__core::hash::Hash'>Hash</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.hash' class='method'><code>fn <a href='../../../bitflags/__core/hash/trait.Hash.html#tymethod.hash' class='fnname'>hash</a>&lt;H&gt;(&amp;self, s: &amp;mut H) <span class='where'>where H: <a class='trait' href='../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code></h4>
+<h4 id='method.hash_slice' class='method'><code>fn <a href='../../../bitflags/__core/hash/trait.Hash.html#method.hash_slice' class='fnname'>hash_slice</a>&lt;H&gt;(data: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[Self]</a>, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code><span class="since">1.3.0</span></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.PartialOrd.html' title='bitflags::__core::cmp::PartialOrd'>PartialOrd</a>&lt;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>&gt; for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.partial_cmp' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#tymethod.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>) -&gt; <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='enum' href='../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.le' class='fnname'>le</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.gt' class='fnname'>gt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.ge' class='fnname'>ge</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='method.cmp' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.Ord.html#tymethod.cmp' class='fnname'>cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>) -&gt; <a class='enum' href='../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/convert/trait.From.html' title='bitflags::__core::convert::From'>From</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>&gt; for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code><span class="since">1.1.0</span></h3><div class='impl-items'><h4 id='method.from' class='method'><code>fn <a href='../../../bitflags/__core/convert/trait.From.html#tymethod.from' class='fnname'>from</a>(ip: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/convert/trait.From.html' title='bitflags::__core::convert::From'>From</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>; 4]</a>&gt; for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code><span class="since">1.9.0</span></h3><div class='impl-items'><h4 id='method.from-1' class='method'><code>fn <a href='../../../bitflags/__core/convert/trait.From.html#tymethod.from' class='fnname'>from</a>(octets: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.array.html'>; 4]</a>) -&gt; <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/str/trait.FromStr.html' title='bitflags::__core::str::FromStr'>FromStr</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'><h4 id='associatedtype.Err' class='type'><code>type <a href='../../../bitflags/__core/str/trait.FromStr.html#associatedtype.Err' class='type'>Err</a> = <a class='struct' href='../../../bitflags/__core/net/struct.AddrParseError.html' title='bitflags::__core::net::AddrParseError'>AddrParseError</a></code></h4>
+<h4 id='method.from_str' class='method'><code>fn <a href='../../../bitflags/__core/str/trait.FromStr.html#tymethod.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a>, <a class='struct' href='../../../bitflags/__core/net/struct.AddrParseError.html' title='bitflags::__core::net::AddrParseError'>AddrParseError</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/marker/trait.Copy.html' title='bitflags::__core::marker::Copy'>Copy</a> for <a class='struct' href='../../../bitflags/__core/net/struct.Ipv4Addr.html' title='bitflags::__core::net::Ipv4Addr'>Ipv4Addr</a></code></h3><div class='impl-items'></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

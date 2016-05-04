@@ -47,11 +47,24 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-2064' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.OccupiedEntry.html?gotosrc=2064' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct OccupiedEntry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
+               </span><a id='src-2050' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.OccupiedEntry.html?gotosrc=2050' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct OccupiedEntry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single occupied location in a HashMap.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a, K, V&gt; <a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.OccupiedEntry.html' title='bitflags::__core::collections::hash_map::OccupiedEntry'>OccupiedEntry</a>&lt;'a, K, V&gt;</code></h3><div class='impl-items'><h4 id='method.key' class='method'><code>fn <a href='#method.key' class='fnname'>key</a>(&amp;self) -&gt; &amp;K</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>map_entry_keys</code>)</em></div><div class='docblock'><p>Gets a reference to the key in the entry.</p>
+</div><h4 id='method.get' class='method'><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;self) -&gt; &amp;V</code></h4>
+<div class='docblock'><p>Gets a reference to the value in the entry.</p>
+</div><h4 id='method.get_mut' class='method'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self) -&gt; &amp;mut V</code></h4>
+<div class='docblock'><p>Gets a mutable reference to the value in the entry.</p>
+</div><h4 id='method.into_mut' class='method'><code>fn <a href='#method.into_mut' class='fnname'>into_mut</a>(self) -&gt; &amp;'a mut V</code></h4>
+<div class='docblock'><p>Converts the OccupiedEntry into a mutable reference to the value in the entry
+with a lifetime bound to the map itself</p>
+</div><h4 id='method.insert' class='method'><code>fn <a href='#method.insert' class='fnname'>insert</a>(&amp;mut self, value: V) -&gt; V</code></h4>
+<div class='docblock'><p>Sets the value of the entry, and returns the entry&#39;s old value</p>
+</div><h4 id='method.remove' class='method'><code>fn <a href='#method.remove' class='fnname'>remove</a>(self) -&gt; V</code></h4>
+<div class='docblock'><p>Takes the value out of the entry, and returns it</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

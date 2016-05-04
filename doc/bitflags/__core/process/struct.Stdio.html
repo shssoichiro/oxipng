@@ -47,8 +47,16 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-8545' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Stdio.html?gotosrc=8545' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-8433' class='srclink' href='https://doc.rust-lang.org/nightly/std/process/struct.Stdio.html?gotosrc=8433' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Stdio(_);</pre><span class="since">1.0.0</span><div class='docblock'><p>Describes what to do with a standard I/O stream for a child process.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></h3><div class='impl-items'><h4 id='method.piped' class='method'><code>fn <a href='#method.piped' class='fnname'>piped</a>() -&gt; <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></h4>
+<div class='docblock'><p>A new pipe should be arranged to connect the parent and child processes.</p>
+</div><h4 id='method.inherit' class='method'><code>fn <a href='#method.inherit' class='fnname'>inherit</a>() -&gt; <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></h4>
+<div class='docblock'><p>The child inherits from the corresponding parent descriptor.</p>
+</div><h4 id='method.null' class='method'><code>fn <a href='#method.null' class='fnname'>null</a>() -&gt; <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></h4>
+<div class='docblock'><p>This stream will be ignored. This is the equivalent of attaching the
+stream to <code>/dev/null</code></p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/prelude/trait.FromRawFd.html' title='bitflags::__core::os::ext::prelude::FromRawFd'>FromRawFd</a> for <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code><span class="since">1.2.0</span></h3><div class='impl-items'><h4 id='method.from_raw_fd' class='method'><code>unsafe fn <a href='../../../bitflags/__core/os/ext/prelude/trait.FromRawFd.html#tymethod.from_raw_fd' class='fnname'>from_raw_fd</a>(fd: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>) -&gt; <a class='struct' href='../../../bitflags/__core/process/struct.Stdio.html' title='bitflags::__core::process::Stdio'>Stdio</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

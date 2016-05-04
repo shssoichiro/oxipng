@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4044' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/buffered/struct.BufWriter.html?gotosrc=4044' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4000' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/buffered/struct.BufWriter.html?gotosrc=4000' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct BufWriter&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a></span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>Wraps a writer and buffers its output.</p>
@@ -90,6 +90,78 @@ overhead of a system call per byte written. We can fix this with a
 <p>By wrapping the stream with a <code>BufWriter</code>, these ten writes are all grouped
 together by the buffer, and will all be written out in one system call when
 the <code>stream</code> is dropped.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;W&gt; <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a></span></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(inner: W) -&gt; <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt;</code></h4>
+<div class='docblock'><p>Creates a new <code>BufWriter</code> with a default buffer capacity.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());</pre>
+</div><h4 id='method.with_capacity' class='method'><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>(cap: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, inner: W) -&gt; <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt;</code></h4>
+<div class='docblock'><p>Creates a new <code>BufWriter</code> with the specified buffer capacity.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<p>Creating a buffer with a buffer of a hundred bytes.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>with_capacity</span>(<span class='number'>100</span>, <span class='ident'>stream</span>);</pre>
+</div><h4 id='method.get_ref' class='method'><code>fn <a href='#method.get_ref' class='fnname'>get_ref</a>(&amp;self) -&gt; &amp;W</code></h4>
+<div class='docblock'><p>Gets a reference to the underlying writer.</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());
+
+<span class='comment'>// we can use reference just like buffer</span>
+<span class='kw'>let</span> <span class='ident'>reference</span> <span class='op'>=</span> <span class='ident'>buffer</span>.<span class='ident'>get_ref</span>();</pre>
+</div><h4 id='method.get_mut' class='method'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self) -&gt; &amp;mut W</code></h4>
+<div class='docblock'><p>Gets a mutable reference to the underlying writer.</p>
+
+<p>It is inadvisable to directly write to the underlying writer.</p>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());
+
+<span class='comment'>// we can use reference just like buffer</span>
+<span class='kw'>let</span> <span class='ident'>reference</span> <span class='op'>=</span> <span class='ident'>buffer</span>.<span class='ident'>get_mut</span>();</pre>
+</div><h4 id='method.into_inner' class='method'><code>fn <a href='#method.into_inner' class='fnname'>into_inner</a>(self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;W, <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;<a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Unwraps this <code>BufWriter</code>, returning the underlying writer.</p>
+
+<p>The buffer is written out before returning the writer.</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());
+
+<span class='comment'>// unwrap the TcpStream and flush the buffer</span>
+<span class='kw'>let</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='ident'>buffer</span>.<span class='ident'>into_inner</span>().<span class='ident'>unwrap</span>();</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a> for <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a></span></code></h3><div class='impl-items'><h4 id='method.write' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#tymethod.write' class='fnname'>write</a>(&amp;mut self, buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.flush' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#tymethod.flush' class='fnname'>flush</a>(&amp;mut self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.write_all' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.write_all' class='fnname'>write_all</a>(&amp;mut self, buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.write_fmt' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.write_fmt' class='fnname'>write_fmt</a>(&amp;mut self, fmt: <a class='struct' href='../../../bitflags/__core/fmt/struct.Arguments.html' title='bitflags::__core::fmt::Arguments'>Arguments</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.by_ref' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.by_ref' class='fnname'>by_ref</a>(&amp;mut self) -&gt; &amp;mut Self</code></h4>
+</div><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a> + <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a> for <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a> + <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a></span></code></h3><div class='impl-items'><h4 id='method.seek' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Seek.html#tymethod.seek' class='fnname'>seek</a>(&amp;mut self, pos: <a class='enum' href='../../../bitflags/__core/io/enum.SeekFrom.html' title='bitflags::__core::io::SeekFrom'>SeekFrom</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Seek to the offset, in bytes, in the underlying writer.</p>
+
+<p>Seeking always writes out the internal buffer before seeking.</p>
+</div></div><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a></span></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

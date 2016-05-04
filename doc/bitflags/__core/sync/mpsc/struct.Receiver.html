@@ -47,11 +47,82 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-9636' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/struct.Receiver.html?gotosrc=9636' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-9514' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/struct.Receiver.html?gotosrc=9514' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Receiver&lt;T&gt; {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>The receiving-half of Rust&#39;s channel type. This half can only be owned by
 one thread</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.try_recv' class='method'><code>fn <a href='#method.try_recv' class='fnname'>try_recv</a>(&amp;self) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;T, <a class='enum' href='../../../../bitflags/__core/sync/mpsc/enum.TryRecvError.html' title='bitflags::__core::sync::mpsc::TryRecvError'>TryRecvError</a>&gt;</code></h4>
+<div class='docblock'><p>Attempts to return a pending value on this receiver without blocking</p>
+
+<p>This method will never block the caller in order to wait for data to
+become available. Instead, this will always return immediately with a
+possible option of pending data on the channel.</p>
+
+<p>This is useful for a flavor of &quot;optimistic check&quot; before deciding to
+block on a receiver.</p>
+</div><h4 id='method.recv' class='method'><code>fn <a href='#method.recv' class='fnname'>recv</a>(&amp;self) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;T, <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.RecvError.html' title='bitflags::__core::sync::mpsc::RecvError'>RecvError</a>&gt;</code></h4>
+<div class='docblock'><p>Attempts to wait for a value on this receiver, returning an error if the
+corresponding channel has hung up.</p>
+
+<p>This function will always block the current thread if there is no data
+available and it&#39;s possible for more data to be sent. Once a message is
+sent to the corresponding <code>Sender</code>, then this receiver will wake up and
+return that message.</p>
+
+<p>If the corresponding <code>Sender</code> has disconnected, or it disconnects while
+this call is blocking, this call will wake up and return <code>Err</code> to
+indicate that no more messages can ever be received on this channel.
+However, since channels are buffered, messages sent before the disconnect
+will still be properly received.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>;
+
+<span class='kw'>let</span> (<span class='ident'>send</span>, <span class='ident'>recv</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+<span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='ident'>send</span>.<span class='ident'>send</span>(<span class='number'>1u8</span>).<span class='ident'>unwrap</span>();
+});
+
+<span class='ident'>handle</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>();
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Ok</span>(<span class='number'>1</span>), <span class='ident'>recv</span>.<span class='ident'>recv</span>());</pre>
+
+<p>Buffering behavior:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>::<span class='ident'>RecvError</span>;
+
+<span class='kw'>let</span> (<span class='ident'>send</span>, <span class='ident'>recv</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+<span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='ident'>send</span>.<span class='ident'>send</span>(<span class='number'>1u8</span>).<span class='ident'>unwrap</span>();
+    <span class='ident'>send</span>.<span class='ident'>send</span>(<span class='number'>2</span>).<span class='ident'>unwrap</span>();
+    <span class='ident'>send</span>.<span class='ident'>send</span>(<span class='number'>3</span>).<span class='ident'>unwrap</span>();
+    <span class='ident'>drop</span>(<span class='ident'>send</span>);
+});
+
+<span class='comment'>// wait for the thread to join so we ensure the sender is dropped</span>
+<span class='ident'>handle</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>();
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Ok</span>(<span class='number'>1</span>), <span class='ident'>recv</span>.<span class='ident'>recv</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Ok</span>(<span class='number'>2</span>), <span class='ident'>recv</span>.<span class='ident'>recv</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Ok</span>(<span class='number'>3</span>), <span class='ident'>recv</span>.<span class='ident'>recv</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Err</span>(<span class='ident'>RecvError</span>), <span class='ident'>recv</span>.<span class='ident'>recv</span>());</pre>
+</div><h4 id='method.iter' class='method'><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;self) -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Iter.html' title='bitflags::__core::sync::mpsc::Iter'>Iter</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Returns an iterator that will block waiting for messages, but never
+<code>panic!</code>. It will return <code>None</code> when the channel has hung up.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; !<a class='trait' href='../../../../bitflags/__core/marker/trait.Sync.html' title='bitflags::__core::marker::Sync'>Sync</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a> for &amp;'a <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code><span class="since">1.1.0</span></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.Item' class='type'>Item</a> = T</code></h4>
+<h4 id='associatedtype.IntoIter' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.IntoIter' class='type'>IntoIter</a> = <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Iter.html' title='bitflags::__core::sync::mpsc::Iter'>Iter</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.into_iter' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#tymethod.into_iter' class='fnname'>into_iter</a>(self) -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Iter.html' title='bitflags::__core::sync::mpsc::Iter'>Iter</a>&lt;'a, T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/iter/trait.IntoIterator.html' title='bitflags::__core::iter::IntoIterator'>IntoIterator</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code><span class="since">1.1.0</span></h3><div class='impl-items'><h4 id='associatedtype.Item-1' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.Item' class='type'>Item</a> = T</code></h4>
+<h4 id='associatedtype.IntoIter-1' class='type'><code>type <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#associatedtype.IntoIter' class='type'>IntoIter</a> = <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.IntoIter.html' title='bitflags::__core::sync::mpsc::IntoIter'>IntoIter</a>&lt;T&gt;</code></h4>
+<h4 id='method.into_iter-1' class='method'><code>fn <a href='../../../../bitflags/__core/iter/trait.IntoIterator.html#tymethod.into_iter' class='fnname'>into_iter</a>(self) -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.IntoIter.html' title='bitflags::__core::sync::mpsc::IntoIter'>IntoIter</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;</code><span class="since">1.7.0</span></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

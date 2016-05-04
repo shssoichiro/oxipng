@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/re_unicode.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.69/src/re_unicode.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>re_unicode.rs.html -- source</title>
@@ -1193,6 +1193,61 @@
 <span id="1149">1149</span>
 <span id="1150">1150</span>
 <span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1213,10 +1268,11 @@
 
 <span class='kw'>use</span> <span class='ident'>syntax</span>;
 
-<span class='kw'>use</span> <span class='ident'>exec</span>::{<span class='ident'>Exec</span>, <span class='ident'>ExecNoSyncStr</span>, <span class='ident'>ExecBuilder</span>};
 <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
+<span class='kw'>use</span> <span class='ident'>exec</span>::{<span class='ident'>Exec</span>, <span class='ident'>ExecNoSyncStr</span>};
+<span class='kw'>use</span> <span class='ident'>re_builder</span>::<span class='ident'>unicode</span>::<span class='ident'>RegexBuilder</span>;
 <span class='kw'>use</span> <span class='ident'>re_plugin</span>::<span class='ident'>Plugin</span>;
-<span class='kw'>use</span> <span class='ident'>re_trait</span>::{<span class='self'>self</span>, <span class='ident'>RegularExpression</span>};
+<span class='kw'>use</span> <span class='ident'>re_trait</span>::{<span class='self'>self</span>, <span class='ident'>RegularExpression</span>, <span class='ident'>Slot</span>};
 
 <span class='doccomment'>/// Escapes all regular expression meta characters in `text`.</span>
 <span class='doccomment'>///</span>
@@ -1365,7 +1421,7 @@
     <span class='doccomment'>/// If the data structure exceeds the size given, then an error is</span>
     <span class='doccomment'>/// returned.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_size_limit</span>(<span class='ident'>size</span>: <span class='ident'>usize</span>, <span class='ident'>re</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Regex</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='ident'>ExecBuilder</span>::<span class='ident'>new</span>(<span class='ident'>re</span>).<span class='ident'>size_limit</span>(<span class='ident'>size</span>).<span class='ident'>build</span>().<span class='ident'>map</span>(<span class='ident'>Regex</span>::<span class='ident'>from</span>)
+        <span class='ident'>RegexBuilder</span>::<span class='ident'>new</span>(<span class='ident'>re</span>).<span class='ident'>size_limit</span>(<span class='ident'>size</span>).<span class='ident'>compile</span>()
     }
 
     <span class='doccomment'>/// Returns true if and only if the regex matches the string given.</span>
@@ -1387,7 +1443,18 @@
     <span class='doccomment'>/// # }</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_match</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='self'>self</span>.<span class='ident'>shortest_match</span>(<span class='ident'>text</span>).<span class='ident'>is_some</span>()
+        <span class='self'>self</span>.<span class='ident'>is_match_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>)
+    }
+
+    <span class='doccomment'>/// Returns the same as is_match, but starts the search at the given</span>
+    <span class='doccomment'>/// offset.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The significance of the starting point is that it takes the surrounding</span>
+    <span class='doccomment'>/// context into consideration. For example, the `\A` anchor can only</span>
+    <span class='doccomment'>/// match when `start == 0`.</span>
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_match_at</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>start</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='ident'>start</span>).<span class='ident'>is_some</span>()
     }
 
     <span class='doccomment'>/// Returns the start and end byte range of the leftmost-first match in</span>
@@ -1411,11 +1478,22 @@
     <span class='doccomment'>/// # }</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>find_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>)
+    }
+
+    <span class='doccomment'>/// Returns the same as find, but starts the search at the given</span>
+    <span class='doccomment'>/// offset.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The significance of the starting point is that it takes the surrounding</span>
+    <span class='doccomment'>/// context into consideration. For example, the `\A` anchor can only</span>
+    <span class='doccomment'>/// match when `start == 0`.</span>
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>find_at</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>start</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span> {
             <span class='ident'>_Regex</span>::<span class='ident'>Dynamic</span>(<span class='kw-2'>ref</span> <span class='ident'>exec</span>) <span class='op'>=&gt;</span> {
-                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>find_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>)
+                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>find_at</span>(<span class='ident'>text</span>, <span class='ident'>start</span>)
             }
-            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> <span class='ident'>plug</span>.<span class='ident'>find_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>),
+            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> <span class='ident'>plug</span>.<span class='ident'>find_at</span>(<span class='ident'>text</span>, <span class='ident'>start</span>),
         }
     }
 
@@ -1520,17 +1598,34 @@
     <span class='doccomment'>/// accessed with `at(0)` or `[0]`.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>captures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;t</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Captures</span><span class='op'>&lt;</span><span class='lifetime'>&#39;t</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>slots</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='prelude-val'>None</span>; <span class='number'>2</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>captures_len</span>()];
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span> {
-            <span class='ident'>_Regex</span>::<span class='ident'>Dynamic</span>(<span class='kw-2'>ref</span> <span class='ident'>exec</span>) <span class='op'>=&gt;</span> {
-                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>captures_at</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>slots</span>, <span class='ident'>text</span>, <span class='number'>0</span>)
-            }
-            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> <span class='ident'>plug</span>.<span class='ident'>captures_at</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>slots</span>, <span class='ident'>text</span>, <span class='number'>0</span>),
-        };
-        <span class='ident'>result</span>.<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='ident'>Captures</span> {
+        <span class='self'>self</span>.<span class='ident'>read_captures_at</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>slots</span>, <span class='ident'>text</span>, <span class='number'>0</span>).<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='ident'>Captures</span> {
             <span class='ident'>text</span>: <span class='ident'>text</span>,
             <span class='ident'>slots</span>: <span class='ident'>slots</span>,
             <span class='ident'>named_groups</span>: <span class='ident'>NamedGroups</span>::<span class='ident'>from_regex</span>(<span class='self'>self</span>)
         })
+    }
+
+    <span class='doccomment'>/// Returns the same as captures, but starts the search at the given</span>
+    <span class='doccomment'>/// offset and populates the capture locations given.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The significance of the starting point is that it takes the surrounding</span>
+    <span class='doccomment'>/// context into consideration. For example, the `\A` anchor can only</span>
+    <span class='doccomment'>/// match when `start == 0`.</span>
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_captures_at</span>(
+        <span class='kw-2'>&amp;</span><span class='self'>self</span>,
+        <span class='ident'>slots</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>Slot</span>],
+        <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
+        <span class='ident'>start</span>: <span class='ident'>usize</span>,
+    ) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>usize</span>, <span class='ident'>usize</span>)<span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span> {
+            <span class='ident'>_Regex</span>::<span class='ident'>Dynamic</span>(<span class='kw-2'>ref</span> <span class='ident'>exec</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>read_captures_at</span>(<span class='ident'>slots</span>, <span class='ident'>text</span>, <span class='ident'>start</span>)
+            }
+            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>plug</span>.<span class='ident'>read_captures_at</span>(<span class='ident'>slots</span>, <span class='ident'>text</span>, <span class='ident'>start</span>)
+            }
+        }
     }
 
     <span class='doccomment'>/// Returns an iterator over all the non-overlapping capture groups matched</span>
@@ -1785,11 +1880,26 @@
     <span class='doccomment'>/// # }</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>shortest_match</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>)
+    }
+
+    <span class='doccomment'>/// Returns the same as shortest_match, but starts the search at the given</span>
+    <span class='doccomment'>/// offset.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The significance of the starting point is that it takes the surrounding</span>
+    <span class='doccomment'>/// context into consideration. For example, the `\A` anchor can only</span>
+    <span class='doccomment'>/// match when `start == 0`.</span>
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>shortest_match_at</span>(
+        <span class='kw-2'>&amp;</span><span class='self'>self</span>,
+        <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
+        <span class='ident'>start</span>: <span class='ident'>usize</span>,
+    ) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span> {
             <span class='ident'>_Regex</span>::<span class='ident'>Dynamic</span>(<span class='kw-2'>ref</span> <span class='ident'>exec</span>) <span class='op'>=&gt;</span> {
-                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>)
+                <span class='ident'>exec</span>.<span class='ident'>searcher_str</span>().<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='ident'>start</span>)
             }
-            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> <span class='ident'>plug</span>.<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='number'>0</span>),
+            <span class='ident'>_Regex</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>plug</span>) <span class='op'>=&gt;</span> <span class='ident'>plug</span>.<span class='ident'>shortest_match_at</span>(<span class='ident'>text</span>, <span class='ident'>start</span>),
         }
     }
 
@@ -2011,7 +2121,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>NamedGroupsIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;n</span><span class='op'>&gt;</span> {
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;n</span> <span class='ident'>str</span>, <span class='ident'>usize</span>);
 
-    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
             <span class='ident'>NamedGroupsIter</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>it</span>) <span class='op'>=&gt;</span> <span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>),
             <span class='ident'>NamedGroupsIter</span>::<span class='ident'>Dynamic</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>it</span>) <span class='op'>=&gt;</span> {

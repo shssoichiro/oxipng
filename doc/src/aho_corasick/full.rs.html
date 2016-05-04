@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/aho-corasick-0.5.1/src/full.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/aho-corasick-0.5.2/src/full.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>full.rs.html -- source</title>
@@ -177,16 +177,17 @@
 <span id="133">133</span>
 <span id="134">134</span>
 <span id="135">135</span>
+<span id="136">136</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>super</span>::{
+<span class='kw'>use</span> <span class='kw'>super</span>::{
     <span class='ident'>FAIL_STATE</span>,
     <span class='ident'>StateIdx</span>, <span class='ident'>AcAutomaton</span>, <span class='ident'>Transitions</span>, <span class='ident'>Match</span>,
     <span class='ident'>usize_bytes</span>, <span class='ident'>vec_bytes</span>,
 };
-<span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>autiter</span>::<span class='ident'>Automaton</span>;
+<span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>autiter</span>::<span class='ident'>Automaton</span>;
 
 <span class='doccomment'>/// A complete Aho-Corasick automaton.</span>
 <span class='doccomment'>///</span>
@@ -259,7 +260,8 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>P</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span>[<span class='ident'>u8</span>]<span class='op'>&gt;&gt;</span> <span class='ident'>Automaton</span><span class='op'>&lt;</span><span class='ident'>P</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>FullAcAutomaton</span><span class='op'>&lt;</span><span class='ident'>P</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>next_state</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>si</span>: <span class='ident'>StateIdx</span>, <span class='ident'>i</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>StateIdx</span> {
-        <span class='self'>self</span>.<span class='ident'>trans</span>[<span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>usize</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>num_states</span>() <span class='op'>+</span> <span class='ident'>si</span> <span class='kw'>as</span> <span class='ident'>usize</span>]
+        <span class='kw'>let</span> <span class='ident'>at</span> <span class='op'>=</span> <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>usize</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>num_states</span>() <span class='op'>+</span> <span class='ident'>si</span> <span class='kw'>as</span> <span class='ident'>usize</span>;
+        <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>trans</span>.<span class='ident'>get_unchecked</span>(<span class='ident'>at</span>) }
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -276,7 +278,7 @@
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>has_match</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>si</span>: <span class='ident'>StateIdx</span>, <span class='ident'>outi</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='ident'>outi</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>out</span>[<span class='ident'>si</span> <span class='kw'>as</span> <span class='ident'>usize</span>].<span class='ident'>len</span>()
+        <span class='kw'>unsafe</span> { <span class='ident'>outi</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>out</span>.<span class='ident'>get_unchecked</span>(<span class='ident'>si</span> <span class='kw'>as</span> <span class='ident'>usize</span>).<span class='ident'>len</span>() }
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>

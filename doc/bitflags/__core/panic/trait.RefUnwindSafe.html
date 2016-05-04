@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6731' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/trait.RefUnwindSafe.html?gotosrc=6731' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-6627' class='srclink' href='https://doc.rust-lang.org/nightly/std/panic/trait.RefUnwindSafe.html?gotosrc=6627' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait RefUnwindSafe { }</pre><div class='docblock'><p>A marker trait representing types where a shared reference is considered
 recover safe.</p>
 
@@ -59,7 +59,10 @@ interior mutability.</p>
 </div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl&lt;T&gt; !RefUnwindSafe for <a class='struct' href='../../../bitflags/__core/cell/struct.UnsafeCell.html' title='bitflags::__core::cell::UnsafeCell'>UnsafeCell</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;T&gt; RefUnwindSafe for <a class='struct' href='../../../bitflags/__core/panic/struct.AssertUnwindSafe.html' title='bitflags::__core::panic::AssertUnwindSafe'>AssertUnwindSafe</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; RefUnwindSafe for <a class='struct' href='../../../bitflags/__core/panic/struct.AssertRecoverSafe.html' title='bitflags::__core::panic::AssertRecoverSafe'>AssertRecoverSafe</a>&lt;T&gt;</code></li>
+</ul><script type="text/javascript" async
                          src="../../../implementors/std/panic/trait.RefUnwindSafe.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

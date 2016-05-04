@@ -47,11 +47,17 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-2070' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.VacantEntry.html?gotosrc=2070' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct VacantEntry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
+               </span><a id='src-2056' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.VacantEntry.html?gotosrc=2056' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct VacantEntry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single empty location in a HashMap.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a, K, V&gt; <a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.VacantEntry.html' title='bitflags::__core::collections::hash_map::VacantEntry'>VacantEntry</a>&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span></code></h3><div class='impl-items'><h4 id='method.key' class='method'><code>fn <a href='#method.key' class='fnname'>key</a>(&amp;self) -&gt; &amp;K</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>map_entry_keys</code>)</em></div><div class='docblock'><p>Gets a reference to the key that would be used when inserting a value
+through the VacantEntry.</p>
+</div><h4 id='method.insert' class='method'><code>fn <a href='#method.insert' class='fnname'>insert</a>(self, value: V) -&gt; &amp;'a mut V</code></h4>
+<div class='docblock'><p>Sets the value of the entry with the VacantEntry&#39;s key,
+and returns a mutable reference to it</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

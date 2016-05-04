@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4772' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/stdio/struct.Stdout.html?gotosrc=4772' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4710' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/stdio/struct.Stdout.html?gotosrc=4710' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Stdout {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A handle to the global standard output stream of the current process.</p>
@@ -57,6 +57,17 @@ output stream. Access is also synchronized via a lock and explicit control
 over locking is available via the <code>lock</code> method.</p>
 
 <p>Created by the <a href="fn.stdout.html"><code>io::stdout</code></a> method.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/io/struct.Stdout.html' title='bitflags::__core::io::Stdout'>Stdout</a></code></h3><div class='impl-items'><h4 id='method.lock' class='method'><code>fn <a href='#method.lock' class='fnname'>lock</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/io/struct.StdoutLock.html' title='bitflags::__core::io::StdoutLock'>StdoutLock</a></code></h4>
+<div class='docblock'><p>Locks this handle to the standard output stream, returning a writable
+guard.</p>
+
+<p>The lock is released when the returned lock goes out of scope. The
+returned guard also implements the <code>Write</code> trait for writing data.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a> for <a class='struct' href='../../../bitflags/__core/io/struct.Stdout.html' title='bitflags::__core::io::Stdout'>Stdout</a></code></h3><div class='impl-items'><h4 id='method.write' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#tymethod.write' class='fnname'>write</a>(&amp;mut self, buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.flush' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#tymethod.flush' class='fnname'>flush</a>(&amp;mut self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.write_all' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.write_all' class='fnname'>write_all</a>(&amp;mut self, buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.write_fmt' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.write_fmt' class='fnname'>write_fmt</a>(&amp;mut self, args: <a class='struct' href='../../../bitflags/__core/fmt/struct.Arguments.html' title='bitflags::__core::fmt::Arguments'>Arguments</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;</code></h4>
+<h4 id='method.by_ref' class='method'><code>fn <a href='../../../bitflags/__core/io/trait.Write.html#method.by_ref' class='fnname'>by_ref</a>(&amp;mut self) -&gt; &amp;mut Self</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

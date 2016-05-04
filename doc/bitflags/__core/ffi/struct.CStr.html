@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-3070' class='srclink' href='https://doc.rust-lang.org/nightly/std/ffi/c_str/struct.CStr.html?gotosrc=3070' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-3052' class='srclink' href='https://doc.rust-lang.org/nightly/std/ffi/c_str/struct.CStr.html?gotosrc=3052' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct CStr {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>Representation of a borrowed C string.</p>
@@ -111,6 +111,143 @@ interface to other consumers.</p>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;string: {}&quot;</span>, <span class='ident'>my_string_safe</span>());
 }</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'><h4 id='method.from_ptr' class='method'><code>unsafe fn <a href='#method.from_ptr' class='fnname'>from_ptr</a>(ptr: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.pointer.html'>*const </a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a>) -&gt; &amp;'a <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h4>
+<div class='docblock'><p>Casts a raw C string to a safe C string wrapper.</p>
+
+<p>This function will cast the provided <code>ptr</code> to the <code>CStr</code> wrapper which
+allows inspection and interoperation of non-owned C strings. This method
+is unsafe for a number of reasons:</p>
+
+<ul>
+<li>There is no guarantee to the validity of <code>ptr</code></li>
+<li>The returned lifetime is not guaranteed to be the actual lifetime of
+<code>ptr</code></li>
+<li>There is no guarantee that the memory pointed to by <code>ptr</code> contains a
+valid nul terminator byte at the end of the string.</li>
+</ul>
+
+<blockquote>
+<p><strong>Note</strong>: This operation is intended to be a 0-cost cast but it is
+currently implemented with an up-front calculation of the length of
+the string. This is not guaranteed to always be the case.</p>
+</blockquote>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CStr</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>raw</span>::<span class='ident'>c_char</span>;
+
+<span class='kw'>extern</span> {
+    <span class='kw'>fn</span> <span class='ident'>my_string</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_char</span>;
+}
+
+<span class='kw'>unsafe</span> {
+    <span class='kw'>let</span> <span class='ident'>slice</span> <span class='op'>=</span> <span class='ident'>CStr</span>::<span class='ident'>from_ptr</span>(<span class='ident'>my_string</span>());
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;string returned: {}&quot;</span>, <span class='ident'>slice</span>.<span class='ident'>to_str</span>().<span class='ident'>unwrap</span>());
+}</pre>
+</div><h4 id='method.from_bytes_with_nul' class='method'><code>fn <a href='#method.from_bytes_with_nul' class='fnname'>from_bytes_with_nul</a>(bytes: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>cstr_from_bytes</code>)<p>: recently added</p>
+</em></div><div class='docblock'><p>Creates a C string wrapper from a byte slice.</p>
+
+<p>This function will cast the provided <code>bytes</code> to a <code>CStr</code> wrapper after
+ensuring that it is null terminated and does not contain any interior
+nul bytes.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CStr</span>;
+
+<span class='kw'>let</span> <span class='ident'>cstr</span> <span class='op'>=</span> <span class='ident'>CStr</span>::<span class='ident'>from_bytes_with_nul</span>(<span class='string'>b&quot;hello\0&quot;</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>cstr</span>.<span class='ident'>is_some</span>());</pre>
+</div><h4 id='method.from_bytes_with_nul_unchecked' class='method'><code>unsafe fn <a href='#method.from_bytes_with_nul_unchecked' class='fnname'>from_bytes_with_nul_unchecked</a>(bytes: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>) -&gt; &amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>cstr_from_bytes</code>)<p>: recently added</p>
+</em></div><div class='docblock'><p>Unsafely creates a C string wrapper from a byte slice.</p>
+
+<p>This function will cast the provided <code>bytes</code> to a <code>CStr</code> wrapper without
+performing any sanity checks. The provided slice must be null terminated
+and not contain any interior nul bytes.</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::{<span class='ident'>CStr</span>, <span class='ident'>CString</span>};
+
+<span class='kw'>unsafe</span> {
+    <span class='kw'>let</span> <span class='ident'>cstring</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='string'>&quot;hello&quot;</span>).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>cstr</span> <span class='op'>=</span> <span class='ident'>CStr</span>::<span class='ident'>from_bytes_with_nul_unchecked</span>(<span class='ident'>cstring</span>.<span class='ident'>to_bytes_with_nul</span>());
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cstr</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>cstring</span>);
+}</pre>
+</div><h4 id='method.as_ptr' class='method'><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.pointer.html'>*const </a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i8.html'>i8</a></code></h4>
+<div class='docblock'><p>Returns the inner pointer to this C string.</p>
+
+<p>The returned pointer will be valid for as long as <code>self</code> is and points
+to a contiguous region of memory terminated with a 0 byte to represent
+the end of the string.</p>
+</div><h4 id='method.to_bytes' class='method'><code>fn <a href='#method.to_bytes' class='fnname'>to_bytes</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Converts this C string to a byte slice.</p>
+
+<p>This function will calculate the length of this string (which normally
+requires a linear amount of work to be done) and then return the
+resulting slice of <code>u8</code> elements.</p>
+
+<p>The returned slice will <strong>not</strong> contain the trailing nul that this C
+string has.</p>
+
+<blockquote>
+<p><strong>Note</strong>: This method is currently implemented as a 0-cost cast, but
+it is planned to alter its definition in the future to perform the
+length calculation whenever this method is called.</p>
+</blockquote>
+</div><h4 id='method.to_bytes_with_nul' class='method'><code>fn <a href='#method.to_bytes_with_nul' class='fnname'>to_bytes_with_nul</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Converts this C string to a byte slice containing the trailing 0 byte.</p>
+
+<p>This function is the equivalent of <code>to_bytes</code> except that it will retain
+the trailing nul instead of chopping it off.</p>
+
+<blockquote>
+<p><strong>Note</strong>: This method is currently implemented as a 0-cost cast, but
+it is planned to alter its definition in the future to perform the
+length calculation whenever this method is called.</p>
+</blockquote>
+</div><h4 id='method.to_str' class='method'><code>fn <a href='#method.to_str' class='fnname'>to_str</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>, <a class='struct' href='../../../bitflags/__core/str/struct.Utf8Error.html' title='bitflags::__core::str::Utf8Error'>Utf8Error</a>&gt;</code><span class="since">1.4.0</span></h4>
+<div class='docblock'><p>Yields a <code>&amp;str</code> slice if the <code>CStr</code> contains valid UTF-8.</p>
+
+<p>This function will calculate the length of this string and check for
+UTF-8 validity, and then return the <code>&amp;str</code> if it&#39;s valid.</p>
+
+<blockquote>
+<p><strong>Note</strong>: This method is currently implemented to check for validity
+after a 0-cost cast, but it is planned to alter its definition in the
+future to perform the length calculation in addition to the UTF-8
+check whenever this method is called.</p>
+</blockquote>
+</div><h4 id='method.to_string_lossy' class='method'><code>fn <a href='#method.to_string_lossy' class='fnname'>to_string_lossy</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/borrow/enum.Cow.html' title='bitflags::__core::borrow::Cow'>Cow</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a>&gt;</code><span class="since">1.4.0</span></h4>
+<div class='docblock'><p>Converts a <code>CStr</code> into a <code>Cow&lt;str&gt;</code>.</p>
+
+<p>This function will calculate the length of this string (which normally
+requires a linear amount of work to be done) and then return the
+resulting slice as a <code>Cow&lt;str&gt;</code>, replacing any invalid UTF-8 sequences
+with <code>U+FFFD REPLACEMENT CHARACTER</code>.</p>
+
+<blockquote>
+<p><strong>Note</strong>: This method is currently implemented to check for validity
+after a 0-cost cast, but it is planned to alter its definition in the
+future to perform the length calculation in addition to the UTF-8
+check whenever this method is called.</p>
+</blockquote>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code><span class="since">1.3.0</span></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.PartialEq.html' title='bitflags::__core::cmp::PartialEq'>PartialEq</a>&lt;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>&gt; for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.Eq.html' title='bitflags::__core::cmp::Eq'>Eq</a> for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.PartialOrd.html' title='bitflags::__core::cmp::PartialOrd'>PartialOrd</a>&lt;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>&gt; for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'><h4 id='method.partial_cmp' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#tymethod.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>) -&gt; <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;<a class='enum' href='../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.le' class='fnname'>le</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.gt' class='fnname'>gt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.PartialOrd.html#method.ge' class='fnname'>ge</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a> for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'><h4 id='method.cmp' class='method'><code>fn <a href='../../../bitflags/__core/cmp/trait.Ord.html#tymethod.cmp' class='fnname'>cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>) -&gt; <a class='enum' href='../../../bitflags/__core/cmp/enum.Ordering.html' title='bitflags::__core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/borrow/trait.ToOwned.html' title='bitflags::__core::borrow::ToOwned'>ToOwned</a> for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code><span class="since">1.3.0</span></h3><div class='impl-items'><h4 id='associatedtype.Owned' class='type'><code>type <a href='../../../bitflags/__core/borrow/trait.ToOwned.html#associatedtype.Owned' class='type'>Owned</a> = <a class='struct' href='../../../bitflags/__core/ffi/struct.CString.html' title='bitflags::__core::ffi::CString'>CString</a></code></h4>
+<h4 id='method.to_owned' class='method'><code>fn <a href='../../../bitflags/__core/borrow/trait.ToOwned.html#tymethod.to_owned' class='fnname'>to_owned</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/ffi/struct.CString.html' title='bitflags::__core::ffi::CString'>CString</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a>&gt; for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code><span class="since">1.7.0</span></h3><div class='impl-items'><h4 id='method.as_ref' class='method'><code>fn <a href='../../../bitflags/__core/convert/trait.AsRef.html#tymethod.as_ref' class='fnname'>as_ref</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/hash/trait.Hash.html' title='bitflags::__core::hash::Hash'>Hash</a> for <a class='struct' href='../../../bitflags/__core/ffi/struct.CStr.html' title='bitflags::__core::ffi::CStr'>CStr</a></code></h3><div class='impl-items'><h4 id='method.hash' class='method'><code>fn <a href='../../../bitflags/__core/hash/trait.Hash.html#tymethod.hash' class='fnname'>hash</a>&lt;__H&gt;(&amp;self, __arg_0: &amp;mut __H) <span class='where'>where __H: <a class='trait' href='../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code></h4>
+<h4 id='method.hash_slice' class='method'><code>fn <a href='../../../bitflags/__core/hash/trait.Hash.html#method.hash_slice' class='fnname'>hash_slice</a>&lt;H&gt;(data: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>&amp;[Self]</a>, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='../../../bitflags/__core/hash/trait.Hasher.html' title='bitflags::__core::hash::Hasher'>Hasher</a></span></code><span class="since">1.3.0</span></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

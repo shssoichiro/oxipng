@@ -47,11 +47,22 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-13268' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/net/struct.SocketAddr.html?gotosrc=13268' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-13018' class='srclink' href='https://doc.rust-lang.org/nightly/std/sys/ext/net/struct.SocketAddr.html?gotosrc=13018' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct SocketAddr {
     // some fields omitted
 }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>unix_socket</code>)<p>: newly added</p>
 </em></div><div class='docblock'><p>An address associated with a Unix socket.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.SocketAddr.html' title='bitflags::__core::os::ext::net::SocketAddr'>SocketAddr</a></code></h3><div class='impl-items'><h4 id='method.is_unnamed' class='method'><code>fn <a href='#method.is_unnamed' class='fnname'>is_unnamed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>unix_socket</code>)<p>: newly added</p>
+</em></div><div class='docblock'><p>Returns true iff the address is unnamed.</p>
+</div><h4 id='method.as_pathname' class='method'><code>fn <a href='#method.as_pathname' class='fnname'>as_pathname</a>(&amp;self) -&gt; <a class='enum' href='../../../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../../../../../bitflags/__core/path/struct.Path.html' title='bitflags::__core::path::Path'>Path</a>&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>unix_socket</code>)<p>: newly added</p>
+</em></div><div class='docblock'><p>Returns the contents of this address if it is a <code>pathname</code> address.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.SocketAddr.html' title='bitflags::__core::os::ext::net::SocketAddr'>SocketAddr</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='../../../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>unix_socket</code>)<p>: newly added</p>
+</em></div></div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='../../../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> for <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.SocketAddr.html' title='bitflags::__core::os::ext::net::SocketAddr'>SocketAddr</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='../../../../../bitflags/__core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../../../bitflags/__core/os/ext/net/struct.SocketAddr.html' title='bitflags::__core::os::ext::net::SocketAddr'>SocketAddr</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>unix_socket</code>)<p>: newly added</p>
+</em></div><h4 id='method.clone_from' class='method'><code>fn <a href='../../../../../bitflags/__core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><span class="since">1.0.0</span></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

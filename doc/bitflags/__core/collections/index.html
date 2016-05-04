@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1090' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/index.html?gotosrc=1090' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1084' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/index.html?gotosrc=1084' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Collection types.</p>
 
 <p>Rust&#39;s standard collection library provides efficient implementations of the
@@ -213,6 +213,7 @@ is generally going to be faster than LinkedList.</p>
 <th>insert</th>
 <th>remove</th>
 <th>predecessor</th>
+<th>append</th>
 </tr>
 </thead>
 
@@ -223,6 +224,7 @@ is generally going to be faster than LinkedList.</p>
 <td>O(1)~*</td>
 <td>O(1)~</td>
 <td>N/A</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>BTreeMap</td>
@@ -230,11 +232,10 @@ is generally going to be faster than LinkedList.</p>
 <td>O(log n)</td>
 <td>O(log n)</td>
 <td>O(log n)</td>
+<td>O(n+m)</td>
 </tr>
 </tbody>
 </table>
-
-<p>Note that BTreeMap&#39;s precise performance depends on the value of B.</p>
 
 <h1 id='correct-and-efficient-usage-of-collections' class='section-header'><a href='#correct-and-efficient-usage-of-collections'>Correct and Efficient Usage of Collections</a></h1>
 <p>Of course, knowing which collection is the right one for the job doesn&#39;t

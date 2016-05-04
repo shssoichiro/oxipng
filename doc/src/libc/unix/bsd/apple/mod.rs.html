@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.10/src/unix/bsd/apple/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.11/src/unix/bsd/apple/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -1175,6 +1175,32 @@
 <span id="1131">1131</span>
 <span id="1132">1132</span>
 <span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Apple (ios/darwin)-specific definitions</span>
 <span class='doccomment'>//!</span>
@@ -1616,6 +1642,7 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGQUIT</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>3</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGILL</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>4</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGABRT</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>6</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGEMT</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>7</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGFPE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>8</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGKILL</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>9</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SIGSEGV</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>11</span>;
@@ -1903,6 +1930,7 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_STACK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>3</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_CORE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>4</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_AS</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>5</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_RSS</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>RLIMIT_AS</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_MEMLOCK</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>6</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_NPROC</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>7</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RLIMIT_NOFILE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>8</span>;
@@ -2202,6 +2230,30 @@
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_NODELETE</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0x80</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_NOLOAD</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0x10</span>;
 <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RTLD_GLOBAL</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0x8</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_WSTOPPED</span>: ::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0o177</span>;
+
+<span class='macro'>f</span><span class='macro'>!</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WSTOPSIG</span>(<span class='ident'>status</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span> {
+        <span class='ident'>status</span> <span class='op'>&gt;&gt;</span> <span class='number'>8</span>
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>_WSTATUS</span>(<span class='ident'>status</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> ::<span class='ident'>c_int</span> {
+        <span class='ident'>status</span> <span class='kw-2'>&amp;</span> <span class='number'>0x7f</span>
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFCONTINUED</span>(<span class='ident'>status</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='ident'>_WSTATUS</span>(<span class='ident'>status</span>) <span class='op'>==</span> <span class='ident'>_WSTOPPED</span> <span class='op'>&amp;&amp;</span> <span class='ident'>WSTOPSIG</span>(<span class='ident'>status</span>) <span class='op'>==</span> <span class='number'>0x13</span>
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFSIGNALED</span>(<span class='ident'>status</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='ident'>_WSTATUS</span>(<span class='ident'>status</span>) <span class='op'>!=</span> <span class='ident'>_WSTOPPED</span> <span class='op'>&amp;&amp;</span> <span class='ident'>_WSTATUS</span>(<span class='ident'>status</span>) <span class='op'>!=</span> <span class='number'>0</span>
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFSTOPPED</span>(<span class='ident'>status</span>: ::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='ident'>_WSTATUS</span>(<span class='ident'>status</span>) <span class='op'>==</span> <span class='ident'>_WSTOPPED</span> <span class='op'>&amp;&amp;</span> <span class='ident'>WSTOPSIG</span>(<span class='ident'>status</span>) <span class='op'>!=</span> <span class='number'>0x13</span>
+    }
+}
 
 <span class='kw'>extern</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>getnameinfo</span>(<span class='ident'>sa</span>: <span class='op'>*</span><span class='kw'>const</span> ::<span class='ident'>sockaddr</span>,

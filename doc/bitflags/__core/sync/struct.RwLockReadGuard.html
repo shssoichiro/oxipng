@@ -47,12 +47,29 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-10431' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLockReadGuard.html?gotosrc=10431' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-10305' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLockReadGuard.html?gotosrc=10305' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>#[must_use]
 pub struct RwLockReadGuard&lt;'a, T&gt; <span class='where'>where T: 'a + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>RAII structure used to release the shared read access of a lock when
 dropped.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'rwlock, T&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'rwlock, T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='method.map' class='method'><code>fn <a href='#method.map' class='fnname'>map</a>&lt;U, F&gt;(this: <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'rwlock, T&gt;, cb: F) -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'rwlock, U&gt; <span class='where'>where U: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a>, F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>(&amp;T) -&gt; &amp;U</span></code></h4>
+<div class='stability'><em class='stab deprecated'>Deprecated since 1.8.0<p>: unsound on Mutex because of Condvar and RwLock may also with to be used with Condvar one day</p>
+</em></div><div class='stability'><em class='stab unstable'>Unstable (<code>guard_map</code>)<p>: unsound on Mutex because of Condvar and RwLock may also with to be used with Condvar one day</p>
+</em></div><div class='docblock'><p>Transform this guard to hold a sub-borrow of the original data.</p>
+
+<p>Applies the supplied closure to the data, returning a new lock
+guard referencing the borrow returned by the closure.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>RwLock</span>::<span class='ident'>new</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>]);
+
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>RwLockReadGuard</span>::<span class='ident'>map</span>(<span class='ident'>x</span>.<span class='ident'>read</span>().<span class='ident'>unwrap</span>(), <span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>v</span>[<span class='number'>0</span>]);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>y</span>, <span class='number'>1</span>);</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a, T&gt; !<a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'a, T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;'rwlock, T&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Deref.html' title='bitflags::__core::ops::Deref'>Deref</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'rwlock, T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='associatedtype.Target' class='type'><code>type <a href='../../../bitflags/__core/ops/trait.Deref.html#associatedtype.Target' class='type'>Target</a> = T</code></h4>
+<h4 id='method.deref' class='method'><code>fn <a href='../../../bitflags/__core/ops/trait.Deref.html#tymethod.deref' class='fnname'>deref</a>(&amp;self) -&gt; &amp;T</code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;'a, T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

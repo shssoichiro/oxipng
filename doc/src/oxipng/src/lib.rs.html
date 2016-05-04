@@ -441,12 +441,119 @@
 <span id="397">397</span>
 <span id="398">398</span>
 <span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bit_vec</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>byteorder</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>crc</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libz_sys</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>miniz_sys</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num_cpus</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>scoped_pool</span>;
 
@@ -459,7 +566,8 @@
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>deflate</span> {
     <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>deflate</span>;
-    <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>stream</span>;
+    <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>libz_stream</span>;
+    <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>miniz_stream</span>;
 }
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>png</span>;
 
@@ -521,6 +629,57 @@
     <span class='doccomment'>/// Whether to use heuristics to pick the best filter and compression</span>
     <span class='doccomment'>/// Intended for use with `-o 1` from the CLI interface</span>
     <span class='kw'>pub</span> <span class='ident'>use_heuristics</span>: <span class='ident'>bool</span>,
+    <span class='doccomment'>/// Number of threads to use, defaults to 1.5x CPU cores, rounded down</span>
+    <span class='kw'>pub</span> <span class='ident'>threads</span>: <span class='ident'>usize</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>Options</span> {
+    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>Options</span> {
+        <span class='comment'>// Default settings based on -o 2 from the CLI interface</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>filter</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
+        <span class='ident'>filter</span>.<span class='ident'>insert</span>(<span class='number'>0</span>);
+        <span class='ident'>filter</span>.<span class='ident'>insert</span>(<span class='number'>5</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>compression</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
+        <span class='ident'>compression</span>.<span class='ident'>insert</span>(<span class='number'>9</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>memory</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
+        <span class='ident'>memory</span>.<span class='ident'>insert</span>(<span class='number'>9</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>strategies</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>4</span> {
+            <span class='ident'>strategies</span>.<span class='ident'>insert</span>(<span class='ident'>i</span>);
+        }
+
+        <span class='comment'>// Default to 1 thread on single-core, otherwise use threads = 1.5x CPU cores</span>
+        <span class='kw'>let</span> <span class='ident'>num_cpus</span> <span class='op'>=</span> <span class='ident'>num_cpus</span>::<span class='ident'>get</span>();
+        <span class='kw'>let</span> <span class='ident'>thread_count</span> <span class='op'>=</span> <span class='ident'>num_cpus</span> <span class='op'>+</span> (<span class='ident'>num_cpus</span> <span class='op'>&gt;&gt;</span> <span class='number'>1</span>);
+
+        <span class='ident'>Options</span> {
+            <span class='ident'>backup</span>: <span class='boolval'>false</span>,
+            <span class='ident'>out_file</span>: <span class='ident'>PathBuf</span>::<span class='ident'>new</span>(),
+            <span class='ident'>out_dir</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>stdout</span>: <span class='boolval'>false</span>,
+            <span class='ident'>pretend</span>: <span class='boolval'>false</span>,
+            <span class='ident'>recursive</span>: <span class='boolval'>false</span>,
+            <span class='ident'>fix_errors</span>: <span class='boolval'>false</span>,
+            <span class='ident'>clobber</span>: <span class='boolval'>true</span>,
+            <span class='ident'>create</span>: <span class='boolval'>true</span>,
+            <span class='ident'>force</span>: <span class='boolval'>false</span>,
+            <span class='ident'>preserve_attrs</span>: <span class='boolval'>false</span>,
+            <span class='ident'>verbosity</span>: <span class='prelude-val'>Some</span>(<span class='number'>0</span>),
+            <span class='ident'>filter</span>: <span class='ident'>filter</span>,
+            <span class='ident'>interlace</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>compression</span>: <span class='ident'>compression</span>,
+            <span class='ident'>memory</span>: <span class='ident'>memory</span>,
+            <span class='ident'>strategies</span>: <span class='ident'>strategies</span>,
+            <span class='ident'>window</span>: <span class='number'>15</span>,
+            <span class='ident'>bit_depth_reduction</span>: <span class='boolval'>true</span>,
+            <span class='ident'>color_type_reduction</span>: <span class='boolval'>true</span>,
+            <span class='ident'>palette_reduction</span>: <span class='boolval'>true</span>,
+            <span class='ident'>idat_recoding</span>: <span class='boolval'>true</span>,
+            <span class='ident'>strip</span>: <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='prelude-val'>None</span>,
+            <span class='ident'>use_heuristics</span>: <span class='boolval'>false</span>,
+            <span class='ident'>threads</span>: <span class='ident'>thread_count</span>,
+        }
+    }
 }
 
 <span class='doccomment'>/// Perform optimization on the input file using the options provided</span>
@@ -532,7 +691,7 @@
         <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Processing: {}&quot;</span>, <span class='ident'>filepath</span>.<span class='ident'>to_str</span>().<span class='ident'>unwrap</span>()).<span class='ident'>ok</span>();
     }
     <span class='kw'>let</span> <span class='ident'>in_file</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>filepath</span>);
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>png</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>in_file</span>) {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>png</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>in_file</span>, <span class='ident'>opts</span>.<span class='ident'>fix_errors</span>) {
         <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
         <span class='prelude-val'>Err</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>x</span>),
     };
@@ -595,50 +754,10 @@
         }
     }
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-
-    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>palette_reduction</span> {
-        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_palette</span>() {
-            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
-                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
-            }
-        };
-    }
-
-    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>bit_depth_reduction</span> {
-        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_bit_depth</span>() {
-            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
-                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
-            }
-        };
-    }
-
-    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>color_type_reduction</span> {
-        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_color_type</span>() {
-            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
-                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
-            }
-        };
-    }
-
-    <span class='kw'>if</span> <span class='ident'>something_changed</span> <span class='op'>&amp;&amp;</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-        <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
-    }
-
-    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>interlacing</span>) <span class='op'>=</span> <span class='ident'>opts</span>.<span class='ident'>interlace</span> {
-        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>change_interlacing</span>(<span class='ident'>interlacing</span>) {
-            <span class='ident'>png</span>.<span class='ident'>ihdr_data</span>.<span class='ident'>interlaced</span> <span class='op'>=</span> <span class='ident'>interlacing</span>;
-            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-        }
-    }
+    <span class='kw'>let</span> <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='ident'>perform_reductions</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>, <span class='kw-2'>&amp;</span><span class='ident'>opts</span>);
 
     <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>idat_recoding</span> <span class='op'>||</span> <span class='ident'>something_changed</span> {
-        <span class='comment'>// Use 1 thread on single-core, otherwise use threads = 1.5x CPU cores</span>
-        <span class='kw'>let</span> <span class='ident'>num_cpus</span> <span class='op'>=</span> <span class='ident'>num_cpus</span>::<span class='ident'>get</span>();
-        <span class='kw'>let</span> <span class='ident'>thread_count</span> <span class='op'>=</span> <span class='ident'>num_cpus</span> <span class='op'>+</span> (<span class='ident'>num_cpus</span> <span class='op'>&gt;&gt;</span> <span class='number'>1</span>);
+        <span class='kw'>let</span> <span class='ident'>thread_count</span> <span class='op'>=</span> <span class='ident'>opts</span>.<span class='ident'>threads</span>;
         <span class='kw'>let</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>Pool</span>::<span class='ident'>new</span>(<span class='ident'>thread_count</span>);
         <span class='comment'>// Go through selected permutations and determine the best</span>
         <span class='kw'>let</span> <span class='ident'>best</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>TrialWithData</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>));
@@ -714,29 +833,7 @@
         }
     }
 
-    <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>strip</span>.<span class='ident'>clone</span>() {
-        <span class='comment'>// Strip headers</span>
-        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (),
-        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='prelude-val'>Some</span>(<span class='ident'>hdrs</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>for</span> <span class='ident'>hdr</span> <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>hdrs</span> {
-                <span class='ident'>png</span>.<span class='ident'>aux_headers</span>.<span class='ident'>remove</span>(<span class='ident'>hdr</span>);
-            }
-        }
-        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='ident'>Safe</span> <span class='op'>=&gt;</span> {
-            <span class='kw'>const</span> <span class='ident'>PRESERVED_HEADERS</span>: [<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>; <span class='number'>9</span>] <span class='op'>=</span> [<span class='string'>&quot;cHRM&quot;</span>, <span class='string'>&quot;gAMA&quot;</span>, <span class='string'>&quot;iCCP&quot;</span>, <span class='string'>&quot;sBIT&quot;</span>, <span class='string'>&quot;sRGB&quot;</span>,
-                                                          <span class='string'>&quot;bKGD&quot;</span>, <span class='string'>&quot;hIST&quot;</span>, <span class='string'>&quot;pHYs&quot;</span>, <span class='string'>&quot;sPLT&quot;</span>];
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>preserved</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
-            <span class='kw'>for</span> (<span class='ident'>hdr</span>, <span class='ident'>contents</span>) <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>png</span>.<span class='ident'>aux_headers</span> {
-                <span class='kw'>if</span> <span class='ident'>PRESERVED_HEADERS</span>.<span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='ident'>hdr</span>.<span class='ident'>as_ref</span>()) {
-                    <span class='ident'>preserved</span>.<span class='ident'>insert</span>(<span class='ident'>hdr</span>.<span class='ident'>clone</span>(), <span class='ident'>contents</span>.<span class='ident'>clone</span>());
-                }
-            }
-            <span class='ident'>png</span>.<span class='ident'>aux_headers</span> <span class='op'>=</span> <span class='ident'>preserved</span>;
-        }
-        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='ident'>All</span> <span class='op'>=&gt;</span> {
-            <span class='ident'>png</span>.<span class='ident'>aux_headers</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
-        }
-    }
+    <span class='ident'>perform_strip</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>, <span class='kw-2'>&amp;</span><span class='ident'>opts</span>);
 
     <span class='kw'>let</span> <span class='ident'>output_data</span> <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>output</span>();
     <span class='kw'>if</span> <span class='ident'>file_original_size</span> <span class='op'>&lt;=</span> <span class='ident'>output_data</span>.<span class='ident'>len</span>() <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>force</span> <span class='op'>&amp;&amp;</span> <span class='ident'>opts</span>.<span class='ident'>interlace</span>.<span class='ident'>is_none</span>() {
@@ -777,6 +874,51 @@
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to file {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
                 }
             };
+
+            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>preserve_attrs</span> {
+                <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>filepath</span>) {
+                    <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
+                        <span class='kw'>match</span> <span class='ident'>f</span>.<span class='ident'>metadata</span>() {
+                            <span class='prelude-val'>Ok</span>(<span class='ident'>metadata</span>) <span class='op'>=&gt;</span> {
+                                <span class='comment'>// TODO: Implement full permission changing on Unix</span>
+                                <span class='comment'>// Not available in stable, requires block cfg statements</span>
+                                <span class='comment'>// See https://github.com/rust-lang/rust/issues/15701</span>
+                                {
+                                    <span class='kw'>match</span> <span class='ident'>out_file</span>.<span class='ident'>metadata</span>() {
+                                        <span class='prelude-val'>Ok</span>(<span class='ident'>out_meta</span>) <span class='op'>=&gt;</span> {
+                                            <span class='kw'>let</span> <span class='ident'>readonly</span> <span class='op'>=</span> <span class='ident'>metadata</span>.<span class='ident'>permissions</span>()
+                                                                   .<span class='ident'>readonly</span>();
+                                            <span class='ident'>out_meta</span>.<span class='ident'>permissions</span>()
+                                                    .<span class='ident'>set_readonly</span>(<span class='ident'>readonly</span>);
+                                        }
+                                        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                                            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                                                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
+                                                         <span class='string'>&quot;Failed to set permissions on output file&quot;</span>)
+                                                    .<span class='ident'>ok</span>();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                                <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                                    <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
+                                             <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
+                                        .<span class='ident'>ok</span>();
+                                }
+                            }
+                        }
+                    }
+                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
+                                .<span class='ident'>ok</span>();
+                        }
+                    }
+                };
+            }
+
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>out_file</span>);
             <span class='kw'>match</span> <span class='ident'>buffer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>output_data</span>) {
                 <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {
@@ -825,6 +967,50 @@
     <span class='prelude-val'>Ok</span>(())
 }
 
+<span class='kw'>fn</span> <span class='ident'>perform_reductions</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+
+    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>palette_reduction</span> {
+        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_palette</span>() {
+            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
+                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
+            }
+        };
+    }
+
+    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>bit_depth_reduction</span> {
+        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_bit_depth</span>() {
+            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
+                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
+            }
+        };
+    }
+
+    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>color_type_reduction</span> {
+        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>reduce_color_type</span>() {
+            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
+                <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
+            }
+        };
+    }
+
+    <span class='kw'>if</span> <span class='ident'>something_changed</span> <span class='op'>&amp;&amp;</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+        <span class='ident'>report_reduction</span>(<span class='kw-2'>&amp;</span><span class='ident'>png</span>);
+    }
+
+    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>interlacing</span>) <span class='op'>=</span> <span class='ident'>opts</span>.<span class='ident'>interlace</span> {
+        <span class='kw'>if</span> <span class='ident'>png</span>.<span class='ident'>change_interlacing</span>(<span class='ident'>interlacing</span>) {
+            <span class='ident'>png</span>.<span class='ident'>ihdr_data</span>.<span class='ident'>interlaced</span> <span class='op'>=</span> <span class='ident'>interlacing</span>;
+            <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+        }
+    }
+
+    <span class='ident'>something_changed</span>
+}
+
 <span class='kw'>fn</span> <span class='ident'>report_reduction</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='ident'>png</span>::<span class='ident'>PngData</span>) {
     <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>palette</span>) <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>palette</span>.<span class='ident'>clone</span>() {
         <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
@@ -839,6 +1025,32 @@
                  <span class='ident'>png</span>.<span class='ident'>ihdr_data</span>.<span class='ident'>bit_depth</span>,
                  <span class='ident'>png</span>.<span class='ident'>ihdr_data</span>.<span class='ident'>color_type</span>)
             .<span class='ident'>ok</span>();
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>perform_strip</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) {
+    <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>strip</span>.<span class='ident'>clone</span>() {
+        <span class='comment'>// Strip headers</span>
+        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (),
+        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='prelude-val'>Some</span>(<span class='ident'>hdrs</span>) <span class='op'>=&gt;</span> {
+            <span class='kw'>for</span> <span class='ident'>hdr</span> <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>hdrs</span> {
+                <span class='ident'>png</span>.<span class='ident'>aux_headers</span>.<span class='ident'>remove</span>(<span class='ident'>hdr</span>);
+            }
+        }
+        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='ident'>Safe</span> <span class='op'>=&gt;</span> {
+            <span class='kw'>const</span> <span class='ident'>PRESERVED_HEADERS</span>: [<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>; <span class='number'>9</span>] <span class='op'>=</span> [<span class='string'>&quot;cHRM&quot;</span>, <span class='string'>&quot;gAMA&quot;</span>, <span class='string'>&quot;iCCP&quot;</span>, <span class='string'>&quot;sBIT&quot;</span>, <span class='string'>&quot;sRGB&quot;</span>,
+                                                          <span class='string'>&quot;bKGD&quot;</span>, <span class='string'>&quot;hIST&quot;</span>, <span class='string'>&quot;pHYs&quot;</span>, <span class='string'>&quot;sPLT&quot;</span>];
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>preserved</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+            <span class='kw'>for</span> (<span class='ident'>hdr</span>, <span class='ident'>contents</span>) <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>png</span>.<span class='ident'>aux_headers</span> {
+                <span class='kw'>if</span> <span class='ident'>PRESERVED_HEADERS</span>.<span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='ident'>hdr</span>.<span class='ident'>as_ref</span>()) {
+                    <span class='ident'>preserved</span>.<span class='ident'>insert</span>(<span class='ident'>hdr</span>.<span class='ident'>clone</span>(), <span class='ident'>contents</span>.<span class='ident'>clone</span>());
+                }
+            }
+            <span class='ident'>png</span>.<span class='ident'>aux_headers</span> <span class='op'>=</span> <span class='ident'>preserved</span>;
+        }
+        <span class='ident'>png</span>::<span class='ident'>Headers</span>::<span class='ident'>All</span> <span class='op'>=&gt;</span> {
+            <span class='ident'>png</span>.<span class='ident'>aux_headers</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+        }
     }
 }
 </pre>

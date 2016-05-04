@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/literals.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.69/src/literals.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>literals.rs.html -- source</title>
@@ -568,19 +568,19 @@
 <span class='kw'>impl</span> <span class='ident'>LiteralSearcher</span> {
     <span class='doccomment'>/// Returns a matcher that never matches and never advances the input.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>empty</span>() <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
-        <span class='ident'>Self</span>::<span class='ident'>new</span>(<span class='ident'>syntax</span>::<span class='ident'>Literals</span>::<span class='ident'>empty</span>(), <span class='ident'>Matcher</span>::<span class='ident'>Empty</span>)
+        <span class='kw'>Self</span>::<span class='ident'>new</span>(<span class='ident'>syntax</span>::<span class='ident'>Literals</span>::<span class='ident'>empty</span>(), <span class='ident'>Matcher</span>::<span class='ident'>Empty</span>)
     }
 
     <span class='doccomment'>/// Returns a matcher for literal prefixes from the given set.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>prefixes</span>(<span class='ident'>lits</span>: <span class='ident'>syntax</span>::<span class='ident'>Literals</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='kw'>let</span> <span class='ident'>matcher</span> <span class='op'>=</span> <span class='ident'>Matcher</span>::<span class='ident'>prefixes</span>(<span class='kw-2'>&amp;</span><span class='ident'>lits</span>);
-        <span class='ident'>Self</span>::<span class='ident'>new</span>(<span class='ident'>lits</span>, <span class='ident'>matcher</span>)
+        <span class='kw'>Self</span>::<span class='ident'>new</span>(<span class='ident'>lits</span>, <span class='ident'>matcher</span>)
     }
 
     <span class='doccomment'>/// Returns a matcher for literal suffixes from the given set.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>suffixes</span>(<span class='ident'>lits</span>: <span class='ident'>syntax</span>::<span class='ident'>Literals</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='kw'>let</span> <span class='ident'>matcher</span> <span class='op'>=</span> <span class='ident'>Matcher</span>::<span class='ident'>suffixes</span>(<span class='kw-2'>&amp;</span><span class='ident'>lits</span>);
-        <span class='ident'>Self</span>::<span class='ident'>new</span>(<span class='ident'>lits</span>, <span class='ident'>matcher</span>)
+        <span class='kw'>Self</span>::<span class='ident'>new</span>(<span class='ident'>lits</span>, <span class='ident'>matcher</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>lits</span>: <span class='ident'>syntax</span>::<span class='ident'>Literals</span>, <span class='ident'>matcher</span>: <span class='ident'>Matcher</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
@@ -732,7 +732,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>LiteralIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>];
 
-    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
             <span class='ident'>LiteralIter</span>::<span class='ident'>Empty</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
             <span class='ident'>LiteralIter</span>::<span class='ident'>Bytes</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>many</span>) <span class='op'>=&gt;</span> {

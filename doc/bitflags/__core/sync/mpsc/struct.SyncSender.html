@@ -47,11 +47,40 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-9657' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/struct.SyncSender.html?gotosrc=9657' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-9535' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/struct.SyncSender.html?gotosrc=9535' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct SyncSender&lt;T&gt; {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>The sending-half of Rust&#39;s synchronous channel type. This half can only be
 owned by one thread, but it can be cloned to send to other threads.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.send' class='method'><code>fn <a href='#method.send' class='fnname'>send</a>(&amp;self, t: T) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SendError.html' title='bitflags::__core::sync::mpsc::SendError'>SendError</a>&lt;T&gt;&gt;</code></h4>
+<div class='docblock'><p>Sends a value on this synchronous channel.</p>
+
+<p>This function will <em>block</em> until space in the internal buffer becomes
+available or a receiver is available to hand off the message to.</p>
+
+<p>Note that a successful send does <em>not</em> guarantee that the receiver will
+ever see the data if there is a buffer on this channel. Items may be
+enqueued in the internal buffer for the receiver to receive at a later
+time. If the buffer size is 0, however, it can be guaranteed that the
+receiver has indeed received the data if this function returns success.</p>
+
+<p>This function will never panic, but it may return <code>Err</code> if the
+<code>Receiver</code> has disconnected and is no longer able to receive
+information.</p>
+</div><h4 id='method.try_send' class='method'><code>fn <a href='#method.try_send' class='fnname'>try_send</a>(&amp;self, t: T) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='enum' href='../../../../bitflags/__core/sync/mpsc/enum.TrySendError.html' title='bitflags::__core::sync::mpsc::TrySendError'>TrySendError</a>&lt;T&gt;&gt;</code></h4>
+<div class='docblock'><p>Attempts to send a value on this channel without blocking.</p>
+
+<p>This method differs from <code>send</code> by returning immediately if the
+channel&#39;s buffer is full or no receiver is waiting to acquire some
+data. Compared with <code>send</code>, this function has two failure cases
+instead of one (one for disconnection, one for a full buffer).</p>
+
+<p>See <code>SyncSender::send</code> for notes about guarantees of whether the
+receiver has received the data or not if this function is successful.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; !<a class='trait' href='../../../../bitflags/__core/marker/trait.Sync.html' title='bitflags::__core::marker::Sync'>Sync</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='../../../../bitflags/__core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='../../../../bitflags/__core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.SyncSender.html' title='bitflags::__core::sync::mpsc::SyncSender'>SyncSender</a>&lt;T&gt;</code><span class="since">1.7.0</span></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

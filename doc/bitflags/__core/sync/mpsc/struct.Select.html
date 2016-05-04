@@ -47,12 +47,42 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-8842' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/select/struct.Select.html?gotosrc=8842' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-8728' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/mpsc/select/struct.Select.html?gotosrc=8728' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Select {
     // some fields omitted
 }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>mpsc_select</code>)<p>: This implementation, while likely sufficient, is unsafe and likely to be error prone. At some point in the future this module will likely be replaced, and it is currently unknown how much API breakage that will cause. The ability to select over a number of channels will remain forever, but no guarantees beyond this are being made</p>
 </em></div><div class='docblock'><p>The &quot;receiver set&quot; of the select interface. This structure is used to manage
 a set of receivers which are being selected over.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Select.html' title='bitflags::__core::sync::mpsc::Select'>Select</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Select.html' title='bitflags::__core::sync::mpsc::Select'>Select</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>mpsc_select</code>)<p>: This implementation, while likely sufficient, is unsafe and likely to be error prone. At some point in the future this module will likely be replaced, and it is currently unknown how much API breakage that will cause. The ability to select over a number of channels will remain forever, but no guarantees beyond this are being made</p>
+</em></div><div class='docblock'><p>Creates a new selection structure. This set is initially empty.</p>
+
+<p>Usage of this struct directly can sometimes be burdensome, and usage is much easier through
+the <code>select!</code> macro.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>mpsc_select</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>::<span class='ident'>Select</span>;
+
+<span class='kw'>let</span> <span class='ident'>select</span> <span class='op'>=</span> <span class='ident'>Select</span>::<span class='ident'>new</span>();</pre>
+</div><h4 id='method.handle' class='method'><code>fn <a href='#method.handle' class='fnname'>handle</a>&lt;T&gt;(&amp;'a self, rx: &amp;'a <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Receiver.html' title='bitflags::__core::sync::mpsc::Receiver'>Receiver</a>&lt;T&gt;) -&gt; <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Handle.html' title='bitflags::__core::sync::mpsc::Handle'>Handle</a>&lt;'a, T&gt; <span class='where'>where T: <a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a></span></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>mpsc_select</code>)<p>: This implementation, while likely sufficient, is unsafe and likely to be error prone. At some point in the future this module will likely be replaced, and it is currently unknown how much API breakage that will cause. The ability to select over a number of channels will remain forever, but no guarantees beyond this are being made</p>
+</em></div><div class='docblock'><p>Creates a new handle into this receiver set for a new receiver. Note
+that this does <em>not</em> add the receiver to the receiver set, for that you
+must call the <code>add</code> method on the handle itself.</p>
+</div><h4 id='method.wait' class='method'><code>fn <a href='#method.wait' class='fnname'>wait</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>mpsc_select</code>)<p>: This implementation, while likely sufficient, is unsafe and likely to be error prone. At some point in the future this module will likely be replaced, and it is currently unknown how much API breakage that will cause. The ability to select over a number of channels will remain forever, but no guarantees beyond this are being made</p>
+</em></div><div class='docblock'><p>Waits for an event on this receiver set. The returned value is <em>not</em> an
+index, but rather an id. This id can be queried against any active
+<code>Handle</code> structures (each one has an <code>id</code> method). The handle with
+the matching <code>id</code> will have some sort of event available on it. The
+event could either be that data is available or the corresponding
+channel has been closed.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl !<a class='trait' href='../../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Select.html' title='bitflags::__core::sync::mpsc::Select'>Select</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='../../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Select.html' title='bitflags::__core::sync::mpsc::Select'>Select</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>mpsc_select</code>)<p>: This implementation, while likely sufficient, is unsafe and likely to be error prone. At some point in the future this module will likely be replaced, and it is currently unknown how much API breakage that will cause. The ability to select over a number of channels will remain forever, but no guarantees beyond this are being made</p>
+</em></div></div><h3 class='impl'><code>impl <a class='trait' href='../../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../../bitflags/__core/sync/mpsc/struct.Select.html' title='bitflags::__core::sync::mpsc::Select'>Select</a></code><span class="since">1.7.0</span></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

@@ -47,18 +47,20 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-21797' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html?gotosrc=21797' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-21711' class='srclink' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html?gotosrc=21711' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait FnMut&lt;Args&gt;: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>&lt;Args&gt; {
-    extern "rust-call" fn <a href='#tymethod.call_mut' class='fnname'>call_mut</a>(&amp;mut self, args: Args) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>Output</a>;
+    extern &quot;rust-call&quot; fn <a href='#tymethod.call_mut' class='fnname'>call_mut</a>(&amp;mut self, args: Args) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>Output</a>;
 }</pre><div class='docblock'><p>A version of the call operator that takes a mutable receiver.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.call_mut' class='method stab unstable'><code>extern "rust-call" fn <a href='#tymethod.call_mut' class='fnname'>call_mut</a>(&amp;mut self, args: Args) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>Output</a></code></h3><div class='stability'><em class='stab unstable'>Unstable (<code>fn_traits</code>)</em></div><div class='docblock'><p>This is called when the call operator is used.</p>
+        <h3 id='tymethod.call_mut' class='method stab unstable'><code>extern &quot;rust-call&quot; fn <a href='#tymethod.call_mut' class='fnname'>call_mut</a>(&amp;mut self, args: Args) -&gt; Self::<a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>Output</a></code></h3><div class='stability'><em class='stab unstable'>Unstable (<code>fn_traits</code>)</em></div><div class='docblock'><p>This is called when the call operator is used.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl&lt;'a, A, F&gt; FnMut for &amp;'a F <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.Fn.html' title='bitflags::__core::ops::Fn'>Fn</a>&lt;A&gt; + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;'a, A, F&gt; FnMut for &amp;'a mut F <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>&lt;A&gt; + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+</ul><script type="text/javascript" async
                          src="../../../implementors/core/ops/trait.FnMut.js">
                  </script></section>
     <section id='search' class="content hidden"></section>

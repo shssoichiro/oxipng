@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RegexBuilder","A configurable builder for a regular expression."]]});

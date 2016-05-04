@@ -47,12 +47,18 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-15691' class='srclink' href='https://doc.rust-lang.org/nightly/std/panicking/struct.Location.html?gotosrc=15691' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-15230' class='srclink' href='https://doc.rust-lang.org/nightly/std/panicking/struct.Location.html?gotosrc=15230' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Location&lt;'a&gt; {
     // some fields omitted
 }</pre><div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
 </em></div><div class='docblock'><p>A struct containing information about the location of a panic.</p>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='struct' href='../../../bitflags/__core/panic/struct.Location.html' title='bitflags::__core::panic::Location'>Location</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.file' class='method'><code>fn <a href='#method.file' class='fnname'>file</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
+</em></div><div class='docblock'><p>Returns the name of the source file from which the panic originated.</p>
+</div><h4 id='method.line' class='method'><code>fn <a href='#method.line' class='fnname'>line</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a></code></h4>
+<div class='stability'><em class='stab unstable'>Unstable (<code>panic_handler</code>)<p>: awaiting feedback</p>
+</em></div><div class='docblock'><p>Returns the line number from which the panic originated.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

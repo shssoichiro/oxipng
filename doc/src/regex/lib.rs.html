@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.66/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/regex-0.1.69/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -687,6 +687,10 @@
 <span id="643">643</span>
 <span id="644">644</span>
 <span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1201,7 +1205,8 @@
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>utf8_ranges</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>set</span>::{<span class='ident'>RegexSet</span>, <span class='ident'>SetMatches</span>, <span class='ident'>SetMatchesIntoIter</span>, <span class='ident'>SetMatchesIter</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_builder</span>::<span class='ident'>unicode</span>::<span class='op'>*</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_set</span>::<span class='ident'>unicode</span>::<span class='op'>*</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_unicode</span>::{
     <span class='ident'>Regex</span>, <span class='ident'>Captures</span>, <span class='ident'>SubCaptures</span>, <span class='ident'>SubCapturesPos</span>, <span class='ident'>SubCapturesNamed</span>,
     <span class='ident'>CaptureNames</span>, <span class='ident'>FindCaptures</span>, <span class='ident'>FindMatches</span>,
@@ -1296,6 +1301,8 @@ In general, one should expect performance on `&amp;[u8]` to be roughly similar t
 performance on `&amp;str`.
 */</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>bytes</span> {
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_builder</span>::<span class='ident'>bytes</span>::<span class='op'>*</span>;
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_set</span>::<span class='ident'>bytes</span>::<span class='op'>*</span>;
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>re_bytes</span>::<span class='op'>*</span>;
 }
 
@@ -1313,11 +1320,12 @@ performance on `&amp;str`.
 <span class='kw'>mod</span> <span class='ident'>pattern</span>;
 <span class='kw'>mod</span> <span class='ident'>pikevm</span>;
 <span class='kw'>mod</span> <span class='ident'>prog</span>;
+<span class='kw'>mod</span> <span class='ident'>re_builder</span>;
 <span class='kw'>mod</span> <span class='ident'>re_bytes</span>;
 <span class='kw'>mod</span> <span class='ident'>re_plugin</span>;
+<span class='kw'>mod</span> <span class='ident'>re_set</span>;
 <span class='kw'>mod</span> <span class='ident'>re_trait</span>;
 <span class='kw'>mod</span> <span class='ident'>re_unicode</span>;
-<span class='kw'>mod</span> <span class='ident'>set</span>;
 <span class='kw'>mod</span> <span class='ident'>sparse</span>;
 
 <span class='doccomment'>/// The `internal` module exists to support the `regex!` macro and other</span>

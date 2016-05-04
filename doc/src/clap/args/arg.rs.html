@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/args/arg.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.4.0/src/args/arg.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>arg.rs.html -- source</title>
@@ -1981,6 +1981,235 @@
 <span id="1937">1937</span>
 <span id="1938">1938</span>
 <span id="1939">1939</span>
+<span id="1940">1940</span>
+<span id="1941">1941</span>
+<span id="1942">1942</span>
+<span id="1943">1943</span>
+<span id="1944">1944</span>
+<span id="1945">1945</span>
+<span id="1946">1946</span>
+<span id="1947">1947</span>
+<span id="1948">1948</span>
+<span id="1949">1949</span>
+<span id="1950">1950</span>
+<span id="1951">1951</span>
+<span id="1952">1952</span>
+<span id="1953">1953</span>
+<span id="1954">1954</span>
+<span id="1955">1955</span>
+<span id="1956">1956</span>
+<span id="1957">1957</span>
+<span id="1958">1958</span>
+<span id="1959">1959</span>
+<span id="1960">1960</span>
+<span id="1961">1961</span>
+<span id="1962">1962</span>
+<span id="1963">1963</span>
+<span id="1964">1964</span>
+<span id="1965">1965</span>
+<span id="1966">1966</span>
+<span id="1967">1967</span>
+<span id="1968">1968</span>
+<span id="1969">1969</span>
+<span id="1970">1970</span>
+<span id="1971">1971</span>
+<span id="1972">1972</span>
+<span id="1973">1973</span>
+<span id="1974">1974</span>
+<span id="1975">1975</span>
+<span id="1976">1976</span>
+<span id="1977">1977</span>
+<span id="1978">1978</span>
+<span id="1979">1979</span>
+<span id="1980">1980</span>
+<span id="1981">1981</span>
+<span id="1982">1982</span>
+<span id="1983">1983</span>
+<span id="1984">1984</span>
+<span id="1985">1985</span>
+<span id="1986">1986</span>
+<span id="1987">1987</span>
+<span id="1988">1988</span>
+<span id="1989">1989</span>
+<span id="1990">1990</span>
+<span id="1991">1991</span>
+<span id="1992">1992</span>
+<span id="1993">1993</span>
+<span id="1994">1994</span>
+<span id="1995">1995</span>
+<span id="1996">1996</span>
+<span id="1997">1997</span>
+<span id="1998">1998</span>
+<span id="1999">1999</span>
+<span id="2000">2000</span>
+<span id="2001">2001</span>
+<span id="2002">2002</span>
+<span id="2003">2003</span>
+<span id="2004">2004</span>
+<span id="2005">2005</span>
+<span id="2006">2006</span>
+<span id="2007">2007</span>
+<span id="2008">2008</span>
+<span id="2009">2009</span>
+<span id="2010">2010</span>
+<span id="2011">2011</span>
+<span id="2012">2012</span>
+<span id="2013">2013</span>
+<span id="2014">2014</span>
+<span id="2015">2015</span>
+<span id="2016">2016</span>
+<span id="2017">2017</span>
+<span id="2018">2018</span>
+<span id="2019">2019</span>
+<span id="2020">2020</span>
+<span id="2021">2021</span>
+<span id="2022">2022</span>
+<span id="2023">2023</span>
+<span id="2024">2024</span>
+<span id="2025">2025</span>
+<span id="2026">2026</span>
+<span id="2027">2027</span>
+<span id="2028">2028</span>
+<span id="2029">2029</span>
+<span id="2030">2030</span>
+<span id="2031">2031</span>
+<span id="2032">2032</span>
+<span id="2033">2033</span>
+<span id="2034">2034</span>
+<span id="2035">2035</span>
+<span id="2036">2036</span>
+<span id="2037">2037</span>
+<span id="2038">2038</span>
+<span id="2039">2039</span>
+<span id="2040">2040</span>
+<span id="2041">2041</span>
+<span id="2042">2042</span>
+<span id="2043">2043</span>
+<span id="2044">2044</span>
+<span id="2045">2045</span>
+<span id="2046">2046</span>
+<span id="2047">2047</span>
+<span id="2048">2048</span>
+<span id="2049">2049</span>
+<span id="2050">2050</span>
+<span id="2051">2051</span>
+<span id="2052">2052</span>
+<span id="2053">2053</span>
+<span id="2054">2054</span>
+<span id="2055">2055</span>
+<span id="2056">2056</span>
+<span id="2057">2057</span>
+<span id="2058">2058</span>
+<span id="2059">2059</span>
+<span id="2060">2060</span>
+<span id="2061">2061</span>
+<span id="2062">2062</span>
+<span id="2063">2063</span>
+<span id="2064">2064</span>
+<span id="2065">2065</span>
+<span id="2066">2066</span>
+<span id="2067">2067</span>
+<span id="2068">2068</span>
+<span id="2069">2069</span>
+<span id="2070">2070</span>
+<span id="2071">2071</span>
+<span id="2072">2072</span>
+<span id="2073">2073</span>
+<span id="2074">2074</span>
+<span id="2075">2075</span>
+<span id="2076">2076</span>
+<span id="2077">2077</span>
+<span id="2078">2078</span>
+<span id="2079">2079</span>
+<span id="2080">2080</span>
+<span id="2081">2081</span>
+<span id="2082">2082</span>
+<span id="2083">2083</span>
+<span id="2084">2084</span>
+<span id="2085">2085</span>
+<span id="2086">2086</span>
+<span id="2087">2087</span>
+<span id="2088">2088</span>
+<span id="2089">2089</span>
+<span id="2090">2090</span>
+<span id="2091">2091</span>
+<span id="2092">2092</span>
+<span id="2093">2093</span>
+<span id="2094">2094</span>
+<span id="2095">2095</span>
+<span id="2096">2096</span>
+<span id="2097">2097</span>
+<span id="2098">2098</span>
+<span id="2099">2099</span>
+<span id="2100">2100</span>
+<span id="2101">2101</span>
+<span id="2102">2102</span>
+<span id="2103">2103</span>
+<span id="2104">2104</span>
+<span id="2105">2105</span>
+<span id="2106">2106</span>
+<span id="2107">2107</span>
+<span id="2108">2108</span>
+<span id="2109">2109</span>
+<span id="2110">2110</span>
+<span id="2111">2111</span>
+<span id="2112">2112</span>
+<span id="2113">2113</span>
+<span id="2114">2114</span>
+<span id="2115">2115</span>
+<span id="2116">2116</span>
+<span id="2117">2117</span>
+<span id="2118">2118</span>
+<span id="2119">2119</span>
+<span id="2120">2120</span>
+<span id="2121">2121</span>
+<span id="2122">2122</span>
+<span id="2123">2123</span>
+<span id="2124">2124</span>
+<span id="2125">2125</span>
+<span id="2126">2126</span>
+<span id="2127">2127</span>
+<span id="2128">2128</span>
+<span id="2129">2129</span>
+<span id="2130">2130</span>
+<span id="2131">2131</span>
+<span id="2132">2132</span>
+<span id="2133">2133</span>
+<span id="2134">2134</span>
+<span id="2135">2135</span>
+<span id="2136">2136</span>
+<span id="2137">2137</span>
+<span id="2138">2138</span>
+<span id="2139">2139</span>
+<span id="2140">2140</span>
+<span id="2141">2141</span>
+<span id="2142">2142</span>
+<span id="2143">2143</span>
+<span id="2144">2144</span>
+<span id="2145">2145</span>
+<span id="2146">2146</span>
+<span id="2147">2147</span>
+<span id="2148">2148</span>
+<span id="2149">2149</span>
+<span id="2150">2150</span>
+<span id="2151">2151</span>
+<span id="2152">2152</span>
+<span id="2153">2153</span>
+<span id="2154">2154</span>
+<span id="2155">2155</span>
+<span id="2156">2156</span>
+<span id="2157">2157</span>
+<span id="2158">2158</span>
+<span id="2159">2159</span>
+<span id="2160">2160</span>
+<span id="2161">2161</span>
+<span id="2162">2162</span>
+<span id="2163">2163</span>
+<span id="2164">2164</span>
+<span id="2165">2165</span>
+<span id="2166">2166</span>
+<span id="2167">2167</span>
+<span id="2168">2168</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;yaml&quot;</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>BTreeMap</span>;
@@ -2054,6 +2283,8 @@
     <span class='kw'>pub</span> <span class='ident'>default_val</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='kw'>pub</span> <span class='ident'>disp_ord</span>: <span class='ident'>usize</span>,
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='ident'>r_unless</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>Arg</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> {
@@ -2078,6 +2309,7 @@
             <span class='ident'>val_delim</span>: <span class='prelude-val'>Some</span>(<span class='string'>&#39;,&#39;</span>),
             <span class='ident'>default_val</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>disp_ord</span>: <span class='number'>999</span>,
+            <span class='ident'>r_unless</span>: <span class='prelude-val'>None</span>,
         }
     }
 }
@@ -2141,6 +2373,7 @@
                 <span class='string'>&quot;value_name&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>value_name</span>(<span class='ident'>v</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>()),
                 <span class='string'>&quot;use_delimiter&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>use_delimiter</span>(<span class='ident'>v</span>.<span class='ident'>as_bool</span>().<span class='ident'>unwrap</span>()),
                 <span class='string'>&quot;value_delimiter&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>value_delimiter</span>(<span class='ident'>v</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>()),
+                <span class='string'>&quot;required_unless&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>required_unless</span>(<span class='ident'>v</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>()),
                 <span class='string'>&quot;display_order&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>display_order</span>(<span class='ident'>v</span>.<span class='ident'>as_i64</span>().<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='ident'>usize</span>),
                 <span class='string'>&quot;value_names&quot;</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>for</span> <span class='ident'>ys</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>as_vec</span>().<span class='ident'>unwrap</span>() {
@@ -2180,6 +2413,23 @@
                             <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>possible_value</span>(<span class='ident'>s</span>);
                         }
                     }
+                    <span class='ident'>a</span>
+                }
+                <span class='string'>&quot;required_unless_one&quot;</span> <span class='op'>=&gt;</span> {
+                    <span class='kw'>for</span> <span class='ident'>ys</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>as_vec</span>().<span class='ident'>unwrap</span>() {
+                        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=</span> <span class='ident'>ys</span>.<span class='ident'>as_str</span>() {
+                            <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>required_unless</span>(<span class='ident'>s</span>);
+                        }
+                    }
+                    <span class='ident'>a</span>
+                }
+                <span class='string'>&quot;required_unless_all&quot;</span> <span class='op'>=&gt;</span> {
+                    <span class='kw'>for</span> <span class='ident'>ys</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>as_vec</span>().<span class='ident'>unwrap</span>() {
+                        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=</span> <span class='ident'>ys</span>.<span class='ident'>as_str</span>() {
+                            <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>required_unless</span>(<span class='ident'>s</span>);
+                        }
+                    }
+                    <span class='ident'>a</span>.<span class='ident'>setb</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>RequiredUnlessAll</span>);
                     <span class='ident'>a</span>
                 }
                 <span class='ident'>s</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Unknown Arg setting &#39;{}&#39; in YAML file for arg &#39;{}&#39;&quot;</span>,
@@ -2502,6 +2752,212 @@
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required</span>(<span class='self'>self</span>, <span class='ident'>r</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='kw'>if</span> <span class='ident'>r</span> { <span class='self'>self</span>.<span class='ident'>set</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>Required</span>) } <span class='kw'>else</span> { <span class='self'>self</span>.<span class='ident'>unset</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>Required</span>) }
+    }
+
+    <span class='doccomment'>/// Sets an arg that override this arg&#39;s required setting. (i.e. this arg will be required</span>
+    <span class='doccomment'>/// unless this other argument is present).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Pro Tip:** Using `Arg::required_unless` implies `Arg::required` and is therefore not</span>
+    <span class='doccomment'>/// mandatory to also set.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::Arg;</span>
+    <span class='doccomment'>/// Arg::with_name(&quot;config&quot;)</span>
+    <span class='doccomment'>///     .required_unless(&quot;debug&quot;)</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless(name)` requires that the argument be used at runtime *unless*</span>
+    <span class='doccomment'>/// `name` is present. In the following example, the required argument is *not* provided, but</span>
+    <span class='doccomment'>/// it&#39;s not an error because the `unless` arg has been supplied.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlesstest&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlesstest&quot;, &quot;--debug&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_ok());</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless(name)` and *not* supplying `name` or this arg is an error.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ErrorKind};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlesstest&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlesstest&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_err());</span>
+    <span class='doccomment'>/// assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required_unless</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>r_unless</span> {
+            <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>name</span>);
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>r_unless</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>name</span>]);
+        }
+        <span class='self'>self</span>.<span class='ident'>required</span>(<span class='boolval'>true</span>)
+    }
+
+    <span class='doccomment'>/// Sets args that override this arg&#39;s required setting. (i.e. this arg will be required unless</span>
+    <span class='doccomment'>/// all these other argument are present).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** If you wish for the this argument to only be required if *one of* these args are</span>
+    <span class='doccomment'>/// present see `Arg::required_unless_one`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::Arg;</span>
+    <span class='doccomment'>/// Arg::with_name(&quot;config&quot;)</span>
+    <span class='doccomment'>///     .required_unless_all(&amp;[&quot;cfg&quot;, &quot;dbg&quot;])</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless_all(names)` requires that the argument be used at runtime *unless*</span>
+    <span class='doccomment'>/// *all* the args in `names` are present. In the following example, the required argument is</span>
+    <span class='doccomment'>/// *not* provided, but it&#39;s not an error because all the `unless` args have been supplied.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlessall&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless_all(&amp;[&quot;dbg&quot;, &quot;infile&quot;])</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;infile&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;i&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlessall&quot;, &quot;--debug&quot;, &quot;-i&quot;, &quot;file&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_ok());</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless_all(names)` and *not* supplying *all* of `names` or this arg is an</span>
+    <span class='doccomment'>/// error.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ErrorKind};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlessall&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless_all(&amp;[&quot;dbg&quot;, &quot;infile&quot;])</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;infile&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;i&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlessall&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_err());</span>
+    <span class='doccomment'>/// assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required_unless_all</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>names</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>r_unless</span> {
+            <span class='kw'>for</span> <span class='ident'>s</span> <span class='kw'>in</span> <span class='ident'>names</span> {
+                <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>s</span>);
+            }
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>r_unless</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>names</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>s</span>).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>());
+        }
+        <span class='self'>self</span>.<span class='ident'>setb</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>RequiredUnlessAll</span>);
+        <span class='self'>self</span>.<span class='ident'>required</span>(<span class='boolval'>true</span>)
+    }
+
+    <span class='doccomment'>/// Sets args that override this arg&#39;s required setting. (i.e. this arg will be required unless</span>
+    <span class='doccomment'>/// *at least one of* these other argument are present).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **NOTE:** If you wish for the this argument to only be required if *all of* these args are</span>
+    <span class='doccomment'>/// present see `Arg::required_unless_all`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::Arg;</span>
+    <span class='doccomment'>/// Arg::with_name(&quot;config&quot;)</span>
+    <span class='doccomment'>///     .required_unless_all(&amp;[&quot;cfg&quot;, &quot;dbg&quot;])</span>
+    <span class='doccomment'>/// # ;</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless_one(names)` requires that the argument be used at runtime *unless*</span>
+    <span class='doccomment'>/// *at least one of* the args in `names` are present. In the following example, the required</span>
+    <span class='doccomment'>/// argument is *not* provided, but it&#39;s not an error because one the `unless` args have been</span>
+    <span class='doccomment'>/// supplied.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlessone&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless_one(&amp;[&quot;dbg&quot;, &quot;infile&quot;])</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;infile&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;i&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlessone&quot;, &quot;--debug&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_ok());</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Setting `required_unless_one(names)` and *not* supplying *at least one of* `names` or this</span>
+    <span class='doccomment'>/// arg is an error.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// # use clap::{App, Arg, ErrorKind};</span>
+    <span class='doccomment'>/// let res = App::new(&quot;unlessone&quot;)</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;cfg&quot;)</span>
+    <span class='doccomment'>///         .required_unless_one(&amp;[&quot;dbg&quot;, &quot;infile&quot;])</span>
+    <span class='doccomment'>///         .takes_value(true)</span>
+    <span class='doccomment'>///         .long(&quot;config&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;dbg&quot;)</span>
+    <span class='doccomment'>///         .long(&quot;debug&quot;))</span>
+    <span class='doccomment'>///     .arg(Arg::with_name(&quot;infile&quot;)</span>
+    <span class='doccomment'>///         .short(&quot;i&quot;)</span>
+    <span class='doccomment'>///         .takes_value(true))</span>
+    <span class='doccomment'>///     .get_matches_from_safe(vec![</span>
+    <span class='doccomment'>///         &quot;unlessone&quot;</span>
+    <span class='doccomment'>///     ]);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(res.is_err());</span>
+    <span class='doccomment'>/// assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>required_unless_one</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>names</span>: <span class='kw-2'>&amp;</span>[<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>]) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>r_unless</span> {
+            <span class='kw'>for</span> <span class='ident'>s</span> <span class='kw'>in</span> <span class='ident'>names</span> {
+                <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>s</span>);
+            }
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>r_unless</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>names</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>s</span>).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>());
+        }
+        <span class='self'>self</span>.<span class='ident'>required</span>(<span class='boolval'>true</span>)
     }
 
     <span class='doccomment'>/// Sets a conflicting argument by name. I.e. when using this argument,</span>
@@ -3892,6 +4348,7 @@
             <span class='ident'>val_delim</span>: <span class='ident'>a</span>.<span class='ident'>val_delim</span>,
             <span class='ident'>default_val</span>: <span class='ident'>a</span>.<span class='ident'>default_val</span>,
             <span class='ident'>disp_ord</span>: <span class='ident'>a</span>.<span class='ident'>disp_ord</span>,
+            <span class='ident'>r_unless</span>: <span class='ident'>a</span>.<span class='ident'>r_unless</span>.<span class='ident'>clone</span>(),
         }
     }
 }
@@ -3918,6 +4375,7 @@
             <span class='ident'>val_delim</span>: <span class='self'>self</span>.<span class='ident'>val_delim</span>,
             <span class='ident'>default_val</span>: <span class='self'>self</span>.<span class='ident'>default_val</span>,
             <span class='ident'>disp_ord</span>: <span class='self'>self</span>.<span class='ident'>disp_ord</span>,
+            <span class='ident'>r_unless</span>: <span class='self'>self</span>.<span class='ident'>r_unless</span>.<span class='ident'>clone</span>(),
         }
     }
 }

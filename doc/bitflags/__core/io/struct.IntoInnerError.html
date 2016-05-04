@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4049' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/buffered/struct.IntoInnerError.html?gotosrc=4049' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4005' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/buffered/struct.IntoInnerError.html?gotosrc=4005' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct IntoInnerError&lt;W&gt;(_, _);</pre><span class="since">1.0.0</span><div class='docblock'><p>An error returned by <code>into_inner</code> which combines an error that
 happened while writing out the buffer, and the buffered writer object
 which may be used to recover from the condition.</p>
@@ -70,6 +70,66 @@ which may be used to recover from the condition.</p>
         <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An error occurred&quot;</span>);
     }
 };</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;W&gt; <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;W&gt;</code></h3><div class='impl-items'><h4 id='method.error' class='method'><code>fn <a href='#method.error' class='fnname'>error</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a></code></h4>
+<div class='docblock'><p>Returns the error which caused the call to <code>into_inner()</code> to fail.</p>
+
+<p>This error was returned when attempting to write the internal buffer.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());
+
+<span class='comment'>// do stuff with the stream</span>
+
+<span class='comment'>// we want to get our `TcpStream` back, so let&#39;s try:</span>
+
+<span class='kw'>let</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>stream</span>.<span class='ident'>into_inner</span>() {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Here, e is an IntoInnerError, let&#39;s log the inner error.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// We&#39;ll just &#39;log&#39; to stdout for this example.</span>
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>.<span class='ident'>error</span>());
+
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An unexpected error occurred.&quot;</span>);
+    }
+};</pre>
+</div><h4 id='method.into_inner' class='method'><code>fn <a href='#method.into_inner' class='fnname'>into_inner</a>(self) -&gt; W</code></h4>
+<div class='docblock'><p>Returns the buffered writer instance which generated the error.</p>
+
+<p>The returned object can be used for error recovery, such as
+re-inspecting the buffer.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufWriter</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='string'>&quot;127.0.0.1:34254&quot;</span>).<span class='ident'>unwrap</span>());
+
+<span class='comment'>// do stuff with the stream</span>
+
+<span class='comment'>// we want to get our `TcpStream` back, so let&#39;s try:</span>
+
+<span class='kw'>let</span> <span class='ident'>stream</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>stream</span>.<span class='ident'>into_inner</span>() {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Here, e is an IntoInnerError, let&#39;s re-examine the buffer:</span>
+        <span class='kw'>let</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>e</span>.<span class='ident'>into_inner</span>();
+
+        <span class='comment'>// do stuff to try to recover</span>
+
+        <span class='comment'>// afterwards, let&#39;s just return the stream</span>
+        <span class='ident'>buffer</span>.<span class='ident'>into_inner</span>().<span class='ident'>unwrap</span>()
+    }
+};</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/error/trait.Error.html' title='bitflags::__core::error::Error'>Error</a> for <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> + <a class='trait' href='../../../bitflags/__core/marker/trait.Reflect.html' title='bitflags::__core::marker::Reflect'>Reflect</a> + <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.description' class='method'><code>fn <a href='../../../bitflags/__core/error/trait.Error.html#tymethod.description' class='fnname'>description</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.str.html'>str</a></code></h4>
+<h4 id='method.cause' class='method'><code>fn <a href='../../../bitflags/__core/error/trait.Error.html#method.cause' class='fnname'>cause</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/option/enum.Option.html' title='bitflags::__core::option::Option'>Option</a>&lt;&amp;<a class='trait' href='../../../bitflags/__core/error/trait.Error.html' title='bitflags::__core::error::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/fmt/trait.Display.html' title='bitflags::__core::fmt::Display'>Display</a> for <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;W&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;W&gt; <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/io/struct.IntoInnerError.html' title='bitflags::__core::io::IntoInnerError'>IntoInnerError</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

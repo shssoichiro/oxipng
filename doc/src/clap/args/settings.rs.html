@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.3.0/src/args/settings.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/holmerj/.cargo/registry/src/github.com-88ac128001ac3a9a/clap-2.4.0/src/args/settings.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>settings.rs.html -- source</title>
@@ -124,20 +124,26 @@
 <span id="80">80</span>
 <span id="81">81</span>
 <span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ascii</span>::<span class='ident'>AsciiExt</span>;
 
 <span class='macro'>bitflags</span><span class='macro'>!</span> {
-    <span class='ident'>flags</span> <span class='ident'>Flags</span>: <span class='ident'>u8</span> {
-        <span class='kw'>const</span> <span class='ident'>REQUIRED</span>   <span class='op'>=</span> <span class='number'>0b00000001</span>,
-        <span class='kw'>const</span> <span class='ident'>MULTIPLE</span>   <span class='op'>=</span> <span class='number'>0b00000010</span>,
-        <span class='kw'>const</span> <span class='ident'>EMPTY_VALS</span> <span class='op'>=</span> <span class='number'>0b00000100</span>,
-        <span class='kw'>const</span> <span class='ident'>GLOBAL</span>     <span class='op'>=</span> <span class='number'>0b00001000</span>,
-        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>     <span class='op'>=</span> <span class='number'>0b00010000</span>,
-        <span class='kw'>const</span> <span class='ident'>TAKES_VAL</span>  <span class='op'>=</span> <span class='number'>0b00100000</span>,
-        <span class='kw'>const</span> <span class='ident'>USE_DELIM</span>  <span class='op'>=</span> <span class='number'>0b01000000</span>,
-        <span class='kw'>const</span> <span class='ident'>NEXT_LINE_HELP</span> <span class='op'>=</span> <span class='number'>0b10000000</span>,
+    <span class='ident'>flags</span> <span class='ident'>Flags</span>: <span class='ident'>u16</span> {
+        <span class='kw'>const</span> <span class='ident'>REQUIRED</span>       <span class='op'>=</span> <span class='number'>0b000000001</span>,
+        <span class='kw'>const</span> <span class='ident'>MULTIPLE</span>       <span class='op'>=</span> <span class='number'>0b000000010</span>,
+        <span class='kw'>const</span> <span class='ident'>EMPTY_VALS</span>     <span class='op'>=</span> <span class='number'>0b000000100</span>,
+        <span class='kw'>const</span> <span class='ident'>GLOBAL</span>         <span class='op'>=</span> <span class='number'>0b000001000</span>,
+        <span class='kw'>const</span> <span class='ident'>HIDDEN</span>         <span class='op'>=</span> <span class='number'>0b000010000</span>,
+        <span class='kw'>const</span> <span class='ident'>TAKES_VAL</span>      <span class='op'>=</span> <span class='number'>0b000100000</span>,
+        <span class='kw'>const</span> <span class='ident'>USE_DELIM</span>      <span class='op'>=</span> <span class='number'>0b001000000</span>,
+        <span class='kw'>const</span> <span class='ident'>NEXT_LINE_HELP</span> <span class='op'>=</span> <span class='number'>0b010000000</span>,
+        <span class='kw'>const</span> <span class='ident'>R_UNLESS_ALL</span>   <span class='op'>=</span> <span class='number'>0b100000000</span>,
     }
 }
 
@@ -158,7 +164,8 @@
         <span class='ident'>Hidden</span> <span class='op'>=&gt;</span> <span class='ident'>HIDDEN</span>,
         <span class='ident'>TakesValue</span> <span class='op'>=&gt;</span> <span class='ident'>TAKES_VAL</span>,
         <span class='ident'>UseValueDelimiter</span> <span class='op'>=&gt;</span> <span class='ident'>USE_DELIM</span>,
-        <span class='ident'>NextLineHelp</span> <span class='op'>=&gt;</span> <span class='ident'>NEXT_LINE_HELP</span>
+        <span class='ident'>NextLineHelp</span> <span class='op'>=&gt;</span> <span class='ident'>NEXT_LINE_HELP</span>,
+        <span class='ident'>RequiredUnlessAll</span> <span class='op'>=&gt;</span> <span class='ident'>R_UNLESS_ALL</span>
     }
 }
 
@@ -189,6 +196,8 @@
     <span class='ident'>UseValueDelimiter</span>,
     <span class='doccomment'>/// Prints the help text on the line after the argument</span>
     <span class='ident'>NextLineHelp</span>,
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='ident'>RequiredUnlessAll</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>FromStr</span> <span class='kw'>for</span> <span class='ident'>ArgSettings</span> {
@@ -203,6 +212,7 @@
             <span class='string'>&quot;takesvalue&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>TakesValue</span>),
             <span class='string'>&quot;usevaluedelimiter&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>UseValueDelimiter</span>),
             <span class='string'>&quot;nextlinehelp&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>NextLineHelp</span>),
+            <span class='string'>&quot;requiredunlessall&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ArgSettings</span>::<span class='ident'>RequiredUnlessAll</span>),
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;unknown ArgSetting, cannot convert from str&quot;</span>.<span class='ident'>to_owned</span>()),
         }
     }

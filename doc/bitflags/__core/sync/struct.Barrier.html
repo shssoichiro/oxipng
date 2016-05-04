@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-10045' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/barrier/struct.Barrier.html?gotosrc=10045' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-9923' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/barrier/struct.Barrier.html?gotosrc=9923' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Barrier {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A barrier enables multiple threads to synchronize the beginning
@@ -73,7 +73,22 @@ of some computation.</p>
 <span class='kw'>for</span> <span class='ident'>handle</span> <span class='kw'>in</span> <span class='ident'>handles</span> {
     <span class='ident'>handle</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>();
 }</pre>
-</div></section>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/sync/struct.Barrier.html' title='bitflags::__core::sync::Barrier'>Barrier</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(n: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.Barrier.html' title='bitflags::__core::sync::Barrier'>Barrier</a></code></h4>
+<div class='docblock'><p>Creates a new barrier that can block a given number of threads.</p>
+
+<p>A barrier will block <code>n</code>-1 threads which call <code>wait</code> and then wake up
+all threads at once when the <code>n</code>th thread calls <code>wait</code>.</p>
+</div><h4 id='method.wait' class='method'><code>fn <a href='#method.wait' class='fnname'>wait</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.BarrierWaitResult.html' title='bitflags::__core::sync::BarrierWaitResult'>BarrierWaitResult</a></code></h4>
+<div class='docblock'><p>Blocks the current thread until all threads has rendezvoused here.</p>
+
+<p>Barriers are re-usable after all threads have rendezvoused once, and can
+be used continuously.</p>
+
+<p>A single (arbitrary) thread will receive a <code>BarrierWaitResult</code> that
+returns <code>true</code> from <code>is_leader</code> when returning from this function, and
+all other threads will receive a result that will return <code>false</code> from
+<code>is_leader</code></p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

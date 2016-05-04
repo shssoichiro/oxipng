@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-10419' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLock.html?gotosrc=10419' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-10293' class='srclink' href='https://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLock.html?gotosrc=10293' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct RwLock&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A reader-writer lock</p>
@@ -93,6 +93,107 @@ will not be poisoned.</p>
     <span class='op'>*</span><span class='ident'>w</span> <span class='op'>+=</span> <span class='number'>1</span>;
     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>w</span>, <span class='number'>6</span>);
 } <span class='comment'>// write lock is dropped here</span></pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(t: T) -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Creates a new instance of an <code>RwLock&lt;T&gt;</code> which is unlocked.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>RwLock</span>;
+
+<span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>RwLock</span>::<span class='ident'>new</span>(<span class='number'>5</span>);</pre>
+</div></div><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='method.read' class='method'><code>fn <a href='#method.read' class='fnname'>read</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;T&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Locks this rwlock with shared read access, blocking the current thread
+until it can be acquired.</p>
+
+<p>The calling thread will be blocked until there are no more writers which
+hold the lock. There may be other readers currently inside the lock when
+this method returns. This method does not provide any guarantees with
+respect to the ordering of whether contentious readers or writers will
+acquire the lock first.</p>
+
+<p>Returns an RAII guard which will release this thread&#39;s shared access
+once it is dropped.</p>
+
+<h1 id='errors' class='section-header'><a href='#errors'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock.
+The failure will occur immediately after the lock has been acquired.</p>
+</div><h4 id='method.try_read' class='method'><code>fn <a href='#method.try_read' class='fnname'>try_read</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;T&gt;, <a class='enum' href='../../../bitflags/__core/sync/enum.TryLockError.html' title='bitflags::__core::sync::TryLockError'>TryLockError</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockReadGuard.html' title='bitflags::__core::sync::RwLockReadGuard'>RwLockReadGuard</a>&lt;T&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Attempts to acquire this rwlock with shared read access.</p>
+
+<p>If the access could not be granted at this time, then <code>Err</code> is returned.
+Otherwise, an RAII guard is returned which will release the shared access
+when it is dropped.</p>
+
+<p>This function does not block.</p>
+
+<p>This function does not provide any guarantees with respect to the ordering
+of whether contentious readers or writers will acquire the lock first.</p>
+
+<h1 id='errors-1' class='section-header'><a href='#errors-1'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock. An
+error will only be returned if the lock would have otherwise been
+acquired.</p>
+</div><h4 id='method.write' class='method'><code>fn <a href='#method.write' class='fnname'>write</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockWriteGuard.html' title='bitflags::__core::sync::RwLockWriteGuard'>RwLockWriteGuard</a>&lt;T&gt;, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockWriteGuard.html' title='bitflags::__core::sync::RwLockWriteGuard'>RwLockWriteGuard</a>&lt;T&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Locks this rwlock with exclusive write access, blocking the current
+thread until it can be acquired.</p>
+
+<p>This function will not return while other writers or other readers
+currently have access to the lock.</p>
+
+<p>Returns an RAII guard which will drop the write access of this rwlock
+when dropped.</p>
+
+<h1 id='errors-2' class='section-header'><a href='#errors-2'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock.
+An error will be returned when the lock is acquired.</p>
+</div><h4 id='method.try_write' class='method'><code>fn <a href='#method.try_write' class='fnname'>try_write</a>(&amp;self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockWriteGuard.html' title='bitflags::__core::sync::RwLockWriteGuard'>RwLockWriteGuard</a>&lt;T&gt;, <a class='enum' href='../../../bitflags/__core/sync/enum.TryLockError.html' title='bitflags::__core::sync::TryLockError'>TryLockError</a>&lt;<a class='struct' href='../../../bitflags/__core/sync/struct.RwLockWriteGuard.html' title='bitflags::__core::sync::RwLockWriteGuard'>RwLockWriteGuard</a>&lt;T&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Attempts to lock this rwlock with exclusive write access.</p>
+
+<p>If the lock could not be acquired at this time, then <code>Err</code> is returned.
+Otherwise, an RAII guard is returned which will release the lock when
+it is dropped.</p>
+
+<p>This function does not block.</p>
+
+<p>This function does not provide any guarantees with respect to the ordering
+of whether contentious readers or writers will acquire the lock first.</p>
+
+<h1 id='errors-3' class='section-header'><a href='#errors-3'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock. An
+error will only be returned if the lock would have otherwise been
+acquired.</p>
+</div><h4 id='method.is_poisoned' class='method'><code>fn <a href='#method.is_poisoned' class='fnname'>is_poisoned</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a></code><span class="since">1.2.0</span></h4>
+<div class='docblock'><p>Determines whether the lock is poisoned.</p>
+
+<p>If another thread is active, the lock can still become poisoned at any
+time.  You should not trust a <code>false</code> value for program correctness
+without additional synchronization.</p>
+</div><h4 id='method.into_inner' class='method'><code>fn <a href='#method.into_inner' class='fnname'>into_inner</a>(self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;T, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;T&gt;&gt;</code><span class="since">1.6.0</span></h4>
+<div class='docblock'><p>Consumes this <code>RwLock</code>, returning the underlying data.</p>
+
+<h1 id='errors-4' class='section-header'><a href='#errors-4'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock. An
+error will only be returned if the lock would have otherwise been
+acquired.</p>
+</div><h4 id='method.get_mut' class='method'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;&amp;mut T, <a class='struct' href='../../../bitflags/__core/sync/struct.PoisonError.html' title='bitflags::__core::sync::PoisonError'>PoisonError</a>&lt;&amp;mut T&gt;&gt;</code><span class="since">1.6.0</span></h4>
+<div class='docblock'><p>Returns a mutable reference to the underlying data.</p>
+
+<p>Since this call borrows the <code>RwLock</code> mutably, no actual locking needs to
+take place---the mutable borrow statically guarantees no locks exist.</p>
+
+<h1 id='errors-5' class='section-header'><a href='#errors-5'>Errors</a></h1>
+<p>This function will return an error if the RwLock is poisoned. An RwLock
+is poisoned whenever a writer panics while holding an exclusive lock. An
+error will only be returned if the lock would have otherwise been
+acquired.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/panic/trait.UnwindSafe.html' title='bitflags::__core::panic::UnwindSafe'>UnwindSafe</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code><span class="since">1.9.0</span></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> + <a class='trait' href='../../../bitflags/__core/marker/trait.Sync.html' title='bitflags::__core::marker::Sync'>Sync</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/marker/trait.Sync.html' title='bitflags::__core::marker::Sync'>Sync</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/marker/trait.Send.html' title='bitflags::__core::marker::Send'>Send</a> + <a class='trait' href='../../../bitflags/__core/marker/trait.Sync.html' title='bitflags::__core::marker::Sync'>Sync</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/ops/trait.Drop.html' title='bitflags::__core::ops::Drop'>Drop</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='../../../bitflags/__core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/fmt/trait.Debug.html' title='bitflags::__core::fmt::Debug'>Debug</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='../../../bitflags/__core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../bitflags/__core/fmt/struct.Formatter.html' title='bitflags::__core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.tuple.html'>()</a>, <a class='struct' href='../../../bitflags/__core/fmt/struct.Error.html' title='bitflags::__core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../bitflags/__core/default/trait.Default.html' title='bitflags::__core::default::Default'>Default</a> for <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/default/trait.Default.html' title='bitflags::__core::default::Default'>Default</a></span></code><span class="since">1.9.0</span></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='../../../bitflags/__core/default/trait.Default.html#tymethod.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../../bitflags/__core/sync/struct.RwLock.html' title='bitflags::__core::sync::RwLock'>RwLock</a>&lt;T&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

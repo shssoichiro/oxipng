@@ -47,15 +47,21 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-2056' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/enum.Entry.html?gotosrc=2056' title='goto source code'>[src]</a></span></h1>
-<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
+               </span><a id='src-2042' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/enum.Entry.html?gotosrc=2042' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
     Occupied(<a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.OccupiedEntry.html' title='bitflags::__core::collections::hash_map::OccupiedEntry'>OccupiedEntry</a>&lt;'a, K, V&gt;),
     Vacant(<a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.VacantEntry.html' title='bitflags::__core::collections::hash_map::VacantEntry'>VacantEntry</a>&lt;'a, K, V&gt;),
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single location in a map, which may be vacant or occupied.</p>
 </div><h2 class='variants'>Variants</h2>
 <table class='variants_table'><tr><td id='variant.Occupied'><code>Occupied</code></td><td><div class='docblock'><p>An occupied Entry.</p>
 </div></td><td></td></tr><tr><td id='variant.Vacant'><code>Vacant</code></td><td><div class='docblock'><p>A vacant Entry.</p>
-</div></td><td></td></tr></table></section>
+</div></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a, K, V&gt; <a class='enum' href='../../../../bitflags/__core/collections/hash_map/enum.Entry.html' title='bitflags::__core::collections::hash_map::Entry'>Entry</a>&lt;'a, K, V&gt;</code></h3><div class='impl-items'><h4 id='method.or_insert' class='method'><code>fn <a href='#method.or_insert' class='fnname'>or_insert</a>(self, default: V) -&gt; &amp;'a mut V</code></h4>
+<div class='docblock'><p>Ensures a value is in the entry by inserting the default if empty, and returns
+a mutable reference to the value in the entry.</p>
+</div><h4 id='method.or_insert_with' class='method'><code>fn <a href='#method.or_insert_with' class='fnname'>or_insert_with</a>&lt;F&gt;(self, default: F) -&gt; &amp;'a mut V <span class='where'>where F: <a class='trait' href='../../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; V</span></code></h4>
+<div class='docblock'><p>Ensures a value is in the entry by inserting the result of the default function if empty,
+and returns a mutable reference to the value in the entry.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

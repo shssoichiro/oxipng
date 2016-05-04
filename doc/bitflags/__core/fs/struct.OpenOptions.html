@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-3638' class='srclink' href='https://doc.rust-lang.org/nightly/std/fs/struct.OpenOptions.html?gotosrc=3638' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-3614' class='srclink' href='https://doc.rust-lang.org/nightly/std/fs/struct.OpenOptions.html?gotosrc=3614' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct OpenOptions(_);</pre><span class="since">1.0.0</span><div class='docblock'><p>Options and flags which can be used to configure how a file is opened.</p>
 
 <p>This builder exposes the ability to configure how a <code>File</code> is opened and
@@ -80,6 +80,147 @@ doesn&#39;t exist:</p>
             .<span class='ident'>write</span>(<span class='boolval'>true</span>)
             .<span class='ident'>create</span>(<span class='boolval'>true</span>)
             .<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Creates a blank new set of options ready for configuration.</p>
+
+<p>All options are initially set to <code>false</code>.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>options</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>();
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>options</span>.<span class='ident'>read</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.read' class='method'><code>fn <a href='#method.read' class='fnname'>read</a>(&amp;mut self, read: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Sets the option for read access.</p>
+
+<p>This option, when true, will indicate that the file should be
+<code>read</code>-able if opened.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>read</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.write' class='method'><code>fn <a href='#method.write' class='fnname'>write</a>(&amp;mut self, write: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Sets the option for write access.</p>
+
+<p>This option, when true, will indicate that the file should be
+<code>write</code>-able if opened.</p>
+
+<p>If the file already exists, any write calls on it will overwrite its
+contents, without truncating it.</p>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>write</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.append' class='method'><code>fn <a href='#method.append' class='fnname'>append</a>(&amp;mut self, append: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Sets the option for the append mode.</p>
+
+<p>This option, when true, means that writes will append to a file instead
+of overwriting previous contents.
+Note that setting <code>.write(true).append(true)</code> has the same effect as
+setting only <code>.append(true)</code>.</p>
+
+<p>For most filesystems, the operating system guarantees that all writes are
+atomic: no writes get mangled because another process writes at the same
+time.</p>
+
+<p>One maybe obvious note when using append-mode: make sure that all data
+that belongs together is written to the file in one operation. This
+can be done by concatenating strings before passing them to <code>write()</code>,
+or using a buffered writer (with a buffer of adequate size),
+and calling <code>flush()</code> when the message is complete.</p>
+
+<p>If a file is opened with both read and append access, beware that after
+opening, and after every write, the position for reading may be set at the
+end of the file. So, before writing, save the current position (using
+<code>seek(SeekFrom::Current(0))</code>, and restore it before the next read.</p>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>append</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.truncate' class='method'><code>fn <a href='#method.truncate' class='fnname'>truncate</a>(&amp;mut self, truncate: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Sets the option for truncating a previous file.</p>
+
+<p>If a file is successfully opened with this option set it will truncate
+the file to 0 length if it already exists.</p>
+
+<p>The file must be opened with write access for truncate to work.</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>write</span>(<span class='boolval'>true</span>).<span class='ident'>truncate</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.create' class='method'><code>fn <a href='#method.create' class='fnname'>create</a>(&amp;mut self, create: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<div class='docblock'><p>Sets the option for creating a new file.</p>
+
+<p>This option indicates whether a new file will be created if the file
+does not yet already exist.</p>
+
+<p>In order for the file to be created, <code>write</code> or <code>append</code> access must
+be used.</p>
+
+<h1 id='examples-6' class='section-header'><a href='#examples-6'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>write</span>(<span class='boolval'>true</span>).<span class='ident'>create</span>(<span class='boolval'>true</span>).<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.create_new' class='method'><code>fn <a href='#method.create_new' class='fnname'>create_new</a>(&amp;mut self, create_new: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.bool.html'>bool</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code><span class="since">1.9.0</span></h4>
+<div class='docblock'><p>Sets the option to always create a new file.</p>
+
+<p>This option indicates whether a new file will be created.
+No file is allowed to exist at the target location, also no (dangling)
+symlink.</p>
+
+<p>This option is useful because it as atomic. Otherwise between checking
+whether a file exists and creating a new one, the file may have been
+created by another process (a TOCTOU race condition / attack).</p>
+
+<p>If <code>.create_new(true)</code> is set, <code>.create()</code> and <code>.truncate()</code> are
+ignored.</p>
+
+<p>The file must be opened with write or append access in order to create
+a new file.</p>
+
+<h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>write</span>(<span class='boolval'>true</span>)
+                             .<span class='ident'>create_new</span>(<span class='boolval'>true</span>)
+                             .<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div><h4 id='method.open' class='method'><code>fn <a href='#method.open' class='fnname'>open</a>&lt;P&gt;(&amp;self, path: P) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='struct' href='../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='../../../bitflags/__core/path/struct.Path.html' title='bitflags::__core::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Opens a file at <code>path</code> with the options specified by <code>self</code>.</p>
+
+<h1 id='errors' class='section-header'><a href='#errors'>Errors</a></h1>
+<p>This function will return an error under a number of different
+circumstances, to include but not limited to:</p>
+
+<ul>
+<li>Opening a file that does not exist without setting <code>create</code> or
+<code>create_new</code>.</li>
+<li>Attempting to open a file with access that the user lacks
+permissions for</li>
+<li>Filesystem-level errors (full disk, etc)</li>
+<li>Invalid combinations of open options (truncate without write access,
+no access mode set, etc)</li>
+</ul>
+
+<h1 id='examples-8' class='section-header'><a href='#examples-8'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+
+<span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>OpenOptions</span>::<span class='ident'>new</span>().<span class='ident'>open</span>(<span class='string'>&quot;foo.txt&quot;</span>);</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/os/ext/prelude/trait.OpenOptionsExt.html' title='bitflags::__core::os::ext::prelude::OpenOptionsExt'>OpenOptionsExt</a> for <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code><span class="since">1.1.0</span></h3><div class='impl-items'><h4 id='method.mode' class='method'><code>fn <a href='../../../bitflags/__core/os/ext/prelude/trait.OpenOptionsExt.html#tymethod.mode' class='fnname'>mode</a>(&amp;mut self, mode: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u32.html'>u32</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<h4 id='method.custom_flags' class='method'><code>fn <a href='../../../bitflags/__core/os/ext/prelude/trait.OpenOptionsExt.html#tymethod.custom_flags' class='fnname'>custom_flags</a>(&amp;mut self, flags: <a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.i32.html'>i32</a>) -&gt; &amp;mut <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='../../../bitflags/__core/clone/trait.Clone.html' title='bitflags::__core::clone::Clone'>Clone</a> for <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='../../../bitflags/__core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../bitflags/__core/fs/struct.OpenOptions.html' title='bitflags::__core::fs::OpenOptions'>OpenOptions</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='../../../bitflags/__core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

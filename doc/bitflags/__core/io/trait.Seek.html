@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4954' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/trait.Seek.html?gotosrc=4954' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4892' class='srclink' href='https://doc.rust-lang.org/nightly/std/io/trait.Seek.html?gotosrc=4892' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Seek {
     fn <a href='#tymethod.seek' class='fnname'>seek</a>(&amp;mut self, pos: <a class='enum' href='../../../bitflags/__core/io/enum.SeekFrom.html' title='bitflags::__core::io::SeekFrom'>SeekFrom</a>) -&gt; <a class='enum' href='../../../bitflags/__core/result/enum.Result.html' title='bitflags::__core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u64.html'>u64</a>, <a class='struct' href='../../../bitflags/__core/io/struct.Error.html' title='bitflags::__core::io::Error'>Error</a>&gt;;
 }</pre><div class='docblock'><p>The <code>Seek</code> trait provides a cursor which can be moved within a stream of
@@ -86,7 +86,14 @@ That position can be used later with <code>SeekFrom::Start</code>.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    </ul><script type="text/javascript" async
+    <li><code>impl Seek for <a class='struct' href='../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a></code></li>
+<li><code>impl&lt;'a&gt; Seek for &amp;'a <a class='struct' href='../../../bitflags/__core/fs/struct.File.html' title='bitflags::__core::fs::File'>File</a></code></li>
+<li><code>impl&lt;R&gt; Seek for <a class='struct' href='../../../bitflags/__core/io/struct.BufReader.html' title='bitflags::__core::io::BufReader'>BufReader</a>&lt;R&gt; <span class='where'>where R: <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a></span></code></li>
+<li><code>impl&lt;W&gt; Seek for <a class='struct' href='../../../bitflags/__core/io/struct.BufWriter.html' title='bitflags::__core::io::BufWriter'>BufWriter</a>&lt;W&gt; <span class='where'>where W: <a class='trait' href='../../../bitflags/__core/io/trait.Write.html' title='bitflags::__core::io::Write'>Write</a> + <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a></span></code></li>
+<li><code>impl&lt;T&gt; Seek for <a class='struct' href='../../../bitflags/__core/io/struct.Cursor.html' title='bitflags::__core::io::Cursor'>Cursor</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../bitflags/__core/convert/trait.AsRef.html' title='bitflags::__core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/bitflags/primitive.slice.html'>]</a>&gt;</span></code></li>
+<li><code>impl&lt;'a, S&gt; Seek for &amp;'a mut S <span class='where'>where S: <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+<li><code>impl&lt;S&gt; Seek for <a class='struct' href='../../../bitflags/__core/boxed/struct.Box.html' title='bitflags::__core::boxed::Box'>Box</a>&lt;S&gt; <span class='where'>where S: <a class='trait' href='../../../bitflags/__core/io/trait.Seek.html' title='bitflags::__core::io::Seek'>Seek</a> + ?<a class='trait' href='../../../bitflags/__core/marker/trait.Sized.html' title='bitflags::__core::marker::Sized'>Sized</a></span></code></li>
+</ul><script type="text/javascript" async
                          src="../../../implementors/std/io/trait.Seek.js">
                  </script></section>
     <section id='search' class="content hidden"></section>
