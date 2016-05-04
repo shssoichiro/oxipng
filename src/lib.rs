@@ -81,6 +81,50 @@ pub struct Options {
     pub use_heuristics: bool,
 }
 
+impl Default for Options {
+    fn default() -> Options {
+        // Default settings based on -o 2 from the CLI interface
+        let mut filter = HashSet::new();
+        filter.insert(0);
+        filter.insert(5);
+        let mut compression = HashSet::new();
+        compression.insert(9);
+        let mut memory = HashSet::new();
+        memory.insert(9);
+        let mut strategies = HashSet::new();
+        for i in 0..4 {
+            strategies.insert(i);
+        }
+
+        Options {
+            backup: false,
+            out_file: PathBuf::new(),
+            out_dir: None,
+            stdout: false,
+            pretend: false,
+            recursive: false,
+            fix_errors: false,
+            clobber: true,
+            create: true,
+            force: false,
+            preserve_attrs: false,
+            verbosity: Some(0),
+            filter: filter,
+            interlace: None,
+            compression: compression,
+            memory: memory,
+            strategies: strategies,
+            window: 15,
+            bit_depth_reduction: true,
+            color_type_reduction: true,
+            palette_reduction: true,
+            idat_recoding: true,
+            strip: png::Headers::None,
+            use_heuristics: false,
+        }
+    }
+}
+
 /// Perform optimization on the input file using the options provided
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     type TrialWithData = (u8, u8, u8, u8, Vec<u8>);

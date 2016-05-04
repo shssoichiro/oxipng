@@ -13,45 +13,6 @@ use std::path::PathBuf;
 const VERSION_STRING: &'static str = "0.6.0";
 
 fn main() {
-    let mut filter = HashSet::new();
-    filter.insert(0);
-    filter.insert(5);
-    let mut compression = HashSet::new();
-    compression.insert(9);
-    let mut memory = HashSet::new();
-    memory.insert(9);
-    let mut strategies = HashSet::new();
-    for i in 0..4 {
-        strategies.insert(i);
-    }
-
-    let default_opts = oxipng::Options {
-        backup: false,
-        out_file: PathBuf::new(),
-        out_dir: None,
-        stdout: false,
-        pretend: false,
-        recursive: false,
-        fix_errors: false,
-        clobber: true,
-        create: true,
-        force: false,
-        preserve_attrs: false,
-        verbosity: Some(0),
-        filter: filter,
-        interlace: None,
-        compression: compression,
-        memory: memory,
-        strategies: strategies,
-        window: 15,
-        bit_depth_reduction: true,
-        color_type_reduction: true,
-        palette_reduction: true,
-        idat_recoding: true,
-        strip: png::Headers::None,
-        use_heuristics: false,
-    };
-
     let matches =
         App::new("oxipng")
             .version(VERSION_STRING)
@@ -228,7 +189,7 @@ fn main() {
     regardless of the order you write the arguments.")
             .get_matches();
 
-    let mut opts = default_opts;
+    let mut opts = oxipng::Options::default();
 
     match parse_opts_into_struct(&matches, &mut opts) {
         Ok(_) => (),
