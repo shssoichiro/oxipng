@@ -452,6 +452,8 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
     output
 }
 
+/// Attempt all reduction operations requested by the given `Options` struct
+/// and apply them directly to the `PngData` passed in
 fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
     let mut something_changed = false;
 
@@ -496,6 +498,7 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
     something_changed
 }
 
+/// Display the status of the image data after a reduction has taken place
 fn report_reduction(png: &png::PngData) {
     if let Some(palette) = png.palette.clone() {
         writeln!(&mut stderr(),
@@ -513,6 +516,7 @@ fn report_reduction(png: &png::PngData) {
     }
 }
 
+/// Strip headers from the `PngData` object, as requested by the passed `Options`
 fn perform_strip(png: &mut png::PngData, opts: &Options) {
     match opts.strip.clone() {
         // Strip headers
@@ -539,6 +543,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
     }
 }
 
+/// Check if an image was already optimized prior to oxipng's operations
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
     original_size <= optimized_size && !opts.force && opts.interlace.is_none()
 }

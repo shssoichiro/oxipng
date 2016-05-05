@@ -38,6 +38,7 @@ impl fmt::Display for ColorType {
 }
 
 impl ColorType {
+    /// Get the code used by the PNG specification to denote this color type
     fn png_header_code(&self) -> u8 {
         match *self {
             ColorType::Grayscale => 0,
