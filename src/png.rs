@@ -302,6 +302,11 @@ impl PngData {
             Ok(_) => (),
             Err(_) => return Err("Failed to read from file".to_owned()),
         }
+
+        return PngData::from_slice(&byte_data, fix_errors)
+    }
+
+    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, String> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
         let header: Vec<u8> = byte_data.iter().take(8).cloned().collect();
