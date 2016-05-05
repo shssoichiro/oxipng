@@ -303,7 +303,7 @@ impl PngData {
             Err(_) => return Err("Failed to read from file".to_owned()),
         }
 
-        return PngData::from_slice(&byte_data, fix_errors)
+        PngData::from_slice(&byte_data, fix_errors)
     }
 
     /// Create a new `PngData` struct by reading a slice

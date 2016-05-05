@@ -253,7 +253,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, String> {
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
-        writeln!(&mut stderr(), "Processing from memory");
+        writeln!(&mut stderr(), "Processing from memory").ok();
     }
     let original_size = data.len() as usize;
     let mut png = match png::PngData::from_slice(&data, opts.fix_errors) {
@@ -264,12 +264,11 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, Stri
     // Run the optimizer on the decoded PNG.
     let optimized_output = optimize_png(&mut png, original_size, opts);
 
-    match is_fully_optimized(original_size, optimized_output.len(), opts) {
-        true => {
-            writeln!(&mut stderr(), "Image already optimized").ok();
-            Ok(data.to_vec())
-        },
-        false => Ok(optimized_output)
+    if is_fully_optimized(original_size, optimized_output.len(), opts) {
+        writeln!(&mut stderr(), "Image already optimized").ok();
+        Ok(data.to_vec())
+    } else {
+        Ok(optimized_output)
     }
 }
 
@@ -541,5 +540,5 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
 }
 
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
-    return original_size <= optimized_size && !opts.force && opts.interlace.is_none()
+    original_size <= optimized_size && !opts.force && opts.interlace.is_none()
 }
