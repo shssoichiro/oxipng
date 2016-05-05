@@ -1,5 +1,4 @@
 target
-Cargo.lock
 *.bk
 .DS_Store
 *.out.png
