@@ -306,6 +306,7 @@ impl PngData {
         return PngData::from_slice(&byte_data, fix_errors)
     }
 
+    /// Create a new `PngData` struct by reading a slice
     pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, String> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid

@@ -248,7 +248,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
     Ok(())
 }
 
-/// Perform optimization on the input file using the options provided
+/// Perform optimization on the input file using the options provided, where the file is already
+/// loaded in-memory
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, String> {
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
@@ -272,7 +273,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, Stri
     }
 }
 
-/// Perform optimization on the input file using the options provided
+/// Perform optimization on the input PNG object using the options provided
 fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Options) -> Vec<u8> {
     type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
 
