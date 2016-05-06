@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `optimize` fn in crate `oxipng`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, optimize">
+    <meta name="description" content="API documentation for the Rust `optimize_from_memory` fn in crate `oxipng`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, optimize_from_memory">
 
-    <title>oxipng::optimize - Rust</title>
+    <title>oxipng::optimize_from_memory - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>oxipng</a></p><script>window.sidebarCurrent = {name: 'optimize', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>oxipng</a></p><script>window.sidebarCurrent = {name: 'optimize_from_memory', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,12 +43,13 @@
     </nav>
 
     <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>oxipng</a>::<wbr><a class='fn' href=''>optimize</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>oxipng</a>::<wbr><a class='fn' href=''>optimize_from_memory</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-956' class='srclink' href='../src/oxipng/src/lib.rs.html#136-249' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn optimize(filepath: &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>, opts: &amp;<a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</pre><div class='docblock'><p>Perform optimization on the input file using the options provided</p>
+               </span><a id='src-991' class='srclink' href='../src/oxipng/src/lib.rs.html#253-273' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn optimize_from_memory(data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, opts: &amp;<a class='struct' href='../oxipng/struct.Options.html' title='oxipng::Options'>Options</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</pre><div class='docblock'><p>Perform optimization on the input file using the options provided, where the file is already
+loaded in-memory</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

@@ -1714,6 +1714,13 @@
 <span id="1670">1670</span>
 <span id="1671">1671</span>
 <span id="1672">1672</span>
+<span id="1673">1673</span>
+<span id="1674">1674</span>
+<span id="1675">1675</span>
+<span id="1676">1676</span>
+<span id="1677">1677</span>
+<span id="1678">1678</span>
+<span id="1679">1679</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>bit_vec</span>::<span class='ident'>BitVec</span>;
 <span class='kw'>use</span> <span class='ident'>byteorder</span>::{<span class='ident'>BigEndian</span>, <span class='ident'>ReadBytesExt</span>, <span class='ident'>WriteBytesExt</span>};
@@ -1755,6 +1762,7 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>ColorType</span> {
+    <span class='doccomment'>/// Get the code used by the PNG specification to denote this color type</span>
     <span class='kw'>fn</span> <span class='ident'>png_header_code</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u8</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
             <span class='ident'>ColorType</span>::<span class='ident'>Grayscale</span> <span class='op'>=&gt;</span> <span class='number'>0</span>,
@@ -2019,6 +2027,12 @@
             <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> (),
             <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Failed to read from file&quot;</span>.<span class='ident'>to_owned</span>()),
         }
+
+        <span class='ident'>PngData</span>::<span class='ident'>from_slice</span>(<span class='kw-2'>&amp;</span><span class='ident'>byte_data</span>, <span class='ident'>fix_errors</span>)
+    }
+
+    <span class='doccomment'>/// Create a new `PngData` struct by reading a slice</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_slice</span>(<span class='ident'>byte_data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>fix_errors</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>PngData</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>byte_offset</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='comment'>// Test that png header is valid</span>
         <span class='kw'>let</span> <span class='ident'>header</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>byte_data</span>.<span class='ident'>iter</span>().<span class='ident'>take</span>(<span class='number'>8</span>).<span class='ident'>cloned</span>().<span class='ident'>collect</span>();

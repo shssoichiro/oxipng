@@ -10,7 +10,7 @@ use std::fs::DirBuilder;
 use std::io::{Write, stderr};
 use std::path::PathBuf;
 
-const VERSION_STRING: &'static str = "0.7.0";
+const VERSION_STRING: &'static str = "0.8.0";
 
 fn main() {
     let matches =

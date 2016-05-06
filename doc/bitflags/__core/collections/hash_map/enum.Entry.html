@@ -48,7 +48,7 @@
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a id='src-2042' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/enum.Entry.html?gotosrc=2042' title='goto source code'>[src]</a></span></h1>
-<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
+<pre class='rust enum'>pub enum Entry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
     Occupied(<a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.OccupiedEntry.html' title='bitflags::__core::collections::hash_map::OccupiedEntry'>OccupiedEntry</a>&lt;'a, K, V&gt;),
     Vacant(<a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.VacantEntry.html' title='bitflags::__core::collections::hash_map::VacantEntry'>VacantEntry</a>&lt;'a, K, V&gt;),
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single location in a map, which may be vacant or occupied.</p>

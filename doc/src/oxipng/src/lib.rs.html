@@ -547,6 +547,50 @@
 <span id="503">503</span>
 <span id="504">504</span>
 <span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bit_vec</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>byteorder</span>;
@@ -684,21 +728,150 @@
 
 <span class='doccomment'>/// Perform optimization on the input file using the options provided</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>optimize</span>(<span class='ident'>filepath</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>TrialWithData</span> <span class='op'>=</span> (<span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>);
-
-    <span class='comment'>// Decode PNG from file</span>
+    <span class='comment'>// Read in the file and try to decode as PNG.</span>
     <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
         <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Processing: {}&quot;</span>, <span class='ident'>filepath</span>.<span class='ident'>to_str</span>().<span class='ident'>unwrap</span>()).<span class='ident'>ok</span>();
     }
+
     <span class='kw'>let</span> <span class='ident'>in_file</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>filepath</span>);
+    <span class='kw'>let</span> <span class='ident'>original_size</span> <span class='op'>=</span> <span class='ident'>in_file</span>.<span class='ident'>metadata</span>().<span class='ident'>unwrap</span>().<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>usize</span>;
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>png</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>in_file</span>, <span class='ident'>opts</span>.<span class='ident'>fix_errors</span>) {
         <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
         <span class='prelude-val'>Err</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>x</span>),
     };
 
+    <span class='comment'>// Run the optimizer on the decoded PNG.</span>
+    <span class='kw'>let</span> <span class='ident'>optimized_output</span> <span class='op'>=</span> <span class='ident'>optimize_png</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>, <span class='ident'>original_size</span>, <span class='ident'>opts</span>);
+
+    <span class='kw'>if</span> <span class='ident'>is_fully_optimized</span>(<span class='ident'>original_size</span>, <span class='ident'>optimized_output</span>.<span class='ident'>len</span>(), <span class='ident'>opts</span>) {
+        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;File already optimized&quot;</span>).<span class='ident'>ok</span>();
+        <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(());
+    }
+
+    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>pretend</span> {
+        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Running in pretend mode, no output&quot;</span>).<span class='ident'>ok</span>();
+        }
+    } <span class='kw'>else</span> {
+        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>backup</span> {
+            <span class='kw'>match</span> <span class='ident'>copy</span>(<span class='ident'>in_file</span>,
+                       <span class='ident'>in_file</span>.<span class='ident'>with_extension</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;bak.{}&quot;</span>,
+                                                      <span class='ident'>in_file</span>.<span class='ident'>extension</span>()
+                                                             .<span class='ident'>unwrap</span>()
+                                                             .<span class='ident'>to_str</span>()
+                                                             .<span class='ident'>unwrap</span>()))) {
+                <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to backup file at {}&quot;</span>,
+                                       <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
+                }
+            };
+        }
+
+        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>stdout</span> {
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>stdout</span>());
+            <span class='kw'>match</span> <span class='ident'>buffer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>optimized_output</span>) {
+                <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> (),
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Unable to write to stdout&quot;</span>.<span class='ident'>to_owned</span>()),
+            }
+        } <span class='kw'>else</span> {
+            <span class='kw'>let</span> <span class='ident'>out_file</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>create</span>(<span class='kw-2'>&amp;</span><span class='ident'>opts</span>.<span class='ident'>out_file</span>) {
+                <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to file {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
+                }
+            };
+
+            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>preserve_attrs</span> {
+                <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>filepath</span>) {
+                    <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
+                        <span class='kw'>match</span> <span class='ident'>f</span>.<span class='ident'>metadata</span>() {
+                            <span class='prelude-val'>Ok</span>(<span class='ident'>metadata</span>) <span class='op'>=&gt;</span> {
+                                <span class='comment'>// TODO: Implement full permission changing on Unix</span>
+                                <span class='comment'>// Not available in stable, requires block cfg statements</span>
+                                <span class='comment'>// See https://github.com/rust-lang/rust/issues/15701</span>
+                                {
+                                    <span class='kw'>match</span> <span class='ident'>out_file</span>.<span class='ident'>metadata</span>() {
+                                        <span class='prelude-val'>Ok</span>(<span class='ident'>out_meta</span>) <span class='op'>=&gt;</span> {
+                                            <span class='kw'>let</span> <span class='ident'>readonly</span> <span class='op'>=</span> <span class='ident'>metadata</span>.<span class='ident'>permissions</span>()
+                                                                   .<span class='ident'>readonly</span>();
+                                            <span class='ident'>out_meta</span>.<span class='ident'>permissions</span>()
+                                                    .<span class='ident'>set_readonly</span>(<span class='ident'>readonly</span>);
+                                        }
+                                        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                                            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                                                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
+                                                         <span class='string'>&quot;Failed to set permissions on output file&quot;</span>)
+                                                    .<span class='ident'>ok</span>();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                                <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                                    <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
+                                             <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
+                                        .<span class='ident'>ok</span>();
+                                }
+                            }
+                        }
+                    }
+                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
+                                .<span class='ident'>ok</span>();
+                        }
+                    }
+                };
+            }
+
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>out_file</span>);
+            <span class='kw'>match</span> <span class='ident'>buffer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>optimized_output</span>) {
+                <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Output: {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()).<span class='ident'>ok</span>();
+                    }
+                }
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to file {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
+                }
+            }
+        }
+    }
+    <span class='prelude-val'>Ok</span>(())
+}
+
+<span class='doccomment'>/// Perform optimization on the input file using the options provided, where the file is already</span>
+<span class='doccomment'>/// loaded in-memory</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>optimize_from_memory</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='comment'>// Read in the file and try to decode as PNG.</span>
+    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
+        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Processing from memory&quot;</span>).<span class='ident'>ok</span>();
+    }
+    <span class='kw'>let</span> <span class='ident'>original_size</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>usize</span>;
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>png</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>::<span class='ident'>from_slice</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>, <span class='ident'>opts</span>.<span class='ident'>fix_errors</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>x</span>),
+    };
+
+    <span class='comment'>// Run the optimizer on the decoded PNG.</span>
+    <span class='kw'>let</span> <span class='ident'>optimized_output</span> <span class='op'>=</span> <span class='ident'>optimize_png</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>, <span class='ident'>original_size</span>, <span class='ident'>opts</span>);
+
+    <span class='kw'>if</span> <span class='ident'>is_fully_optimized</span>(<span class='ident'>original_size</span>, <span class='ident'>optimized_output</span>.<span class='ident'>len</span>(), <span class='ident'>opts</span>) {
+        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Image already optimized&quot;</span>).<span class='ident'>ok</span>();
+        <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>.<span class='ident'>to_vec</span>())
+    } <span class='kw'>else</span> {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>optimized_output</span>)
+    }
+}
+
+<span class='doccomment'>/// Perform optimization on the input PNG object using the options provided</span>
+<span class='kw'>fn</span> <span class='ident'>optimize_png</span>(<span class='kw-2'>mut</span> <span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>, <span class='ident'>file_original_size</span>: <span class='ident'>usize</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>TrialWithData</span> <span class='op'>=</span> (<span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>u8</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>);
+
     <span class='comment'>// Print png info</span>
     <span class='kw'>let</span> <span class='ident'>idat_original_size</span> <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>idat_data</span>.<span class='ident'>len</span>();
-    <span class='kw'>let</span> <span class='ident'>file_original_size</span> <span class='op'>=</span> <span class='ident'>filepath</span>.<span class='ident'>metadata</span>().<span class='ident'>unwrap</span>().<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>usize</span>;
     <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
         <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
                  <span class='string'>&quot;    {}x{} pixels, PNG format&quot;</span>,
@@ -835,103 +1008,8 @@
 
     <span class='ident'>perform_strip</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>, <span class='kw-2'>&amp;</span><span class='ident'>opts</span>);
 
-    <span class='kw'>let</span> <span class='ident'>output_data</span> <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>output</span>();
-    <span class='kw'>if</span> <span class='ident'>file_original_size</span> <span class='op'>&lt;=</span> <span class='ident'>output_data</span>.<span class='ident'>len</span>() <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>force</span> <span class='op'>&amp;&amp;</span> <span class='ident'>opts</span>.<span class='ident'>interlace</span>.<span class='ident'>is_none</span>() {
-        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;File already optimized&quot;</span>).<span class='ident'>ok</span>();
-        <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(());
-    }
+    <span class='kw'>let</span> <span class='ident'>output</span> <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>output</span>();
 
-    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>pretend</span> {
-        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Running in pretend mode, no output&quot;</span>).<span class='ident'>ok</span>();
-        }
-    } <span class='kw'>else</span> {
-        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>backup</span> {
-            <span class='kw'>match</span> <span class='ident'>copy</span>(<span class='ident'>in_file</span>,
-                       <span class='ident'>in_file</span>.<span class='ident'>with_extension</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;bak.{}&quot;</span>,
-                                                      <span class='ident'>in_file</span>.<span class='ident'>extension</span>()
-                                                             .<span class='ident'>unwrap</span>()
-                                                             .<span class='ident'>to_str</span>()
-                                                             .<span class='ident'>unwrap</span>()))) {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
-                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to backup file at {}&quot;</span>,
-                                       <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
-                }
-            };
-        }
-
-        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>stdout</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>stdout</span>());
-            <span class='kw'>match</span> <span class='ident'>buffer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>output_data</span>) {
-                <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> (),
-                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Unable to write to stdout&quot;</span>.<span class='ident'>to_owned</span>()),
-            }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>out_file</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>create</span>(<span class='kw-2'>&amp;</span><span class='ident'>opts</span>.<span class='ident'>out_file</span>) {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
-                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to file {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
-                }
-            };
-
-            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>preserve_attrs</span> {
-                <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>filepath</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
-                        <span class='kw'>match</span> <span class='ident'>f</span>.<span class='ident'>metadata</span>() {
-                            <span class='prelude-val'>Ok</span>(<span class='ident'>metadata</span>) <span class='op'>=&gt;</span> {
-                                <span class='comment'>// TODO: Implement full permission changing on Unix</span>
-                                <span class='comment'>// Not available in stable, requires block cfg statements</span>
-                                <span class='comment'>// See https://github.com/rust-lang/rust/issues/15701</span>
-                                {
-                                    <span class='kw'>match</span> <span class='ident'>out_file</span>.<span class='ident'>metadata</span>() {
-                                        <span class='prelude-val'>Ok</span>(<span class='ident'>out_meta</span>) <span class='op'>=&gt;</span> {
-                                            <span class='kw'>let</span> <span class='ident'>readonly</span> <span class='op'>=</span> <span class='ident'>metadata</span>.<span class='ident'>permissions</span>()
-                                                                   .<span class='ident'>readonly</span>();
-                                            <span class='ident'>out_meta</span>.<span class='ident'>permissions</span>()
-                                                    .<span class='ident'>set_readonly</span>(<span class='ident'>readonly</span>);
-                                        }
-                                        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                                            <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-                                                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
-                                                         <span class='string'>&quot;Failed to set permissions on output file&quot;</span>)
-                                                    .<span class='ident'>ok</span>();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                                <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-                                    <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
-                                             <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
-                                        .<span class='ident'>ok</span>();
-                                }
-                            }
-                        }
-                    }
-                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                        <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-                            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Failed to read permissions on input file&quot;</span>)
-                                .<span class='ident'>ok</span>();
-                        }
-                    }
-                };
-            }
-
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>out_file</span>);
-            <span class='kw'>match</span> <span class='ident'>buffer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>output_data</span>) {
-                <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(), <span class='string'>&quot;Output: {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()).<span class='ident'>ok</span>();
-                    }
-                }
-                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Unable to write to file {}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>out_file</span>.<span class='ident'>display</span>()))
-                }
-            }
-        }
-    }
     <span class='kw'>if</span> <span class='ident'>opts</span>.<span class='ident'>verbosity</span>.<span class='ident'>is_some</span>() {
         <span class='kw'>if</span> <span class='ident'>idat_original_size</span> <span class='op'>&gt;=</span> <span class='ident'>png</span>.<span class='ident'>idat_data</span>.<span class='ident'>len</span>() {
             <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
@@ -946,27 +1024,30 @@
                      <span class='ident'>png</span>.<span class='ident'>idat_data</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>idat_original_size</span>)
                 .<span class='ident'>ok</span>();
         }
-        <span class='kw'>if</span> <span class='ident'>file_original_size</span> <span class='op'>&gt;=</span> <span class='ident'>output_data</span>.<span class='ident'>len</span>() {
+        <span class='kw'>if</span> <span class='ident'>file_original_size</span> <span class='op'>&gt;=</span> <span class='ident'>output</span>.<span class='ident'>len</span>() {
             <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
                      <span class='string'>&quot;    file size = {} bytes ({} bytes = {:.2}% decrease)&quot;</span>,
-                     <span class='ident'>output_data</span>.<span class='ident'>len</span>(),
-                     <span class='ident'>file_original_size</span> <span class='op'>-</span> <span class='ident'>output_data</span>.<span class='ident'>len</span>(),
-                     (<span class='ident'>file_original_size</span> <span class='op'>-</span> <span class='ident'>output_data</span>.<span class='ident'>len</span>()) <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>/</span> <span class='ident'>file_original_size</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>*</span>
+                     <span class='ident'>output</span>.<span class='ident'>len</span>(),
+                     <span class='ident'>file_original_size</span> <span class='op'>-</span> <span class='ident'>output</span>.<span class='ident'>len</span>(),
+                     (<span class='ident'>file_original_size</span> <span class='op'>-</span> <span class='ident'>output</span>.<span class='ident'>len</span>()) <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>/</span> <span class='ident'>file_original_size</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>*</span>
                      <span class='number'>100f64</span>)
                 .<span class='ident'>ok</span>();
         } <span class='kw'>else</span> {
             <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
                      <span class='string'>&quot;    file size = {} bytes ({} bytes = {:.2}% increase)&quot;</span>,
-                     <span class='ident'>output_data</span>.<span class='ident'>len</span>(),
-                     <span class='ident'>output_data</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>file_original_size</span>,
-                     (<span class='ident'>output_data</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>file_original_size</span>) <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>/</span> <span class='ident'>file_original_size</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>*</span>
+                     <span class='ident'>output</span>.<span class='ident'>len</span>(),
+                     <span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>file_original_size</span>,
+                     (<span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>file_original_size</span>) <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>/</span> <span class='ident'>file_original_size</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>*</span>
                      <span class='number'>100f64</span>)
                 .<span class='ident'>ok</span>();
         }
     }
-    <span class='prelude-val'>Ok</span>(())
+
+    <span class='ident'>output</span>
 }
 
+<span class='doccomment'>/// Attempt all reduction operations requested by the given `Options` struct</span>
+<span class='doccomment'>/// and apply them directly to the `PngData` passed in</span>
 <span class='kw'>fn</span> <span class='ident'>perform_reductions</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>something_changed</span> <span class='op'>=</span> <span class='boolval'>false</span>;
 
@@ -1011,6 +1092,7 @@
     <span class='ident'>something_changed</span>
 }
 
+<span class='doccomment'>/// Display the status of the image data after a reduction has taken place</span>
 <span class='kw'>fn</span> <span class='ident'>report_reduction</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='ident'>png</span>::<span class='ident'>PngData</span>) {
     <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>palette</span>) <span class='op'>=</span> <span class='ident'>png</span>.<span class='ident'>palette</span>.<span class='ident'>clone</span>() {
         <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stderr</span>(),
@@ -1028,6 +1110,7 @@
     }
 }
 
+<span class='doccomment'>/// Strip headers from the `PngData` object, as requested by the passed `Options`</span>
 <span class='kw'>fn</span> <span class='ident'>perform_strip</span>(<span class='ident'>png</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>png</span>::<span class='ident'>PngData</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) {
     <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>strip</span>.<span class='ident'>clone</span>() {
         <span class='comment'>// Strip headers</span>
@@ -1052,6 +1135,11 @@
             <span class='ident'>png</span>.<span class='ident'>aux_headers</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
         }
     }
+}
+
+<span class='doccomment'>/// Check if an image was already optimized prior to oxipng&#39;s operations</span>
+<span class='kw'>fn</span> <span class='ident'>is_fully_optimized</span>(<span class='ident'>original_size</span>: <span class='ident'>usize</span>, <span class='ident'>optimized_size</span>: <span class='ident'>usize</span>, <span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>Options</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='ident'>original_size</span> <span class='op'>&lt;=</span> <span class='ident'>optimized_size</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>force</span> <span class='op'>&amp;&amp;</span> <span class='ident'>opts</span>.<span class='ident'>interlace</span>.<span class='ident'>is_none</span>()
 }
 </pre>
 </section>

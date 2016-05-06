@@ -173,7 +173,7 @@ or returns a <code>default</code> (if not).</p>
 
 <span class='kw'>let</span> <span class='ident'>x</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>map_or</span>(<span class='number'>42</span>, <span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>len</span>()), <span class='number'>42</span>);</pre>
-</div><h4 id='method.map_or_else' class='method'><code>fn <a href='#method.map_or_else' class='fnname'>map_or_else</a>&lt;U, D, F&gt;(self, default: D, f: F) -&gt; U <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>(T) -&gt; U, D: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; U</span></code></h4>
+</div><h4 id='method.map_or_else' class='method'><code>fn <a href='#method.map_or_else' class='fnname'>map_or_else</a>&lt;U, D, F&gt;(self, default: D, f: F) -&gt; U <span class='where'>where D: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>() -&gt; U, F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnOnce.html' title='bitflags::__core::ops::FnOnce'>FnOnce</a>(T) -&gt; U</span></code></h4>
 <div class='docblock'><p>Applies a function to the contained value (if any),
 or computes a <code>default</code> (if not).</p>
 

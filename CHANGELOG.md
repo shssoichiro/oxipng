@@ -1,4 +1,4 @@
-**Version 0.8.0 (unreleased)**
+**Version 0.8.0**
  - [SEMVER_MINOR] Add support for optimizing PNGs already loaded into memory via library function
 
 **Version 0.7.0**
