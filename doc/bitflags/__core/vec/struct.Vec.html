@@ -981,7 +981,7 @@ fourth could match any position in <code>[1,4]</code>.</p>
 
 <span class='ident'>v</span>.<span class='ident'>sort</span>();
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>v</span> <span class='op'>==</span> [<span class='op'>-</span><span class='number'>5</span>, <span class='op'>-</span><span class='number'>3</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>4</span>]);</pre>
-</div><h4 id='method.sort_by_key' class='method'><code>fn <a href='#method.sort_by_key' class='fnname'>sort_by_key</a>&lt;B, F&gt;(&amp;mut self, f: F) <span class='where'>where F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(&amp;T) -&gt; B, B: <a class='trait' href='../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a></span></code><span class="since">1.7.0</span></h4>
+</div><h4 id='method.sort_by_key' class='method'><code>fn <a href='#method.sort_by_key' class='fnname'>sort_by_key</a>&lt;B, F&gt;(&amp;mut self, f: F) <span class='where'>where B: <a class='trait' href='../../../bitflags/__core/cmp/trait.Ord.html' title='bitflags::__core::cmp::Ord'>Ord</a>, F: <a class='trait' href='../../../bitflags/__core/ops/trait.FnMut.html' title='bitflags::__core::ops::FnMut'>FnMut</a>(&amp;T) -&gt; B</span></code><span class="since">1.7.0</span></h4>
 <div class='docblock'><p>Sorts the slice, in place, using <code>key</code> to extract a key by which to
 order the sort by.</p>
 

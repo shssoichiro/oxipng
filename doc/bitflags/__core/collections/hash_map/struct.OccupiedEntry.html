@@ -48,7 +48,7 @@
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a id='src-2050' class='srclink' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.OccupiedEntry.html?gotosrc=2050' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct OccupiedEntry&lt;'a, K, V&gt; <span class='where'>where K: 'a, V: 'a</span> {
+<pre class='rust struct'>pub struct OccupiedEntry&lt;'a, K, V&gt; <span class='where'>where V: 'a, K: 'a</span> {
     // some fields omitted
 }</pre><span class="since">1.0.0</span><div class='docblock'><p>A view into a single occupied location in a HashMap.</p>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a, K, V&gt; <a class='struct' href='../../../../bitflags/__core/collections/hash_map/struct.OccupiedEntry.html' title='bitflags::__core::collections::hash_map::OccupiedEntry'>OccupiedEntry</a>&lt;'a, K, V&gt;</code></h3><div class='impl-items'><h4 id='method.key' class='method'><code>fn <a href='#method.key' class='fnname'>key</a>(&amp;self) -&gt; &amp;K</code></h4>

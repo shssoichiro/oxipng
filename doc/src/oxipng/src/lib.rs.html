@@ -591,6 +591,28 @@
 <span id="547">547</span>
 <span id="548">548</span>
 <span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bit_vec</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>byteorder</span>;
@@ -619,61 +641,83 @@
 <span class='doccomment'>/// Options controlling the output of the `optimize` function</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Options</span> {
     <span class='doccomment'>/// Whether the input file should be backed up before writing the output</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>backup</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Path to write the output file to</span>
     <span class='kw'>pub</span> <span class='ident'>out_file</span>: <span class='ident'>PathBuf</span>,
     <span class='doccomment'>/// Used only in CLI interface</span>
     <span class='kw'>pub</span> <span class='ident'>out_dir</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Write to stdout instead of a file</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>stdout</span>: <span class='ident'>bool</span>,
-    <span class='doccomment'>/// Attempt to fix errors when decoding the input file</span>
+    <span class='doccomment'>/// Attempt to fix errors when decoding the input file rather than returning an `Err`</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>fix_errors</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Don&#39;t actually write any output, just calculate the best results</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>pretend</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Used only in CLI interface</span>
     <span class='kw'>pub</span> <span class='ident'>recursive</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Overwrite existing output files</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>clobber</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Create new output files if they don&#39;t exist</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>create</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Write to output even if there was no improvement in compression</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>force</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Ensure the output file has the same permissions as the input file</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>preserve_attrs</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// How verbose the console logging should be (`None` for quiet, `Some(0)` for normal, `Some(1)` for verbose)</span>
+    <span class='doccomment'>/// Default: `Some(0)`</span>
     <span class='kw'>pub</span> <span class='ident'>verbosity</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Which filters to try on the file (0-5)</span>
+    <span class='doccomment'>/// Default: `0,5`</span>
     <span class='kw'>pub</span> <span class='ident'>filter</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Whether to change the interlacing type of the file</span>
     <span class='doccomment'>/// `None` will not change the current interlacing type</span>
     <span class='doccomment'>/// `Some(x)` will change the file to interlacing mode `x`</span>
+    <span class='doccomment'>/// Default: `None`</span>
     <span class='kw'>pub</span> <span class='ident'>interlace</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Which zlib compression levels to try on the file (1-9)</span>
+    <span class='doccomment'>/// Default: `9`</span>
     <span class='kw'>pub</span> <span class='ident'>compression</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Which zlib memory levels to try on the file (1-9)</span>
+    <span class='doccomment'>/// Default: `9`</span>
     <span class='kw'>pub</span> <span class='ident'>memory</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Which zlib compression strategies to try on the file (0-3)</span>
+    <span class='doccomment'>/// Default: `0-3`</span>
     <span class='kw'>pub</span> <span class='ident'>strategies</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Window size to use when compressing the file, as `2^window` bytes</span>
     <span class='doccomment'>/// Doesn&#39;t affect compression but may affect speed and memory usage</span>
-    <span class='doccomment'>/// 15 is recommended default, 8-15 are valid values</span>
+    <span class='doccomment'>/// 8-15 are valid values</span>
+    <span class='doccomment'>/// Default: `15`</span>
     <span class='kw'>pub</span> <span class='ident'>window</span>: <span class='ident'>u8</span>,
     <span class='doccomment'>/// Whether to attempt bit depth reduction</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>bit_depth_reduction</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Whether to attempt color type reduction</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>color_type_reduction</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Whether to attempt palette reduction</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>palette_reduction</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Whether to perform IDAT recoding</span>
     <span class='doccomment'>/// If any type of reduction is performed, IDAT recoding will be performed</span>
     <span class='doccomment'>/// regardless of this setting</span>
+    <span class='doccomment'>/// Default: `true`</span>
     <span class='kw'>pub</span> <span class='ident'>idat_recoding</span>: <span class='ident'>bool</span>,
     <span class='doccomment'>/// Which headers to strip from the PNG file, if any</span>
+    <span class='doccomment'>/// Default: `None`</span>
     <span class='kw'>pub</span> <span class='ident'>strip</span>: <span class='ident'>png</span>::<span class='ident'>Headers</span>,
     <span class='doccomment'>/// Whether to use heuristics to pick the best filter and compression</span>
     <span class='doccomment'>/// Intended for use with `-o 1` from the CLI interface</span>
+    <span class='doccomment'>/// Default: `false`</span>
     <span class='kw'>pub</span> <span class='ident'>use_heuristics</span>: <span class='ident'>bool</span>,
-    <span class='doccomment'>/// Number of threads to use, defaults to 1.5x CPU cores, rounded down</span>
+    <span class='doccomment'>/// Number of threads to use</span>
+    <span class='doccomment'>/// Default: 1.5x CPU cores, rounded down</span>
     <span class='kw'>pub</span> <span class='ident'>threads</span>: <span class='ident'>usize</span>,
 }
 
