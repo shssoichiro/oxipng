@@ -163,7 +163,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
     let in_file = Path::new(filepath);
     let original_size = in_file.metadata().unwrap().len() as usize;
-    let mut png = match png::PngData::new(&in_file, opts.fix_errors) {
+    let mut png = match png::PngData::new(in_file, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => return Err(x),
     };
@@ -278,7 +278,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, Stri
         writeln!(&mut stderr(), "Processing from memory").ok();
     }
     let original_size = data.len() as usize;
-    let mut png = match png::PngData::from_slice(&data, opts.fix_errors) {
+    let mut png = match png::PngData::from_slice(data, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => return Err(x),
     };
@@ -355,7 +355,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         }
     }
 
-    let something_changed = perform_reductions(&mut png, &opts);
+    let something_changed = perform_reductions(&mut png, opts);
 
     if opts.idat_recoding || something_changed {
         let thread_count = opts.threads;
@@ -434,7 +434,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         }
     }
 
-    perform_strip(&mut png, &opts);
+    perform_strip(&mut png, opts);
 
     let output = png.output();
 
@@ -483,7 +483,7 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         if png.reduce_palette() {
             something_changed = true;
             if opts.verbosity == Some(1) {
-                report_reduction(&png);
+                report_reduction(png);
             }
         };
     }
@@ -492,7 +492,7 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         if png.reduce_bit_depth() {
             something_changed = true;
             if opts.verbosity == Some(1) {
-                report_reduction(&png);
+                report_reduction(png);
             }
         };
     }
@@ -501,13 +501,13 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         if png.reduce_color_type() {
             something_changed = true;
             if opts.verbosity == Some(1) {
-                report_reduction(&png);
+                report_reduction(png);
             }
         };
     }
 
     if something_changed && opts.verbosity.is_some() {
-        report_reduction(&png);
+        report_reduction(png);
     }
 
     if let Some(interlacing) = opts.interlace {

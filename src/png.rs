@@ -4,7 +4,7 @@ use crc::crc32;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs::File;
-use std::io::{Cursor, Read, Write};
+use std::io::{Cursor, Read};
 use std::iter::Iterator;
 use std::path::Path;
 
@@ -408,7 +408,7 @@ impl PngData {
         for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
             !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")
         }) {
-            write_png_block(&key.as_bytes(), &header, &mut output);
+            write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
         if let Some(palette) = self.palette.clone() {
@@ -425,7 +425,7 @@ impl PngData {
         for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
             **key == "bKGD" || **key == "hIST" || **key == "tRNS"
         }) {
-            write_png_block(&key.as_bytes(), &header, &mut output);
+            write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);
@@ -437,7 +437,7 @@ impl PngData {
     /// Return an iterator over the scanlines of the image
     pub fn scan_lines(&self) -> ScanLines {
         ScanLines {
-            png: &self,
+            png: self,
             start: 0,
             end: 0,
             pass: None,
@@ -711,14 +711,14 @@ impl PngData {
                         let lower = *byte & 0b00001111;
                         let mut new_byte = 0u8;
                         if let Some(new_idx) = index_map.get(&upper) {
-                            new_byte = new_byte & (*new_idx << 4);
+                            new_byte &= *new_idx << 4;
                         } else {
-                            new_byte = new_byte & (upper << 4);
+                            new_byte &= upper << 4;
                         }
                         if let Some(new_idx) = index_map.get(&lower) {
-                            new_byte = new_byte & *new_idx;
+                            new_byte &= *new_idx;
                         } else {
-                            new_byte = new_byte & lower;
+                            new_byte &= lower;
                         }
                         new_data.push(new_byte);
                     }
@@ -731,24 +731,24 @@ impl PngData {
                         let four = *byte & 0b00000011;
                         let mut new_byte = 0u8;
                         if let Some(new_idx) = index_map.get(&one) {
-                            new_byte = new_byte & (*new_idx << 6);
+                            new_byte &= *new_idx << 6;
                         } else {
-                            new_byte = new_byte & (one << 6);
+                            new_byte &= one << 6;
                         }
                         if let Some(new_idx) = index_map.get(&two) {
-                            new_byte = new_byte & (*new_idx << 4);
+                            new_byte &= *new_idx << 4;
                         } else {
-                            new_byte = new_byte & (two << 4);
+                            new_byte &= two << 4;
                         }
                         if let Some(new_idx) = index_map.get(&three) {
-                            new_byte = new_byte & (*new_idx << 2);
+                            new_byte &= *new_idx << 2;
                         } else {
-                            new_byte = new_byte & (three << 2);
+                            new_byte &= three << 2;
                         }
                         if let Some(new_idx) = index_map.get(&four) {
-                            new_byte = new_byte & *new_idx;
+                            new_byte &= *new_idx;
                         } else {
-                            new_byte = new_byte & four;
+                            new_byte &= four;
                         }
                         new_data.push(new_byte);
                     }
@@ -1401,7 +1401,7 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
 
     let mut color_palette = Vec::with_capacity(palette.len() * 3);
     for color in &palette {
-        color_palette.extend_from_slice(&color);
+        color_palette.extend_from_slice(color);
     }
 
     Some((reduced, color_palette))
@@ -1453,7 +1453,7 @@ fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
 
     let mut color_palette = Vec::with_capacity(palette.len() * 3);
     for color in &palette {
-        color_palette.extend_from_slice(&color);
+        color_palette.extend_from_slice(color);
     }
 
     Some((reduced.to_bytes(), color_palette))
