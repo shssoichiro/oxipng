@@ -1246,3 +1246,18 @@ fn interlaced_small_files() {
                      png::ColorType::Indexed,
                      png::BitDepth::One);
 }
+
+#[test]
+fn interlaced_odd_width() {
+    let input = PathBuf::from("tests/files/interlaced_odd_width.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight,
+                     png::ColorType::RGB,
+                     png::BitDepth::Eight);
+}

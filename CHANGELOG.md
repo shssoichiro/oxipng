@@ -1,5 +1,6 @@
 **Version 0.8.1 (unreleased)**
  - Minor optimizations
+ - Fix issue where interlaced images with certain widths would fail to optimize
 
 **Version 0.8.0**
  - [SEMVER_MINOR] Add support for optimizing PNGs already loaded into memory via library function
