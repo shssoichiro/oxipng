@@ -1,4 +1,4 @@
-**Version 0.8.1 (unreleased)**
+**Version 0.8.1**
  - Minor optimizations
  - Fix issue where interlaced images with certain widths would fail to optimize
 
