@@ -185,9 +185,9 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             match copy(in_file,
                        in_file.with_extension(format!("bak.{}",
                                                       in_file.extension()
-                                                             .unwrap()
-                                                             .to_str()
-                                                             .unwrap()))) {
+                                                          .unwrap()
+                                                          .to_str()
+                                                          .unwrap()))) {
                 Ok(x) => x,
                 Err(_) => {
                     return Err(format!("Unable to write to backup file at {}",
@@ -222,9 +222,9 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                                     match out_file.metadata() {
                                         Ok(out_meta) => {
                                             let readonly = metadata.permissions()
-                                                                   .readonly();
+                                                .readonly();
                                             out_meta.permissions()
-                                                    .set_readonly(readonly);
+                                                .set_readonly(readonly);
                                         }
                                         Err(_) => {
                                             if opts.verbosity.is_some() {
@@ -388,12 +388,9 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
                 let filtered = filters.get(&trial.0).unwrap();
                 let best = best.clone();
                 scope.execute(move || {
-                    let new_idat = deflate::deflate::deflate(filtered,
-                                                             trial.1,
-                                                             trial.2,
-                                                             trial.3,
-                                                             opts.window)
-                                       .unwrap();
+                    let new_idat =
+                        deflate::deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
+                            .unwrap();
 
                     if opts.verbosity == Some(1) {
                         writeln!(&mut stderr(),

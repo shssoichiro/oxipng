@@ -486,3 +486,44 @@ fn fix_errors() {
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
     remove_file(output).ok();
 }
+
+#[test]
+fn issue_42() {
+    let input = PathBuf::from("tests/files/issue_42.png");
+    let mut opts = get_opts(&input);
+    opts.interlace = Some(1);
+    let output = opts.out_file.clone();
+
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
+
+    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::GrayscaleAlpha);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+
+    match oxipng::optimize(&input, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!(x.to_owned()),
+    };
+    assert!(output.exists());
+
+    let png = match png::PngData::new(&output, opts.fix_errors) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!(x.to_owned())
+        }
+    };
+
+    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.ihdr_data.color_type, png::ColorType::GrayscaleAlpha);
+    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+
+    let old_png = image::open(&input).unwrap();
+    let new_png = image::open(&output).unwrap();
+
+    // Conversion should be lossless
+    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+
+    remove_file(output).ok();
+}

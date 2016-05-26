@@ -1,3 +1,6 @@
+**Version 0.8.2**
+ - Fix issue where images smaller than 4px width would crash on interlacing ([#42](https://github.com/shssoichiro/oxipng/issues/42))
+
 **Version 0.8.1**
  - Minor optimizations
  - Fix issue where interlaced images with certain widths would fail to optimize

@@ -416,9 +416,9 @@ impl PngData {
         ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
-            !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")
-        }) {
+        for (key, header) in self.aux_headers
+            .iter()
+            .filter(|&(ref key, _)| !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")) {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
@@ -433,9 +433,9 @@ impl PngData {
             write_png_block(b"tRNS", &transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers.iter().filter(|&(ref key, _)| {
-            **key == "bKGD" || **key == "hIST" || **key == "tRNS"
-        }) {
+        for (key, header) in self.aux_headers
+            .iter()
+            .filter(|&(ref key, _)| **key == "bKGD" || **key == "hIST" || **key == "tRNS") {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -459,7 +459,7 @@ impl PngData {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
                    8f32)
-                      .ceil() as usize;
+            .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
             let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
@@ -480,7 +480,7 @@ impl PngData {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
                    8f32)
-                      .ceil() as usize;
+            .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
@@ -512,13 +512,13 @@ impl PngData {
                         trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
                     }
                     let (best_filter, best_line) = trials.iter()
-                                                         .min_by_key(|x| {
-                                                             x.1.iter().fold(0u64, |acc, &x| {
-                                                                 let signed = x as i8;
-                                                                 acc + (signed as i16).abs() as u64
-                                                             })
-                                                         })
-                                                         .unwrap();
+                        .min_by_key(|x| {
+                            x.1.iter().fold(0u64, |acc, &x| {
+                                let signed = x as i8;
+                                acc + (signed as i16).abs() as u64
+                            })
+                        })
+                        .unwrap();
                     filtered.push(*best_filter);
                     filtered.extend_from_slice(best_line);
                 }
@@ -548,10 +548,10 @@ impl PngData {
         }
 
         // Reduce from 16 to 8 bits per channel per pixel
-        let mut reduced =
-            Vec::with_capacity((self.ihdr_data.width * self.ihdr_data.height *
-                                self.channels_per_pixel() as u32 +
-                                self.ihdr_data.height) as usize);
+        let mut reduced = Vec::with_capacity((self.ihdr_data.width * self.ihdr_data.height *
+                                              self.channels_per_pixel() as u32 +
+                                              self.ihdr_data
+            .height) as usize);
         let mut high_byte = 0;
 
         for line in self.scan_lines() {
@@ -888,23 +888,33 @@ fn interlace_image(png: &mut PngData) {
     let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
     for (index, line) in png.scan_lines().enumerate() {
         match index % 8 {
-            // Add filter bytes to appropriate lines
+            // Add filter bytes to passes that will be in the output image
             0 => {
                 passes[0].extend(BitVec::from_elem(8, false));
-                passes[3].extend(BitVec::from_elem(8, false));
-                passes[5].extend(BitVec::from_elem(8, false));
-                if png.ihdr_data.width > 4 {
+                if png.ihdr_data.width >= 5 {
                     passes[1].extend(BitVec::from_elem(8, false));
+                }
+                if png.ihdr_data.width >= 3 {
+                    passes[3].extend(BitVec::from_elem(8, false));
+                }
+                if png.ihdr_data.width >= 2 {
+                    passes[5].extend(BitVec::from_elem(8, false));
                 }
             }
             4 => {
-                passes[3].extend(BitVec::from_elem(8, false));
-                passes[5].extend(BitVec::from_elem(8, false));
                 passes[2].extend(BitVec::from_elem(8, false));
+                if png.ihdr_data.width >= 3 {
+                    passes[3].extend(BitVec::from_elem(8, false));
+                }
+                if png.ihdr_data.width >= 2 {
+                    passes[5].extend(BitVec::from_elem(8, false));
+                }
             }
             2 | 6 => {
                 passes[4].extend(BitVec::from_elem(8, false));
-                passes[5].extend(BitVec::from_elem(8, false));
+                if png.ihdr_data.width >= 2 {
+                    passes[5].extend(BitVec::from_elem(8, false));
+                }
             }
             _ => {
                 passes[6].extend(BitVec::from_elem(8, false));
@@ -975,8 +985,7 @@ fn deinterlace_image(png: &mut PngData) {
         let bit_vec = BitVec::from_bytes(&line.data);
         let bits_in_line = ((png.ihdr_data.width - pass_constants.x_shift as u32) as f32 /
                             pass_constants.x_step as f32)
-                               .ceil() as usize *
-                           bits_per_pixel as usize;
+            .ceil() as usize * bits_per_pixel as usize;
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= bits_in_line {
@@ -1093,19 +1102,19 @@ fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8>
         1 => {
             filtered.extend_from_slice(&data[0..bpp]);
             filtered.extend_from_slice(&data.iter()
-                                            .skip(bpp)
-                                            .zip(data.iter())
-                                            .map(|(cur, last)| cur.wrapping_sub(*last))
-                                            .collect::<Vec<u8>>());
+                .skip(bpp)
+                .zip(data.iter())
+                .map(|(cur, last)| cur.wrapping_sub(*last))
+                .collect::<Vec<u8>>());
         }
         2 => {
             if last_line.is_empty() {
                 filtered.extend_from_slice(data);
             } else {
                 filtered.extend_from_slice(&data.iter()
-                                                .zip(last_line.iter())
-                                                .map(|(cur, last)| cur.wrapping_sub(*last))
-                                                .collect::<Vec<u8>>());
+                    .zip(last_line.iter())
+                    .map(|(cur, last)| cur.wrapping_sub(*last))
+                    .collect::<Vec<u8>>());
             };
         }
         3 => {
@@ -1171,9 +1180,9 @@ fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u
                 unfiltered.extend_from_slice(data);
             } else {
                 unfiltered.extend_from_slice(&data.iter()
-                                                  .zip(last_line.iter())
-                                                  .map(|(cur, last)| cur.wrapping_add(*last))
-                                                  .collect::<Vec<u8>>());
+                    .zip(last_line.iter())
+                    .map(|(cur, last)| cur.wrapping_add(*last))
+                    .collect::<Vec<u8>>());
             };
         }
         3 => {
@@ -1535,14 +1544,14 @@ fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
                     reduced.push(cur_pixel[0]);
                 } else {
                     let mut pixel_zip = cur_pixel.iter()
-                                                 .enumerate()
-                                                 .filter(|&(i, _)| i % 2 == 0)
-                                                 .map(|(_, x)| *x)
-                                                 .zip(cur_pixel.iter()
-                                                               .enumerate()
-                                                               .filter(|&(i, _)| i % 2 == 1)
-                                                               .map(|(_, x)| *x))
-                                                 .collect::<Vec<(u8, u8)>>();
+                        .enumerate()
+                        .filter(|&(i, _)| i % 2 == 0)
+                        .map(|(_, x)| *x)
+                        .zip(cur_pixel.iter()
+                            .enumerate()
+                            .filter(|&(i, _)| i % 2 == 1)
+                            .map(|(_, x)| *x))
+                        .collect::<Vec<(u8, u8)>>();
                     pixel_zip.sort();
                     pixel_zip.dedup();
                     if pixel_zip.len() > 1 {
@@ -1605,10 +1614,10 @@ fn parse_next_header(byte_data: &[u8],
                      fix_errors: bool)
                      -> Result<Option<(String, Vec<u8>)>, String> {
     let mut rdr = Cursor::new(byte_data.iter()
-                                       .skip(*byte_offset)
-                                       .take(4)
-                                       .cloned()
-                                       .collect::<Vec<u8>>());
+        .skip(*byte_offset)
+        .take(4)
+        .cloned()
+        .collect::<Vec<u8>>());
     let length: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
         Err(_) => return Err("Invalid data found--unable to read PNG file".to_owned()),
@@ -1627,16 +1636,16 @@ fn parse_next_header(byte_data: &[u8],
     *byte_offset += 4;
 
     let data: Vec<u8> = byte_data.iter()
-                                 .skip(*byte_offset)
-                                 .take(length as usize)
-                                 .cloned()
-                                 .collect();
+        .skip(*byte_offset)
+        .take(length as usize)
+        .cloned()
+        .collect();
     *byte_offset += length as usize;
     let mut rdr = Cursor::new(byte_data.iter()
-                                       .skip(*byte_offset)
-                                       .take(4)
-                                       .cloned()
-                                       .collect::<Vec<u8>>());
+        .skip(*byte_offset)
+        .take(4)
+        .cloned()
+        .collect::<Vec<u8>>());
     let crc: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
         Err(_) => return Err("Invalid data found--unable to read PNG file".to_owned()),
