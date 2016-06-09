@@ -1,7 +1,63 @@
 language: rust
+cache: cargo
+
 rust:
   - 1.8.0
   - stable
   - beta
   - nightly
 cache: cargo
+
+env:
+  global:
+    - PROJECT_NAME=oxipng
+
+# AFAICT There are a few ways to set up the build jobs. This one is not the DRYest but I feel is the
+# easiest to reason about.
+matrix:
+  include:
+    - os: windows
+      rust: stable
+      env: TARGET=x86_64-pc-windows-msvc
+    - os: osx
+      rust: stable
+      env: TARGET=x86_64-apple-darwin
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-musl
+
+before_install:
+  - export PATH="$PATH:$HOME/.cargo/bin"
+
+install:
+  - bash ci/install.sh
+
+script:
+  - bash ci/script.sh
+
+before_deploy:
+  - bash ci/before_deploy.sh
+
+deploy:
+  provider: releases
+  # TODO Regenerate this api_key for your project, this one won't work for you. Here's how:
+  # - Go to 'https://github.com/settings/tokens/new' and generate a Token with only the
+  # `public_repo` scope enabled
+  # - Call `travis encrypt $github_token` where $github_token is the token you got in the previous
+  # step and `travis` is the official Travis CI gem (see https://rubygems.org/gems/travis/)
+  # - Enter the "encrypted value" below
+  api_key:
+    secure: FarU1VnPW15WXkNP76rQH0VdB+dnp6Op7t2/bl5oCjn7OQ8R3vB32vxCP7DXtBvtE2U9z3CeRmE4pKIRN1rObb/GUyNKxPH0UJiTtDgGtxtTYZHdBjED2nEqdcA2+G1ElCub5O3NhtzsRLM1KPPukJcts6gCFgK/tgcDyKLMX/iGsXOuxOwqu6algZOTcHIaT4M8/TjH7g/hzOz8UKoaqZgSLuKLJ+J30LCJKK4umW57Nev66ATavBWQ3MIFCTyBc9YSsMSQcsjtlA7jcHNhelsCxQHzbxXWQK1jF439QXyNHog3tS41qmfMal+TUhW/NiSkqwJ1//PowD+oYI7si/biBawf6PU2oz5AfWknzPr4k6lAX2WYDcRLIkwEwKi5fHrvMYL0TuNWGb8gF+7DD+7DRaZrRLAbrA6SOFGydSPNzO7HvEYJjs39/2LfqXOQ0aie4ez5fGzsE655D+U1ulmVOx3Y6C1rxKi/oBVJZNuvdMPqtRpgbFYtAsk//wM+nt+YH8TndFR+x6AjZ9OTSDbbJwMLm1SckDLAE/sAC/vU+A6io82uMuDvKmPrtiOKsZp4kmwo5N1CWvIBtvd8evIMPAOFW51AncxnCvCiqYGtfB/BkKAr7mcxiwuWVwXMkOpSr7JzfQd8C5gOEMVczA9qnB6fRCY+dpxGjY0LSY0=
+  file_glob: true
+  file: ${PROJECT_NAME}-${TRAVIS_TAG}-${TARGET}.*
+  # don't delete the artifacts from previous phases
+  skip_cleanup: true
+  # deploy when a new tag is pushed
+  on:
+    # channel to use to produce the release artifacts
+    condition: $TRAVIS_RUST_VERSION = stable
+    tags: true
+
+notifications:
+  email:
+    on_success: never
