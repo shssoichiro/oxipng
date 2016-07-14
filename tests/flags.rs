@@ -3,6 +3,8 @@ extern crate oxipng;
 
 use image::GenericImage;
 use image::Pixel;
+use oxipng::colors::{BitDepth, ColorType};
+use oxipng::headers::Headers;
 use oxipng::png;
 use std::collections::HashSet;
 use std::fs::remove_file;
@@ -24,10 +26,10 @@ fn get_opts(input: &Path) -> oxipng::Options {
 fn test_it_converts(input: &Path,
                     output: &Path,
                     opts: &oxipng::Options,
-                    color_type_in: png::ColorType,
-                    bit_depth_in: png::BitDepth,
-                    color_type_out: png::ColorType,
-                    bit_depth_out: png::BitDepth) {
+                    color_type_in: ColorType,
+                    bit_depth_in: BitDepth,
+                    color_type_out: ColorType,
+                    bit_depth_out: BitDepth) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
@@ -70,17 +72,17 @@ fn verbose_mode() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
 fn strip_headers_list() {
     let input = PathBuf::from("tests/files/strip_headers_list.png");
     let mut opts = get_opts(&input);
-    opts.strip = png::Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
+    opts.strip = Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
     let output = opts.out_file.clone();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
@@ -121,7 +123,7 @@ fn strip_headers_list() {
 fn strip_headers_safe() {
     let input = PathBuf::from("tests/files/strip_headers_safe.png");
     let mut opts = get_opts(&input);
-    opts.strip = png::Headers::Safe;
+    opts.strip = Headers::Safe;
     let output = opts.out_file.clone();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
@@ -162,7 +164,7 @@ fn strip_headers_safe() {
 fn strip_headers_all() {
     let input = PathBuf::from("tests/files/strip_headers_all.png");
     let mut opts = get_opts(&input);
-    opts.strip = png::Headers::All;
+    opts.strip = Headers::All;
     let output = opts.out_file.clone();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
@@ -203,7 +205,7 @@ fn strip_headers_all() {
 fn strip_headers_none() {
     let input = PathBuf::from("tests/files/strip_headers_none.png");
     let mut opts = get_opts(&input);
-    opts.strip = png::Headers::None;
+    opts.strip = Headers::None;
     let output = opts.out_file.clone();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
@@ -324,8 +326,8 @@ fn interlacing_0_to_1_small_files() {
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -342,8 +344,8 @@ fn interlacing_0_to_1_small_files() {
     };
 
     assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::One);
+    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::One);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
@@ -365,8 +367,8 @@ fn interlacing_1_to_0_small_files() {
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -383,8 +385,8 @@ fn interlacing_1_to_0_small_files() {
     };
 
     assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::One);
+    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::One);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();
@@ -446,10 +448,10 @@ fn preserve_attrs() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 
     // TODO: Actually check permissions
 }
@@ -463,8 +465,8 @@ fn fix_errors() {
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::RGBA);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -480,8 +482,8 @@ fn fix_errors() {
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::Grayscale);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::Grayscale);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
     remove_file(output).ok();
@@ -497,8 +499,8 @@ fn issue_42() {
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::GrayscaleAlpha);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
@@ -515,8 +517,8 @@ fn issue_42() {
     };
 
     assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, png::ColorType::GrayscaleAlpha);
-    assert_eq!(png.ihdr_data.bit_depth, png::BitDepth::Eight);
+    assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
+    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
     let old_png = image::open(&input).unwrap();
     let new_png = image::open(&output).unwrap();

@@ -34,7 +34,15 @@ num_cpus = "^0.2.11"
 regex = "^0.1.63"
 scoped-pool = "^0.1.8"
 
+[dependencies.clippy]
+optional = true
+version = "*"
+
 [dev-dependencies.image]
 version = "^0.8.0"
 default-features = false
 features = ["png_codec"]
+
+[features]
+default = []
+nightly = ["clippy", "regex/simd-accel"]

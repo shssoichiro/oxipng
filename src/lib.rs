@@ -8,6 +8,7 @@ extern crate miniz_sys;
 extern crate num_cpus;
 extern crate scoped_pool;
 
+use headers::Headers;
 use scoped_pool::Pool;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
@@ -15,12 +16,17 @@ use std::io::{BufWriter, Write, stderr, stdout};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
+pub mod colors;
 pub mod deflate {
     pub mod deflate;
     pub mod libz_stream;
     pub mod miniz_stream;
 }
+mod filters;
+pub mod headers;
+mod interlace;
 pub mod png;
+mod reduction;
 
 #[derive(Clone,Debug)]
 /// Options controlling the output of the `optimize` function
@@ -96,7 +102,7 @@ pub struct Options {
     pub idat_recoding: bool,
     /// Which headers to strip from the PNG file, if any
     /// Default: `None`
-    pub strip: png::Headers,
+    pub strip: Headers,
     /// Whether to use heuristics to pick the best filter and compression
     /// Intended for use with `-o 1` from the CLI interface
     /// Default: `false`
@@ -148,7 +154,7 @@ impl Default for Options {
             color_type_reduction: true,
             palette_reduction: true,
             idat_recoding: true,
-            strip: png::Headers::None,
+            strip: Headers::None,
             use_heuristics: false,
             threads: thread_count,
         }
@@ -339,7 +345,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
     if opts.use_heuristics {
         // Heuristically determine which set of options to use
         if png.ihdr_data.bit_depth.as_u8() >= 8 &&
-           png.ihdr_data.color_type != png::ColorType::Indexed {
+           png.ihdr_data.color_type != colors::ColorType::Indexed {
             if filter.is_empty() {
                 filter.insert(5);
             }
@@ -540,13 +546,13 @@ fn report_reduction(png: &png::PngData) {
 fn perform_strip(png: &mut png::PngData, opts: &Options) {
     match opts.strip.clone() {
         // Strip headers
-        png::Headers::None => (),
-        png::Headers::Some(hdrs) => {
+        Headers::None => (),
+        Headers::Some(hdrs) => {
             for hdr in &hdrs {
                 png.aux_headers.remove(hdr);
             }
         }
-        png::Headers::Safe => {
+        Headers::Safe => {
             const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
                                                           "bKGD", "hIST", "pHYs", "sPLT"];
             let mut preserved = HashMap::new();
@@ -557,7 +563,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
             }
             png.aux_headers = preserved;
         }
-        png::Headers::All => {
+        Headers::All => {
             png.aux_headers = HashMap::new();
         }
     }

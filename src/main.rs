@@ -3,7 +3,7 @@ extern crate clap;
 extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
-use oxipng::png;
+use oxipng::headers::Headers;
 use regex::Regex;
 use std::collections::HashSet;
 use std::fs::DirBuilder;
@@ -475,9 +475,9 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
                     .to_owned());
             }
             if hdrs[0] == "safe" {
-                opts.strip = png::Headers::Safe;
+                opts.strip = Headers::Safe;
             } else {
-                opts.strip = png::Headers::All;
+                opts.strip = Headers::All;
             }
         } else {
             const FORBIDDEN_CHUNKS: [&'static str; 5] = ["IHDR", "IDAT", "tRNS", "PLTE", "IEND"];
@@ -486,12 +486,12 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
                     return Err(format!("{} chunk is not allowed to be stripped", i));
                 }
             }
-            opts.strip = png::Headers::Some(hdrs);
+            opts.strip = Headers::Some(hdrs);
         }
     }
 
     if matches.is_present("strip-safe") {
-        opts.strip = png::Headers::Safe;
+        opts.strip = Headers::Safe;
     }
 
     if let Some(x) = matches.value_of("threads") {

@@ -3,6 +3,7 @@ extern crate oxipng;
 
 use image::GenericImage;
 use image::Pixel;
+use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
 use std::fs::remove_file;
@@ -24,10 +25,10 @@ fn get_opts(input: &Path) -> oxipng::Options {
 fn test_it_converts(input: &Path,
                     output: &Path,
                     opts: &oxipng::Options,
-                    color_type_in: png::ColorType,
-                    bit_depth_in: png::BitDepth,
-                    color_type_out: png::ColorType,
-                    bit_depth_out: png::BitDepth) {
+                    color_type_in: ColorType,
+                    bit_depth_in: BitDepth,
+                    color_type_out: ColorType,
+                    bit_depth_out: BitDepth) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
@@ -71,10 +72,10 @@ fn filter_0_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -88,10 +89,10 @@ fn filter_1_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -105,10 +106,10 @@ fn filter_2_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -122,10 +123,10 @@ fn filter_3_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -139,10 +140,10 @@ fn filter_4_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -156,10 +157,10 @@ fn filter_5_for_rgba_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGBA,
+                     BitDepth::Sixteen,
+                     ColorType::RGBA,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -173,10 +174,10 @@ fn filter_0_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -190,10 +191,10 @@ fn filter_1_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -207,10 +208,10 @@ fn filter_2_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -224,10 +225,10 @@ fn filter_3_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -241,10 +242,10 @@ fn filter_4_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -258,10 +259,10 @@ fn filter_5_for_rgba_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGBA,
-                     png::BitDepth::Eight);
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::RGBA,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -275,10 +276,10 @@ fn filter_0_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -292,10 +293,10 @@ fn filter_1_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -309,10 +310,10 @@ fn filter_2_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -326,10 +327,10 @@ fn filter_3_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -343,10 +344,10 @@ fn filter_4_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -360,10 +361,10 @@ fn filter_5_for_rgb_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::RGB,
-                     png::BitDepth::Sixteen);
+                     ColorType::RGB,
+                     BitDepth::Sixteen,
+                     ColorType::RGB,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -377,10 +378,10 @@ fn filter_0_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -394,10 +395,10 @@ fn filter_1_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -411,10 +412,10 @@ fn filter_2_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -428,10 +429,10 @@ fn filter_3_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -445,10 +446,10 @@ fn filter_4_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -462,10 +463,10 @@ fn filter_5_for_rgb_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -479,10 +480,10 @@ fn filter_0_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -496,10 +497,10 @@ fn filter_1_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -513,10 +514,10 @@ fn filter_2_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -530,10 +531,10 @@ fn filter_3_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -547,10 +548,10 @@ fn filter_4_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -564,10 +565,10 @@ fn filter_5_for_grayscale_alpha_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Sixteen);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -581,10 +582,10 @@ fn filter_0_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -598,10 +599,10 @@ fn filter_1_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -615,10 +616,10 @@ fn filter_2_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -632,10 +633,10 @@ fn filter_3_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -649,10 +650,10 @@ fn filter_4_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -666,10 +667,10 @@ fn filter_5_for_grayscale_alpha_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight,
-                     png::ColorType::GrayscaleAlpha,
-                     png::BitDepth::Eight);
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -683,10 +684,10 @@ fn filter_0_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -700,10 +701,10 @@ fn filter_1_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -717,10 +718,10 @@ fn filter_2_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -734,10 +735,10 @@ fn filter_3_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -751,10 +752,10 @@ fn filter_4_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -768,10 +769,10 @@ fn filter_5_for_grayscale_16() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Sixteen);
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen,
+                     ColorType::Grayscale,
+                     BitDepth::Sixteen);
 }
 
 #[test]
@@ -785,10 +786,10 @@ fn filter_0_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -802,10 +803,10 @@ fn filter_1_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -819,10 +820,10 @@ fn filter_2_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -836,10 +837,10 @@ fn filter_3_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -853,10 +854,10 @@ fn filter_4_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -870,10 +871,10 @@ fn filter_5_for_grayscale_8() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight,
-                     png::ColorType::Grayscale,
-                     png::BitDepth::Eight);
+                     ColorType::Grayscale,
+                     BitDepth::Eight,
+                     ColorType::Grayscale,
+                     BitDepth::Eight);
 }
 
 #[test]
@@ -887,10 +888,10 @@ fn filter_0_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -904,10 +905,10 @@ fn filter_1_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -921,10 +922,10 @@ fn filter_2_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -938,10 +939,10 @@ fn filter_3_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -955,10 +956,10 @@ fn filter_4_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -972,10 +973,10 @@ fn filter_5_for_palette_4() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Four);
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
 
 #[test]
@@ -989,10 +990,10 @@ fn filter_0_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1006,10 +1007,10 @@ fn filter_1_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1023,10 +1024,10 @@ fn filter_2_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1040,10 +1041,10 @@ fn filter_3_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1057,10 +1058,10 @@ fn filter_4_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1074,10 +1075,10 @@ fn filter_5_for_palette_2() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two,
-                     png::ColorType::Indexed,
-                     png::BitDepth::Two);
+                     ColorType::Indexed,
+                     BitDepth::Two,
+                     ColorType::Indexed,
+                     BitDepth::Two);
 }
 
 #[test]
@@ -1091,10 +1092,10 @@ fn filter_0_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1108,10 +1109,10 @@ fn filter_1_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1125,10 +1126,10 @@ fn filter_2_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1142,10 +1143,10 @@ fn filter_3_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1159,10 +1160,10 @@ fn filter_4_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1176,10 +1177,10 @@ fn filter_5_for_palette_1() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One,
-                     png::ColorType::Indexed,
-                     png::BitDepth::One);
+                     ColorType::Indexed,
+                     BitDepth::One,
+                     ColorType::Indexed,
+                     BitDepth::One);
 }
 
 #[test]
@@ -1193,8 +1194,8 @@ fn issue_29() {
     test_it_converts(&input,
                      &output,
                      &opts,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight,
-                     png::ColorType::RGB,
-                     png::BitDepth::Eight);
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }
