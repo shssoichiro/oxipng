@@ -371,22 +371,33 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         let best: Arc<Mutex<Option<TrialWithData>>> = Arc::new(Mutex::new(None));
         let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
         let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
-        let mut filters: HashMap<u8, Vec<u8>> = HashMap::with_capacity(filter.len());
+        let filters: Arc<Mutex<HashMap<u8, Vec<u8>>>> =
+            Arc::new(Mutex::new(HashMap::with_capacity(filter.len())));
         if opts.verbosity.is_some() {
             writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
         }
 
-        for f in &filter {
-            let filtered = png.filter_image(*f);
-            filters.insert(*f, filtered.clone());
-            for zc in &compression {
-                for zm in &memory {
-                    for zs in &strategies {
-                        results.push((*f, *zc, *zm, *zs));
+        pool.scoped(|scope| {
+            for f in &filter {
+                let png = png.clone();
+                let filters = filters.clone();
+                for zc in &compression {
+                    for zm in &memory {
+                        for zs in &strategies {
+                            results.push((*f, *zc, *zm, *zs));
+                        }
                     }
                 }
+                scope.execute(move || {
+                    let filtered = png.filter_image(*f);
+                    let mut filters = filters.lock().unwrap();
+                    filters.insert(*f, filtered);
+                });
             }
-        }
+        });
+
+        let filters = filters.lock().unwrap();
+
         pool.scoped(|scope| {
             let original_len = png.idat_data.len();
             let interlacing_changed = opts.interlace.is_some() &&
