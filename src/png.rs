@@ -1,6 +1,7 @@
 use bit_vec::BitVec;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use crc::crc32;
+use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs::File;
@@ -612,80 +613,73 @@ impl PngData {
 
         // Remove duplicates from the data
         if !duplicates.is_empty() {
-            self.do_palette_reduction(&mut duplicates, &mut index_map, &mut indexed_palette);
+            self.do_palette_reduction(&duplicates, &mut index_map, &mut indexed_palette);
         }
 
-        // A list of unused palette indices
-        let mut unused: Vec<u8> = Vec::new();
-        {
-            // Find palette entries that are never used
-            let mut seen = HashSet::with_capacity(indexed_palette.len());
-            for line in self.scan_lines() {
-                match self.ihdr_data.bit_depth {
-                    BitDepth::Eight => {
-                        for byte in &line.data {
-                            seen.insert(*byte);
-                        }
+        // Find palette entries that are never used
+        let mut seen = HashSet::with_capacity(indexed_palette.len());
+        for line in self.scan_lines() {
+            match self.ihdr_data.bit_depth {
+                BitDepth::Eight => {
+                    for byte in &line.data {
+                        seen.insert(*byte);
                     }
-                    BitDepth::Four => {
-                        let bitvec = BitVec::from_bytes(&line.data);
-                        let mut current = 0u8;
-                        for (i, bit) in bitvec.iter().enumerate() {
-                            let mod_i = i % 4;
-                            if bit {
-                                current += 2u8.pow(3u32 - mod_i as u32);
-                            }
-                            if mod_i == 3 {
-                                seen.insert(current);
-                                current = 0;
-                            }
-                        }
-                    }
-                    BitDepth::Two => {
-                        let bitvec = BitVec::from_bytes(&line.data);
-                        let mut current = 0u8;
-                        for (i, bit) in bitvec.iter().enumerate() {
-                            let mod_i = i % 2;
-                            if bit {
-                                current += 2u8.pow(1u32 - mod_i as u32);
-                            }
-                            if mod_i == 1 {
-                                seen.insert(current);
-                                current = 0;
-                            }
-                        }
-                    }
-                    _ => unreachable!(),
                 }
-
-                if seen.len() == indexed_palette.len() {
-                    // Exit early if no further possible optimizations
-                    // Check at the end of each line
-                    // Checking after every pixel would be overly expensive
-                    return !duplicates.is_empty();
+                BitDepth::Four => {
+                    let bitvec = BitVec::from_bytes(&line.data);
+                    let mut current = 0u8;
+                    for (i, bit) in bitvec.iter().enumerate() {
+                        let mod_i = i % 4;
+                        if bit {
+                            current += 2u8.pow(3u32 - mod_i as u32);
+                        }
+                        if mod_i == 3 {
+                            seen.insert(current);
+                            current = 0;
+                        }
+                    }
                 }
+                BitDepth::Two => {
+                    let bitvec = BitVec::from_bytes(&line.data);
+                    let mut current = 0u8;
+                    for (i, bit) in bitvec.iter().enumerate() {
+                        let mod_i = i % 2;
+                        if bit {
+                            current += 2u8.pow(1u32 - mod_i as u32);
+                        }
+                        if mod_i == 1 {
+                            seen.insert(current);
+                            current = 0;
+                        }
+                    }
+                }
+                _ => unreachable!(),
             }
-            for i in 0..indexed_palette.len() as u8 {
-                if !seen.contains(&i) {
-                    unused.push(i);
-                }
+
+            if seen.len() == indexed_palette.len() {
+                // Exit early if no further possible optimizations
+                // Check at the end of each line
+                // Checking after every pixel would be overly expensive
+                return !duplicates.is_empty();
             }
         }
+
+        let unused: Vec<u8> =
+            (0..indexed_palette.len() as u8).filter(|i| !seen.contains(&i)).collect();
 
         // Remove unused palette indices
-        self.do_palette_reduction(&mut unused, &mut index_map, &mut indexed_palette);
+        self.do_palette_reduction(&unused, &mut index_map, &mut indexed_palette);
 
         true
     }
     fn do_palette_reduction(&mut self,
-                            indices: &mut Vec<u8>,
+                            indices: &[u8],
                             index_map: &mut HashMap<u8, u8>,
                             indexed_palette: &mut Vec<&[u8]>) {
         let mut new_data = Vec::with_capacity(self.raw_data.len());
         let mut alpha_palette = self.aux_headers.get("tRNS").cloned();
         let original_len = indexed_palette.len();
-        indices.sort_by(|a, b| b.cmp(a));
-        for idx in indices {
+        for idx in indices.iter().sorted_by(|a, b| b.cmp(a)) {
             for i in (*idx as usize + 1)..original_len {
                 let existing = index_map.entry(i as u8).or_insert(i as u8);
                 if *existing >= *idx {
@@ -769,10 +763,7 @@ impl PngData {
         }
         index_map.clear();
         self.raw_data = new_data;
-        let mut new_palette = Vec::with_capacity(indexed_palette.len() * 3);
-        for color in indexed_palette {
-            new_palette.extend_from_slice(color);
-        }
+        let new_palette = indexed_palette.iter().cloned().flatten().cloned().collect::<Vec<u8>>();
         self.palette = Some(new_palette);
     }
     /// Attempt to reduce the color type of the image
@@ -881,10 +872,7 @@ impl PngData {
 }
 
 fn interlace_image(png: &mut PngData) {
-    let mut passes: Vec<BitVec> = Vec::with_capacity(7);
-    for _ in 0..7 {
-        passes.push(BitVec::new());
-    }
+    let mut passes: Vec<BitVec> = vec![BitVec::new(); 7];
     let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
     for (index, line) in png.scan_lines().enumerate() {
         match index % 8 {
@@ -971,13 +959,11 @@ fn interlace_image(png: &mut PngData) {
 
 fn deinterlace_image(png: &mut PngData) {
     let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
-    let mut lines: Vec<BitVec> = Vec::with_capacity(png.ihdr_data.height as usize);
-    for _ in 0..png.ihdr_data.height {
-        // Initialize each output line with a starting filter byte of 0
-        // as well as some blank data
-        lines.push(BitVec::from_elem(8 + bits_per_pixel as usize * png.ihdr_data.width as usize,
-                                     false));
-    }
+    let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr_data.width as usize;
+    // Initialize each output line with a starting filter byte of 0
+    // as well as some blank data
+    let mut lines: Vec<BitVec> =
+        vec![BitVec::from_elem(bits_per_line, false); png.ihdr_data.height as usize];
     let mut current_pass = 1;
     let mut pass_constants = interlaced_constants(current_pass);
     let mut current_y: usize = pass_constants.y_shift as usize;
@@ -1024,6 +1010,7 @@ fn deinterlace_image(png: &mut PngData) {
     png.raw_data = output;
 }
 
+#[derive(Clone, Copy)]
 struct InterlacedConstants {
     x_shift: u8,
     y_shift: u8,
@@ -1321,15 +1308,11 @@ fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
             }
 
             if i % bpp == bpp - 1 {
-                low_bytes.sort();
-                low_bytes.dedup();
-                if low_bytes.len() > 1 {
+                if low_bytes.iter().unique().count() > 1 {
                     return None;
                 }
                 if byte_depth == 2 {
-                    high_bytes.sort();
-                    high_bytes.dedup();
-                    if high_bytes.len() > 1 {
+                    if high_bytes.iter().unique().count() > 1 {
                         return None;
                     }
                     reduced.push(high_bytes[0]);
@@ -1359,8 +1342,7 @@ fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> 
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if palette.contains(&cur_pixel) {
-                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                if let Some(idx) = palette.iter().position(|x| x == &cur_pixel) {
                     reduced.push(idx as u8);
                 } else {
                     let len = palette.len();
@@ -1403,8 +1385,7 @@ fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
         for (i, byte) in line.data.iter().enumerate() {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
-                if palette.contains(&cur_pixel) {
-                    let idx = palette.iter().enumerate().find(|&x| x.1 == &cur_pixel).unwrap().0;
+                if let Some(idx) = palette.iter().position(|x| x == &cur_pixel) {
                     reduced.push(idx as u8);
                 } else {
                     let len = palette.len();
@@ -1487,9 +1468,7 @@ fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
     for byte in &palette {
         cur_pixel.push(*byte);
         if cur_pixel.len() == 3 {
-            cur_pixel.sort();
-            cur_pixel.dedup();
-            if cur_pixel.len() > 1 {
+            if cur_pixel.iter().unique().count() > 1 {
                 return None;
             }
             cur_pixel.clear();
@@ -1536,29 +1515,25 @@ fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             cur_pixel.push(*byte);
             if i % bpp == bpp - 1 {
                 if bpp == 3 {
-                    cur_pixel.sort();
-                    cur_pixel.dedup();
-                    if cur_pixel.len() > 1 {
+                    if cur_pixel.iter().unique().count() > 1 {
                         return None;
                     }
                     reduced.push(cur_pixel[0]);
                 } else {
-                    let mut pixel_zip = cur_pixel.iter()
-                        .enumerate()
-                        .filter(|&(i, _)| i % 2 == 0)
-                        .map(|(_, x)| *x)
+                    let pixel_bytes = cur_pixel.iter()
+                        .step(2)
+                        .cloned()
                         .zip(cur_pixel.iter()
-                            .enumerate()
-                            .filter(|&(i, _)| i % 2 == 1)
-                            .map(|(_, x)| *x))
+                            .skip(1)
+                            .step(2)
+                            .cloned())
+                        .unique()
                         .collect::<Vec<(u8, u8)>>();
-                    pixel_zip.sort();
-                    pixel_zip.dedup();
-                    if pixel_zip.len() > 1 {
+                    if pixel_bytes.len() > 1 {
                         return None;
                     }
-                    reduced.push(pixel_zip[0].0);
-                    reduced.push(pixel_zip[0].1);
+                    reduced.push(pixel_bytes[0].0);
+                    reduced.push(pixel_bytes[0].1);
                 }
                 cur_pixel.clear();
             }

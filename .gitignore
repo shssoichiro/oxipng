@@ -2,3 +2,4 @@ target
 *.bk
 .DS_Store
 *.out.png
+/.idea
