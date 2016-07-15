@@ -6,14 +6,8 @@
 
 ## Overview
 
-Oxipng is a lossless PNG compression optimizer.
-
-**Note:** This package should be considered a beta. Although there are many tests in place,
-there is still a chance of data loss or corruption. You should backup your files before
-using this tool, unless you are very brave.
-
-If you encounter an issue, please report it via the GitHub issues tab. Include as many details
-as possible.
+Oxipng is a multithreaded lossless PNG compression optimizer. It can be used via a command-line
+interface or as a library in other Rust programs.
 
 ## Installing
 
@@ -56,7 +50,7 @@ to give any extra compression gains and is not recommended.
 PNG interlacing on any images that are processed. `-i 0` will remove interlacing from all
 processed images. Not specifying either will keep the same interlacing state as the
 input image. Note: Interlacing can add 25-50% to the size of an optimized image. Only use
-it if you have a good reason.
+it if you believe the benefits outweight the costs for your use case.
 * Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
 Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
 will never affect rendering of the image. "All" removes all metadata that is not critical
@@ -67,7 +61,7 @@ More advanced options can be found by running `oxipng -h`.
 
 ## Library Usage
 
-Although intended to be used as an executable, oxipng can also be used as a library in
+Although originally intended to be used as an executable, oxipng can also be used as a library in
 other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.toml,
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://shssoichiro.github.io/oxipng/doc/oxipng/). The simplest
@@ -89,10 +83,10 @@ This also served as an opportunity to choose a more modern, safer language (Rust
 ## Contributing
 
 Any contributions are welcome and will be accepted via pull request on GitHub. Bug reports can be
-filed via GitHub issues. If you have the capability to submit a fix with the bug report, it is
-preferred that you do so via pull request, however you do not need to be a Rust programmer to
-contribute. Other contributions (such as improving documentation or translations) are also
-welcome via GitHub.
+filed via GitHub issues. Please include as many details as possible. If you have the capability
+to submit a fix with the bug report, it is preferred that you do so via pull request,
+however you do not need to be a Rust developer to contribute.
+Other contributions (such as improving documentation or translations) are also welcome via GitHub.
 
 ## License
 
