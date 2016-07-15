@@ -24,19 +24,25 @@ doc = false
 [dependencies]
 bit-vec = "^0.4.2"
 byteorder = "^0.5.0"
-clap = "^2.2.5"
 crc = "^1.2.0"
 itertools = "^0.4.16"
 libc = "^0.2.4"
 libz-sys = "^1.0.0"
 miniz-sys = "^0.1.7"
 num_cpus = "^0.2.11"
-regex = "^0.1.63"
 scoped-pool = "^0.1.8"
+
+[dependencies.clap]
+optional = true
+version = "^2.2.5"
 
 [dependencies.clippy]
 optional = true
 version = "^0.0.79"
+
+[dependencies.regex]
+optional = true
+version = "^0.1.63"
 
 [dev-dependencies.image]
 version = "^0.8.0"
@@ -44,5 +50,7 @@ default-features = false
 features = ["png_codec"]
 
 [features]
-default = []
-nightly = ["clippy", "regex/simd-accel"]
+default = ["binary"]
+binary = ["clap", "regex"]
+nightly = ["clippy"]
+nightly-binary = ["binary", "nightly", "regex/simd-accel"]
