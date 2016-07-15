@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["optimize","Perform optimization on the input file using the options provided"],["optimize_from_memory","Perform optimization on the input file using the options provided, where the file is already loaded in-memory"]],"mod":[["deflate",""],["png",""]],"struct":[["Options","Options controlling the output of the `optimize` function"]]});

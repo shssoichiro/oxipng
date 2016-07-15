@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["scope","Create a new `scope`, for deferred destructors."]],"struct":[["Scope",""],["ScopedJoinHandle","A handle to a scoped thread"]]});

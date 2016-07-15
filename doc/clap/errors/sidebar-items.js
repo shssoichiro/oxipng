@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ErrorKind","Command line argument parser kind of error"]],"struct":[["Error","Command Line Argument Parser Error"]],"type":[["Result","Short hand for result type"]]});

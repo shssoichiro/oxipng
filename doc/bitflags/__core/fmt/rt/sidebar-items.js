@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["v1","This is an internal module used by the ifmt! runtime. These structures are emitted to static arrays to precompile format strings ahead of time."]]});

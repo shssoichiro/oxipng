@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Error","Base functionality for all errors in Rust."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["MAX",""],["MIN",""]]});

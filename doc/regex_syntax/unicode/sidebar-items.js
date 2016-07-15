@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["case_folding",""],["derived_property",""],["general_category",""],["property",""],["regex",""],["script",""]]});

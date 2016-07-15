@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["UNICODE_VERSION","The version of Unicode that this version of unicode-width is based on."]],"mod":[["charwidth",""]]});

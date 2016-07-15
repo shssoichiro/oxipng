@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["CommandExt","Unix-specific extensions to the `std::process::Command` builder"],["ExitStatusExt","Unix-specific extensions to `std::process::ExitStatus`"]]});

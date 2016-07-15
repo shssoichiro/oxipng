@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","An error that occurred during parsing or compiling a regular expression."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ArgGroup","`ArgGroup`s are a family of related arguments and way for you to express, \"Any of these arguments\". By placing arguments in a logical group, you can create easier requirement and exclusion rules instead of having to list each argument individually, or when you want a rule to apply \"any but not all\" arguments."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Atomic","Like `std::sync::atomic::AtomicPtr`."]]});

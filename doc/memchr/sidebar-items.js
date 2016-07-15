@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["memchr","A safe interface to `memchr`."],["memchr2","Like `memchr`, but searches for two bytes instead of one."],["memchr3","Like `memchr`, but searches for three bytes instead of one."],["memrchr","A safe interface to `memrchr`."]]});

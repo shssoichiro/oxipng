@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["deflate","Compress a data stream using the zlib implementation of the DEFLATE algorithm"],["inflate","Decompress a data stream using the DEFLATE algorithm"]]});

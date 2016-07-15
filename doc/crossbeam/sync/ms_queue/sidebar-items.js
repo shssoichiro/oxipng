@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MsQueue","A Michael-Scott lock-free queue, with support for blocking `pop`s."]]});
