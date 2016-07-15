@@ -1,4 +1,4 @@
-**Version 0.9.0 (unreleased)**
+**Version 0.9.0**
  - [SEMVER_MAJOR] Significant refactoring of modules
  - Use `itertools` to cleanup areas of code
  - Use multiple threads for filtering trials
