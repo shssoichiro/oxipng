@@ -36,7 +36,7 @@ scoped-pool = "^0.1.8"
 
 [dependencies.clippy]
 optional = true
-version = "*"
+version = "^0.0.79"
 
 [dev-dependencies.image]
 version = "^0.8.0"
