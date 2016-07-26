@@ -754,21 +754,6 @@ fn interlaced_rgb_8_should_be_palette_1_grayscale() {
 }
 
 #[test]
-fn interlaced_palette_8_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone();
-
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::Indexed,
-                     BitDepth::Eight,
-                     ColorType::Grayscale,
-                     BitDepth::Eight);
-}
-
-#[test]
 fn interlaced_palette_8_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_palette_8.png");
     let opts = get_opts(&input);
