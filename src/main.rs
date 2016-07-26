@@ -10,7 +10,7 @@ use std::fs::DirBuilder;
 use std::io::{Write, stderr};
 use std::path::PathBuf;
 
-const VERSION_STRING: &'static str = "0.9.0";
+const VERSION_STRING: &'static str = "0.10.0";
 
 fn main() {
     let matches = App::new("oxipng")
