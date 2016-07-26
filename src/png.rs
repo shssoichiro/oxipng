@@ -707,16 +707,7 @@ impl PngData {
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::Indexed && self.transparency_palette.is_none() &&
-           self.palette.as_ref().map(|x| x.len()).unwrap() > 16 {
-            if let Some(data) = reduce_palette_to_grayscale(self) {
-                self.raw_data = data;
-                self.palette = None;
-                self.ihdr_data.color_type = ColorType::Grayscale;
-                changed = true;
-                should_reduce_bit_depth = false;
-            }
-        } else if self.ihdr_data.color_type == ColorType::Grayscale {
+        if self.ihdr_data.color_type == ColorType::Grayscale {
             if let Some((data, palette)) = reduce_grayscale_to_palette(self) {
                 self.raw_data = data;
                 self.palette = Some(palette);

@@ -234,50 +234,6 @@ pub fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> 
     Some((reduced.to_bytes(), color_palette))
 }
 
-pub fn reduce_palette_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
-    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
-    let mut cur_pixel = Vec::with_capacity(3);
-    let palette = png.palette.clone().unwrap();
-    // Iterate through palette and determine if all colors are grayscale
-    for byte in &palette {
-        cur_pixel.push(*byte);
-        if cur_pixel.len() == 3 {
-            if cur_pixel.iter().unique().count() > 1 {
-                return None;
-            }
-            cur_pixel.clear();
-        }
-    }
-
-    // Iterate through scanlines and assign grayscale value to each pixel
-    let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
-    let bit_depth_inverse = 8 - bit_depth;
-    for line in png.scan_lines() {
-        reduced.extend(BitVec::from_bytes(&[line.filter]));
-        let bit_vec = BitVec::from_bytes(&line.data);
-        let mut cur_pixel = BitVec::with_capacity(bit_depth);
-        for bit in bit_vec {
-            // Handle bit depths less than 8-bits
-            // At the end of each pixel, push its grayscale value onto the reduced image
-            cur_pixel.push(bit);
-            if cur_pixel.len() == bit_depth {
-                // `to_bytes` gives us e.g. 10000000 for a 1-bit pixel, when we would want 00000001
-                let padded_pixel = cur_pixel.to_bytes()[0] >> bit_depth_inverse;
-                let palette_idx: usize = padded_pixel as usize * 3;
-                reduced.extend(BitVec::from_bytes(&[palette[palette_idx]]));
-                // BitVec's clear function doesn't set len to 0
-                cur_pixel = BitVec::with_capacity(bit_depth);
-            }
-        }
-        // Pad end of line to get 8 bits per byte
-        while reduced.len() % 8 != 0 {
-            reduced.push(false);
-        }
-    }
-
-    Some(reduced.to_bytes())
-}
-
 pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;

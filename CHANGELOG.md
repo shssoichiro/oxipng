@@ -1,6 +1,7 @@
 **Version 0.10.0 (unreleased)**
  - [SEMVER_MINOR] Make clap and regex dependencies optional
    - Enabled by default, needed for executable build; can be disabled for use in crates
+ - Remove reduction from palette to grayscale, which was not working and provided minimal benefit
 
 **Version 0.9.0**
  - [SEMVER_MAJOR] Significant refactoring of modules
