@@ -2,6 +2,8 @@ use libz_sys;
 use miniz_sys;
 use libc::c_int;
 use std::cmp::max;
+#[cfg(test)]
+use quickcheck::TestResult;
 
 /// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
@@ -57,4 +59,14 @@ pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, S
     output.shrink_to_fit();
 
     Ok(output)
+}
+
+#[cfg(test)]
+quickcheck! {
+    fn quickcheck(data: Vec<u8>, zc: u8, zm: u8, zs: u8, zw: u8) -> TestResult {
+        if data.is_empty() || zc > 9 || zm == 0 || zm > 9 || zs > 3 || zw > 15 || zw < 8 {
+            return TestResult::discard();
+        }
+        TestResult::from_bool(data == inflate(&deflate(&data, zc, zm, zs, zw).unwrap()).unwrap())
+    }
 }

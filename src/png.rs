@@ -272,6 +272,7 @@ impl PngData {
     }
 
     /// Return the number of channels in the image, based on color type
+    #[inline]
     pub fn channels_per_pixel(&self) -> u8 {
         match self.ihdr_data.color_type {
             ColorType::Grayscale | ColorType::Indexed => 1,
@@ -733,6 +734,7 @@ impl PngData {
     /// Returns true if the interlacing was changed, false otherwise
     /// The `interlace` parameter specifies the *new* interlacing mode
     /// Assumes that the data has already been de-filtered
+    #[inline]
     pub fn change_interlacing(&mut self, interlace: u8) -> bool {
         if interlace == self.ihdr_data.interlaced {
             return false;
@@ -749,6 +751,7 @@ impl PngData {
     }
 }
 
+#[inline]
 fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     let mut header_data = Vec::with_capacity(header.len() + 4);
     header_data.extend_from_slice(key);

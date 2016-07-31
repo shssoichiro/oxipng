@@ -57,10 +57,12 @@ impl Stream<Compress> {
 }
 
 impl<T: Direction> Stream<T> {
+    #[inline]
     pub fn total_in(&self) -> usize {
         self.raw.total_in as usize
     }
 
+    #[inline]
     pub fn total_out(&self) -> usize {
         self.raw.total_out as usize
     }
@@ -100,23 +102,27 @@ impl Stream<Compress> {
         }
     }
 
+    #[inline]
     pub fn reset(&mut self) -> c_int {
         unsafe { miniz_sys::mz_deflateReset(&mut self.raw) }
     }
 }
 
 impl Direction for Compress {
+    #[inline]
     unsafe fn destroy(stream: *mut miniz_sys::mz_stream) -> c_int {
         miniz_sys::mz_deflateEnd(stream)
     }
 }
 impl Direction for Decompress {
+    #[inline]
     unsafe fn destroy(stream: *mut miniz_sys::mz_stream) -> c_int {
         miniz_sys::mz_inflateEnd(stream)
     }
 }
 
 impl<D: Direction> Drop for Stream<D> {
+    #[inline]
     fn drop(&mut self) {
         unsafe {
             let _ = <D as Direction>::destroy(&mut self.raw);

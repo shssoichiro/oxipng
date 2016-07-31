@@ -16,6 +16,7 @@ pub enum ColorType {
 }
 
 impl fmt::Display for ColorType {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
                "{}",
@@ -31,6 +32,7 @@ impl fmt::Display for ColorType {
 
 impl ColorType {
     /// Get the code used by the PNG specification to denote this color type
+    #[inline]
     pub fn png_header_code(&self) -> u8 {
         match *self {
             ColorType::Grayscale => 0,
@@ -58,6 +60,7 @@ pub enum BitDepth {
 }
 
 impl fmt::Display for BitDepth {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
                "{}",
@@ -73,6 +76,7 @@ impl fmt::Display for BitDepth {
 
 impl BitDepth {
     /// Retrieve the number of bits per channel per pixel as a `u8`
+    #[inline]
     pub fn as_u8(&self) -> u8 {
         match *self {
             BitDepth::One => 1,
@@ -83,6 +87,7 @@ impl BitDepth {
         }
     }
     /// Parse a number of bits per channel per pixel into a `BitDepth`
+    #[inline]
     pub fn from_u8(depth: u8) -> BitDepth {
         match depth {
             1 => BitDepth::One,

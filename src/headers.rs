@@ -35,10 +35,11 @@ pub enum Headers {
     All,
 }
 
+#[inline]
 pub fn file_header_is_valid(bytes: &[u8]) -> bool {
     let expected_header: [u8; 8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
-    bytes.iter().zip(expected_header.iter()).all(|x| x.0 == x.1)
+    *bytes == expected_header
 }
 
 pub fn parse_next_header(byte_data: &[u8],

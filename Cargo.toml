@@ -44,6 +44,9 @@ version = "^0.0.79"
 optional = true
 version = "^0.1.63"
 
+[dev-dependencies]
+quickcheck = "^0.3.0"
+
 [dev-dependencies.image]
 version = "^0.8.0"
 default-features = false

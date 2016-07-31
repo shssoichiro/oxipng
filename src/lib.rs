@@ -8,6 +8,10 @@ extern crate miniz_sys;
 extern crate num_cpus;
 extern crate scoped_pool;
 
+#[cfg(test)]
+#[macro_use]
+extern crate quickcheck;
+
 use headers::Headers;
 use scoped_pool::Pool;
 use std::collections::{HashMap, HashSet};
@@ -536,6 +540,7 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
 }
 
 /// Display the status of the image data after a reduction has taken place
+#[inline]
 fn report_reduction(png: &png::PngData) {
     if let Some(palette) = png.palette.clone() {
         writeln!(&mut stderr(),
@@ -581,6 +586,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
 }
 
 /// Check if an image was already optimized prior to oxipng's operations
+#[inline]
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
     original_size <= optimized_size && !opts.force && opts.interlace.is_none()
 }
