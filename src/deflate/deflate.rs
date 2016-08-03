@@ -2,8 +2,6 @@ use libz_sys;
 use miniz_sys;
 use libc::c_int;
 use std::cmp::max;
-#[cfg(test)]
-use quickcheck::TestResult;
 
 /// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
