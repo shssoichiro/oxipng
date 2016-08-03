@@ -1,3 +1,6 @@
+**Version 0.11.0 (unreleased)**
+ - [SEMVER_MAJOR] Bump minimum rustc version to 1.8.0, required by dependencies
+
 **Version 0.10.0**
  - [SEMVER_MINOR] Make clap and regex dependencies optional
    - Enabled by default, needed for executable build; can be disabled for use in crates

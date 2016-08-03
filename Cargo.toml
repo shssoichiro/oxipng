@@ -45,7 +45,7 @@ optional = true
 version = "^0.1.63"
 
 [dev-dependencies.image]
-version = "^0.8.0"
+version = "^0.10.0"
 default-features = false
 features = ["png_codec"]
 
