@@ -1,12 +1,4 @@
 language: rust
-cache: cargo
-
-rust:
-  - 1.8.0
-  - stable
-  - beta
-  - nightly
-cache: cargo
 
 env:
   global:
@@ -14,24 +6,26 @@ env:
 
 matrix:
   include:
-    - os: windows
-      rust: stable
-      env: TARGET=x86_64-pc-windows-msvc
     - os: osx
       rust: stable
       env: TARGET=x86_64-apple-darwin
+      cache: cargo
     - os: linux
-      rust: 1.6.0
+      rust: 1.8.0
       env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
     - os: linux
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
     - os: linux
       rust: beta
       env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
     - os: linux
       rust: nightly
       env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
 
 before_install:
   - export PATH="$PATH:$HOME/.cargo/bin"
