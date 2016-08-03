@@ -8,10 +8,6 @@ extern crate miniz_sys;
 extern crate num_cpus;
 extern crate scoped_pool;
 
-#[cfg(test)]
-#[macro_use]
-extern crate quickcheck;
-
 use headers::Headers;
 use scoped_pool::Pool;
 use std::collections::{HashMap, HashSet};

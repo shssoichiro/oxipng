@@ -38,14 +38,11 @@ version = "^2.2.5"
 
 [dependencies.clippy]
 optional = true
-version = "^0.0.79"
+version = "0.0.80"
 
 [dependencies.regex]
 optional = true
 version = "^0.1.63"
-
-[dev-dependencies]
-quickcheck = "^0.3.0"
 
 [dev-dependencies.image]
 version = "^0.8.0"
