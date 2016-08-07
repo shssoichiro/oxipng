@@ -112,6 +112,114 @@ pub struct Options {
     pub threads: usize,
 }
 
+impl Options {
+    pub fn from_preset(level: u8) -> Options {
+        let mut opts = Options::default();
+        match level {
+            0 => {
+                opts.idat_recoding = false;
+                let mut compression = HashSet::new();
+                compression.insert(3);
+                opts.compression = compression;
+            }
+            1 => {
+                let filter = HashSet::new();
+                opts.filter = filter;
+                let strategies = HashSet::new();
+                opts.strategies = strategies;
+                opts.use_heuristics = true;
+            }
+            // 2 is the default
+            3 => {
+                let mut filter = HashSet::new();
+                filter.insert(0);
+                filter.insert(5);
+                opts.filter = filter;
+                let mut compression = HashSet::new();
+                compression.insert(9);
+                opts.compression = compression;
+                let mut memory = HashSet::new();
+                for i in 8..10 {
+                    memory.insert(i);
+                }
+                opts.memory = memory;
+                let mut strategies = HashSet::new();
+                for i in 0..4 {
+                    strategies.insert(i);
+                }
+                opts.strategies = strategies;
+            }
+            4 => {
+                let mut filter = HashSet::new();
+                for i in 0..6 {
+                    filter.insert(i);
+                }
+                opts.filter = filter;
+                let mut compression = HashSet::new();
+                compression.insert(9);
+                opts.compression = compression;
+                let mut memory = HashSet::new();
+                for i in 8..10 {
+                    memory.insert(i);
+                }
+                opts.memory = memory;
+                let mut strategies = HashSet::new();
+                for i in 0..4 {
+                    strategies.insert(i);
+                }
+                opts.strategies = strategies;
+            }
+            5 => {
+                let mut filter = HashSet::new();
+                for i in 0..6 {
+                    filter.insert(i);
+                }
+                opts.filter = filter;
+                let mut compression = HashSet::new();
+                for i in 3..10 {
+                    compression.insert(i);
+                }
+                opts.compression = compression;
+                let mut memory = HashSet::new();
+                for i in 8..10 {
+                    memory.insert(i);
+                }
+                opts.memory = memory;
+                let mut strategies = HashSet::new();
+                for i in 0..4 {
+                    strategies.insert(i);
+                }
+                opts.strategies = strategies;
+            }
+            // Level 6
+            // If higher than 6, assume 6
+            _ => {
+                let mut filter = HashSet::new();
+                for i in 0..6 {
+                    filter.insert(i);
+                }
+                opts.filter = filter;
+                let mut compression = HashSet::new();
+                for i in 1..10 {
+                    compression.insert(i);
+                }
+                opts.compression = compression;
+                let mut memory = HashSet::new();
+                for i in 7..10 {
+                    memory.insert(i);
+                }
+                opts.memory = memory;
+                let mut strategies = HashSet::new();
+                for i in 0..4 {
+                    strategies.insert(i);
+                }
+                opts.strategies = strategies;
+            }
+        }
+        opts
+    }
+}
+
 impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface

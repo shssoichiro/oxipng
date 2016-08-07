@@ -38,7 +38,7 @@ version = "^2.2.5"
 
 [dependencies.clippy]
 optional = true
-version = "0.0.80"
+version = "0.0.81"
 
 [dependencies.regex]
 optional = true

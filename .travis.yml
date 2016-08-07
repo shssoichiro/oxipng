@@ -26,6 +26,8 @@ matrix:
       rust: nightly
       env: TARGET=x86_64-unknown-linux-gnu
       cache: cargo
+  allow_failures:
+    - rust: nightly
 
 before_install:
   - export PATH="$PATH:$HOME/.cargo/bin"
