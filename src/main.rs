@@ -4,6 +4,7 @@ extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
 use oxipng::headers::Headers;
+use oxipng::Options;
 use regex::Regex;
 use std::collections::HashSet;
 use std::fs::DirBuilder;
@@ -205,15 +206,13 @@ fn main() {
     regardless of the order you write the arguments.")
         .get_matches();
 
-    let mut opts = oxipng::Options::default();
-
-    match parse_opts_into_struct(&matches, &mut opts) {
-        Ok(_) => (),
+    let opts = match parse_opts_into_struct(&matches) {
+        Ok(x) => x,
         Err(x) => {
             writeln!(&mut stderr(), "{}", x).ok();
             return ();
         }
-    }
+    };
 
     handle_optimization(matches.values_of("files")
                             .unwrap()
@@ -222,7 +221,7 @@ fn main() {
                         opts);
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: oxipng::Options) {
+fn handle_optimization(inputs: Vec<PathBuf>, opts: Options) {
     for input in inputs {
         let mut current_opts = opts.clone();
         if input.is_dir() {
@@ -251,107 +250,16 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: oxipng::Options) {
     }
 }
 
-fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> Result<(), String> {
-    match matches.value_of("optimization") {
-        Some("0") => {
-            opts.idat_recoding = false;
-            let mut compression = HashSet::new();
-            compression.insert(3);
-            opts.compression = compression;
+fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
+    let mut opts = if let Some(x) = matches.value_of("optimization") {
+        if let Ok(opt) = x.parse::<u8>() {
+            Options::from_preset(opt)
+        } else {
+            unreachable!()
         }
-        Some("1") => {
-            let filter = HashSet::new();
-            opts.filter = filter;
-            let strategies = HashSet::new();
-            opts.strategies = strategies;
-            opts.use_heuristics = true;
-        }
-        // 2 is the default
-        Some("3") => {
-            let mut filter = HashSet::new();
-            filter.insert(0);
-            filter.insert(5);
-            opts.filter = filter;
-            let mut compression = HashSet::new();
-            compression.insert(9);
-            opts.compression = compression;
-            let mut memory = HashSet::new();
-            for i in 8..10 {
-                memory.insert(i);
-            }
-            opts.memory = memory;
-            let mut strategies = HashSet::new();
-            for i in 0..4 {
-                strategies.insert(i);
-            }
-            opts.strategies = strategies;
-        }
-        Some("4") => {
-            let mut filter = HashSet::new();
-            for i in 0..6 {
-                filter.insert(i);
-            }
-            opts.filter = filter;
-            let mut compression = HashSet::new();
-            compression.insert(9);
-            opts.compression = compression;
-            let mut memory = HashSet::new();
-            for i in 8..10 {
-                memory.insert(i);
-            }
-            opts.memory = memory;
-            let mut strategies = HashSet::new();
-            for i in 0..4 {
-                strategies.insert(i);
-            }
-            opts.strategies = strategies;
-        }
-        Some("5") => {
-            let mut filter = HashSet::new();
-            for i in 0..6 {
-                filter.insert(i);
-            }
-            opts.filter = filter;
-            let mut compression = HashSet::new();
-            for i in 3..10 {
-                compression.insert(i);
-            }
-            opts.compression = compression;
-            let mut memory = HashSet::new();
-            for i in 8..10 {
-                memory.insert(i);
-            }
-            opts.memory = memory;
-            let mut strategies = HashSet::new();
-            for i in 0..4 {
-                strategies.insert(i);
-            }
-            opts.strategies = strategies;
-        }
-        Some("6") => {
-            let mut filter = HashSet::new();
-            for i in 0..6 {
-                filter.insert(i);
-            }
-            opts.filter = filter;
-            let mut compression = HashSet::new();
-            for i in 1..10 {
-                compression.insert(i);
-            }
-            opts.compression = compression;
-            let mut memory = HashSet::new();
-            for i in 7..10 {
-                memory.insert(i);
-            }
-            opts.memory = memory;
-            let mut strategies = HashSet::new();
-            for i in 0..4 {
-                strategies.insert(i);
-            }
-            opts.strategies = strategies;
-        }
-        _ => (), // Use default
-    }
+    } else {
+        Options::default()
+    };
 
     if let Some(x) = matches.value_of("interlace") {
         opts.interlace = x.parse::<u8>().ok();
@@ -498,7 +406,7 @@ fn parse_opts_into_struct(matches: &ArgMatches, opts: &mut oxipng::Options) -> R
         opts.threads = x.parse::<usize>().unwrap();
     }
 
-    Ok(())
+    Ok(opts)
 }
 
 fn parse_numeric_range_opts(input: &str,
