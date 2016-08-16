@@ -7,6 +7,7 @@ use oxipng::colors::{BitDepth, ColorType};
 use oxipng::headers::Headers;
 use oxipng::png;
 use std::collections::HashSet;
+use std::error::Error;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -37,7 +38,7 @@ fn test_it_converts(input: &Path,
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -45,7 +46,7 @@ fn test_it_converts(input: &Path,
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -93,7 +94,7 @@ fn strip_headers_list() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -101,7 +102,7 @@ fn strip_headers_list() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -134,7 +135,7 @@ fn strip_headers_safe() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -142,7 +143,7 @@ fn strip_headers_safe() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -175,7 +176,7 @@ fn strip_headers_all() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -183,7 +184,7 @@ fn strip_headers_all() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -216,7 +217,7 @@ fn strip_headers_none() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -224,7 +225,7 @@ fn strip_headers_none() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -255,7 +256,7 @@ fn interlacing_0_to_1() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -263,7 +264,7 @@ fn interlacing_0_to_1() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -292,7 +293,7 @@ fn interlacing_1_to_0() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -300,7 +301,7 @@ fn interlacing_1_to_0() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -331,7 +332,7 @@ fn interlacing_0_to_1_small_files() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -339,7 +340,7 @@ fn interlacing_0_to_1_small_files() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -372,7 +373,7 @@ fn interlacing_1_to_0_small_files() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -380,7 +381,7 @@ fn interlacing_1_to_0_small_files() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -414,7 +415,7 @@ fn interlaced_0_to_1_other_filter_mode() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -422,7 +423,7 @@ fn interlaced_0_to_1_other_filter_mode() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -470,7 +471,7 @@ fn fix_errors() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -478,7 +479,7 @@ fn fix_errors() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 
@@ -504,7 +505,7 @@ fn issue_42() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -512,7 +513,7 @@ fn issue_42() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 

@@ -6,6 +6,7 @@ use image::Pixel;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
+use std::error::Error;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -36,7 +37,7 @@ fn test_it_converts(input: &Path,
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.to_owned()),
+        Err(x) => panic!(x.description().to_owned()),
     };
     assert!(output.exists());
 
@@ -44,7 +45,7 @@ fn test_it_converts(input: &Path,
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.to_owned())
+            panic!(x.description().to_owned())
         }
     };
 

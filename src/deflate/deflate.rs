@@ -1,10 +1,11 @@
+use error::PngError;
 use libz_sys;
 use miniz_sys;
 use libc::c_int;
 use std::cmp::max;
 
 /// Decompress a data stream using the DEFLATE algorithm
-pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
+pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
     let mut input = data.to_owned();
     let mut stream = super::libz_stream::Stream::new_decompress();
     let mut output = Vec::with_capacity(data.len());
@@ -12,7 +13,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
         match stream.decompress_vec(input.as_mut(), output.as_mut()) {
             libz_sys::Z_OK => output.reserve(data.len()),
             libz_sys::Z_STREAM_END => break,
-            c => return Err(format!("Error code on decompress: {}", c)),
+            c => return Err(PngError::new(&format!("Error code on decompress: {}", c))),
         }
     }
     output.shrink_to_fit();
@@ -21,7 +22,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, String> {
 }
 
 /// Compress a data stream using the zlib implementation of the DEFLATE algorithm
-pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, String> {
+pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, PngError> {
     let mut input = data.to_owned();
     // Compressed input should be smaller than decompressed, so allocate less than data.len()
     // However, it needs a minimum capacity in order to handle very small images
@@ -36,7 +37,7 @@ pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, S
             match stream.compress_vec(input.as_mut(), output.as_mut()) {
                 miniz_sys::MZ_OK => output.reserve(max(1024, data.len() / 20)),
                 miniz_sys::MZ_STREAM_END => break,
-                c => return Err(format!("Error code on compress: {}", c)),
+                c => return Err(PngError::new(&format!("Error code on compress: {}", c))),
             }
         }
     } else {
@@ -49,7 +50,7 @@ pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, S
             match stream.compress_vec(input.as_mut(), output.as_mut()) {
                 libz_sys::Z_OK => output.reserve(max(1024, data.len() / 20)),
                 libz_sys::Z_STREAM_END => break,
-                c => return Err(format!("Error code on compress: {}", c)),
+                c => return Err(PngError::new(&format!("Error code on compress: {}", c))),
             }
         }
     }

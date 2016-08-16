@@ -2,6 +2,7 @@ use bit_vec::BitVec;
 use byteorder::{BigEndian, WriteBytesExt};
 use colors::{BitDepth, ColorType};
 use crc::crc32;
+use error::PngError;
 use filters::*;
 use headers::*;
 use interlace::{interlace_image, deinterlace_image};
@@ -181,28 +182,28 @@ pub struct PngData {
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
-    pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, String> {
+    pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, PngError> {
         let mut file = match File::open(filepath) {
             Ok(f) => f,
-            Err(_) => return Err("Failed to open file for reading".to_owned()),
+            Err(_) => return Err(PngError::new("Failed to open file for reading")),
         };
         let mut byte_data: Vec<u8> = Vec::new();
         // Read raw png data into memory
         match file.read_to_end(&mut byte_data) {
             Ok(_) => (),
-            Err(_) => return Err("Failed to read from file".to_owned()),
+            Err(_) => return Err(PngError::new("Failed to read from file")),
         }
 
         PngData::from_slice(&byte_data, fix_errors)
     }
 
     /// Create a new `PngData` struct by reading a slice
-    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, String> {
+    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, PngError> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
         let header: Vec<u8> = byte_data.iter().take(8).cloned().collect();
         if !file_header_is_valid(header.as_ref()) {
-            return Err("Invalid PNG header detected".to_owned());
+            return Err(PngError::new("Invalid PNG header detected"));
         }
         byte_offset += 8;
         // Read the data headers
@@ -226,10 +227,10 @@ impl PngData {
         }
         // Parse the headers into our PngData
         if idat_headers.is_empty() {
-            return Err("Image data was empty, skipping".to_owned());
+            return Err(PngError::new("Image data was empty, skipping"));
         }
         if aux_headers.get("IHDR").is_none() {
-            return Err("Image header data was missing, skipping".to_owned());
+            return Err(PngError::new("Image header data was missing, skipping"));
         }
         let ihdr_header = match parse_ihdr_header(aux_headers.remove("IHDR").unwrap().as_ref()) {
             Ok(x) => x,
@@ -388,11 +389,7 @@ impl PngData {
                     // http://www.libpng.org/pub/png/book/chapter09.html
                     let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
                     // Avoid vertical filtering on first line of each interlacing pass
-                    for filter in if last_pass == line.pass {
-                        0..5
-                    } else {
-                        0..2
-                    } {
+                    for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
                         trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
                     }
                     let (best_filter, best_line) = trials.iter()
