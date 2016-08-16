@@ -8,6 +8,7 @@ extern crate miniz_sys;
 extern crate num_cpus;
 extern crate scoped_pool;
 
+use error::PngError;
 use headers::Headers;
 use scoped_pool::Pool;
 use std::collections::{HashMap, HashSet};
@@ -22,6 +23,7 @@ pub mod deflate {
     pub mod libz_stream;
     pub mod miniz_stream;
 }
+mod error;
 mod filters;
 pub mod headers;
 mod interlace;
@@ -270,7 +272,7 @@ impl Default for Options {
 }
 
 /// Perform optimization on the input file using the options provided
-pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
+pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
@@ -305,8 +307,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                                                           .unwrap()))) {
                 Ok(x) => x,
                 Err(_) => {
-                    return Err(format!("Unable to write to backup file at {}",
-                                       opts.out_file.display()))
+                    return Err(PngError::new(&format!("Unable to write to backup file at {}",
+                                                      opts.out_file.display())))
                 }
             };
         }
@@ -315,13 +317,14 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
             let mut buffer = BufWriter::new(stdout());
             match buffer.write_all(&optimized_output) {
                 Ok(_) => (),
-                Err(_) => return Err("Unable to write to stdout".to_owned()),
+                Err(_) => return Err(PngError::new("Unable to write to stdout")),
             }
         } else {
             let out_file = match File::create(&opts.out_file) {
                 Ok(x) => x,
                 Err(_) => {
-                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                    return Err(PngError::new(&format!("Unable to write to file {}",
+                                                      opts.out_file.display())))
                 }
             };
 
@@ -377,7 +380,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
                     }
                 }
                 Err(_) => {
-                    return Err(format!("Unable to write to file {}", opts.out_file.display()))
+                    return Err(PngError::new(&format!("Unable to write to file {}",
+                                                      opts.out_file.display())))
                 }
             }
         }
@@ -387,7 +391,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), String> {
 
 /// Perform optimization on the input file using the options provided, where the file is already
 /// loaded in-memory
-pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, String> {
+pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(), "Processing from memory").ok();

@@ -1,6 +1,7 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use colors::{BitDepth, ColorType};
 use crc::crc32;
+use error::PngError;
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Copy)]
@@ -45,7 +46,7 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
 pub fn parse_next_header(byte_data: &[u8],
                          byte_offset: &mut usize,
                          fix_errors: bool)
-                         -> Result<Option<(String, Vec<u8>)>, String> {
+                         -> Result<Option<(String, Vec<u8>)>, PngError> {
     let mut rdr = Cursor::new(byte_data.iter()
         .skip(*byte_offset)
         .take(4)
@@ -53,14 +54,14 @@ pub fn parse_next_header(byte_data: &[u8],
         .collect::<Vec<u8>>());
     let length: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
-        Err(_) => return Err("Invalid data found--unable to read PNG file".to_owned()),
+        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
     };
     *byte_offset += 4;
 
     let mut header_bytes: Vec<u8> = byte_data.iter().skip(*byte_offset).take(4).cloned().collect();
     let header = match String::from_utf8(header_bytes.clone()) {
         Ok(x) => x,
-        Err(_) => return Err("Invalid data found--unable to read PNG file".to_owned()),
+        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
     };
     if header == "IEND" {
         // End of data
@@ -81,19 +82,19 @@ pub fn parse_next_header(byte_data: &[u8],
         .collect::<Vec<u8>>());
     let crc: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
-        Err(_) => return Err("Invalid data found--unable to read PNG file".to_owned()),
+        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
     };
     *byte_offset += 4;
     header_bytes.extend(data.clone());
     if !fix_errors && crc32::checksum_ieee(header_bytes.as_ref()) != crc {
-        return Err(format!("Corrupt data chunk found--CRC Mismatch in {}\nThis may be recoverable by using --fix",
-                           header));
+        return Err(PngError::new(&format!("CRC Mismatch in {} header; May be recoverable by using --fix",
+                                          header)));
     }
 
     Ok(Some((header, data)))
 }
 
-pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, String> {
+pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, PngError> {
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {
@@ -102,7 +103,7 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, String> {
             3 => ColorType::Indexed,
             4 => ColorType::GrayscaleAlpha,
             6 => ColorType::RGBA,
-            _ => return Err("Unexpected color type in header".to_owned()),
+            _ => return Err(PngError::new("Unexpected color type in header")),
         },
         bit_depth: match byte_data[8] {
             1 => BitDepth::One,
@@ -110,7 +111,7 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, String> {
             4 => BitDepth::Four,
             8 => BitDepth::Eight,
             16 => BitDepth::Sixteen,
-            _ => return Err("Unexpected bit depth in header".to_owned()),
+            _ => return Err(PngError::new("Unexpected bit depth in header")),
         },
         width: rdr.read_u32::<BigEndian>().unwrap(),
         height: rdr.read_u32::<BigEndian>().unwrap(),
