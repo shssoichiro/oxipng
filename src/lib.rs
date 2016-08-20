@@ -15,7 +15,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
 use std::io::{BufWriter, Write, stderr, stdout};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 pub mod colors;
 pub mod deflate {
@@ -425,7 +425,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
                  png.ihdr_data.width,
                  png.ihdr_data.height)
             .ok();
-        if let Some(palette) = png.palette.clone() {
+        if let Some(ref palette) = png.palette {
             writeln!(&mut stderr(),
                      "    {} bits/pixel, {} colors in palette",
                      png.ihdr_data.bit_depth,
@@ -450,8 +450,8 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
     }
 
     let mut filter = opts.filter.clone();
-    let compression = opts.compression.clone();
-    let memory = opts.memory.clone();
+    let compression = &opts.compression;
+    let memory = &opts.memory;
     let mut strategies = opts.strategies.clone();
 
     if opts.use_heuristics {
@@ -480,21 +480,21 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         let thread_count = opts.threads;
         let pool = Pool::new(thread_count);
         // Go through selected permutations and determine the best
-        let best: Arc<Mutex<Option<TrialWithData>>> = Arc::new(Mutex::new(None));
+        let best: Mutex<Option<TrialWithData>> = Mutex::new(None);
         let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
         let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
-        let filters: Arc<Mutex<HashMap<u8, Vec<u8>>>> =
-            Arc::new(Mutex::new(HashMap::with_capacity(filter.len())));
+        let filters: Mutex<HashMap<u8, Vec<u8>>> =
+            Mutex::new(HashMap::with_capacity(filter.len()));
         if opts.verbosity.is_some() {
             writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
         }
 
         pool.scoped(|scope| {
             for f in &filter {
-                let png = png.clone();
-                let filters = filters.clone();
-                for zc in &compression {
-                    for zm in &memory {
+                let png = &png;
+                let filters = &filters;
+                for zc in compression {
+                    for zm in memory {
                         for zs in &strategies {
                             results.push((*f, *zc, *zm, *zs));
                         }
@@ -516,7 +516,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
                                       opts.interlace != Some(png.ihdr_data.interlaced);
             for trial in &results {
                 let filtered = filters.get(&trial.0).unwrap();
-                let best = best.clone();
+                let best = &best;
                 scope.execute(move || {
                     let new_idat =
                         deflate::deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
@@ -546,7 +546,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
 
         let mut final_best = best.lock().unwrap();
         if let Some(better) = final_best.take() {
-            png.idat_data = better.4.clone();
+            png.idat_data = better.4;
             if opts.verbosity.is_some() {
                 writeln!(&mut stderr(), "Found better combination:").ok();
                 writeln!(&mut stderr(),
@@ -650,7 +650,7 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
 /// Display the status of the image data after a reduction has taken place
 #[inline]
 fn report_reduction(png: &png::PngData) {
-    if let Some(palette) = png.palette.clone() {
+    if let Some(ref palette) = png.palette {
         writeln!(&mut stderr(),
                  "Reducing image to {} bits/pixel, {} colors in palette",
                  png.ihdr_data.bit_depth,
@@ -668,26 +668,25 @@ fn report_reduction(png: &png::PngData) {
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
 fn perform_strip(png: &mut png::PngData, opts: &Options) {
-    match opts.strip.clone() {
+    match &opts.strip {
         // Strip headers
-        Headers::None => (),
-        Headers::Some(hdrs) => {
-            for hdr in &hdrs {
+        &Headers::None => (),
+        &Headers::Some(ref hdrs) => {
+            for hdr in hdrs {
                 png.aux_headers.remove(hdr);
             }
         }
-        Headers::Safe => {
+        &Headers::Safe => {
             const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
                                                           "bKGD", "hIST", "pHYs", "sPLT"];
-            let mut preserved = HashMap::new();
-            for (hdr, contents) in &png.aux_headers {
-                if PRESERVED_HEADERS.contains(&hdr.as_ref()) {
-                    preserved.insert(hdr.clone(), contents.clone());
+            let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
+            for hdr in hdrs {
+                if !PRESERVED_HEADERS.contains(&hdr.as_ref()) {
+                    png.aux_headers.remove(&hdr);
                 }
             }
-            png.aux_headers = preserved;
         }
-        Headers::All => {
+        &Headers::All => {
             png.aux_headers = HashMap::new();
         }
     }

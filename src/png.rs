@@ -251,7 +251,7 @@ impl PngData {
             }
         }
         let mut png_data = PngData {
-            idat_data: idat_headers.clone(),
+            idat_data: idat_headers,
             ihdr_data: ihdr_header,
             raw_data: raw_data,
             palette: aux_headers.remove("PLTE"),
@@ -304,13 +304,13 @@ impl PngData {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
-        if let Some(palette) = self.palette.clone() {
+        if let Some(ref palette) = self.palette {
             write_png_block(b"PLTE", &palette, &mut output);
-            if let Some(transparency_palette) = self.transparency_palette.clone() {
+            if let Some(ref transparency_palette) = self.transparency_palette {
                 // Transparency pixel
                 write_png_block(b"tRNS", &transparency_palette, &mut output);
             }
-        } else if let Some(transparency_pixel) = self.transparency_pixel.clone() {
+        } else if let Some(ref transparency_pixel) = self.transparency_pixel {
             // Transparency pixel
             write_png_block(b"tRNS", &transparency_pixel, &mut output);
         }
@@ -405,7 +405,7 @@ impl PngData {
                 }
                 _ => unreachable!(),
             }
-            last_line = line.data.clone();
+            last_line = line.data;
             last_pass = line.pass;
         }
         filtered

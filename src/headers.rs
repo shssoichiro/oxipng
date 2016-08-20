@@ -85,7 +85,7 @@ pub fn parse_next_header(byte_data: &[u8],
         Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
     };
     *byte_offset += 4;
-    header_bytes.extend(data.clone());
+    header_bytes.extend_from_slice(&data);
     if !fix_errors && crc32::checksum_ieee(header_bytes.as_ref()) != crc {
         return Err(PngError::new(&format!("CRC Mismatch in {} header; May be recoverable by using --fix",
                                           header)));

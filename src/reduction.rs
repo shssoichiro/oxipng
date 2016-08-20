@@ -123,10 +123,10 @@ pub fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8
                     if len == 256 {
                         return None;
                     }
-                    palette.push(cur_pixel.clone());
+                    palette.push(cur_pixel);
                     reduced.push(len as u8);
                 }
-                cur_pixel.clear();
+                cur_pixel = Vec::with_capacity(bpp);
             }
         }
     }
@@ -166,10 +166,10 @@ pub fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
                     if len == 256 {
                         return None;
                     }
-                    palette.push(cur_pixel.clone());
+                    palette.push(cur_pixel);
                     reduced.push(len as u8);
                 }
-                cur_pixel.clear();
+                cur_pixel = Vec::with_capacity(bpp);
             }
         }
     }
@@ -211,7 +211,7 @@ pub fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> 
                     if len == 16 {
                         return None;
                     }
-                    palette.push(pix_slice.clone());
+                    palette.push(pix_slice);
                     let idx = BitVec::from_bytes(&[(len as u8) << bpp_inverse]);
                     for b in idx.iter().take(bpp) {
                         reduced.push(b);

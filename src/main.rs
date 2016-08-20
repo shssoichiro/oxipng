@@ -236,7 +236,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: Options) {
             }
             continue;
         }
-        if let Some(out_dir) = current_opts.out_dir.clone() {
+        if let Some(ref out_dir) = current_opts.out_dir {
             current_opts.out_file = out_dir.join(input.file_name().unwrap());
         } else if current_opts.out_file.components().count() == 0 {
             current_opts.out_file = input.clone();
