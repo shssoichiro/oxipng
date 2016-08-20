@@ -38,7 +38,7 @@ version = "^2.2.5"
 
 [dependencies.clippy]
 optional = true
-version = "0.0.81"
+version = "0.0.85"
 
 [dependencies.regex]
 optional = true
@@ -52,5 +52,6 @@ features = ["png_codec"]
 [features]
 default = ["binary"]
 binary = ["clap", "regex"]
-nightly = ["clippy"]
+nightly = []
 nightly-binary = ["binary", "nightly", "regex/simd-accel"]
+dev = ["nightly-binary", "clippy"]
