@@ -1,3 +1,6 @@
+#![cfg_attr(feature="dev", feature(plugin))]
+#![cfg_attr(feature="dev", plugin(clippy))]
+
 extern crate oxipng;
 extern crate clap;
 extern crate regex;

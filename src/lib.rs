@@ -1,3 +1,7 @@
+#![cfg_attr(feature="dev", feature(plugin))]
+#![cfg_attr(feature="dev", plugin(clippy))]
+#![cfg_attr(feature="dev", allow(module_inception))]
+
 extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
@@ -483,8 +487,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         let best: Mutex<Option<TrialWithData>> = Mutex::new(None);
         let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
         let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
-        let filters: Mutex<HashMap<u8, Vec<u8>>> =
-            Mutex::new(HashMap::with_capacity(filter.len()));
+        let filters: Mutex<HashMap<u8, Vec<u8>>> = Mutex::new(HashMap::with_capacity(filter.len()));
         if opts.verbosity.is_some() {
             writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
         }
@@ -606,31 +609,25 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
 fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
     let mut something_changed = false;
 
-    if opts.palette_reduction {
-        if png.reduce_palette() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(png);
-            }
-        };
+    if opts.palette_reduction && png.reduce_palette() {
+        something_changed = true;
+        if opts.verbosity == Some(1) {
+            report_reduction(png);
+        }
     }
 
-    if opts.bit_depth_reduction {
-        if png.reduce_bit_depth() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(png);
-            }
-        };
+    if opts.bit_depth_reduction && png.reduce_bit_depth() {
+        something_changed = true;
+        if opts.verbosity == Some(1) {
+            report_reduction(png);
+        }
     }
 
-    if opts.color_type_reduction {
-        if png.reduce_color_type() {
-            something_changed = true;
-            if opts.verbosity == Some(1) {
-                report_reduction(png);
-            }
-        };
+    if opts.color_type_reduction && png.reduce_color_type() {
+        something_changed = true;
+        if opts.verbosity == Some(1) {
+            report_reduction(png);
+        }
     }
 
     if something_changed && opts.verbosity.is_some() {
@@ -668,15 +665,15 @@ fn report_reduction(png: &png::PngData) {
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
 fn perform_strip(png: &mut png::PngData, opts: &Options) {
-    match &opts.strip {
+    match opts.strip {
         // Strip headers
-        &Headers::None => (),
-        &Headers::Some(ref hdrs) => {
+        Headers::None => (),
+        Headers::Some(ref hdrs) => {
             for hdr in hdrs {
                 png.aux_headers.remove(hdr);
             }
         }
-        &Headers::Safe => {
+        Headers::Safe => {
             const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
                                                           "bKGD", "hIST", "pHYs", "sPLT"];
             let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
@@ -686,7 +683,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
                 }
             }
         }
-        &Headers::All => {
+        Headers::All => {
             png.aux_headers = HashMap::new();
         }
     }

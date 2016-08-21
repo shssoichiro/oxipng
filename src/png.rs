@@ -300,24 +300,24 @@ impl PngData {
         // Ancillary headers
         for (key, header) in self.aux_headers
             .iter()
-            .filter(|&(ref key, _)| !(**key == "bKGD" || **key == "hIST" || **key == "tRNS")) {
+            .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")) {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
         if let Some(ref palette) = self.palette {
-            write_png_block(b"PLTE", &palette, &mut output);
+            write_png_block(b"PLTE", palette, &mut output);
             if let Some(ref transparency_palette) = self.transparency_palette {
                 // Transparency pixel
-                write_png_block(b"tRNS", &transparency_palette, &mut output);
+                write_png_block(b"tRNS", transparency_palette, &mut output);
             }
         } else if let Some(ref transparency_pixel) = self.transparency_pixel {
             // Transparency pixel
-            write_png_block(b"tRNS", &transparency_pixel, &mut output);
+            write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
         for (key, header) in self.aux_headers
             .iter()
-            .filter(|&(ref key, _)| **key == "bKGD" || **key == "hIST" || **key == "tRNS") {
+            .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS") {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -547,7 +547,7 @@ impl PngData {
         }
 
         let unused: Vec<u8> =
-            (0..indexed_palette.len() as u8).filter(|i| !seen.contains(&i)).collect();
+            (0..indexed_palette.len() as u8).filter(|i| !seen.contains(i)).collect();
 
         // Remove unused palette indices
         self.do_palette_reduction(&unused, &mut index_map, &mut indexed_palette);
