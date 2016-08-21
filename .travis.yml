@@ -27,6 +27,7 @@ matrix:
       env: TARGET=x86_64-unknown-linux-gnu
       cache: cargo
   allow_failures:
+    - rust: beta
     - rust: nightly
 
 before_install:
