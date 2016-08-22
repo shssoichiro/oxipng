@@ -1,6 +1,5 @@
 #![cfg_attr(feature="dev", feature(plugin))]
 #![cfg_attr(feature="dev", plugin(clippy))]
-#![cfg_attr(feature="dev", allow(module_inception))]
 
 extern crate bit_vec;
 extern crate byteorder;
@@ -11,7 +10,9 @@ extern crate libz_sys;
 extern crate miniz_sys;
 extern crate num_cpus;
 extern crate rayon;
+extern crate zopfli;
 
+use deflate::Deflaters;
 use error::PngError;
 use headers::Headers;
 use rayon::prelude::*;
@@ -21,11 +22,7 @@ use std::io::{BufWriter, Write, stderr, stdout};
 use std::path::{Path, PathBuf};
 
 pub mod colors;
-pub mod deflate {
-    pub mod deflate;
-    pub mod libz_stream;
-    pub mod miniz_stream;
-}
+pub mod deflate;
 mod error;
 mod filters;
 pub mod headers;
@@ -108,6 +105,9 @@ pub struct Options {
     /// Which headers to strip from the PNG file, if any
     /// Default: `None`
     pub strip: Headers,
+    /// Which DEFLATE algorithm to use
+    /// Default: `Zlib`
+    pub deflate: Deflaters,
     /// Whether to use heuristics to pick the best filter and compression
     /// Intended for use with `-o 1` from the CLI interface
     /// Default: `false`
@@ -268,6 +268,7 @@ impl Default for Options {
             palette_reduction: true,
             idat_recoding: true,
             strip: Headers::None,
+            deflate: Deflaters::Zlib,
             use_heuristics: false,
             threads: thread_count,
         }
@@ -489,19 +490,28 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
 
     if opts.idat_recoding || something_changed {
         // Go through selected permutations and determine the best
-        let combinations = filter.len() * compression.len() * memory.len() * strategies.len();
+        let combinations = if opts.deflate == Deflaters::Zlib {
+            filter.len() * compression.len() * memory.len() * strategies.len()
+        } else {
+            filter.len()
+        };
         let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
         if opts.verbosity.is_some() {
             writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
         }
 
         for f in &filter {
-            for zc in compression {
-                for zm in memory {
-                    for zs in &strategies {
-                        results.push((*f, *zc, *zm, *zs));
+            if opts.deflate == Deflaters::Zlib {
+                for zc in compression {
+                    for zm in memory {
+                        for zs in &strategies {
+                            results.push((*f, *zc, *zm, *zs));
+                        }
                     }
                 }
+            } else {
+                // Zopfli compression has no additional options
+                results.push((*f, 0, 0, 0));
             }
         }
 
@@ -521,9 +531,12 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
             .weight_max()
             .filter_map(|trial| {
                 let filtered = filters.get(&trial.0).unwrap();
-                let new_idat =
-                    deflate::deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
-                        .unwrap();
+                let new_idat = if opts.deflate == Deflaters::Zlib {
+                        deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
+                    } else {
+                        deflate::zopfli_deflate(filtered)
+                    }
+                    .unwrap();
 
                 if opts.verbosity == Some(1) {
                     writeln!(&mut stderr(),

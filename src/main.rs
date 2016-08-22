@@ -12,6 +12,7 @@ extern crate clap;
 extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
+use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
 use oxipng::Options;
 use regex::Regex;
@@ -180,6 +181,10 @@ fn main() {
             .help("Strip safely-removable metadata objects")
             .short("s")
             .conflicts_with("strip"))
+        .arg(Arg::with_name("zopfli")
+            .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
+            .short("Z")
+            .long("zopfli"))
         .arg(Arg::with_name("threads")
             .help("Set number of threads to use - default 1.5x CPU cores")
             .long("threads")
@@ -408,6 +413,10 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
 
     if matches.is_present("strip-safe") {
         opts.strip = Headers::Safe;
+    }
+
+    if matches.is_present("zopfli") {
+        opts.deflate = Deflaters::Zopfli;
     }
 
     if let Some(x) = matches.value_of("threads") {

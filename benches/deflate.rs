@@ -4,7 +4,7 @@ extern crate test;
 extern crate oxipng;
 
 use oxipng::png;
-use oxipng::deflate::deflate;
+use oxipng::deflate;
 use test::Bencher;
 use std::path::PathBuf;
 
