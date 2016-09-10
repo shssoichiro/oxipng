@@ -1,5 +1,11 @@
 #![cfg_attr(feature="dev", feature(plugin))]
 #![cfg_attr(feature="dev", plugin(clippy))]
+#![cfg_attr(feature="dev", warn(enum_glob_use))]
+#![cfg_attr(feature="dev", warn(if_not_else))]
+#![cfg_attr(feature="dev", warn(string_add))]
+#![cfg_attr(feature="dev", warn(string_add_assign))]
+#![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
+#![deny(missing_debug_implementations, missing_copy_implementations)]
 
 extern crate oxipng;
 extern crate clap;
@@ -14,11 +20,9 @@ use std::fs::DirBuilder;
 use std::io::{Write, stderr};
 use std::path::PathBuf;
 
-const VERSION_STRING: &'static str = "0.10.0";
-
 fn main() {
     let matches = App::new("oxipng")
-        .version(VERSION_STRING)
+        .version(env!("CARGO_PKG_VERSION"))
         .author("Joshua Holmer <jholmer.in@gmail.com>")
         .about("Losslessly improves compression of PNG files")
         .arg(Arg::with_name("files")
