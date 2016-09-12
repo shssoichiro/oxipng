@@ -34,7 +34,7 @@ scoped-pool = "^1.0.0"
 
 [dependencies.clap]
 optional = true
-version = "^2.2.5"
+version = ">=2.10.0, <2.11.0"
 
 [dependencies.clippy]
 optional = true
