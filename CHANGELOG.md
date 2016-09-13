@@ -1,4 +1,4 @@
-**Version 0.11.0 (unreleased)**
+**Version 0.11.0**
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.9.0, required by dependencies
  - [SEMVER_MINOR] Allow calling optimization presets via crate using `Options::from_preset`
  - [SEMVER_MAJOR] Return proper `PngError` type which implements `std::error::Error` from `Result`s
