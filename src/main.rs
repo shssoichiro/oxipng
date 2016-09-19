@@ -29,6 +29,7 @@ fn main() {
             .help("File(s) to compress")
             .index(1)
             .multiple(true)
+            .use_delimiter(false)
             .required(true))
         .arg(Arg::with_name("optimization")
             .help("Optimization level - Default: 2")
