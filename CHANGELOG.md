@@ -1,5 +1,6 @@
 **Version 0.11.1 (unreleased)**
  - Performance optimizations
+ - Fix processing filenames that contain commas (@aliceatlas [#50](https://github.com/shssoichiro/oxipng/pull/50))
 
 **Version 0.11.0**
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.9.0, required by dependencies
