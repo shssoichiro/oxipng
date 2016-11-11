@@ -11,7 +11,10 @@ interface or as a library in other Rust programs.
 
 ## Installing
 
-Oxipng can be installed from Cargo, via the following command:
+Oxipng can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
+Windows users will need to ensure they have the [Visual C++ 2015 Runtime](https://www.microsoft.com/en-us/download/details.aspx?id=48145) installed.
+
+Oxipng can also be installed from Cargo, via the following command:
 ```
 cargo install oxipng
 ```

@@ -4,11 +4,7 @@ environment:
     PROJECT_NAME: oxipng
   matrix:
     # Stable channel
-    - TARGET: i686-pc-windows-gnu
-      CHANNEL: stable
     - TARGET: i686-pc-windows-msvc
-      CHANNEL: stable
-    - TARGET: x86_64-pc-windows-gnu
       CHANNEL: stable
     - TARGET: x86_64-pc-windows-msvc
       CHANNEL: stable
