@@ -4,6 +4,7 @@ extern crate oxipng;
 use image::GenericImage;
 use image::Pixel;
 use oxipng::colors::{BitDepth, ColorType};
+use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
 use oxipng::png;
 use std::collections::HashSet;
@@ -529,4 +530,20 @@ fn issue_42() {
                new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
+}
+
+#[test]
+fn zopfli_mode() {
+    let input = PathBuf::from("tests/files/zopfli_mode.png");
+    let mut opts = get_opts(&input);
+    opts.deflate = Deflaters::Zopfli;
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     ColorType::RGB,
+                     BitDepth::Eight,
+                     ColorType::RGB,
+                     BitDepth::Eight);
 }

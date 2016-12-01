@@ -2,6 +2,7 @@ use bit_vec::BitVec;
 use byteorder::{BigEndian, WriteBytesExt};
 use colors::{BitDepth, ColorType};
 use crc::crc32;
+use deflate;
 use error::PngError;
 use filters::*;
 use headers::*;
@@ -236,7 +237,7 @@ impl PngData {
             Ok(x) => x,
             Err(x) => return Err(x),
         };
-        let raw_data = match super::deflate::deflate::inflate(idat_headers.as_ref()) {
+        let raw_data = match deflate::inflate(idat_headers.as_ref()) {
             Ok(x) => x,
             Err(x) => return Err(x),
         };
