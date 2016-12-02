@@ -1,13 +1,13 @@
-**Version 0.11.1 (unreleased)**
+**Version 0.12.0**
  - Performance optimizations
  - Fix processing filenames that contain commas (@aliceatlas [#50](https://github.com/shssoichiro/oxipng/pull/50))
+ - [SEMVER_MINOR] Add zopfli option (-Z), disabled by default. Gives about 10% better compression, but is currently 50-100x slower.
 
 **Version 0.11.0**
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.9.0, required by dependencies
  - [SEMVER_MINOR] Allow calling optimization presets via crate using `Options::from_preset`
  - [SEMVER_MAJOR] Return proper `PngError` type which implements `std::error::Error` from `Result`s
  - [SEMVER_MAJOR] Rename module `deflate::deflate` to `deflate`
- - [SEMVER_MINOR] Add zopfli option (`-Z`)
  - Performance optimizations
 
 **Version 0.10.0**
