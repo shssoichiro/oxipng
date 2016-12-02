@@ -485,7 +485,7 @@ impl PngData {
             let mut seen: HashMap<&[u8], u8> = HashMap::with_capacity(indexed_palette.len());
             for (i, color) in indexed_palette.iter().enumerate() {
                 if seen.contains_key(color) {
-                    let index = seen.get(color).unwrap();
+                    let index = &seen[color];
                     duplicates.push(i as u8);
                     index_map.insert(i as u8, *index);
                 } else {

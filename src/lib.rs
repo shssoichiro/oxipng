@@ -530,7 +530,7 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         let best: Option<TrialWithData> = results.into_par_iter()
             .weight_max()
             .filter_map(|trial| {
-                let filtered = filters.get(&trial.0).unwrap();
+                let filtered = &filters[&trial.0];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
                         deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
                     } else {

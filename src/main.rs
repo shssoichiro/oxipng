@@ -452,20 +452,20 @@ fn parse_numeric_range_opts(input: &str,
             return Err("Not a valid input".to_owned());
         }
 
-        return Ok(match &captures[2] {
+        match &captures[2] {
             "," => {
                 items.insert(first);
                 items.insert(second);
-                return Ok(items);
             }
             "-" => {
                 for i in first..second + 1 {
                     items.insert(i);
                 }
-                return Ok(items);
             }
             _ => unreachable!(),
-        });
+        };
+
+        return Ok(items);
     }
 
     Err("Not a valid input".to_owned())
