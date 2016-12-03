@@ -8,7 +8,7 @@ use test::Bencher;
 use std::path::PathBuf;
 
 #[bench]
-fn bench_interlace_16_bits(b: &mut Bencher) {
+fn interlacing_16_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -19,7 +19,7 @@ fn bench_interlace_16_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_interlace_8_bits(b: &mut Bencher) {
+fn interlacing_8_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -30,7 +30,7 @@ fn bench_interlace_8_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_interlace_4_bits(b: &mut Bencher) {
+fn interlacing_4_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/palette_4_should_be_palette_4.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -41,7 +41,7 @@ fn bench_interlace_4_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_interlace_2_bits(b: &mut Bencher) {
+fn interlacing_2_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/palette_2_should_be_palette_2.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -52,7 +52,7 @@ fn bench_interlace_2_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_interlace_1_bits(b: &mut Bencher) {
+fn interlacing_1_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/palette_1_should_be_palette_1.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -63,7 +63,7 @@ fn bench_interlace_1_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_deinterlace_16_bits(b: &mut Bencher) {
+fn deinterlacing_16_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/interlaced_rgb_16_should_be_rgb_16.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -74,7 +74,7 @@ fn bench_deinterlace_16_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_deinterlace_8_bits(b: &mut Bencher) {
+fn deinterlacing_8_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/interlaced_rgb_8_should_be_rgb_8.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -85,7 +85,7 @@ fn bench_deinterlace_8_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_deinterlace_4_bits(b: &mut Bencher) {
+fn deinterlacing_4_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/interlaced_palette_4_should_be_palette_4.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -96,7 +96,7 @@ fn bench_deinterlace_4_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_deinterlace_2_bits(b: &mut Bencher) {
+fn deinterlacing_2_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/interlaced_palette_2_should_be_palette_2.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
@@ -107,7 +107,7 @@ fn bench_deinterlace_2_bits(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_deinterlace_1_bits(b: &mut Bencher) {
+fn deinterlacing_1_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/interlaced_palette_1_should_be_palette_1.png"));
     let png = png::PngData::new(&input, false).unwrap();
 

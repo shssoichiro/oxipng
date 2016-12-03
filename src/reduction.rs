@@ -40,24 +40,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
 }
 
 pub fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
-    let bpp: usize = 4 * byte_depth as usize;
-    let colored_bytes = bpp - byte_depth as usize;
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
-        for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp >= colored_bytes {
-                if *byte != 255 {
-                    return None;
-                }
-            } else {
-                reduced.push(*byte);
-            }
-        }
-    }
-
-    Some(reduced)
+    reduce_alpha_channel(png, 4)
 }
 
 pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
@@ -274,9 +257,13 @@ pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
 }
 
 pub fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
+    reduce_alpha_channel(png, 2)
+}
+
+fn reduce_alpha_channel(png: &PngData, bpp_factor: usize) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
-    let bpp: usize = 2 * byte_depth as usize;
+    let bpp: usize = bpp_factor * byte_depth as usize;
     let colored_bytes = bpp - byte_depth as usize;
     for line in png.scan_lines() {
         reduced.push(line.filter);
