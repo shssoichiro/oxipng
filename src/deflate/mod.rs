@@ -5,7 +5,9 @@ use libc::c_int;
 use std::cmp::max;
 use zopfli;
 
+#[doc(hidden)]
 pub mod libz_stream;
+#[doc(hidden)]
 pub mod miniz_stream;
 
 /// Decompress a data stream using the DEFLATE algorithm

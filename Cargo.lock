@@ -1,6 +1,6 @@
 [root]
 name = "oxipng"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "bit-vec 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
