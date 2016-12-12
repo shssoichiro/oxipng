@@ -418,14 +418,7 @@ impl PngData {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed ||
                self.ihdr_data.color_type == ColorType::Grayscale {
-                return match reduce_bit_depth_8_or_less(self) {
-                    Some((data, depth)) => {
-                        self.raw_data = data;
-                        self.ihdr_data.bit_depth = BitDepth::from_u8(depth);
-                        true
-                    }
-                    None => false,
-                };
+                return reduce_bit_depth_8_or_less(self);
             }
             return false;
         }
@@ -660,57 +653,35 @@ impl PngData {
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
         if self.ihdr_data.color_type == ColorType::RGBA {
-            if let Some(data) = reduce_rgba_to_grayscale_alpha(self) {
-                self.raw_data = data;
-                self.ihdr_data.color_type = ColorType::GrayscaleAlpha;
+            if reduce_rgba_to_grayscale_alpha(self) {
                 changed = true;
-            } else if let Some(data) = reduce_rgba_to_rgb(self) {
-                self.raw_data = data;
-                self.ihdr_data.color_type = ColorType::RGB;
+            } else if reduce_rgba_to_rgb(self) {
                 changed = true;
-            } else if let Some((data, palette, trans)) = reduce_rgba_to_palette(self) {
-                self.raw_data = data;
-                self.palette = Some(palette);
-                if trans.iter().any(|x| *x != 255) {
-                    self.transparency_palette = Some(trans);
-                } else {
-                    self.transparency_palette = None;
-                }
-                self.ihdr_data.color_type = ColorType::Indexed;
+            } else if reduce_rgba_to_palette(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
             }
         }
 
         if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
-            if let Some(data) = reduce_grayscale_alpha_to_grayscale(self) {
-                self.raw_data = data;
-                self.ihdr_data.color_type = ColorType::Grayscale;
+            if reduce_grayscale_alpha_to_grayscale(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
             }
         }
 
         if self.ihdr_data.color_type == ColorType::RGB {
-            if let Some(data) = reduce_rgb_to_grayscale(self) {
-                self.raw_data = data;
-                self.ihdr_data.color_type = ColorType::Grayscale;
+            if reduce_rgb_to_grayscale(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
-            } else if let Some((data, palette)) = reduce_rgb_to_palette(self) {
-                self.raw_data = data;
-                self.palette = Some(palette);
-                self.ihdr_data.color_type = ColorType::Indexed;
+            } else if reduce_rgb_to_palette(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
             }
         }
 
         if self.ihdr_data.color_type == ColorType::Grayscale {
-            if let Some((data, palette)) = reduce_grayscale_to_palette(self) {
-                self.raw_data = data;
-                self.palette = Some(palette);
-                self.ihdr_data.color_type = ColorType::Indexed;
+            if reduce_grayscale_to_palette(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
             }
@@ -719,10 +690,7 @@ impl PngData {
         if should_reduce_bit_depth {
             // Some conversions will allow us to perform bit depth reduction that
             // wasn't possible before
-            if let Some((data, depth)) = reduce_bit_depth_8_or_less(self) {
-                self.raw_data = data;
-                self.ihdr_data.bit_depth = BitDepth::from_u8(depth);
-            }
+            reduce_bit_depth_8_or_less(self);
         }
 
         changed

@@ -41,7 +41,7 @@ run_test_suite() {
     cargo test --target $TARGET --release
 
     # sanity check the file type
-    file target/$TARGET/debug/oxipng
+    file target/$TARGET/release/oxipng
 }
 
 main() {
