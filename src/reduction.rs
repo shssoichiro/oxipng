@@ -1,9 +1,9 @@
 use bit_vec::BitVec;
-use colors::BitDepth;
+use colors::{BitDepth, ColorType};
 use itertools::Itertools;
 use png::PngData;
 
-pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
+pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
     let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
     let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
     let mut allowed_bits = 1;
@@ -15,7 +15,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
                 allowed_bits = bit_index.next_power_of_two();
                 if allowed_bits == bit_depth {
                     // Not reducable
-                    return None;
+                    return false;
                 }
             }
         }
@@ -36,14 +36,22 @@ pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<(Vec<u8>, u8)> {
         }
     }
 
-    Some((reduced.to_bytes(), allowed_bits as u8))
+    png.raw_data = reduced.to_bytes();
+    png.ihdr_data.bit_depth = BitDepth::from_u8(allowed_bits as u8);
+    true
 }
 
-pub fn reduce_rgba_to_rgb(png: &PngData) -> Option<Vec<u8>> {
-    reduce_alpha_channel(png, 4)
+pub fn reduce_rgba_to_rgb(png: &mut PngData) -> bool {
+    if let Some(reduced) = reduce_alpha_channel(png, 4) {
+        png.raw_data = reduced;
+        png.ihdr_data.color_type = ColorType::RGB;
+        true
+    } else {
+        false
+    }
 }
 
-pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
+pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 4 * byte_depth as usize;
@@ -66,11 +74,11 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
 
             if i % bpp == bpp - 1 {
                 if low_bytes.iter().unique().count() > 1 {
-                    return None;
+                    return false;
                 }
                 if byte_depth == 2 {
                     if high_bytes.iter().unique().count() > 1 {
-                        return None;
+                        return false;
                     }
                     reduced.push(high_bytes[0]);
                     high_bytes.clear();
@@ -83,12 +91,24 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<Vec<u8>> {
         }
     }
 
-    Some(reduced)
+    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+        assert_eq!(sbit_header.len(), 4);
+        sbit_header.remove(1);
+        sbit_header.remove(1);
+    }
+    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+        assert_eq!(bkgd_header.len(), 6);
+        bkgd_header.truncate(2);
+    }
+
+    png.raw_data = reduced;
+    png.ihdr_data.color_type = ColorType::GrayscaleAlpha;
+    true
 }
 
-pub fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> {
+pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
     if png.ihdr_data.bit_depth != BitDepth::Eight {
-        return None;
+        return false;
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = Vec::with_capacity(256);
@@ -104,7 +124,7 @@ pub fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8
                 } else {
                     let len = palette.len();
                     if len == 256 {
-                        return None;
+                        return false;
                     }
                     palette.push(cur_pixel);
                     reduced.push(len as u8);
@@ -126,12 +146,38 @@ pub fn reduce_rgba_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>, Vec<u8
         }
     }
 
-    Some((reduced, color_palette, trans_palette))
+    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+        assert_eq!(bkgd_header.len(), 6);
+        let header_pixels = bkgd_header.iter().skip(1).step(2).cloned().collect::<Vec<u8>>();
+        if let Some(entry) = color_palette.chunks(3).position(|x| x == header_pixels.as_slice()) {
+            *bkgd_header = vec![entry as u8];
+        } else if color_palette.len() == 255 {
+            return false;
+        } else {
+            let entry = color_palette.len() / 3;
+            color_palette.extend_from_slice(&header_pixels);
+            *bkgd_header = vec![entry as u8];
+        }
+    }
+    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+        assert_eq!(sbit_header.len(), 4);
+        sbit_header.pop();
+    }
+
+    png.raw_data = reduced;
+    png.palette = Some(color_palette);
+    if trans_palette.iter().any(|x| *x != 255) {
+        png.transparency_palette = Some(trans_palette);
+    } else {
+        png.transparency_palette = None;
+    }
+    png.ihdr_data.color_type = ColorType::Indexed;
+    true
 }
 
-pub fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
+pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
     if png.ihdr_data.bit_depth != BitDepth::Eight {
-        return None;
+        return false;
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = Vec::with_capacity(256);
@@ -147,7 +193,7 @@ pub fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
                 } else {
                     let len = palette.len();
                     if len == 256 {
-                        return None;
+                        return false;
                     }
                     palette.push(cur_pixel);
                     reduced.push(len as u8);
@@ -162,12 +208,29 @@ pub fn reduce_rgb_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
         color_palette.extend_from_slice(color);
     }
 
-    Some((reduced, color_palette))
+    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+        assert_eq!(bkgd_header.len(), 6);
+        let header_pixels = bkgd_header.iter().skip(1).step(2).cloned().collect::<Vec<u8>>();
+        if let Some(entry) = color_palette.chunks(3).position(|x| x == header_pixels.as_slice()) {
+            *bkgd_header = vec![entry as u8];
+        } else if color_palette.len() == 255 {
+            return false;
+        } else {
+            let entry = color_palette.len() / 3;
+            color_palette.extend_from_slice(&header_pixels);
+            *bkgd_header = vec![entry as u8];
+        }
+    }
+
+    png.raw_data = reduced;
+    png.palette = Some(color_palette);
+    png.ihdr_data.color_type = ColorType::Indexed;
+    true
 }
 
-pub fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> {
+pub fn reduce_grayscale_to_palette(png: &mut PngData) -> bool {
     if png.ihdr_data.bit_depth == BitDepth::Sixteen {
-        return None;
+        return false;
     }
     let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
     // Only perform reduction if we can get to 4-bits or less
@@ -192,7 +255,7 @@ pub fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> 
                 } else {
                     let len = palette.len();
                     if len == 16 {
-                        return None;
+                        return false;
                     }
                     palette.push(pix_slice);
                     let idx = BitVec::from_bytes(&[(len as u8) << bpp_inverse]);
@@ -214,10 +277,34 @@ pub fn reduce_grayscale_to_palette(png: &PngData) -> Option<(Vec<u8>, Vec<u8>)> 
         color_palette.extend_from_slice(color);
     }
 
-    Some((reduced.to_bytes(), color_palette))
+    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+        assert_eq!(bkgd_header.len(), 2);
+        let header_pixels = [bkgd_header[1], bkgd_header[1], bkgd_header[1]];
+        if let Some(entry) = color_palette.chunks(3).position(|x| *x == header_pixels) {
+            *bkgd_header = vec![entry as u8];
+        } else if color_palette.len() == 255 {
+            return false;
+        } else {
+            let entry = color_palette.len() / 3;
+            color_palette.extend_from_slice(&header_pixels);
+            *bkgd_header = vec![entry as u8];
+        }
+    }
+
+    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+        assert_eq!(sbit_header.len(), 1);
+        let byte = sbit_header[0];
+        sbit_header.push(byte);
+        sbit_header.push(byte);
+    }
+
+    png.raw_data = reduced.to_bytes();
+    png.palette = Some(color_palette);
+    png.ihdr_data.color_type = ColorType::Indexed;
+    true
 }
 
-pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
+pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 3 * byte_depth as usize;
@@ -229,7 +316,7 @@ pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             if i % bpp == bpp - 1 {
                 if bpp == 3 {
                     if cur_pixel.iter().unique().count() > 1 {
-                        return None;
+                        return false;
                     }
                     reduced.push(cur_pixel[0]);
                 } else {
@@ -243,7 +330,7 @@ pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
                         .unique()
                         .collect::<Vec<(u8, u8)>>();
                     if pixel_bytes.len() > 1 {
-                        return None;
+                        return false;
                     }
                     reduced.push(pixel_bytes[0].0);
                     reduced.push(pixel_bytes[0].1);
@@ -252,15 +339,31 @@ pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
             }
         }
     }
+    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+        assert_eq!(sbit_header.len(), 3);
+        sbit_header.truncate(1);
+    }
+    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+        assert_eq!(bkgd_header.len(), 6);
+        bkgd_header.truncate(2);
+    }
 
-    Some(reduced)
+    png.raw_data = reduced;
+    png.ihdr_data.color_type = ColorType::Grayscale;
+    true
 }
 
-pub fn reduce_grayscale_alpha_to_grayscale(png: &PngData) -> Option<Vec<u8>> {
-    reduce_alpha_channel(png, 2)
+pub fn reduce_grayscale_alpha_to_grayscale(png: &mut PngData) -> bool {
+    if let Some(reduced) = reduce_alpha_channel(png, 2) {
+        png.raw_data = reduced;
+        png.ihdr_data.color_type = ColorType::Grayscale;
+        true
+    } else {
+        false
+    }
 }
 
-fn reduce_alpha_channel(png: &PngData, bpp_factor: usize) -> Option<Vec<u8>> {
+fn reduce_alpha_channel(png: &mut PngData, bpp_factor: usize) -> Option<Vec<u8>> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = bpp_factor * byte_depth as usize;
@@ -276,6 +379,10 @@ fn reduce_alpha_channel(png: &PngData, bpp_factor: usize) -> Option<Vec<u8>> {
                 reduced.push(*byte);
             }
         }
+    }
+    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+        assert_eq!(sbit_header.len(), bpp_factor);
+        sbit_header.pop();
     }
 
     Some(reduced)

@@ -1,3 +1,6 @@
+**Version 0.12.1 [unreleased]**
+ - Fix bug in certain PNG headers when reducing color type ([#52](https://github.com/shssoichiro/oxipng/issues/52))
+
 **Version 0.12.0**
  - Performance optimizations
  - Fix processing filenames that contain commas (@aliceatlas [#50](https://github.com/shssoichiro/oxipng/pull/50))

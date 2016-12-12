@@ -30,7 +30,7 @@ cp target/release/oxipng /usr/local/bin
 Please note that zlib is a required build dependency. Oxipng should work with any 1.x version of zlib,
 but you are advised to use the latest version (currently 1.2.8) for security and bug fixes.
 
-The current minimum supported Rust version is **1.9.0**. Oxipng may compile on earlier versions of Rust,
+The current minimum supported Rust version is **1.11.0**. Oxipng may compile on earlier versions of Rust,
 but there is no guarantee.
 
 Oxipng follows Semantic Versioning.
