@@ -653,9 +653,7 @@ impl PngData {
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
         if self.ihdr_data.color_type == ColorType::RGBA {
-            if reduce_rgba_to_grayscale_alpha(self) {
-                changed = true;
-            } else if reduce_rgba_to_rgb(self) {
+            if reduce_rgba_to_grayscale_alpha(self) || reduce_rgba_to_rgb(self) {
                 changed = true;
             } else if reduce_rgba_to_palette(self) {
                 changed = true;
@@ -663,28 +661,21 @@ impl PngData {
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
-            if reduce_grayscale_alpha_to_grayscale(self) {
-                changed = true;
-                should_reduce_bit_depth = true;
-            }
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha &&
+           reduce_grayscale_alpha_to_grayscale(self) {
+            changed = true;
+            should_reduce_bit_depth = true;
         }
 
-        if self.ihdr_data.color_type == ColorType::RGB {
-            if reduce_rgb_to_grayscale(self) {
-                changed = true;
-                should_reduce_bit_depth = true;
-            } else if reduce_rgb_to_palette(self) {
-                changed = true;
-                should_reduce_bit_depth = true;
-            }
+        if self.ihdr_data.color_type == ColorType::RGB &&
+           (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self)) {
+            changed = true;
+            should_reduce_bit_depth = true;
         }
 
-        if self.ihdr_data.color_type == ColorType::Grayscale {
-            if reduce_grayscale_to_palette(self) {
-                changed = true;
-                should_reduce_bit_depth = true;
-            }
+        if self.ihdr_data.color_type == ColorType::Grayscale && reduce_grayscale_to_palette(self) {
+            changed = true;
+            should_reduce_bit_depth = true;
         }
 
         if should_reduce_bit_depth {
