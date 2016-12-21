@@ -67,11 +67,11 @@ More advanced options can be found by running `oxipng -h`.
 Although originally intended to be used as an executable, oxipng can also be used as a library in
 other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.toml,
 then `extern crate oxipng` in your project. You should then have access to all of the library
-functions [documented here](https://shssoichiro.github.io/oxipng/doc/oxipng/). The simplest
+functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
-[Options struct](https://shssoichiro.github.io/oxipng/doc/oxipng/struct.Options.html) and
+[Options struct](https://docs.rs/oxipng/0.13.0/oxipng/struct.Options.htmll) and
 passing it, along with an input filename, into the
-[optimize function](https://shssoichiro.github.io/oxipng/doc/oxipng/fn.optimize.html).
+[optimize function](https://docs.rs/oxipng/0.13.0/oxipng/fn.optimize.html).
 
 ## History
 
