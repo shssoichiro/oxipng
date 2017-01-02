@@ -1,7 +1,7 @@
-**Version 0.13.1 (unreleased)**
- - Bump regex crate to 0.2
- - Bump byteorder crate to 1.0
- - Bump rayon crate to 0.6
+**Version 0.13.1**
+ - Bump regex dependency to 0.2
+ - Bump byteorder dependency to 1.0
+ - Bump rayon dependency to 0.6
 
 **Version 0.13.0**
  - Fix bug in certain PNG headers when reducing color type ([#52](https://github.com/shssoichiro/oxipng/issues/52))
