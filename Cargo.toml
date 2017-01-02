@@ -20,14 +20,14 @@ path = "src/main.rs"
 
 [dependencies]
 bit-vec = "^0.4.2"
-byteorder = "^0.5.0"
+byteorder = "^1.0.0"
 crc = "^1.2.0"
 itertools = "^0.5.7"
 libc = "^0.2.4"
 libz-sys = "^1.0.0"
 miniz-sys = "^0.1.7"
 num_cpus = "^1.0.0"
-rayon = "^0.5.0"
+rayon = "^0.6.0"
 zopfli = "^0.3.4"
 
 [dependencies.clap]
@@ -40,7 +40,7 @@ version = ">=0.0.85"
 
 [dependencies.regex]
 optional = true
-version = "^0.1.63"
+version = "^0.2.0"
 
 [dev-dependencies.image]
 default-features = false
