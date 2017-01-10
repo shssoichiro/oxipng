@@ -1,3 +1,6 @@
+**Version 0.13.2 (unreleased)**
+ - Performance optimizations
+
 **Version 0.13.1**
  - Bump regex dependency to 0.2
  - Bump byteorder dependency to 1.0
