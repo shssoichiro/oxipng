@@ -1,5 +1,6 @@
-**Version 0.13.2 (unreleased)**
+**Version 0.14.0 (unreleased)**
  - Performance optimizations
+ - [SEMVER_MAJOR] Bump minimum rustc version to 1.13.0
 
 **Version 0.13.1**
  - Bump regex dependency to 0.2
