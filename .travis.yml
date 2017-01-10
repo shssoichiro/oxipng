@@ -11,7 +11,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
       cache: cargo
     - os: linux
-      rust: 1.12.0
+      rust: 1.13.0
       env: TARGET=x86_64-unknown-linux-gnu
       cache: cargo
     - os: linux
