@@ -6,20 +6,18 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         }
         1 => {
             filtered.extend_from_slice(&data[0..bpp]);
-            filtered.extend_from_slice(&data.iter()
+            filtered.extend(data.iter()
                 .skip(bpp)
                 .zip(data.iter())
-                .map(|(cur, last)| cur.wrapping_sub(*last))
-                .collect::<Vec<u8>>());
+                .map(|(cur, last)| cur.wrapping_sub(*last)));
         }
         2 => {
             if last_line.is_empty() {
                 filtered.extend_from_slice(data);
             } else {
-                filtered.extend_from_slice(&data.iter()
+                filtered.extend(data.iter()
                     .zip(last_line.iter())
-                    .map(|(cur, last)| cur.wrapping_sub(*last))
-                    .collect::<Vec<u8>>());
+                    .map(|(cur, last)| cur.wrapping_sub(*last)));
             };
         }
         3 => {
@@ -84,10 +82,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
             if last_line.is_empty() {
                 unfiltered.extend_from_slice(data);
             } else {
-                unfiltered.extend_from_slice(&data.iter()
+                unfiltered.extend(data.iter()
                     .zip(last_line.iter())
-                    .map(|(cur, last)| cur.wrapping_add(*last))
-                    .collect::<Vec<u8>>());
+                    .map(|(cur, last)| cur.wrapping_add(*last)));
             };
         }
         3 => {
