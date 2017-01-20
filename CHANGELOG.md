@@ -1,6 +1,7 @@
-**Version 0.14.0 (unreleased)**
+**Version 0.14.0**
  - Performance optimizations
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.13.0
+ - Add categories on crates.io
 
 **Version 0.13.1**
  - Bump regex dependency to 0.2
