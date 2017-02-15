@@ -263,6 +263,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: Options) {
     }
 }
 
+#[allow(cyclomatic_complexity)]
 fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
