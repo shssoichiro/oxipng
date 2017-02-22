@@ -1,3 +1,6 @@
+**Version 0.14.1**
+ - Remove zlib dependency and switch entirely to miniz, since zlib 1.2.11 was not working with oxipng. This costs some performance, but is better than having a broken application.
+
 **Version 0.14.0**
  - Performance optimizations
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.13.0
