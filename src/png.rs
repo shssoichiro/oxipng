@@ -465,9 +465,29 @@ impl PngData {
             return false;
         }
 
-        // A palette with RGB slices
-        let palette = self.palette.clone().unwrap();
-        let mut indexed_palette: Vec<&[u8]> = palette.chunks(3).collect();
+        // A palette with RGB or RGBA slices
+        let palette = if let Some(ref trns) = self.transparency_palette {
+            self.palette
+                .clone()
+                .unwrap()
+                .chunks(3)
+                .zip(trns.iter())
+                .flat_map(|(pixel, trns)| {
+                    let mut pixel = pixel.to_owned();
+                    pixel.push(*trns);
+                    pixel
+                })
+                .collect()
+        } else {
+            self.palette.clone().unwrap()
+        };
+        let mut indexed_palette: Vec<&[u8]> =
+            palette.chunks(if self.transparency_palette.is_some() {
+                    4
+                } else {
+                    3
+                })
+                .collect();
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
 
@@ -589,49 +609,49 @@ impl PngData {
                 }
                 BitDepth::Four => {
                     for byte in &line.data {
-                        let upper = *byte >> 4;
+                        let upper = *byte & 0b11110000;
                         let lower = *byte & 0b00001111;
                         let mut new_byte = 0u8;
-                        if let Some(new_idx) = index_map.get(&upper) {
-                            new_byte &= *new_idx << 4;
+                        new_byte |= if let Some(new_idx) = index_map.get(&upper) {
+                            *new_idx << 4
                         } else {
-                            new_byte &= upper << 4;
-                        }
-                        if let Some(new_idx) = index_map.get(&lower) {
-                            new_byte &= *new_idx;
+                            upper << 4
+                        };
+                        new_byte |= if let Some(new_idx) = index_map.get(&lower) {
+                            *new_idx
                         } else {
-                            new_byte &= lower;
-                        }
+                            lower
+                        };
                         new_data.push(new_byte);
                     }
                 }
                 BitDepth::Two => {
                     for byte in &line.data {
-                        let one = *byte >> 6;
-                        let two = (*byte >> 4) & 0b00000011;
-                        let three = (*byte >> 2) & 0b00000011;
+                        let one = *byte & 0b11000000;
+                        let two = *byte & 0b00110000;
+                        let three = *byte & 0b00001100;
                         let four = *byte & 0b00000011;
                         let mut new_byte = 0u8;
-                        if let Some(new_idx) = index_map.get(&one) {
-                            new_byte &= *new_idx << 6;
+                        new_byte |= if let Some(new_idx) = index_map.get(&one) {
+                            *new_idx << 6
                         } else {
-                            new_byte &= one << 6;
-                        }
-                        if let Some(new_idx) = index_map.get(&two) {
-                            new_byte &= *new_idx << 4;
+                            one << 6
+                        };
+                        new_byte |= if let Some(new_idx) = index_map.get(&two) {
+                            *new_idx << 4
                         } else {
-                            new_byte &= two << 4;
-                        }
-                        if let Some(new_idx) = index_map.get(&three) {
-                            new_byte &= *new_idx << 2;
+                            two << 4
+                        };
+                        new_byte |= if let Some(new_idx) = index_map.get(&three) {
+                            *new_idx << 2
                         } else {
-                            new_byte &= three << 2;
-                        }
-                        if let Some(new_idx) = index_map.get(&four) {
-                            new_byte &= *new_idx;
+                            three << 2
+                        };
+                        new_byte |= if let Some(new_idx) = index_map.get(&four) {
+                            *new_idx
                         } else {
-                            new_byte &= four;
-                        }
+                            four
+                        };
                         new_data.push(new_byte);
                     }
                 }

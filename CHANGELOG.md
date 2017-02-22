@@ -1,3 +1,7 @@
+**Version 0.14.2**
+ - Fix a bug when reducing palette in images with bit depth less than 8
+ - Fix a bug when reducing palette in images with transparency
+
 **Version 0.14.1**
  - Remove zlib dependency and switch entirely to miniz, since zlib 1.2.11 was not working with oxipng. This costs some performance, but is better than having a broken application.
 

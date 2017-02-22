@@ -56,8 +56,8 @@ fn test_it_converts(input: &Path,
     let new_png = image::open(output).unwrap();
 
     // Conversion should be lossless
-    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
-               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -65,9 +65,7 @@ fn test_it_converts(input: &Path,
 #[test]
 fn issue_29() {
     let input = PathBuf::from("tests/files/issue-29.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -114,8 +112,8 @@ fn issue_42() {
     let new_png = image::open(&output).unwrap();
 
     // Conversion should be lossless
-    assert_eq!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>(),
-               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
+    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -123,9 +121,7 @@ fn issue_42() {
 #[test]
 fn issue_52_01() {
     let input = PathBuf::from("tests/files/issue-52-01.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -140,9 +136,7 @@ fn issue_52_01() {
 #[test]
 fn issue_52_02() {
     let input = PathBuf::from("tests/files/issue-52-02.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -157,9 +151,7 @@ fn issue_52_02() {
 #[test]
 fn issue_52_03() {
     let input = PathBuf::from("tests/files/issue-52-03.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -174,9 +166,7 @@ fn issue_52_03() {
 #[test]
 fn issue_52_04() {
     let input = PathBuf::from("tests/files/issue-52-04.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -191,9 +181,7 @@ fn issue_52_04() {
 #[test]
 fn issue_52_05() {
     let input = PathBuf::from("tests/files/issue-52-05.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -208,9 +196,7 @@ fn issue_52_05() {
 #[test]
 fn issue_52_06() {
     let input = PathBuf::from("tests/files/issue-52-06.png");
-    let mut opts = get_opts(&input);
-    opts.filter = HashSet::new();
-    opts.filter.insert(0);
+    let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
     test_it_converts(&input,
@@ -220,4 +206,19 @@ fn issue_52_06() {
                      BitDepth::Eight,
                      ColorType::Indexed,
                      BitDepth::Two);
+}
+
+#[test]
+fn issue_56() {
+    let input = PathBuf::from("tests/files/issue-56.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     ColorType::Indexed,
+                     BitDepth::Four,
+                     ColorType::Indexed,
+                     BitDepth::Four);
 }
