@@ -1,3 +1,6 @@
+**Version 0.14.3**
+ - Fix multiple bugs when reducing transparency palettes
+
 **Version 0.14.2**
  - Fix a bug when reducing palette in images with bit depth less than 8
  - Fix a bug when reducing palette in images with transparency

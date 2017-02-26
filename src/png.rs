@@ -471,7 +471,7 @@ impl PngData {
                 .clone()
                 .unwrap()
                 .chunks(3)
-                .zip(trns.iter())
+                .zip(trns.iter().chain([255].iter().cycle()))
                 .flat_map(|(pixel, trns)| {
                     let mut pixel = pixel.to_owned();
                     pixel.push(*trns);
@@ -574,7 +574,6 @@ impl PngData {
                             index_map: &mut HashMap<u8, u8>,
                             indexed_palette: &mut Vec<&[u8]>) {
         let mut new_data = Vec::with_capacity(self.raw_data.len());
-        let mut alpha_palette = self.aux_headers.get("tRNS").cloned();
         let original_len = indexed_palette.len();
         for idx in indices.iter().sorted_by(|a, b| b.cmp(a)) {
             for i in (*idx as usize + 1)..original_len {
@@ -584,14 +583,15 @@ impl PngData {
                 }
             }
             indexed_palette.remove(*idx as usize);
-            if let Some(ref mut alpha) = alpha_palette {
-                alpha.remove(*idx as usize);
+            if let Some(ref mut alpha) = self.transparency_palette {
+                if (*idx as usize) < alpha.len() {
+                    alpha.remove(*idx as usize);
+                }
             }
         }
-        if alpha_palette.is_some() {
-            let alpha_header = self.aux_headers.get_mut("tRNS");
-            if let Some(alpha_hdr) = alpha_header {
-                *alpha_hdr = alpha_palette.unwrap();
+        if let Some(ref mut alpha) = self.transparency_palette {
+            while let Some(255) = alpha.last().cloned() {
+                alpha.pop();
             }
         }
         // Reassign data bytes to new indices
@@ -615,7 +615,7 @@ impl PngData {
                         new_byte |= if let Some(new_idx) = index_map.get(&upper) {
                             *new_idx << 4
                         } else {
-                            upper << 4
+                            upper
                         };
                         new_byte |= if let Some(new_idx) = index_map.get(&lower) {
                             *new_idx
@@ -660,7 +660,13 @@ impl PngData {
         }
         index_map.clear();
         self.raw_data = new_data;
-        let new_palette = indexed_palette.iter().cloned().flatten().cloned().collect::<Vec<u8>>();
+        let new_palette = indexed_palette.iter()
+            .cloned()
+            .flatten()
+            .enumerate()
+            .filter(|&(i, _)| !(self.transparency_palette.is_some() && i % 4 == 3))
+            .map(|(_, x)| *x)
+            .collect::<Vec<u8>>();
         self.palette = Some(new_palette);
     }
 
