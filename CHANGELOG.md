@@ -1,3 +1,6 @@
+**Version 0.14.4**
+ - Fix bug when reducing RGBA to Indexed if image has 256 colors plus a background color
+
 **Version 0.14.3**
  - Fix multiple bugs when reducing transparency palettes
 
