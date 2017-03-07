@@ -183,7 +183,14 @@ pub struct PngData {
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
+    #[inline]
     pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, PngError> {
+        let byte_data = PngData::read_file(filepath)?;
+
+        PngData::from_slice(&byte_data, fix_errors)
+    }
+
+    pub fn read_file(filepath: &Path) -> Result<Vec<u8>, PngError> {
         let mut file = match File::open(filepath) {
             Ok(f) => f,
             Err(_) => return Err(PngError::new("Failed to open file for reading")),
@@ -194,8 +201,7 @@ impl PngData {
             Ok(_) => (),
             Err(_) => return Err(PngError::new("Failed to read from file")),
         }
-
-        PngData::from_slice(&byte_data, fix_errors)
+        Ok(byte_data)
     }
 
     /// Create a new `PngData` struct by reading a slice
@@ -273,6 +279,17 @@ impl PngData {
         Ok(png_data)
     }
 
+    #[doc(hidden)]
+    pub fn reset_from_original(&mut self, original: PngData) {
+        self.idat_data = original.idat_data;
+        self.ihdr_data = original.ihdr_data;
+        self.raw_data = original.raw_data;
+        self.palette = original.palette;
+        self.transparency_pixel = original.transparency_pixel;
+        self.transparency_palette = original.transparency_palette;
+        self.aux_headers = original.aux_headers;
+    }
+
     /// Return the number of channels in the image, based on color type
     #[inline]
     pub fn channels_per_pixel(&self) -> u8 {
@@ -330,6 +347,7 @@ impl PngData {
     }
 
     /// Return an iterator over the scanlines of the image
+    #[inline]
     pub fn scan_lines(&self) -> ScanLines {
         ScanLines {
             png: self,

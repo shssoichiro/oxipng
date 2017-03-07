@@ -1,8 +1,5 @@
-extern crate image;
 extern crate oxipng;
 
-use image::GenericImage;
-use image::Pixel;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
@@ -52,13 +49,6 @@ fn test_it_converts(input: &Path,
 
     assert_eq!(png.ihdr_data.color_type, color_type_out);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
-
-    let old_png = image::open(input).unwrap();
-    let new_png = image::open(output).unwrap();
-
-    // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }

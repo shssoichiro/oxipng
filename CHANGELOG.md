@@ -1,3 +1,7 @@
+**Version 0.15.0 (unreleased)**
+ - [SEMVER_MINOR] Check images for correctness before writing result ([#60](https://github.com/shssoichiro/oxipng/issues/60))
+ - Fix invalid output when reducing image to a different color type but file size does not improve ([#60](https://github.com/shssoichiro/oxipng/issues/60))
+
 **Version 0.14.4**
  - Fix bug when reducing RGBA to Indexed if image has 256 colors plus a background color
 

@@ -4,6 +4,7 @@
 extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
+extern crate image;
 extern crate itertools;
 extern crate libc;
 extern crate miniz_sys;
@@ -13,7 +14,9 @@ extern crate zopfli;
 
 use deflate::Deflaters;
 use error::PngError;
+use image::{GenericImage, Pixel, ImageFormat};
 use headers::Headers;
+use png::PngData;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
@@ -286,16 +289,13 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
     }
 
     let in_file = Path::new(filepath);
-    let original_size = in_file.metadata().unwrap().len() as usize;
-    let mut png = match png::PngData::new(in_file, opts.fix_errors) {
-        Ok(x) => x,
-        Err(x) => return Err(x),
-    };
+    let in_data = PngData::read_file(in_file)?;
+    let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let optimized_output = optimize_png(&mut png, original_size, opts);
+    let optimized_output = optimize_png(&mut png, &in_data, opts)?;
 
-    if is_fully_optimized(original_size, optimized_output.len(), opts) {
+    if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         writeln!(&mut stderr(), "File already optimized").ok();
         return Ok(());
     }
@@ -408,13 +408,10 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngE
         writeln!(&mut stderr(), "Processing from memory").ok();
     }
     let original_size = data.len() as usize;
-    let mut png = match png::PngData::from_slice(data, opts.fix_errors) {
-        Ok(x) => x,
-        Err(x) => return Err(x),
-    };
+    let mut png = PngData::from_slice(data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let optimized_output = optimize_png(&mut png, original_size, opts);
+    let optimized_output = optimize_png(&mut png, data, opts)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
         writeln!(&mut stderr(), "Image already optimized").ok();
@@ -425,10 +422,16 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngE
 }
 
 /// Perform optimization on the input PNG object using the options provided
-fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Options) -> Vec<u8> {
+fn optimize_png(png: &mut PngData,
+                original_data: &[u8],
+                opts: &Options)
+                -> Result<Vec<u8>, PngError> {
     type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
 
+    let original_png = png.clone();
+
     // Print png info
+    let file_original_size = original_data.len();
     let idat_original_size = png.idat_data.len();
     if opts.verbosity.is_some() {
         writeln!(&mut stderr(),
@@ -485,9 +488,9 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         }
     }
 
-    let something_changed = perform_reductions(&mut png, opts);
+    let reduction_occurred = perform_reductions(png, opts);
 
-    if opts.idat_recoding || something_changed {
+    if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
         let combinations = if opts.deflate == Deflaters::Zlib {
             filter.len() * compression.len() * memory.len() * strategies.len()
@@ -569,10 +572,12 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
                          png.idat_data.len())
                     .ok();
             }
+        } else if reduction_occurred {
+            png.reset_from_original(original_png);
         }
     }
 
-    perform_strip(&mut png, opts);
+    perform_strip(png, opts);
 
     let output = png.output();
 
@@ -609,47 +614,65 @@ fn optimize_png(mut png: &mut png::PngData, file_original_size: usize, opts: &Op
         }
     }
 
-    output
+    let old_png = image::load_from_memory_with_format(original_data, ImageFormat::PNG);
+    let new_png = image::load_from_memory_with_format(&output, ImageFormat::PNG);
+
+    if let Ok(new_png) = new_png {
+        if let Ok(old_png) = old_png {
+            if old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
+               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() {
+                return Ok(output);
+            }
+        } else {
+            // The original image might be invalid if, for example, there is a CRC error,
+            // and we set fix_errors to true. In that case, all we can do is check that the
+            // new image is decodable.
+            return Ok(output);
+        }
+    }
+
+    writeln!(&mut stderr(), "The resulting image is corrupted and will not be outputted.\nThis is a bug! Please report it at https://github.com/shssoichiro/oxipng/issues").ok();
+    Err(PngError::new("The resulting image is corrupted"))
 }
 
 /// Attempt all reduction operations requested by the given `Options` struct
 /// and apply them directly to the `PngData` passed in
 fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
-    let mut something_changed = false;
+    let mut reduction_occurred = false;
 
     if opts.palette_reduction && png.reduce_palette() {
-        something_changed = true;
+        reduction_occurred = true;
         if opts.verbosity == Some(1) {
             report_reduction(png);
         }
     }
 
     if opts.bit_depth_reduction && png.reduce_bit_depth() {
-        something_changed = true;
+        reduction_occurred = true;
         if opts.verbosity == Some(1) {
             report_reduction(png);
         }
     }
 
     if opts.color_type_reduction && png.reduce_color_type() {
-        something_changed = true;
+        reduction_occurred = true;
         if opts.verbosity == Some(1) {
             report_reduction(png);
         }
     }
 
-    if something_changed && opts.verbosity.is_some() {
+    if reduction_occurred && opts.verbosity.is_some() {
         report_reduction(png);
     }
 
     if let Some(interlacing) = opts.interlace {
         if png.change_interlacing(interlacing) {
             png.ihdr_data.interlaced = interlacing;
-            something_changed = true;
+            reduction_occurred = true;
         }
     }
 
-    something_changed
+    reduction_occurred
 }
 
 /// Display the status of the image data after a reduction has taken place

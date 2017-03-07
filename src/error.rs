@@ -7,12 +7,14 @@ pub struct PngError {
 }
 
 impl Error for PngError {
+    #[inline]
     fn description(&self) -> &str {
         &self.description
     }
 }
 
 impl fmt::Display for PngError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.description)
     }

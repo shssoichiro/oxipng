@@ -1,4 +1,3 @@
-extern crate image;
 extern crate oxipng;
 
 use std::default::Default;

@@ -1,8 +1,5 @@
-extern crate image;
 extern crate oxipng;
 
-use image::GenericImage;
-use image::Pixel;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
@@ -52,13 +49,6 @@ fn test_it_converts(input: &Path,
     assert_eq!(png.ihdr_data.color_type, color_type_out);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
 
-    let old_png = image::open(input).unwrap();
-    let new_png = image::open(output).unwrap();
-
-    // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
-
     remove_file(output).ok();
 }
 
@@ -107,13 +97,6 @@ fn issue_42() {
     assert_eq!(png.ihdr_data.interlaced, 1);
     assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-
-    let old_png = image::open(&input).unwrap();
-    let new_png = image::open(&output).unwrap();
-
-    // Conversion should be lossless
-    assert!(old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-            new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>());
 
     remove_file(output).ok();
 }
@@ -250,5 +233,20 @@ fn issue_59() {
                      ColorType::RGBA,
                      BitDepth::Eight,
                      ColorType::RGBA,
+                     BitDepth::Eight);
+}
+
+#[test]
+fn issue_60() {
+    let input = PathBuf::from("tests/files/issue-60.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(&input,
+                     &output,
+                     &opts,
+                     ColorType::RGBA,
+                     BitDepth::Eight,
+                     ColorType::GrayscaleAlpha,
                      BitDepth::Eight);
 }

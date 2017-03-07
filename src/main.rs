@@ -231,16 +231,16 @@ fn main() {
                             .unwrap()
                             .map(PathBuf::from)
                             .collect(),
-                        opts);
+                        &opts);
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: Options) {
+fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
     for input in inputs {
         let mut current_opts = opts.clone();
         if input.is_dir() {
             if current_opts.recursive {
                 handle_optimization(input.read_dir().unwrap().map(|x| x.unwrap().path()).collect(),
-                                    current_opts)
+                                    &current_opts)
             } else {
                 writeln!(&mut stderr(),
                          "{} is a directory, skipping",
