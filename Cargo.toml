@@ -8,7 +8,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "0.14.4"
+version = "0.15.0"
 
 [lib]
 name = "oxipng"
