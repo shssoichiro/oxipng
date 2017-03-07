@@ -526,8 +526,7 @@ fn optimize_png(png: &mut PngData,
         let filters: HashMap<u8, Vec<u8>> = filters_tmp.into_iter().collect();
 
         let original_len = original_png.idat_data.len();
-        let interlacing_changed = opts.interlace.is_some() &&
-                                  opts.interlace != Some(original_png.ihdr_data.interlaced);
+        let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
         let best: Option<TrialWithData> = results.into_par_iter()
             .weight_max()
@@ -551,7 +550,7 @@ fn optimize_png(png: &mut PngData,
                         .ok();
                 }
 
-                if new_idat.len() < original_len || interlacing_changed || opts.force {
+                if new_idat.len() < original_len || added_interlacing || opts.force {
                     Some((trial.0, trial.1, trial.2, trial.3, new_idat))
                 } else {
                     None
