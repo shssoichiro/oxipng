@@ -525,9 +525,9 @@ fn optimize_png(png: &mut PngData,
 
         let filters: HashMap<u8, Vec<u8>> = filters_tmp.into_iter().collect();
 
-        let original_len = png.idat_data.len();
+        let original_len = original_png.idat_data.len();
         let interlacing_changed = opts.interlace.is_some() &&
-                                  opts.interlace != Some(png.ihdr_data.interlaced);
+                                  opts.interlace != Some(original_png.ihdr_data.interlaced);
 
         let best: Option<TrialWithData> = results.into_par_iter()
             .weight_max()
