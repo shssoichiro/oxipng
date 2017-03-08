@@ -7,33 +7,36 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         1 => {
             filtered.extend_from_slice(&data[0..bpp]);
             filtered.extend(data.iter()
-                .skip(bpp)
-                .zip(data.iter())
-                .map(|(cur, last)| cur.wrapping_sub(*last)));
+                                .skip(bpp)
+                                .zip(data.iter())
+                                .map(|(cur, last)| cur.wrapping_sub(*last)));
         }
         2 => {
             if last_line.is_empty() {
                 filtered.extend_from_slice(data);
             } else {
-                filtered.extend(data.iter()
-                    .zip(last_line.iter())
-                    .map(|(cur, last)| cur.wrapping_sub(*last)));
+                filtered.extend(data.iter().zip(last_line.iter()).map(|(cur, last)| {
+                                                                          cur.wrapping_sub(*last)
+                                                                      }));
             };
         }
         3 => {
             for (i, byte) in data.iter().enumerate() {
                 if last_line.is_empty() {
                     filtered.push(match i.checked_sub(bpp) {
-                        Some(x) => byte.wrapping_sub(data[x] >> 1),
-                        None => *byte,
-                    });
+                                      Some(x) => byte.wrapping_sub(data[x] >> 1),
+                                      None => *byte,
+                                  });
                 } else {
                     filtered.push(match i.checked_sub(bpp) {
-                        Some(x) => {
-                            byte.wrapping_sub(((data[x] as u16 + last_line[i] as u16) >> 1) as u8)
-                        }
-                        None => byte.wrapping_sub(last_line[i] >> 1),
-                    });
+                                      Some(x) => {
+                                          byte.wrapping_sub(((data[x] as u16 +
+                                                              last_line[i] as u16) >>
+                                                             1) as
+                                                            u8)
+                                      }
+                                      None => byte.wrapping_sub(last_line[i] >> 1),
+                                  });
                 };
             }
         }
@@ -41,16 +44,18 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
             for (i, byte) in data.iter().enumerate() {
                 if last_line.is_empty() {
                     filtered.push(match i.checked_sub(bpp) {
-                        Some(x) => byte.wrapping_sub(data[x]),
-                        None => *byte,
-                    });
+                                      Some(x) => byte.wrapping_sub(data[x]),
+                                      None => *byte,
+                                  });
                 } else {
                     filtered.push(match i.checked_sub(bpp) {
-                        Some(x) => {
-                            byte.wrapping_sub(paeth_predictor(data[x], last_line[i], last_line[x]))
-                        }
-                        None => byte.wrapping_sub(last_line[i]),
-                    });
+                                      Some(x) => {
+                                          byte.wrapping_sub(paeth_predictor(data[x],
+                                                                            last_line[i],
+                                                                            last_line[x]))
+                                      }
+                                      None => byte.wrapping_sub(last_line[i]),
+                                  });
                 };
             }
         }
@@ -82,9 +87,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
             if last_line.is_empty() {
                 unfiltered.extend_from_slice(data);
             } else {
-                unfiltered.extend(data.iter()
-                    .zip(last_line.iter())
-                    .map(|(cur, last)| cur.wrapping_add(*last)));
+                unfiltered.extend(data.iter().zip(last_line.iter()).map(|(cur, last)| {
+                                                                            cur.wrapping_add(*last)
+                                                                        }));
             };
         }
         3 => {
@@ -103,7 +108,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
                     match i.checked_sub(bpp) {
                         Some(x) => {
                             let b = unfiltered[x];
-                            unfiltered.push(byte.wrapping_add(((b as u16 + last_line[i] as u16) >> 1) as u8));
+                            unfiltered.push(byte.wrapping_add(((b as u16 + last_line[i] as u16) >>
+                                                               1) as
+                                                              u8));
                         }
                         None => {
                             unfiltered.push(byte.wrapping_add(last_line[i] >> 1));

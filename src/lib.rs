@@ -346,16 +346,14 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
                                 {
                                     match out_file.metadata() {
                                         Ok(out_meta) => {
-                                            let readonly = metadata.permissions()
-                                                .readonly();
-                                            out_meta.permissions()
-                                                .set_readonly(readonly);
+                                            let readonly = metadata.permissions().readonly();
+                                            out_meta.permissions().set_readonly(readonly);
                                         }
                                         Err(_) => {
                                             if opts.verbosity.is_some() {
                                                 writeln!(&mut stderr(),
                                                          "Failed to set permissions on output file")
-                                                    .ok();
+                                                        .ok();
                                             }
                                         }
                                     }
@@ -365,7 +363,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
                                 if opts.verbosity.is_some() {
                                     writeln!(&mut stderr(),
                                              "Failed to read permissions on input file")
-                                        .ok();
+                                            .ok();
                                 }
                             }
                         }
@@ -438,29 +436,29 @@ fn optimize_png(png: &mut PngData,
                  "    {}x{} pixels, PNG format",
                  png.ihdr_data.width,
                  png.ihdr_data.height)
-            .ok();
+                .ok();
         if let Some(ref palette) = png.palette {
             writeln!(&mut stderr(),
                      "    {} bits/pixel, {} colors in palette",
                      png.ihdr_data.bit_depth,
                      palette.len() / 3)
-                .ok();
+                    .ok();
         } else {
             writeln!(&mut stderr(),
                      "    {}x{} bits/pixel, {:?}",
                      png.channels_per_pixel(),
                      png.ihdr_data.bit_depth,
                      png.ihdr_data.color_type)
-                .ok();
+                    .ok();
         }
         writeln!(&mut stderr(),
                  "    IDAT size = {} bytes",
                  idat_original_size)
-            .ok();
+                .ok();
         writeln!(&mut stderr(),
                  "    File size = {} bytes",
                  file_original_size)
-            .ok();
+                .ok();
     }
 
     let mut filter = opts.filter.clone();
@@ -528,35 +526,36 @@ fn optimize_png(png: &mut PngData,
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
-        let best: Option<TrialWithData> = results.into_par_iter()
-            .weight_max()
-            .filter_map(|trial| {
-                let filtered = &filters[&trial.0];
-                let new_idat = if opts.deflate == Deflaters::Zlib {
-                        deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
-                    } else {
-                        deflate::zopfli_deflate(filtered)
+        let best: Option<TrialWithData> =
+            results.into_par_iter()
+                .weight_max()
+                .filter_map(|trial| {
+                    let filtered = &filters[&trial.0];
+                    let new_idat = if opts.deflate == Deflaters::Zlib {
+                            deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
+                        } else {
+                            deflate::zopfli_deflate(filtered)
+                        }
+                        .unwrap();
+
+                    if opts.verbosity == Some(1) {
+                        writeln!(&mut stderr(),
+                                 "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                                 trial.1,
+                                 trial.2,
+                                 trial.3,
+                                 trial.0,
+                                 new_idat.len())
+                                .ok();
                     }
-                    .unwrap();
 
-                if opts.verbosity == Some(1) {
-                    writeln!(&mut stderr(),
-                             "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                             trial.1,
-                             trial.2,
-                             trial.3,
-                             trial.0,
-                             new_idat.len())
-                        .ok();
-                }
-
-                if new_idat.len() < original_len || added_interlacing || opts.force {
-                    Some((trial.0, trial.1, trial.2, trial.3, new_idat))
-                } else {
-                    None
-                }
-            })
-            .reduce_with(|i, j| if i.4.len() <= j.4.len() { i } else { j });
+                    if new_idat.len() < original_len || added_interlacing || opts.force {
+                        Some((trial.0, trial.1, trial.2, trial.3, new_idat))
+                    } else {
+                        None
+                    }
+                })
+                .reduce_with(|i, j| if i.4.len() <= j.4.len() { i } else { j });
 
         if let Some(better) = best {
             png.idat_data = better.4;
@@ -569,7 +568,7 @@ fn optimize_png(png: &mut PngData,
                          better.3,
                          better.0,
                          png.idat_data.len())
-                    .ok();
+                        .ok();
             }
         } else if reduction_occurred {
             png.reset_from_original(original_png);
@@ -586,13 +585,13 @@ fn optimize_png(png: &mut PngData,
                      "    IDAT size = {} bytes ({} bytes decrease)",
                      png.idat_data.len(),
                      idat_original_size - png.idat_data.len())
-                .ok();
+                    .ok();
         } else {
             writeln!(&mut stderr(),
                      "    IDAT size = {} bytes ({} bytes increase)",
                      png.idat_data.len(),
                      png.idat_data.len() - idat_original_size)
-                .ok();
+                    .ok();
         }
         if file_original_size >= output.len() {
             writeln!(&mut stderr(),
@@ -601,7 +600,7 @@ fn optimize_png(png: &mut PngData,
                      file_original_size - output.len(),
                      (file_original_size - output.len()) as f64 / file_original_size as f64 *
                      100f64)
-                .ok();
+                    .ok();
         } else {
             writeln!(&mut stderr(),
                      "    file size = {} bytes ({} bytes = {:.2}% increase)",
@@ -609,7 +608,7 @@ fn optimize_png(png: &mut PngData,
                      output.len() - file_original_size,
                      (output.len() - file_original_size) as f64 / file_original_size as f64 *
                      100f64)
-                .ok();
+                    .ok();
         }
     }
 
@@ -682,14 +681,14 @@ fn report_reduction(png: &png::PngData) {
                  "Reducing image to {} bits/pixel, {} colors in palette",
                  png.ihdr_data.bit_depth,
                  palette.len() / 3)
-            .ok();
+                .ok();
     } else {
         writeln!(&mut stderr(),
                  "Reducing image to {}x{} bits/pixel, {}",
                  png.channels_per_pixel(),
                  png.ihdr_data.bit_depth,
                  png.ihdr_data.color_type)
-            .ok();
+                .ok();
     }
 }
 
@@ -706,7 +705,10 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
         Headers::Safe => {
             const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
                                                           "bKGD", "hIST", "pHYs", "sPLT"];
-            let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
+            let hdrs = png.aux_headers
+                .keys()
+                .cloned()
+                .collect::<Vec<String>>();
             for hdr in hdrs {
                 if !PRESERVED_HEADERS.contains(&hdr.as_ref()) {
                     png.aux_headers.remove(&hdr);

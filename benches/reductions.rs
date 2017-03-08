@@ -13,9 +13,9 @@ fn reductions_16_to_8_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -24,9 +24,9 @@ fn reductions_8_to_4_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -35,9 +35,9 @@ fn reductions_8_to_2_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -46,9 +46,9 @@ fn reductions_8_to_1_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -57,9 +57,9 @@ fn reductions_4_to_2_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -68,9 +68,9 @@ fn reductions_4_to_1_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -79,9 +79,9 @@ fn reductions_2_to_1_bits(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_bit_depth();
+           });
 }
 
 #[bench]
@@ -90,9 +90,9 @@ fn reductions_rgba_to_rgb_16(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -101,9 +101,9 @@ fn reductions_rgba_to_rgb_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -112,9 +112,9 @@ fn reductions_rgba_to_grayscale_alpha_16(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -123,9 +123,9 @@ fn reductions_rgba_to_grayscale_alpha_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -134,9 +134,9 @@ fn reductions_rgba_to_grayscale_16(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -145,9 +145,9 @@ fn reductions_rgba_to_grayscale_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -156,9 +156,9 @@ fn reductions_rgb_to_grayscale_16(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -167,9 +167,9 @@ fn reductions_rgb_to_grayscale_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -178,9 +178,9 @@ fn reductions_rgba_to_palette_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -189,9 +189,9 @@ fn reductions_rgb_to_palette_8(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_color_type();
+           });
 }
 
 #[bench]
@@ -200,9 +200,9 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_palette();
+           });
 }
 
 #[bench]
@@ -211,9 +211,9 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_palette();
+           });
 }
 
 #[bench]
@@ -222,7 +222,7 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     let png = png::PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette();
-    });
+               let mut safe_png = png.clone();
+               safe_png.reduce_palette();
+           });
 }

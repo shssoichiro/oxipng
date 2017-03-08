@@ -48,17 +48,21 @@ pub fn parse_next_header(byte_data: &[u8],
                          fix_errors: bool)
                          -> Result<Option<(String, Vec<u8>)>, PngError> {
     let mut rdr = Cursor::new(byte_data.iter()
-        .skip(*byte_offset)
-        .take(4)
-        .cloned()
-        .collect::<Vec<u8>>());
+                                  .skip(*byte_offset)
+                                  .take(4)
+                                  .cloned()
+                                  .collect::<Vec<u8>>());
     let length: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
         Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
     };
     *byte_offset += 4;
 
-    let mut header_bytes: Vec<u8> = byte_data.iter().skip(*byte_offset).take(4).cloned().collect();
+    let mut header_bytes: Vec<u8> = byte_data.iter()
+        .skip(*byte_offset)
+        .take(4)
+        .cloned()
+        .collect();
     let header = match String::from_utf8(header_bytes.clone()) {
         Ok(x) => x,
         Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
@@ -76,10 +80,10 @@ pub fn parse_next_header(byte_data: &[u8],
         .collect();
     *byte_offset += length as usize;
     let mut rdr = Cursor::new(byte_data.iter()
-        .skip(*byte_offset)
-        .take(4)
-        .cloned()
-        .collect::<Vec<u8>>());
+                                  .skip(*byte_offset)
+                                  .take(4)
+                                  .cloned()
+                                  .collect::<Vec<u8>>());
     let crc: u32 = match rdr.read_u32::<BigEndian>() {
         Ok(x) => x,
         Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
@@ -97,26 +101,26 @@ pub fn parse_next_header(byte_data: &[u8],
 pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, PngError> {
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
-        color_type: match byte_data[9] {
-            0 => ColorType::Grayscale,
-            2 => ColorType::RGB,
-            3 => ColorType::Indexed,
-            4 => ColorType::GrayscaleAlpha,
-            6 => ColorType::RGBA,
-            _ => return Err(PngError::new("Unexpected color type in header")),
-        },
-        bit_depth: match byte_data[8] {
-            1 => BitDepth::One,
-            2 => BitDepth::Two,
-            4 => BitDepth::Four,
-            8 => BitDepth::Eight,
-            16 => BitDepth::Sixteen,
-            _ => return Err(PngError::new("Unexpected bit depth in header")),
-        },
-        width: rdr.read_u32::<BigEndian>().unwrap(),
-        height: rdr.read_u32::<BigEndian>().unwrap(),
-        compression: byte_data[10],
-        filter: byte_data[11],
-        interlaced: byte_data[12],
-    })
+           color_type: match byte_data[9] {
+               0 => ColorType::Grayscale,
+               2 => ColorType::RGB,
+               3 => ColorType::Indexed,
+               4 => ColorType::GrayscaleAlpha,
+               6 => ColorType::RGBA,
+               _ => return Err(PngError::new("Unexpected color type in header")),
+           },
+           bit_depth: match byte_data[8] {
+               1 => BitDepth::One,
+               2 => BitDepth::Two,
+               4 => BitDepth::Four,
+               8 => BitDepth::Eight,
+               16 => BitDepth::Sixteen,
+               _ => return Err(PngError::new("Unexpected bit depth in header")),
+           },
+           width: rdr.read_u32::<BigEndian>().unwrap(),
+           height: rdr.read_u32::<BigEndian>().unwrap(),
+           compression: byte_data[10],
+           filter: byte_data[11],
+           interlaced: byte_data[12],
+       })
 }

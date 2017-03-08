@@ -239,13 +239,16 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
         let mut current_opts = opts.clone();
         if input.is_dir() {
             if current_opts.recursive {
-                handle_optimization(input.read_dir().unwrap().map(|x| x.unwrap().path()).collect(),
+                handle_optimization(input.read_dir()
+                                        .unwrap()
+                                        .map(|x| x.unwrap().path())
+                                        .collect(),
                                     &current_opts)
             } else {
                 writeln!(&mut stderr(),
                          "{} is a directory, skipping",
                          input.display())
-                    .ok();
+                        .ok();
             }
             continue;
         }
@@ -310,9 +313,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     if let Some(x) = matches.value_of("output_dir") {
         let path = PathBuf::from(x);
         if !path.exists() {
-            match DirBuilder::new()
-                .recursive(true)
-                .create(&path) {
+            match DirBuilder::new().recursive(true).create(&path) {
                 Ok(_) => (),
                 Err(x) => return Err(format!("Could not create output directory {}", x)),
             };
@@ -394,7 +395,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
         if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
             if hdrs.len() > 1 {
                 return Err("'safe' or 'all' presets for --strip should be used by themselves"
-                    .to_owned());
+                               .to_owned());
             }
             if hdrs[0] == "safe" {
                 opts.strip = Headers::Safe;
@@ -437,8 +438,8 @@ fn parse_numeric_range_opts(input: &str,
                                             max_value,
                                             min_value,
                                             max_value)
-            .as_ref())
-        .unwrap();
+                                            .as_ref())
+            .unwrap();
     let mut items = HashSet::new();
 
     if one_item.is_match(input) {
