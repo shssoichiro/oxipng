@@ -1,3 +1,6 @@
+**Version 0.15.1 (unreleased)**
+ - Ignore color reductions that would increase file size ([#61](https://github.com/shssoichiro/oxipng/issues/61))
+
 **Version 0.15.0**
  - [SEMVER_MINOR] Check images for correctness before writing result ([#60](https://github.com/shssoichiro/oxipng/issues/60))
  - Fix invalid output when reducing image to a different color type but file size does not improve ([#60](https://github.com/shssoichiro/oxipng/issues/60))

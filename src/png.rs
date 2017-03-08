@@ -717,11 +717,6 @@ impl PngData {
             should_reduce_bit_depth = true;
         }
 
-        if self.ihdr_data.color_type == ColorType::Grayscale && reduce_grayscale_to_palette(self) {
-            changed = true;
-            should_reduce_bit_depth = true;
-        }
-
         if should_reduce_bit_depth {
             // Some conversions will allow us to perform bit depth reduction that
             // wasn't possible before

@@ -152,6 +152,12 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
         }
     }
 
+    let headers_size = color_palette.len() + trans_palette.len() + 8;
+    if reduced.len() + headers_size > png.raw_data.len() * 4 {
+        // Reduction would result in a larger image
+        return false;
+    }
+
     if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
         assert_eq!(bkgd_header.len(), 6);
         let header_pixels = bkgd_header.iter().skip(1).step(2).cloned().collect::<Vec<u8>>();
@@ -217,6 +223,12 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
         color_palette.extend_from_slice(color);
     }
 
+    let headers_size = color_palette.len() + 4;
+    if reduced.len() + headers_size > png.raw_data.len() * 3 {
+        // Reduction would result in a larger image
+        return false;
+    }
+
     if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
         assert_eq!(bkgd_header.len(), 6);
         let header_pixels = bkgd_header.iter().skip(1).step(2).cloned().collect::<Vec<u8>>();
@@ -232,82 +244,6 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
     }
 
     png.raw_data = reduced;
-    png.palette = Some(color_palette);
-    png.ihdr_data.color_type = ColorType::Indexed;
-    true
-}
-
-pub fn reduce_grayscale_to_palette(png: &mut PngData) -> bool {
-    if png.ihdr_data.bit_depth == BitDepth::Sixteen {
-        return false;
-    }
-    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
-    // Only perform reduction if we can get to 4-bits or less
-    let mut palette = Vec::with_capacity(16);
-    let bpp: usize = png.ihdr_data.bit_depth.as_u8() as usize;
-    let bpp_inverse = 8 - bpp;
-    for line in png.scan_lines() {
-        reduced.extend(BitVec::from_bytes(&[line.filter]));
-        let bit_vec = BitVec::from_bytes(&line.data);
-        let mut cur_pixel = BitVec::with_capacity(bpp);
-        for (i, bit) in bit_vec.iter().enumerate() {
-            cur_pixel.push(bit);
-            if i % bpp == bpp - 1 {
-                let pix_value = cur_pixel.to_bytes()[0] >> bpp_inverse;
-                let pix_slice = vec![pix_value, pix_value, pix_value];
-                if palette.contains(&pix_slice) {
-                    let index = palette.iter().enumerate().find(|&x| x.1 == &pix_slice).unwrap().0;
-                    let idx = BitVec::from_bytes(&[(index as u8) << bpp_inverse]);
-                    for b in idx.iter().take(bpp) {
-                        reduced.push(b);
-                    }
-                } else {
-                    let len = palette.len();
-                    if len == 16 {
-                        return false;
-                    }
-                    palette.push(pix_slice);
-                    let idx = BitVec::from_bytes(&[(len as u8) << bpp_inverse]);
-                    for b in idx.iter().take(bpp) {
-                        reduced.push(b);
-                    }
-                }
-                cur_pixel = BitVec::with_capacity(bpp);
-            }
-        }
-        // Pad end of line to get 8 bits per byte
-        while reduced.len() % 8 != 0 {
-            reduced.push(false);
-        }
-    }
-
-    let mut color_palette = Vec::with_capacity(palette.len() * 3);
-    for color in &palette {
-        color_palette.extend_from_slice(color);
-    }
-
-    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
-        assert_eq!(bkgd_header.len(), 2);
-        let header_pixels = [bkgd_header[1], bkgd_header[1], bkgd_header[1]];
-        if let Some(entry) = color_palette.chunks(3).position(|x| *x == header_pixels) {
-            *bkgd_header = vec![entry as u8];
-        } else if color_palette.len() == 255 {
-            return false;
-        } else {
-            let entry = color_palette.len() / 3;
-            color_palette.extend_from_slice(&header_pixels);
-            *bkgd_header = vec![entry as u8];
-        }
-    }
-
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
-        assert_eq!(sbit_header.len(), 1);
-        let byte = sbit_header[0];
-        sbit_header.push(byte);
-        sbit_header.push(byte);
-    }
-
-    png.raw_data = reduced.to_bytes();
     png.palette = Some(color_palette);
     png.ihdr_data.color_type = ColorType::Indexed;
     true
