@@ -1,4 +1,4 @@
-**Version 0.15.1 (unreleased)**
+**Version 0.15.1**
  - Ignore color reductions that would increase file size ([#61](https://github.com/shssoichiro/oxipng/issues/61))
 
 **Version 0.15.0**
