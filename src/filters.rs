@@ -15,9 +15,9 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
             if last_line.is_empty() {
                 filtered.extend_from_slice(data);
             } else {
-                filtered.extend(data.iter().zip(last_line.iter()).map(|(cur, last)| {
-                                                                          cur.wrapping_sub(*last)
-                                                                      }));
+                filtered.extend(data.iter()
+                                    .zip(last_line.iter())
+                                    .map(|(cur, last)| cur.wrapping_sub(*last)));
             };
         }
         3 => {
@@ -87,9 +87,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
             if last_line.is_empty() {
                 unfiltered.extend_from_slice(data);
             } else {
-                unfiltered.extend(data.iter().zip(last_line.iter()).map(|(cur, last)| {
-                                                                            cur.wrapping_add(*last)
-                                                                        }));
+                unfiltered.extend(data.iter()
+                                      .zip(last_line.iter())
+                                      .map(|(cur, last)| cur.wrapping_add(*last)));
             };
         }
         3 => {

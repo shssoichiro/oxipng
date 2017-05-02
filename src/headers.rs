@@ -47,7 +47,8 @@ pub fn parse_next_header(byte_data: &[u8],
                          byte_offset: &mut usize,
                          fix_errors: bool)
                          -> Result<Option<(String, Vec<u8>)>, PngError> {
-    let mut rdr = Cursor::new(byte_data.iter()
+    let mut rdr = Cursor::new(byte_data
+                                  .iter()
                                   .skip(*byte_offset)
                                   .take(4)
                                   .cloned()
@@ -58,7 +59,8 @@ pub fn parse_next_header(byte_data: &[u8],
     };
     *byte_offset += 4;
 
-    let mut header_bytes: Vec<u8> = byte_data.iter()
+    let mut header_bytes: Vec<u8> = byte_data
+        .iter()
         .skip(*byte_offset)
         .take(4)
         .cloned()
@@ -73,13 +75,15 @@ pub fn parse_next_header(byte_data: &[u8],
     }
     *byte_offset += 4;
 
-    let data: Vec<u8> = byte_data.iter()
+    let data: Vec<u8> = byte_data
+        .iter()
         .skip(*byte_offset)
         .take(length as usize)
         .cloned()
         .collect();
     *byte_offset += length as usize;
-    let mut rdr = Cursor::new(byte_data.iter()
+    let mut rdr = Cursor::new(byte_data
+                                  .iter()
                                   .skip(*byte_offset)
                                   .take(4)
                                   .cloned()

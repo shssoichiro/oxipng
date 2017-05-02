@@ -23,11 +23,11 @@ path = "src/main.rs"
 bit-vec = "^0.4.2"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
-itertools = "^0.5.7"
+itertools = "^0.6.0"
 libc = "^0.2.4"
 miniz-sys = "^0.1.7"
 num_cpus = "^1.0.0"
-rayon = "^0.6.0"
+rayon = "^0.7.0"
 zopfli = "^0.3.4"
 
 [dependencies.clap]

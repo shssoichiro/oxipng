@@ -160,12 +160,15 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
 
     if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
         assert_eq!(bkgd_header.len(), 6);
-        let header_pixels = bkgd_header.iter()
+        let header_pixels = bkgd_header
+            .iter()
             .skip(1)
             .step(2)
             .cloned()
             .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette.chunks(3).position(|x| x == header_pixels.as_slice()) {
+        if let Some(entry) = color_palette
+               .chunks(3)
+               .position(|x| x == header_pixels.as_slice()) {
             *bkgd_header = vec![entry as u8];
         } else if color_palette.len() / 3 == 256 {
             return false;
@@ -235,12 +238,15 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
 
     if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
         assert_eq!(bkgd_header.len(), 6);
-        let header_pixels = bkgd_header.iter()
+        let header_pixels = bkgd_header
+            .iter()
             .skip(1)
             .step(2)
             .cloned()
             .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette.chunks(3).position(|x| x == header_pixels.as_slice()) {
+        if let Some(entry) = color_palette
+               .chunks(3)
+               .position(|x| x == header_pixels.as_slice()) {
             *bkgd_header = vec![entry as u8];
         } else if color_palette.len() == 255 {
             return false;
@@ -273,13 +279,11 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
                     }
                     reduced.push(cur_pixel[0]);
                 } else {
-                    let pixel_bytes = cur_pixel.iter()
+                    let pixel_bytes = cur_pixel
+                        .iter()
                         .step(2)
                         .cloned()
-                        .zip(cur_pixel.iter()
-                                 .skip(1)
-                                 .step(2)
-                                 .cloned())
+                        .zip(cur_pixel.iter().skip(1).step(2).cloned())
                         .unique()
                         .collect::<Vec<(u8, u8)>>();
                     if pixel_bytes.len() > 1 {

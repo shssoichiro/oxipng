@@ -50,10 +50,7 @@ impl<'a> Iterator for ScanLines<'a> {
                     pass.1 = 0;
                 }
             }
-            let bits_per_pixel = self.png
-                .ihdr_data
-                .bit_depth
-                .as_u8() as u32 *
+            let bits_per_pixel = self.png.ihdr_data.bit_depth.as_u8() as u32 *
                                  self.png.channels_per_pixel() as u32;
             let y_steps;
             let pixels_factor;
@@ -139,10 +136,7 @@ impl<'a> Iterator for ScanLines<'a> {
         } else {
             // Standard, non-interlaced PNG scanlines
             let bits_per_line = self.png.ihdr_data.width as usize *
-                                self.png
-                                    .ihdr_data
-                                    .bit_depth
-                                    .as_u8() as usize *
+                                self.png.ihdr_data.bit_depth.as_u8() as usize *
                                 self.png.channels_per_pixel() as usize;
             let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
@@ -214,10 +208,7 @@ impl PngData {
     pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, PngError> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
-        let header: Vec<u8> = byte_data.iter()
-            .take(8)
-            .cloned()
-            .collect();
+        let header: Vec<u8> = byte_data.iter().take(8).cloned().collect();
         if !file_header_is_valid(header.as_ref()) {
             return Err(PngError::new("Invalid PNG header detected"));
         }
@@ -316,20 +307,25 @@ impl PngData {
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
         let mut ihdr_data = Vec::with_capacity(13);
-        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
-        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
+        ihdr_data
+            .write_u32::<BigEndian>(self.ihdr_data.width)
+            .ok();
+        ihdr_data
+            .write_u32::<BigEndian>(self.ihdr_data.height)
+            .ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
-        ihdr_data.write_u8(self.ihdr_data.color_type.png_header_code()).ok();
+        ihdr_data
+            .write_u8(self.ihdr_data.color_type.png_header_code())
+            .ok();
         ihdr_data.write_u8(0).ok(); // Compression -- deflate
         ihdr_data.write_u8(0).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
-                                                                !(*key == "bKGD" ||
-                                                                  *key == "hIST" ||
-                                                                  *key == "tRNS")
-                                                            }) {
+        for (key, header) in
+            self.aux_headers
+                .iter()
+                .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")) {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
@@ -344,10 +340,10 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
-                                                                *key == "bKGD" || *key == "hIST" ||
-                                                                *key == "tRNS"
-                                                            }) {
+        for (key, header) in
+            self.aux_headers
+                .iter()
+                .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS") {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -423,9 +419,12 @@ impl PngData {
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
                         trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
                     }
-                    let (best_filter, best_line) = trials.iter()
+                    let (best_filter, best_line) = trials
+                        .iter()
                         .min_by_key(|x| {
-                                        x.1.iter().fold(0u64, |acc, &x| {
+                                        x.1
+                                            .iter()
+                                            .fold(0u64, |acc, &x| {
                                 let signed = x as i8;
                                 acc + (signed as i16).abs() as u64
                             })
@@ -511,12 +510,12 @@ impl PngData {
         } else {
             self.palette.clone().unwrap()
         };
-        let mut indexed_palette: Vec<&[u8]> = palette.chunks(if self.transparency_palette
-                                                                    .is_some() {
-                                                                 4
-                                                             } else {
-                                                                 3
-                                                             })
+        let mut indexed_palette: Vec<&[u8]> = palette
+            .chunks(if self.transparency_palette.is_some() {
+                        4
+                    } else {
+                        3
+                    })
             .collect();
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
@@ -590,8 +589,9 @@ impl PngData {
             }
         }
 
-        let unused: Vec<u8> =
-            (0..indexed_palette.len() as u8).filter(|i| !seen.contains(i)).collect();
+        let unused: Vec<u8> = (0..indexed_palette.len() as u8)
+            .filter(|i| !seen.contains(i))
+            .collect();
 
         // Remove unused palette indices
         self.do_palette_reduction(&unused, &mut index_map, &mut indexed_palette);
@@ -690,7 +690,8 @@ impl PngData {
         }
         index_map.clear();
         self.raw_data = new_data;
-        let new_palette = indexed_palette.iter()
+        let new_palette = indexed_palette
+            .iter()
             .cloned()
             .flatten()
             .enumerate()
@@ -765,7 +766,9 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     header_data.extend_from_slice(key);
     header_data.extend_from_slice(header);
     output.reserve(header_data.len() + 8);
-    output.write_u32::<BigEndian>(header_data.len() as u32 - 4).ok();
+    output
+        .write_u32::<BigEndian>(header_data.len() as u32 - 4)
+        .ok();
     let crc = crc32::checksum_ieee(&header_data);
     output.append(&mut header_data);
     output.write_u32::<BigEndian>(crc).ok();

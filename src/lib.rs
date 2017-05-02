@@ -281,7 +281,7 @@ impl Default for Options {
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    rayon::initialize(rayon::Configuration::new().set_num_threads(thread_count)).ok();
+    rayon::initialize(rayon::Configuration::new().num_threads(thread_count)).ok();
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
@@ -308,7 +308,8 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
         if opts.backup {
             match copy(in_file,
                        in_file.with_extension(format!("bak.{}",
-                                                      in_file.extension()
+                                                      in_file
+                                                          .extension()
                                                           .unwrap()
                                                           .to_str()
                                                           .unwrap()))) {
@@ -399,7 +400,7 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    rayon::initialize(rayon::Configuration::new().set_num_threads(thread_count)).ok();
+    rayon::initialize(rayon::Configuration::new().num_threads(thread_count)).ok();
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
@@ -461,7 +462,7 @@ fn optimize_png(png: &mut PngData,
                 .ok();
     }
 
-    let mut filter = opts.filter.clone();
+    let mut filter = opts.filter.iter().cloned().collect::<Vec<u8>>();
     let compression = &opts.compression;
     let memory = &opts.memory;
     let mut strategies = opts.strategies.clone();
@@ -471,14 +472,14 @@ fn optimize_png(png: &mut PngData,
         if png.ihdr_data.bit_depth.as_u8() >= 8 &&
            png.ihdr_data.color_type != colors::ColorType::Indexed {
             if filter.is_empty() {
-                filter.insert(5);
+                filter.push(5);
             }
             if strategies.is_empty() {
                 strategies.insert(1);
             }
         } else {
             if filter.is_empty() {
-                filter.insert(0);
+                filter.push(0);
             }
             if strategies.is_empty() {
                 strategies.insert(0);
@@ -516,8 +517,9 @@ fn optimize_png(png: &mut PngData,
         }
 
         let mut filters_tmp: Vec<(u8, Vec<u8>)> = Vec::with_capacity(filter.len());
-        filter.par_iter()
-            .weight_max()
+        filter
+            .par_iter()
+            .with_max_len(1)
             .map(|f| (*f, png.filter_image(*f)))
             .collect_into(&mut filters_tmp);
 
@@ -527,8 +529,9 @@ fn optimize_png(png: &mut PngData,
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
         let best: Option<TrialWithData> =
-            results.into_par_iter()
-                .weight_max()
+            results
+                .into_par_iter()
+                .with_max_len(1)
                 .filter_map(|trial| {
                     let filtered = &filters[&trial.0];
                     let new_idat = if opts.deflate == Deflaters::Zlib {
@@ -617,8 +620,14 @@ fn optimize_png(png: &mut PngData,
 
     if let Ok(new_png) = new_png {
         if let Ok(old_png) = old_png {
-            if old_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() ==
-               new_png.pixels().map(|x| x.2.channels().to_owned()).collect::<Vec<Vec<u8>>>() {
+            if old_png
+                   .pixels()
+                   .map(|x| x.2.channels().to_owned())
+                   .collect::<Vec<Vec<u8>>>() ==
+               new_png
+                   .pixels()
+                   .map(|x| x.2.channels().to_owned())
+                   .collect::<Vec<Vec<u8>>>() {
                 return Ok(output);
             }
         } else {

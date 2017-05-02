@@ -227,7 +227,8 @@ fn main() {
         }
     };
 
-    handle_optimization(matches.values_of("files")
+    handle_optimization(matches
+                            .values_of("files")
                             .unwrap()
                             .map(PathBuf::from)
                             .collect(),
@@ -239,7 +240,8 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
         let mut current_opts = opts.clone();
         if input.is_dir() {
             if current_opts.recursive {
-                handle_optimization(input.read_dir()
+                handle_optimization(input
+                                        .read_dir()
                                         .unwrap()
                                         .map(|x| x.unwrap().path())
                                         .collect(),
@@ -391,7 +393,9 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     }
 
     if let Some(hdrs) = matches.value_of("strip") {
-        let hdrs = hdrs.split(',').map(|x| x.trim().to_owned()).collect::<Vec<String>>();
+        let hdrs = hdrs.split(',')
+            .map(|x| x.trim().to_owned())
+            .collect::<Vec<String>>();
         if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
             if hdrs.len() > 1 {
                 return Err("'safe' or 'all' presets for --strip should be used by themselves"
