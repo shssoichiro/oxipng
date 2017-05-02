@@ -1,3 +1,8 @@
+**Version 0.15.2**
+ - Bump `image` to 0.13 ([#65](https://github.com/shssoichiro/oxipng/pull/65))
+ - Bump `rayon` to 0.7
+ - Bump `itertools` to 0.6
+
 **Version 0.15.1**
  - Ignore color reductions that would increase file size ([#61](https://github.com/shssoichiro/oxipng/issues/61))
 
