@@ -92,8 +92,8 @@ pub fn deinterlace_image(png: &mut PngData) {
     let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr_data.width as usize;
     // Initialize each output line with a starting filter byte of 0
     // as well as some blank data
-    let mut lines: Vec<BitVec> =
-        vec![BitVec::from_elem(bits_per_line, false); png.ihdr_data.height as usize];
+    let mut lines: Vec<BitVec> = vec![BitVec::from_elem(bits_per_line, false);
+                                      png.ihdr_data.height as usize];
     let mut current_pass = 1;
     let mut pass_constants = interlaced_constants(current_pass);
     let mut current_y: usize = pass_constants.y_shift as usize;
@@ -101,7 +101,7 @@ pub fn deinterlace_image(png: &mut PngData) {
         let bit_vec = BitVec::from_bytes(&line.data);
         let bits_in_line = ((png.ihdr_data.width - pass_constants.x_shift as u32) as f32 /
                             pass_constants.x_step as f32)
-                .ceil() as usize * bits_per_pixel as usize;
+            .ceil() as usize * bits_per_pixel as usize;
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= bits_in_line {
