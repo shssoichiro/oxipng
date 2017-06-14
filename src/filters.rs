@@ -108,9 +108,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
                     match i.checked_sub(bpp) {
                         Some(x) => {
                             let b = unfiltered[x];
-                            unfiltered.push(byte.wrapping_add(((b as u16 + last_line[i] as u16) >>
-                                                               1) as
-                                                              u8));
+                            unfiltered
+                                .push(byte.wrapping_add(((b as u16 + last_line[i] as u16) >> 1) as
+                                                        u8));
                         }
                         None => {
                             unfiltered.push(byte.wrapping_add(last_line[i] >> 1));

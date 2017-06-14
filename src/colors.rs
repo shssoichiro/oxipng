@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug,PartialEq,Clone,Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 /// The color type used to represent this image
 pub enum ColorType {
     /// Grayscale, with one color channel
@@ -18,15 +18,13 @@ pub enum ColorType {
 impl fmt::Display for ColorType {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
-               match *self {
-                   ColorType::Grayscale => "Grayscale",
-                   ColorType::RGB => "RGB",
-                   ColorType::Indexed => "Indexed",
-                   ColorType::GrayscaleAlpha => "Grayscale + Alpha",
-                   ColorType::RGBA => "RGB + Alpha",
-               })
+        write!(f, "{}", match *self {
+            ColorType::Grayscale => "Grayscale",
+            ColorType::RGB => "RGB",
+            ColorType::Indexed => "Indexed",
+            ColorType::GrayscaleAlpha => "Grayscale + Alpha",
+            ColorType::RGBA => "RGB + Alpha",
+        })
     }
 }
 
@@ -44,7 +42,7 @@ impl ColorType {
     }
 }
 
-#[derive(Debug,PartialEq,Clone,Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 /// The number of bits to be used per channel per pixel
 pub enum BitDepth {
     /// One bit per channel per pixel
@@ -62,15 +60,13 @@ pub enum BitDepth {
 impl fmt::Display for BitDepth {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
-               match *self {
-                   BitDepth::One => "1",
-                   BitDepth::Two => "2",
-                   BitDepth::Four => "4",
-                   BitDepth::Eight => "8",
-                   BitDepth::Sixteen => "16",
-               })
+        write!(f, "{}", match *self {
+            BitDepth::One => "1",
+            BitDepth::Two => "2",
+            BitDepth::Four => "4",
+            BitDepth::Eight => "8",
+            BitDepth::Sixteen => "16",
+        })
     }
 }
 

@@ -15,7 +15,7 @@ use std::io::Read;
 use std::iter::Iterator;
 use std::path::Path;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 /// An iterator over the scan lines of a PNG image
 pub struct ScanLines<'a> {
     /// A reference to the PNG image being iterated upon
@@ -150,7 +150,7 @@ impl<'a> Iterator for ScanLines<'a> {
     }
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 /// A scan line in a PNG image
 pub struct ScanLine {
     /// The filter type used to encode the current scan line (0-4)
@@ -161,7 +161,7 @@ pub struct ScanLine {
     pub pass: Option<u8>,
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 /// Contains all data relevant to a PNG image
 pub struct PngData {
     /// The filtered and compressed data of the IDAT chunk
@@ -307,12 +307,8 @@ impl PngData {
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
         let mut ihdr_data = Vec::with_capacity(13);
-        ihdr_data
-            .write_u32::<BigEndian>(self.ihdr_data.width)
-            .ok();
-        ihdr_data
-            .write_u32::<BigEndian>(self.ihdr_data.height)
-            .ok();
+        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
+        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
         ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
         ihdr_data
             .write_u8(self.ihdr_data.color_type.png_header_code())
@@ -370,7 +366,7 @@ impl PngData {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
                    8f32)
-                .ceil() as usize;
+            .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
             let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
@@ -392,7 +388,7 @@ impl PngData {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
                    8f32)
-                .ceil() as usize;
+            .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
@@ -400,10 +396,8 @@ impl PngData {
                 0 | 1 | 2 | 3 | 4 => {
                     if last_pass == line.pass || filter <= 1 {
                         filtered.push(filter);
-                        filtered.extend_from_slice(&filter_line(filter,
-                                                                bpp,
-                                                                &line.data,
-                                                                &last_line));
+                        filtered
+                            .extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
                     } else {
                         // Avoid vertical filtering on first line of each interlacing pass
                         filtered.push(0);
@@ -422,13 +416,11 @@ impl PngData {
                     let (best_filter, best_line) = trials
                         .iter()
                         .min_by_key(|x| {
-                                        x.1
-                                            .iter()
-                                            .fold(0u64, |acc, &x| {
+                            x.1.iter().fold(0u64, |acc, &x| {
                                 let signed = x as i8;
                                 acc + (signed as i16).abs() as u64
                             })
-                                    })
+                        })
                         .unwrap();
                     filtered.push(*best_filter);
                     filtered.extend_from_slice(best_line);

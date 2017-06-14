@@ -250,7 +250,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
                 writeln!(&mut stderr(),
                          "{} is a directory, skipping",
                          input.display())
-                        .ok();
+                    .ok();
             }
             continue;
         }
@@ -268,7 +268,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
     }
 }
 
-#[cfg_attr(feature="clippy", allow(cyclomatic_complexity))]
+#[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
 fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
@@ -442,8 +442,8 @@ fn parse_numeric_range_opts(input: &str,
                                             max_value,
                                             min_value,
                                             max_value)
-                                            .as_ref())
-            .unwrap();
+                                        .as_ref())
+        .unwrap();
     let mut items = HashSet::new();
 
     if one_item.is_match(input) {

@@ -1,3 +1,8 @@
+**Version 0.16.0**
+ - [SEMVER_MAJOR] Bump minimum rustc version to 1.17.0
+ - Bump `image` to 0.14
+ - Bump `rayon` to 0.8
+
 **Version 0.15.2**
  - Bump `image` to 0.13 ([#65](https://github.com/shssoichiro/oxipng/pull/65))
  - Bump `rayon` to 0.7
