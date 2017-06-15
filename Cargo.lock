@@ -1,6 +1,6 @@
 [root]
 name = "oxipng"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "bit-vec 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -12,7 +12,7 @@ dependencies = [
  "libc 0.2.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "miniz-sys 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rayon 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rayon 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "zopfli 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -321,15 +321,15 @@ dependencies = [
 
 [[package]]
 name = "rayon"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "rayon-core 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rayon-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "rayon-core"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "coco 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -586,8 +586,8 @@ dependencies = [
 "checksum quine-mc_cluskey 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "07589615d719a60c8dd8a4622e7946465dfef20d1a428f969e3443e7386d5f45"
 "checksum quote 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)" = "7a6e920b65c65f10b2ae65c831a81a073a89edd28c7cce89475bff467ab4167a"
 "checksum rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)" = "022e0636ec2519ddae48154b028864bdce4eaf7d35226ab8e65c611be97b189d"
-"checksum rayon 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6dd66baf8261bed741d568433109736450f9400433c96c5cd7f1f784266ab824"
-"checksum rayon-core 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7cbe5c82dbe8c17fb8cb9a41bbe72b905ec0ce4d62a1cb570e84c1770ea9dc51"
+"checksum rayon 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "705cf28d52a26a9ab548930a9a3d9799eb77cf84d66d7cc6e52fa222ca662424"
+"checksum rayon-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e2c21a92a5dca958fb030787c1158446c6deb7f976399b72fa8074603f169e2a"
 "checksum regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "1731164734096285ec2a5ec7fea5248ae2f5485b3feeb0115af4fda2183b2d1b"
 "checksum regex-syntax 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ad890a5eef7953f55427c50575c680c42841653abd2b028b68cd223d157f62db"
 "checksum scopeguard 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "c79eb2c3ac4bc2507cda80e7f3ac5b88bd8eae4c0914d5663e6a8933994be918"

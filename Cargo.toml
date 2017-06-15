@@ -8,7 +8,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "0.16.0"
+version = "0.16.1"
 
 [lib]
 name = "oxipng"
@@ -27,7 +27,7 @@ itertools = "^0.6.0"
 libc = "^0.2.4"
 miniz-sys = "^0.1.7"
 num_cpus = "^1.0.0"
-rayon = "^0.8.0"
+rayon = "^0.8.1"
 zopfli = "^0.3.4"
 
 [dependencies.clap]
@@ -50,7 +50,7 @@ version = "^0.2.0"
 [features]
 default = ["binary"]
 binary = ["clap", "regex"]
-nightly = ["rayon/unstable"]
+nightly = []
 nightly-binary = ["binary", "nightly", "regex/simd-accel"]
 dev = ["nightly-binary", "clippy"]
 

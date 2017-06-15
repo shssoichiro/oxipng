@@ -1,3 +1,6 @@
+**Version 0.16.1**
+ - Fix rayon's breaking changes that they made in a point release
+
 **Version 0.16.0**
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.17.0
  - Bump `image` to 0.14
