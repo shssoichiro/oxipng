@@ -13,7 +13,7 @@ extern crate rayon;
 extern crate zopfli;
 
 use deflate::Deflaters;
-use error::PngError;
+pub use error::PngError;
 use image::{GenericImage, Pixel, ImageFormat};
 use headers::Headers;
 use png::PngData;
@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 
 pub mod colors;
 pub mod deflate;
-mod error;
+pub mod error;
 mod filters;
 pub mod headers;
 mod interlace;
