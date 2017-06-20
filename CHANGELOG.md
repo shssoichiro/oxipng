@@ -1,3 +1,6 @@
+**Version 0.16.2**
+ - Publicly export `error` module
+
 **Version 0.16.1**
  - Fix rayon's breaking changes that they made in a point release
 
