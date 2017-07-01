@@ -203,16 +203,16 @@ fn main() {
                 }
             }))
         .after_help("Optimization levels:
-    -o 0		=>	--zc 3 --nz				(0 or 1 trials)
-    -o 1		=>	--zc 9					(1 trial, determined heuristically)
-    -o 2		=>	--zc 9 --zs 0-3 --f 0,5			(8 trials)
-    -o 3		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0,5	(16 trials)
-    -o 4		=>	--zc 9 --zm 8-9 --zs 0-3 --f 0-5	(48 trials)
-    -o 5		=>	--zc 3-9 --zm 8-9 --zs 0-3 --f 0-5	(192 trials)
-    -o 6		=>	--zc 1-9 --zm 7-9 --zs 0-3 --f 0-5	(360 trials)
-    -o 6 --zm 1-9	=>	--zc 1-9 --zm 1-9 --zs 0-3 --f 0-5	(1080 trials)
+    -o 0          => --zc 3 --nz                       (0 or 1 trials)
+    -o 1          => --zc 9                            (1 trial, determined heuristically)
+    -o 2          => --zc 9 --zs 0-3 -f 0,5            (8 trials)
+    -o 3          => --zc 9 --zm 8-9 --zs 0-3 -f 0,5   (16 trials)
+    -o 4          => --zc 9 --zm 8-9 --zs 0-3 -f 0-5   (48 trials)
+    -o 5          => --zc 3-9 --zm 8-9 --zs 0-3 -f 0-5 (192 trials)
+    -o 6          => --zc 1-9 --zm 7-9 --zs 0-3 -f 0-5 (360 trials)
+    -o 6 --zm 1-9 => --zc 1-9 --zm 1-9 --zs 0-3 -f 0-5 (1080 trials)
 
-    Exhaustive combinations such as \"-o6 -zm1-9\" are not generally recommended.
+    Exhaustive combinations such as \"-o 6 --zm 1-9\" are not generally recommended.
     These are very slow and generally provide no compression gain.
 
     Manually specifying a compression option (zc, zm, etc.) will override the optimization preset,
