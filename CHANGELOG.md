@@ -1,3 +1,6 @@
+**Version 0.16.3**
+ - Fix command-line help text ([#70](https://github.com/shssoichiro/oxipng/issues/70))
+
 **Version 0.16.2**
  - Publicly export `error` module
 
