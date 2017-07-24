@@ -51,7 +51,7 @@ impl<'a> Iterator for ScanLines<'a> {
                 }
             }
             let bits_per_pixel = self.png.ihdr_data.bit_depth.as_u8() as u32 *
-                                 self.png.channels_per_pixel() as u32;
+                self.png.channels_per_pixel() as u32;
             let y_steps;
             let pixels_factor;
             match self.pass {
@@ -129,23 +129,23 @@ impl<'a> Iterator for ScanLines<'a> {
                 }
             }
             Some(ScanLine {
-                     filter: self.png.raw_data[self.start],
-                     data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
-                     pass: current_pass,
-                 })
+                filter: self.png.raw_data[self.start],
+                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                pass: current_pass,
+            })
         } else {
             // Standard, non-interlaced PNG scanlines
             let bits_per_line = self.png.ihdr_data.width as usize *
-                                self.png.ihdr_data.bit_depth.as_u8() as usize *
-                                self.png.channels_per_pixel() as usize;
+                self.png.ihdr_data.bit_depth.as_u8() as usize *
+                self.png.channels_per_pixel() as usize;
             let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
-                     filter: self.png.raw_data[self.start],
-                     data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
-                     pass: None,
-                 })
+                filter: self.png.raw_data[self.start],
+                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                pass: None,
+            })
         }
     }
 }
@@ -280,14 +280,14 @@ impl PngData {
     }
 
     #[doc(hidden)]
-    pub fn reset_from_original(&mut self, original: PngData) {
-        self.idat_data = original.idat_data;
+    pub fn reset_from_original(&mut self, original: &PngData) {
+        self.idat_data = original.idat_data.clone();
         self.ihdr_data = original.ihdr_data;
-        self.raw_data = original.raw_data;
-        self.palette = original.palette;
-        self.transparency_pixel = original.transparency_pixel;
-        self.transparency_palette = original.transparency_palette;
-        self.aux_headers = original.aux_headers;
+        self.raw_data = original.raw_data.clone();
+        self.palette = original.palette.clone();
+        self.transparency_pixel = original.transparency_pixel.clone();
+        self.transparency_palette = original.transparency_palette.clone();
+        self.aux_headers = original.aux_headers.clone();
     }
 
     /// Return the number of channels in the image, based on color type
@@ -307,21 +307,19 @@ impl PngData {
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
         let mut ihdr_data = Vec::with_capacity(13);
-        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width).ok();
-        ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height).ok();
-        ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8()).ok();
-        ihdr_data
-            .write_u8(self.ihdr_data.color_type.png_header_code())
-            .ok();
-        ihdr_data.write_u8(0).ok(); // Compression -- deflate
-        ihdr_data.write_u8(0).ok(); // Filter method -- 5-way adaptive filtering
-        ihdr_data.write_u8(self.ihdr_data.interlaced).ok();
+        let _ = ihdr_data.write_u32::<BigEndian>(self.ihdr_data.width);
+        let _ = ihdr_data.write_u32::<BigEndian>(self.ihdr_data.height);
+        let _ = ihdr_data.write_u8(self.ihdr_data.bit_depth.as_u8());
+        let _ = ihdr_data.write_u8(self.ihdr_data.color_type.png_header_code());
+        let _ = ihdr_data.write_u8(0); // Compression -- deflate
+        let _ = ihdr_data.write_u8(0); // Filter method -- 5-way adaptive filtering
+        let _ = ihdr_data.write_u8(self.ihdr_data.interlaced);
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in
-            self.aux_headers
-                .iter()
-                .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")) {
+        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
+            !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")
+        })
+        {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
@@ -336,10 +334,10 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in
-            self.aux_headers
-                .iter()
-                .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS") {
+        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
+            *key == "bKGD" || *key == "hIST" || *key == "tRNS"
+        })
+        {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -365,7 +363,7 @@ impl PngData {
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
-                   8f32)
+                       8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
@@ -387,7 +385,7 @@ impl PngData {
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
-                   8f32)
+                       8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
@@ -396,8 +394,9 @@ impl PngData {
                 0 | 1 | 2 | 3 | 4 => {
                     if last_pass == line.pass || filter <= 1 {
                         filtered.push(filter);
-                        filtered
-                            .extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
+                        filtered.extend_from_slice(
+                            &filter_line(filter, bpp, &line.data, &last_line),
+                        );
                     } else {
                         // Avoid vertical filtering on first line of each interlacing pass
                         filtered.push(0);
@@ -438,17 +437,18 @@ impl PngData {
     pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed ||
-               self.ihdr_data.color_type == ColorType::Grayscale {
+                self.ihdr_data.color_type == ColorType::Grayscale
+            {
                 return reduce_bit_depth_8_or_less(self);
             }
             return false;
         }
 
         // Reduce from 16 to 8 bits per channel per pixel
-        let mut reduced = Vec::with_capacity((self.ihdr_data.width * self.ihdr_data.height *
-                                              self.channels_per_pixel() as u32 +
-                                              self.ihdr_data.height) as
-                                             usize);
+        let mut reduced = Vec::with_capacity(
+            (self.ihdr_data.width * self.ihdr_data.height * self.channels_per_pixel() as u32 +
+                 self.ihdr_data.height) as usize,
+        );
         let mut high_byte = 0;
 
         for line in self.scan_lines() {
@@ -494,20 +494,20 @@ impl PngData {
                 .chunks(3)
                 .zip(trns.iter().chain([255].iter().cycle()))
                 .flat_map(|(pixel, trns)| {
-                              let mut pixel = pixel.to_owned();
-                              pixel.push(*trns);
-                              pixel
-                          })
+                    let mut pixel = pixel.to_owned();
+                    pixel.push(*trns);
+                    pixel
+                })
                 .collect()
         } else {
             self.palette.clone().unwrap()
         };
         let mut indexed_palette: Vec<&[u8]> = palette
             .chunks(if self.transparency_palette.is_some() {
-                        4
-                    } else {
-                        3
-                    })
+                4
+            } else {
+                3
+            })
             .collect();
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
@@ -591,10 +591,12 @@ impl PngData {
         true
     }
 
-    fn do_palette_reduction(&mut self,
-                            indices: &[u8],
-                            index_map: &mut HashMap<u8, u8>,
-                            indexed_palette: &mut Vec<&[u8]>) {
+    fn do_palette_reduction(
+        &mut self,
+        indices: &[u8],
+        index_map: &mut HashMap<u8, u8>,
+        indexed_palette: &mut Vec<&[u8]>,
+    ) {
         let mut new_data = Vec::with_capacity(self.raw_data.len());
         let original_len = indexed_palette.len();
         for idx in indices.iter().sorted_by(|a, b| b.cmp(a)) {
@@ -687,7 +689,9 @@ impl PngData {
             .cloned()
             .flatten()
             .enumerate()
-            .filter(|&(i, _)| !(self.transparency_palette.is_some() && i % 4 == 3))
+            .filter(|&(i, _)| {
+                !(self.transparency_palette.is_some() && i % 4 == 3)
+            })
             .map(|(_, x)| *x)
             .collect::<Vec<u8>>();
         self.palette = Some(new_palette);
@@ -711,13 +715,15 @@ impl PngData {
         }
 
         if self.ihdr_data.color_type == ColorType::GrayscaleAlpha &&
-           reduce_grayscale_alpha_to_grayscale(self) {
+            reduce_grayscale_alpha_to_grayscale(self)
+        {
             changed = true;
             should_reduce_bit_depth = true;
         }
 
         if self.ihdr_data.color_type == ColorType::RGB &&
-           (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self)) {
+            (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self))
+        {
             changed = true;
             should_reduce_bit_depth = true;
         }
@@ -729,6 +735,44 @@ impl PngData {
         }
 
         changed
+    }
+
+    pub fn reduce_alpha_channel(&mut self) -> bool {
+        let (bpc, bpp) = match self.ihdr_data.color_type {
+            ColorType::RGBA => {
+                match self.ihdr_data.bit_depth {
+                    BitDepth::Sixteen => (2, 8),
+                    BitDepth::Eight => (1, 4),
+                    _ => unreachable!(),
+                }
+            }
+            ColorType::GrayscaleAlpha => {
+                match self.ihdr_data.bit_depth {
+                    BitDepth::Sixteen => (2, 4),
+                    BitDepth::Eight => (1, 2),
+                    _ => unreachable!(),
+                }
+            }
+            _ => {
+                return false;
+            }
+        };
+
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            for pixel in line.data.chunks(bpp) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    for _ in 0..bpp {
+                        reduced.push(0);
+                    }
+                } else {
+                    reduced.extend_from_slice(pixel);
+                }
+            }
+        }
+        self.raw_data = reduced;
+        true
     }
 
     /// Convert the image to the specified interlacing type
@@ -758,10 +802,8 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     header_data.extend_from_slice(key);
     header_data.extend_from_slice(header);
     output.reserve(header_data.len() + 8);
-    output
-        .write_u32::<BigEndian>(header_data.len() as u32 - 4)
-        .ok();
+    let _ = output.write_u32::<BigEndian>(header_data.len() as u32 - 4);
     let crc = crc32::checksum_ieee(&header_data);
     output.append(&mut header_data);
-    output.write_u32::<BigEndian>(crc).ok();
+    let _ = output.write_u32::<BigEndian>(crc);
 }

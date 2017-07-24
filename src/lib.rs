@@ -20,7 +20,7 @@ use png::PngData;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, copy};
-use std::io::{BufWriter, Write, stderr, stdout};
+use std::io::{BufWriter, Write, stdout};
 use std::path::{Path, PathBuf};
 
 pub mod colors;
@@ -281,11 +281,11 @@ impl Default for Options {
 pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    rayon::initialize(rayon::Configuration::new().num_threads(thread_count)).ok();
+    let _ = rayon::initialize(rayon::Configuration::new().num_threads(thread_count));
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
-        writeln!(&mut stderr(), "Processing: {}", filepath.to_str().unwrap()).ok();
+        eprintln!("Processing: {}", filepath.to_str().unwrap());
     }
 
     let in_file = Path::new(filepath);
@@ -296,27 +296,29 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
     let optimized_output = optimize_png(&mut png, &in_data, opts)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
-        writeln!(&mut stderr(), "File already optimized").ok();
+        eprintln!("File already optimized");
         return Ok(());
     }
 
     if opts.pretend {
         if opts.verbosity.is_some() {
-            writeln!(&mut stderr(), "Running in pretend mode, no output").ok();
+            eprintln!("Running in pretend mode, no output");
         }
     } else {
         if opts.backup {
-            match copy(in_file,
-                       in_file.with_extension(format!("bak.{}",
-                                                      in_file
-                                                          .extension()
-                                                          .unwrap()
-                                                          .to_str()
-                                                          .unwrap()))) {
+            match copy(
+                in_file,
+                in_file.with_extension(format!(
+                    "bak.{}",
+                    in_file.extension().unwrap().to_str().unwrap()
+                )),
+            ) {
                 Ok(x) => x,
                 Err(_) => {
-                    return Err(PngError::new(&format!("Unable to write to backup file at {}",
-                                                      opts.out_file.display())))
+                    return Err(PngError::new(&format!(
+                        "Unable to write to backup file at {}",
+                        opts.out_file.display()
+                    )))
                 }
             };
         }
@@ -331,8 +333,10 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
             let out_file = match File::create(&opts.out_file) {
                 Ok(x) => x,
                 Err(_) => {
-                    return Err(PngError::new(&format!("Unable to write to file {}",
-                                                      opts.out_file.display())))
+                    return Err(PngError::new(&format!(
+                        "Unable to write to file {}",
+                        opts.out_file.display()
+                    )))
                 }
             };
 
@@ -352,9 +356,9 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
                                         }
                                         Err(_) => {
                                             if opts.verbosity.is_some() {
-                                                writeln!(&mut stderr(),
-                                                         "Failed to set permissions on output file")
-                                                    .ok();
+                                                eprintln!(
+                                                    "Failed to set permissions on output file"
+                                                );
                                             }
                                         }
                                     }
@@ -362,17 +366,14 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
                             }
                             Err(_) => {
                                 if opts.verbosity.is_some() {
-                                    writeln!(&mut stderr(),
-                                             "Failed to read permissions on input file")
-                                        .ok();
+                                    eprintln!("Failed to read permissions on input file");
                                 }
                             }
                         }
                     }
                     Err(_) => {
                         if opts.verbosity.is_some() {
-                            writeln!(&mut stderr(), "Failed to read permissions on input file")
-                                .ok();
+                            eprintln!("Failed to read permissions on input file");
                         }
                     }
                 };
@@ -382,12 +383,14 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
             match buffer.write_all(&optimized_output) {
                 Ok(_) => {
                     if opts.verbosity.is_some() {
-                        writeln!(&mut stderr(), "Output: {}", opts.out_file.display()).ok();
+                        eprintln!("Output: {}", opts.out_file.display());
                     }
                 }
                 Err(_) => {
-                    return Err(PngError::new(&format!("Unable to write to file {}",
-                                                      opts.out_file.display())))
+                    return Err(PngError::new(&format!(
+                        "Unable to write to file {}",
+                        opts.out_file.display()
+                    )))
                 }
             }
         }
@@ -400,11 +403,11 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    rayon::initialize(rayon::Configuration::new().num_threads(thread_count)).ok();
+    let _ = rayon::initialize(rayon::Configuration::new().num_threads(thread_count));
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
-        writeln!(&mut stderr(), "Processing from memory").ok();
+        eprintln!("Processing from memory");
     }
     let original_size = data.len() as usize;
     let mut png = PngData::from_slice(data, opts.fix_errors)?;
@@ -413,7 +416,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngE
     let optimized_output = optimize_png(&mut png, data, opts)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
-        writeln!(&mut stderr(), "Image already optimized").ok();
+        eprintln!("Image already optimized");
         Ok(data.to_vec())
     } else {
         Ok(optimized_output)
@@ -421,10 +424,11 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngE
 }
 
 /// Perform optimization on the input PNG object using the options provided
-fn optimize_png(png: &mut PngData,
-                original_data: &[u8],
-                opts: &Options)
-                -> Result<Vec<u8>, PngError> {
+fn optimize_png(
+    png: &mut PngData,
+    original_data: &[u8],
+    opts: &Options,
+) -> Result<Vec<u8>, PngError> {
     type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
 
     let original_png = png.clone();
@@ -433,33 +437,27 @@ fn optimize_png(png: &mut PngData,
     let file_original_size = original_data.len();
     let idat_original_size = png.idat_data.len();
     if opts.verbosity.is_some() {
-        writeln!(&mut stderr(),
-                 "    {}x{} pixels, PNG format",
-                 png.ihdr_data.width,
-                 png.ihdr_data.height)
-            .ok();
+        eprintln!(
+            "    {}x{} pixels, PNG format",
+            png.ihdr_data.width,
+            png.ihdr_data.height
+        );
         if let Some(ref palette) = png.palette {
-            writeln!(&mut stderr(),
-                     "    {} bits/pixel, {} colors in palette",
-                     png.ihdr_data.bit_depth,
-                     palette.len() / 3)
-                .ok();
+            eprintln!(
+                "    {} bits/pixel, {} colors in palette",
+                png.ihdr_data.bit_depth,
+                palette.len() / 3
+            );
         } else {
-            writeln!(&mut stderr(),
-                     "    {}x{} bits/pixel, {:?}",
-                     png.channels_per_pixel(),
-                     png.ihdr_data.bit_depth,
-                     png.ihdr_data.color_type)
-                .ok();
+            eprintln!(
+                "    {}x{} bits/pixel, {:?}",
+                png.channels_per_pixel(),
+                png.ihdr_data.bit_depth,
+                png.ihdr_data.color_type
+            );
         }
-        writeln!(&mut stderr(),
-                 "    IDAT size = {} bytes",
-                 idat_original_size)
-            .ok();
-        writeln!(&mut stderr(),
-                 "    File size = {} bytes",
-                 file_original_size)
-            .ok();
+        eprintln!("    IDAT size = {} bytes", idat_original_size);
+        eprintln!("    File size = {} bytes", file_original_size);
     }
 
     let mut filter = opts.filter.iter().cloned().collect::<Vec<u8>>();
@@ -470,7 +468,8 @@ fn optimize_png(png: &mut PngData,
     if opts.use_heuristics {
         // Heuristically determine which set of options to use
         if png.ihdr_data.bit_depth.as_u8() >= 8 &&
-           png.ihdr_data.color_type != colors::ColorType::Indexed {
+            png.ihdr_data.color_type != colors::ColorType::Indexed
+        {
             if filter.is_empty() {
                 filter.push(5);
             }
@@ -498,7 +497,7 @@ fn optimize_png(png: &mut PngData,
         };
         let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
         if opts.verbosity.is_some() {
-            writeln!(&mut stderr(), "Trying: {} combinations", combinations).ok();
+            eprintln!("Trying: {} combinations", combinations);
         }
 
         for f in &filter {
@@ -541,14 +540,14 @@ fn optimize_png(png: &mut PngData,
                     }.unwrap();
 
                     if opts.verbosity == Some(1) {
-                        writeln!(&mut stderr(),
-                                 "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                                 trial.1,
-                                 trial.2,
-                                 trial.3,
-                                 trial.0,
-                                 new_idat.len())
-                            .ok();
+                        eprintln!(
+                            "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                            trial.1,
+                            trial.2,
+                            trial.3,
+                            trial.0,
+                            new_idat.len()
+                        );
                     }
 
                     if new_idat.len() < original_len || added_interlacing || opts.force {
@@ -562,18 +561,18 @@ fn optimize_png(png: &mut PngData,
         if let Some(better) = best {
             png.idat_data = better.4;
             if opts.verbosity.is_some() {
-                writeln!(&mut stderr(), "Found better combination:").ok();
-                writeln!(&mut stderr(),
-                         "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                         better.1,
-                         better.2,
-                         better.3,
-                         better.0,
-                         png.idat_data.len())
-                    .ok();
+                eprintln!("Found better combination:");
+                eprintln!(
+                    "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                    better.1,
+                    better.2,
+                    better.3,
+                    better.0,
+                    png.idat_data.len()
+                );
             }
         } else if reduction_occurred {
-            png.reset_from_original(original_png);
+            png.reset_from_original(&original_png);
         }
     }
 
@@ -583,34 +582,32 @@ fn optimize_png(png: &mut PngData,
 
     if opts.verbosity.is_some() {
         if idat_original_size >= png.idat_data.len() {
-            writeln!(&mut stderr(),
-                     "    IDAT size = {} bytes ({} bytes decrease)",
-                     png.idat_data.len(),
-                     idat_original_size - png.idat_data.len())
-                .ok();
+            eprintln!(
+                "    IDAT size = {} bytes ({} bytes decrease)",
+                png.idat_data.len(),
+                idat_original_size - png.idat_data.len()
+            );
         } else {
-            writeln!(&mut stderr(),
-                     "    IDAT size = {} bytes ({} bytes increase)",
-                     png.idat_data.len(),
-                     png.idat_data.len() - idat_original_size)
-                .ok();
+            eprintln!(
+                "    IDAT size = {} bytes ({} bytes increase)",
+                png.idat_data.len(),
+                png.idat_data.len() - idat_original_size
+            );
         }
         if file_original_size >= output.len() {
-            writeln!(&mut stderr(),
-                     "    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                     output.len(),
-                     file_original_size - output.len(),
-                     (file_original_size - output.len()) as f64 / file_original_size as f64 *
-                     100f64)
-                .ok();
+            eprintln!(
+                "    file size = {} bytes ({} bytes = {:.2}% decrease)",
+                output.len(),
+                file_original_size - output.len(),
+                (file_original_size - output.len()) as f64 / file_original_size as f64 * 100f64
+            );
         } else {
-            writeln!(&mut stderr(),
-                     "    file size = {} bytes ({} bytes = {:.2}% increase)",
-                     output.len(),
-                     output.len() - file_original_size,
-                     (output.len() - file_original_size) as f64 / file_original_size as f64 *
-                     100f64)
-                .ok();
+            eprintln!(
+                "    file size = {} bytes ({} bytes = {:.2}% increase)",
+                output.len(),
+                output.len() - file_original_size,
+                (output.len() - file_original_size) as f64 / file_original_size as f64 * 100f64
+            );
         }
     }
 
@@ -620,13 +617,16 @@ fn optimize_png(png: &mut PngData,
     if let Ok(new_png) = new_png {
         if let Ok(old_png) = old_png {
             if old_png
-                   .pixels()
-                   .map(|x| x.2.channels().to_owned())
-                   .collect::<Vec<Vec<u8>>>() ==
-               new_png
-                   .pixels()
-                   .map(|x| x.2.channels().to_owned())
-                   .collect::<Vec<Vec<u8>>>() {
+                .pixels()
+                .map(|x| x.2.channels().to_owned())
+                .filter(|p| !(p.len() == 4 && p[3] == 0))
+                .collect::<Vec<Vec<u8>>>() ==
+                new_png
+                    .pixels()
+                    .map(|x| x.2.channels().to_owned())
+                    .filter(|p| !(p.len() == 4 && p[3] == 0))
+                    .collect::<Vec<Vec<u8>>>()
+            {
                 return Ok(output);
             }
         } else {
@@ -637,7 +637,9 @@ fn optimize_png(png: &mut PngData,
         }
     }
 
-    writeln!(&mut stderr(), "The resulting image is corrupted and will not be outputted.\nThis is a bug! Please report it at https://github.com/shssoichiro/oxipng/issues").ok();
+    eprintln!(
+        "The resulting image is corrupted and will not be outputted.\nThis is a bug! Please report it at https://github.com/shssoichiro/oxipng/issues"
+    );
     Err(PngError::new("The resulting image is corrupted"))
 }
 
@@ -671,6 +673,8 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         report_reduction(png);
     }
 
+    png.reduce_alpha_channel();
+
     if let Some(interlacing) = opts.interlace {
         if png.change_interlacing(interlacing) {
             png.ihdr_data.interlaced = interlacing;
@@ -685,18 +689,18 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
 #[inline]
 fn report_reduction(png: &png::PngData) {
     if let Some(ref palette) = png.palette {
-        writeln!(&mut stderr(),
-                 "Reducing image to {} bits/pixel, {} colors in palette",
-                 png.ihdr_data.bit_depth,
-                 palette.len() / 3)
-            .ok();
+        eprintln!(
+            "Reducing image to {} bits/pixel, {} colors in palette",
+            png.ihdr_data.bit_depth,
+            palette.len() / 3
+        );
     } else {
-        writeln!(&mut stderr(),
-                 "Reducing image to {}x{} bits/pixel, {}",
-                 png.channels_per_pixel(),
-                 png.ihdr_data.bit_depth,
-                 png.ihdr_data.color_type)
-            .ok();
+        eprintln!(
+            "Reducing image to {}x{} bits/pixel, {}",
+            png.channels_per_pixel(),
+            png.ihdr_data.bit_depth,
+            png.ihdr_data.color_type
+        );
     }
 }
 
@@ -711,8 +715,17 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
             }
         }
         Headers::Safe => {
-            const PRESERVED_HEADERS: [&'static str; 9] = ["cHRM", "gAMA", "iCCP", "sBIT", "sRGB",
-                                                          "bKGD", "hIST", "pHYs", "sPLT"];
+            const PRESERVED_HEADERS: [&'static str; 9] = [
+                "cHRM",
+                "gAMA",
+                "iCCP",
+                "sBIT",
+                "sRGB",
+                "bKGD",
+                "hIST",
+                "pHYs",
+                "sPLT",
+            ];
             let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
             for hdr in hdrs {
                 if !PRESERVED_HEADERS.contains(&hdr.as_ref()) {

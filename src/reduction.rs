@@ -134,13 +134,14 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
         }
     }
 
-    let mut color_palette = Vec::with_capacity(palette.len() * 3 +
-                                               if png.aux_headers
-                                                      .contains_key(&"bKGD".to_string()) {
-                                                   6
-                                               } else {
-                                                   0
-                                               });
+    let mut color_palette = Vec::with_capacity(
+        palette.len() * 3 +
+            if png.aux_headers.contains_key(&"bKGD".to_string()) {
+                6
+            } else {
+                0
+            },
+    );
     let mut trans_palette = Vec::with_capacity(palette.len());
     for color in &palette {
         for (i, byte) in color.iter().enumerate() {
@@ -166,9 +167,10 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
             .step(2)
             .cloned()
             .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette
-               .chunks(3)
-               .position(|x| x == header_pixels.as_slice()) {
+        if let Some(entry) = color_palette.chunks(3).position(
+            |x| x == header_pixels.as_slice(),
+        )
+        {
             *bkgd_header = vec![entry as u8];
         } else if color_palette.len() / 3 == 256 {
             return false;
@@ -244,9 +246,10 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
             .step(2)
             .cloned()
             .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette
-               .chunks(3)
-               .position(|x| x == header_pixels.as_slice()) {
+        if let Some(entry) = color_palette.chunks(3).position(
+            |x| x == header_pixels.as_slice(),
+        )
+        {
             *bkgd_header = vec![entry as u8];
         } else if color_palette.len() == 255 {
             return false;

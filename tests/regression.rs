@@ -20,13 +20,15 @@ fn get_opts(input: &Path) -> oxipng::Options {
     options
 }
 
-fn test_it_converts(input: &Path,
-                    output: &Path,
-                    opts: &oxipng::Options,
-                    color_type_in: ColorType,
-                    bit_depth_in: BitDepth,
-                    color_type_out: ColorType,
-                    bit_depth_out: BitDepth) {
+fn test_it_converts(
+    input: &Path,
+    output: &Path,
+    opts: &oxipng::Options,
+    color_type_in: ColorType,
+    bit_depth_in: BitDepth,
+    color_type_out: ColorType,
+    bit_depth_out: BitDepth,
+) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
@@ -58,13 +60,15 @@ fn issue_29() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGB,
-                     BitDepth::Eight,
-                     ColorType::RGB,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::RGB,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -107,13 +111,15 @@ fn issue_52_01() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -122,13 +128,15 @@ fn issue_52_02() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -137,13 +145,15 @@ fn issue_52_03() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -152,13 +162,15 @@ fn issue_52_04() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::One);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::One,
+    );
 }
 
 #[test]
@@ -167,13 +179,15 @@ fn issue_52_05() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::One);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::One,
+    );
 }
 
 #[test]
@@ -182,13 +196,15 @@ fn issue_52_06() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::Indexed,
-                     BitDepth::Two);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Two,
+    );
 }
 
 #[test]
@@ -197,13 +213,15 @@ fn issue_56() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::Indexed,
-                     BitDepth::Four,
-                     ColorType::Indexed,
-                     BitDepth::Four);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::Indexed,
+        BitDepth::Four,
+        ColorType::Indexed,
+        BitDepth::Four,
+    );
 }
 
 #[test]
@@ -212,13 +230,15 @@ fn issue_58() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::Indexed,
-                     BitDepth::Four,
-                     ColorType::Indexed,
-                     BitDepth::Four);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::Indexed,
+        BitDepth::Four,
+        ColorType::Indexed,
+        BitDepth::Four,
+    );
 }
 
 #[test]
@@ -227,13 +247,15 @@ fn issue_59() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::RGBA,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -242,11 +264,13 @@ fn issue_60() {
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGBA,
-                     BitDepth::Eight,
-                     ColorType::GrayscaleAlpha,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
 }

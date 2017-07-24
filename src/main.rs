@@ -18,7 +18,6 @@ use oxipng::Options;
 use regex::Regex;
 use std::collections::HashSet;
 use std::fs::DirBuilder;
-use std::io::{Write, stderr};
 use std::path::PathBuf;
 
 fn main() {
@@ -222,17 +221,19 @@ fn main() {
     let opts = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
         Err(x) => {
-            writeln!(&mut stderr(), "{}", x).ok();
+            eprintln!("{}", x);
             return ();
         }
     };
 
-    handle_optimization(matches
-                            .values_of("files")
-                            .unwrap()
-                            .map(PathBuf::from)
-                            .collect(),
-                        &opts);
+    handle_optimization(
+        matches
+            .values_of("files")
+            .unwrap()
+            .map(PathBuf::from)
+            .collect(),
+        &opts,
+    );
 }
 
 fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
@@ -240,17 +241,16 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
         let mut current_opts = opts.clone();
         if input.is_dir() {
             if current_opts.recursive {
-                handle_optimization(input
-                                        .read_dir()
-                                        .unwrap()
-                                        .map(|x| x.unwrap().path())
-                                        .collect(),
-                                    &current_opts)
+                handle_optimization(
+                    input
+                        .read_dir()
+                        .unwrap()
+                        .map(|x| x.unwrap().path())
+                        .collect(),
+                    &current_opts,
+                )
             } else {
-                writeln!(&mut stderr(),
-                         "{} is a directory, skipping",
-                         input.display())
-                    .ok();
+                eprintln!("{} is a directory, skipping", input.display());
             }
             continue;
         }
@@ -262,7 +262,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
         match oxipng::optimize(&input, &current_opts) {
             Ok(_) => (),
             Err(x) => {
-                writeln!(&mut stderr(), "{}", x).ok();
+                eprintln!("{}", x);
             }
         };
     }
@@ -320,8 +320,10 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
                 Err(x) => return Err(format!("Could not create output directory {}", x)),
             };
         } else if !path.is_dir() {
-            return Err(format!("{} is an existing file (not a directory), cannot create directory",
-                               x));
+            return Err(format!(
+                "{} is an existing file (not a directory), cannot create directory",
+                x
+            ));
         }
         opts.out_dir = Some(path);
     }
@@ -398,8 +400,10 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
             .collect::<Vec<String>>();
         if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
             if hdrs.len() > 1 {
-                return Err("'safe' or 'all' presets for --strip should be used by themselves"
-                               .to_owned());
+                return Err(
+                    "'safe' or 'all' presets for --strip should be used by themselves"
+                        .to_owned(),
+                );
             }
             if hdrs[0] == "safe" {
                 opts.strip = Headers::Safe;
@@ -432,18 +436,21 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     Ok(opts)
 }
 
-fn parse_numeric_range_opts(input: &str,
-                            min_value: u8,
-                            max_value: u8)
-                            -> Result<HashSet<u8>, String> {
+fn parse_numeric_range_opts(
+    input: &str,
+    min_value: u8,
+    max_value: u8,
+) -> Result<HashSet<u8>, String> {
     let one_item = Regex::new(format!(r"^[{}-{}]$", min_value, max_value).as_ref()).unwrap();
-    let multiple_items = Regex::new(format!(r"^([{}-{}])(,|-)([{}-{}])$",
-                                            min_value,
-                                            max_value,
-                                            min_value,
-                                            max_value)
-                                        .as_ref())
-        .unwrap();
+    let multiple_items = Regex::new(
+        format!(
+            r"^([{}-{}])(,|-)([{}-{}])$",
+            min_value,
+            max_value,
+            min_value,
+            max_value
+        ).as_ref(),
+    ).unwrap();
     let mut items = HashSet::new();
 
     if one_item.is_match(input) {
