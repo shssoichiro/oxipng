@@ -103,3 +103,33 @@ impl BitDepth {
         }
     }
 }
+
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+/// Potential optimization methods for alpha channel
+pub enum AlphaOptim {
+    NoOp,
+    Black,
+    White,
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+impl fmt::Display for AlphaOptim {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match *self {
+                AlphaOptim::NoOp => "_",
+                AlphaOptim::Black => "B",
+                AlphaOptim::White => "W",
+                AlphaOptim::Up => "U",
+                AlphaOptim::Right => "R",
+                AlphaOptim::Down => "D",
+                AlphaOptim::Left => "L",
+            }
+        )
+    }
+}

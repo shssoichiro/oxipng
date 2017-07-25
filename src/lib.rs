@@ -90,6 +90,8 @@ pub struct Options {
     /// 8-15 are valid values
     /// Default: `15`
     pub window: u8,
+    /// Alpha filtering strategies to use
+    pub alphas: HashSet<colors::AlphaOptim>,
     /// Whether to attempt bit depth reduction
     /// Default: `true`
     pub bit_depth_reduction: bool,
@@ -241,6 +243,9 @@ impl Default for Options {
         for i in 0..4 {
             strategies.insert(i);
         }
+        let mut alphas = HashSet::new();
+        alphas.insert(colors::AlphaOptim::NoOp);
+        alphas.insert(colors::AlphaOptim::Black);
 
         // Default to 1 thread on single-core, otherwise use threads = 1.5x CPU cores
         let num_cpus = num_cpus::get();
@@ -265,6 +270,7 @@ impl Default for Options {
             memory: memory,
             strategies: strategies,
             window: 15,
+            alphas,
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
@@ -429,7 +435,7 @@ fn optimize_png(
     original_data: &[u8],
     opts: &Options,
 ) -> Result<Vec<u8>, PngError> {
-    type TrialWithData = (u8, u8, u8, u8, Vec<u8>);
+    type TrialWithData = (TrialOptions, Vec<u8>);
 
     let original_png = png.clone();
 
@@ -495,7 +501,7 @@ fn optimize_png(
         } else {
             filter.len()
         };
-        let mut results: Vec<(u8, u8, u8, u8)> = Vec::with_capacity(combinations);
+        let mut results: Vec<TrialOptions> = Vec::with_capacity(combinations);
         if opts.verbosity.is_some() {
             eprintln!("Trying: {} combinations", combinations);
         }
@@ -505,24 +511,34 @@ fn optimize_png(
                 for zc in compression {
                     for zm in memory {
                         for zs in &strategies {
-                            results.push((*f, *zc, *zm, *zs));
+                            results.push(TrialOptions {
+                                filter: *f,
+                                compression: *zc,
+                                memory: *zm,
+                                strategy: *zs,
+                            });
                         }
                     }
                 }
             } else {
                 // Zopfli compression has no additional options
-                results.push((*f, 0, 0, 0));
+                results.push(TrialOptions {
+                    filter: *f,
+                    compression: 0,
+                    memory: 0,
+                    strategy: 0,
+                });
             }
         }
 
-        let mut filters_tmp: Vec<(u8, Vec<u8>)> = Vec::with_capacity(filter.len());
-        filter
+        let filters: HashMap<u8, Vec<u8>> = filter
             .par_iter()
             .with_max_len(1)
-            .map(|f| (*f, png.filter_image(*f)))
-            .collect_into(&mut filters_tmp);
-
-        let filters: HashMap<u8, Vec<u8>> = filters_tmp.into_iter().collect();
+            .map(|f| {
+                let png = png.clone();
+                (*f, png.filter_image(*f))
+            })
+            .collect();
 
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
@@ -532,9 +548,15 @@ fn optimize_png(
                 .into_par_iter()
                 .with_max_len(1)
                 .filter_map(|trial| {
-                    let filtered = &filters[&trial.0];
+                    let filtered = &filters[&trial.filter];
                     let new_idat = if opts.deflate == Deflaters::Zlib {
-                        deflate::deflate(filtered, trial.1, trial.2, trial.3, opts.window)
+                        deflate::deflate(
+                            filtered,
+                            trial.compression,
+                            trial.memory,
+                            trial.strategy,
+                            opts.window,
+                        )
                     } else {
                         deflate::zopfli_deflate(filtered)
                     }.unwrap();
@@ -542,32 +564,33 @@ fn optimize_png(
                     if opts.verbosity == Some(1) {
                         eprintln!(
                             "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                            trial.1,
-                            trial.2,
-                            trial.3,
-                            trial.0,
+                            trial.compression,
+                            trial.memory,
+                            trial.strategy,
+                            trial.filter,
                             new_idat.len()
                         );
                     }
 
                     if new_idat.len() < original_len || added_interlacing || opts.force {
-                        Some((trial.0, trial.1, trial.2, trial.3, new_idat))
+                        Some((trial, new_idat))
                     } else {
                         None
                     }
                 })
-                .reduce_with(|i, j| if i.4.len() <= j.4.len() { i } else { j });
+                .reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
 
         if let Some(better) = best {
-            png.idat_data = better.4;
+            png.idat_data = better.1;
             if opts.verbosity.is_some() {
+                let opts = better.0;
                 eprintln!("Found better combination:");
                 eprintln!(
                     "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                    better.1,
-                    better.2,
-                    better.3,
-                    better.0,
+                    opts.compression,
+                    opts.memory,
+                    opts.strategy,
+                    opts.filter,
                     png.idat_data.len()
                 );
             }
@@ -673,14 +696,14 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         report_reduction(png);
     }
 
-    png.reduce_alpha_channel();
-
     if let Some(interlacing) = opts.interlace {
         if png.change_interlacing(interlacing) {
             png.ihdr_data.interlaced = interlacing;
             reduction_occurred = true;
         }
     }
+
+    png.try_alpha_reduction(&opts.alphas);
 
     reduction_occurred
 }
@@ -743,4 +766,13 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
 #[inline]
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
     original_size <= optimized_size && !opts.force && opts.interlace.is_none()
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+/// Defines options to be used for a single compression trial
+struct TrialOptions {
+    pub filter: u8,
+    pub compression: u8,
+    pub memory: u8,
+    pub strategy: u8,
 }

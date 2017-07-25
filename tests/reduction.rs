@@ -1,6 +1,6 @@
 extern crate oxipng;
 
-use oxipng::colors::{BitDepth, ColorType};
+use oxipng::colors::{BitDepth, ColorType, AlphaOptim};
 use oxipng::png;
 use std::collections::HashSet;
 use std::error::Error;
@@ -1096,7 +1096,6 @@ fn rgba_16_reduce_alpha_black() {
     );
 }
 
-
 #[test]
 fn rgba_8_reduce_alpha_black() {
     let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_black.png");
@@ -1131,11 +1130,390 @@ fn grayscale_alpha_16_reduce_alpha_black() {
     );
 }
 
-
 #[test]
 fn grayscale_alpha_8_reduce_alpha_black() {
     let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_black.png");
     let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_16_reduce_alpha_white() {
+    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_white.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::White);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Sixteen,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_8_reduce_alpha_white() {
+    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_white.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::White);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_16_reduce_alpha_white() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_white.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::White);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Sixteen,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_8_reduce_alpha_white() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_white.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::White);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_16_reduce_alpha_down() {
+    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_down.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Down);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Sixteen,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_8_reduce_alpha_down() {
+    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_down.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Down);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_16_reduce_alpha_down() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_down.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Down);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Sixteen,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_8_reduce_alpha_down() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_down.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Down);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_16_reduce_alpha_up() {
+    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_up.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Up);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Sixteen,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_8_reduce_alpha_up() {
+    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_up.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Up);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_16_reduce_alpha_up() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_up.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Up);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Sixteen,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_8_reduce_alpha_up() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_up.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Up);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_16_reduce_alpha_left() {
+    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_left.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Left);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Sixteen,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_8_reduce_alpha_left() {
+    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_left.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Left);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_16_reduce_alpha_left() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_left.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Left);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Sixteen,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_8_reduce_alpha_left() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_left.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Left);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_16_reduce_alpha_right() {
+    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_right.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Right);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Sixteen,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn rgba_8_reduce_alpha_right() {
+    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_right.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Right);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_16_reduce_alpha_right() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_right.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Right);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Sixteen,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_alpha_8_reduce_alpha_right() {
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_right.png");
+    let mut opts = get_opts(&input);
+    opts.alphas = HashSet::with_capacity(1);
+    opts.alphas.insert(AlphaOptim::Right);
     let output = opts.out_file.clone();
 
     test_it_converts(

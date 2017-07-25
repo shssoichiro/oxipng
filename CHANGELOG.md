@@ -1,6 +1,12 @@
 ### Version 0.17.0 (unreleased)
  - [SEMVER_MAJOR] Bump minimum required rustc version to 1.19.0
- - Change all transparent pixels to `rgba(0, 0, 0, 0)` to improve compression 
+ - [SEMVER_MINOR] Oxipng will now, by default, attempt to change all transparent pixels to `rgba(0, 0, 0, 0)` to improve compression.
+    It does fast trials with filters 0 and 5 to see if this is an improvement over
+    the existing alpha channel.
+ - [SEMVER_MINOR] Add a `-a` option to the command line (`alphas` in the struct) which enables 6 different
+    trials for optimizing the alpha channel, using the previously mentioned fast heuristic.
+    This option will make optimization of images with transparency somewhat slower,
+    but may improve compression.
 
 ### Version 0.16.3
  - Fix command-line help text ([#70](https://github.com/shssoichiro/oxipng/issues/70))

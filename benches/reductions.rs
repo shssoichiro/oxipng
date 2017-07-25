@@ -4,6 +4,7 @@ extern crate test;
 extern crate oxipng;
 
 use oxipng::png;
+use oxipng::colors::AlphaOptim;
 use test::Bencher;
 use std::path::PathBuf;
 
@@ -252,5 +253,83 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     b.iter(|| {
         let mut safe_png = png.clone();
         safe_png.reduce_palette();
+    });
+}
+
+#[bench]
+fn reductions_alpha_black(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_black.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::Black);
+    });
+}
+
+#[bench]
+fn reductions_alpha_white(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_white.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::White);
+    });
+}
+
+#[bench]
+fn reductions_alpha_left(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_left.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::Left);
+    });
+}
+
+#[bench]
+fn reductions_alpha_right(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_right.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::Right);
+    });
+}
+
+#[bench]
+fn reductions_alpha_up(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_up.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::Up);
+    });
+}
+
+#[bench]
+fn reductions_alpha_down(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/rgba_8_reduce_alpha_down.png",
+    ));
+    let png = png::PngData::new(&input, false).unwrap();
+
+    b.iter(|| {
+        let mut safe_png = png.clone();
+        safe_png.reduce_alpha_channel(AlphaOptim::Down);
     });
 }

@@ -12,6 +12,7 @@ extern crate clap;
 extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
+use oxipng::colors::AlphaOptim;
 use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
 use oxipng::Options;
@@ -156,6 +157,10 @@ fn main() {
             .possible_value("8k")
             .possible_value("16k")
             .possible_value("32k"))
+        .arg(Arg::with_name("alpha")
+            .help("Perform additional alpha optimizations")
+            .short("a")
+            .long("alpha"))
         .arg(Arg::with_name("no-bit-reduction")
             .help("No bit depth reduction")
             .long("nb"))
@@ -334,6 +339,14 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
 
     if matches.is_present("stdout") {
         opts.stdout = true;
+    }
+
+    if matches.is_present("alpha") {
+        opts.alphas.insert(AlphaOptim::White);
+        opts.alphas.insert(AlphaOptim::Up);
+        opts.alphas.insert(AlphaOptim::Down);
+        opts.alphas.insert(AlphaOptim::Left);
+        opts.alphas.insert(AlphaOptim::Right);
     }
 
     if matches.is_present("backup") {
