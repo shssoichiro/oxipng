@@ -774,141 +774,165 @@ impl PngData {
 
     pub fn reduce_alpha_channel(&mut self, optim: AlphaOptim) -> bool {
         let (bpc, bpp) = match self.ihdr_data.color_type {
-            ColorType::RGBA => {
-                match self.ihdr_data.bit_depth {
-                    BitDepth::Sixteen => (2, 8),
-                    BitDepth::Eight => (1, 4),
-                    _ => unreachable!(),
-                }
-            }
+            ColorType::RGBA |
             ColorType::GrayscaleAlpha => {
-                match self.ihdr_data.bit_depth {
-                    BitDepth::Sixteen => (2, 4),
-                    BitDepth::Eight => (1, 2),
-                    _ => unreachable!(),
-                }
+                let cpp = self.channels_per_pixel();
+                let bpc = self.ihdr_data.bit_depth.as_u8() / 8;
+                (bpc as usize, (bpc * cpp) as usize)
             }
             _ => {
                 return false;
             }
         };
-        let mut reduced = Vec::with_capacity(self.raw_data.len());
 
         match optim {
             AlphaOptim::NoOp => {
                 return false;
             }
             AlphaOptim::Black => {
-                for line in self.scan_lines() {
-                    reduced.push(line.filter);
-                    for pixel in line.data.chunks(bpp) {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            for _ in 0..bpp {
-                                reduced.push(0);
-                            }
-                        } else {
-                            reduced.extend_from_slice(pixel);
-                        }
-                    }
-                }
+                self.raw_data = self.reduce_alpha_to_black(bpc, bpp);
             }
             AlphaOptim::White => {
-                for line in self.scan_lines() {
-                    reduced.push(line.filter);
-                    for pixel in line.data.chunks(bpp) {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            for _ in 0..(bpp - bpc) {
-                                reduced.push(255);
-                            }
-                            for _ in 0..bpc {
-                                reduced.push(0);
-                            }
-                        } else {
-                            reduced.extend_from_slice(pixel);
-                        }
-                    }
-                }
+                self.raw_data = self.reduce_alpha_to_white(bpc, bpp);
             }
             AlphaOptim::Up => {
-                let mut lines = Vec::new();
-                let scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
-                let mut last_line = vec![0; scan_lines[0].data.len()];
-                let mut current_line = Vec::with_capacity(last_line.len());
-                for line in scan_lines.into_iter().rev() {
-                    current_line.push(line.filter);
-                    for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            current_line.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                            for _ in 0..bpc {
-                                current_line.push(0);
-                            }
-                        } else {
-                            current_line.extend_from_slice(pixel);
-                        }
-                    }
-                    last_line = current_line.clone();
-                    lines.push(current_line.clone());
-                    current_line.clear();
-                }
-                reduced.extend(lines.into_iter().rev().flatten());
+                self.raw_data = self.reduce_alpha_to_up(bpc, bpp);
             }
             AlphaOptim::Down => {
-                let mut last_line = vec![0; self.scan_lines().next().unwrap().data.len()];
-                for line in self.scan_lines() {
-                    reduced.push(line.filter);
-                    for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                            for _ in 0..bpc {
-                                reduced.push(0);
-                            }
-                        } else {
-                            reduced.extend_from_slice(pixel);
-                        }
-                    }
-                    last_line = reduced.clone();
-                }
+                self.raw_data = self.reduce_alpha_to_down(bpc, bpp);
             }
             AlphaOptim::Left => {
-                for line in self.scan_lines() {
-                    let mut line_bytes = Vec::with_capacity(line.data.len());
-                    let mut last_pixel = vec![0; bpp];
-                    for pixel in line.data.chunks(bpp).rev() {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            line_bytes.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                            for _ in 0..bpc {
-                                line_bytes.push(0);
-                            }
-                        } else {
-                            line_bytes.extend_from_slice(pixel);
-                        }
-                        last_pixel = pixel.to_owned();
-                    }
-                    reduced.push(line.filter);
-                    reduced.extend(line_bytes.chunks(bpp).rev().flatten());
-                }
+                self.raw_data = self.reduce_alpha_to_left(bpc, bpp);
             }
             AlphaOptim::Right => {
-                for line in self.scan_lines() {
-                    reduced.push(line.filter);
-                    let mut last_pixel = vec![0; bpp];
-                    for pixel in line.data.chunks(bpp) {
-                        if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                            reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                            for _ in 0..bpc {
-                                reduced.push(0);
-                            }
-                        } else {
-                            reduced.extend_from_slice(pixel);
-                        }
-                        last_pixel = pixel.to_owned();
-                    }
-                }
+                self.raw_data = self.reduce_alpha_to_right(bpc, bpp);
             }
         }
 
-        self.raw_data = reduced;
         true
+    }
+
+    fn reduce_alpha_to_black(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            for pixel in line.data.chunks(bpp) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    for _ in 0..bpp {
+                        reduced.push(0);
+                    }
+                } else {
+                    reduced.extend_from_slice(pixel);
+                }
+            }
+        }
+        reduced
+    }
+
+    fn reduce_alpha_to_white(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            for pixel in line.data.chunks(bpp) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    for _ in 0..(bpp - bpc) {
+                        reduced.push(255);
+                    }
+                    for _ in 0..bpc {
+                        reduced.push(0);
+                    }
+                } else {
+                    reduced.extend_from_slice(pixel);
+                }
+            }
+        }
+        reduced
+    }
+
+    fn reduce_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut lines = Vec::new();
+        let scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
+        let mut last_line = vec![0; scan_lines[0].data.len()];
+        let mut current_line = Vec::with_capacity(last_line.len());
+        for line in scan_lines.into_iter().rev() {
+            current_line.push(line.filter);
+            for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    current_line.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                    for _ in 0..bpc {
+                        current_line.push(0);
+                    }
+                } else {
+                    current_line.extend_from_slice(pixel);
+                }
+            }
+            last_line = current_line.clone();
+            lines.push(current_line.clone());
+            current_line.clear();
+        }
+        lines.into_iter().rev().flatten().collect()
+    }
+
+    fn reduce_alpha_to_down(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        let mut last_line = vec![0; self.scan_lines().next().unwrap().data.len()];
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                    for _ in 0..bpc {
+                        reduced.push(0);
+                    }
+                } else {
+                    reduced.extend_from_slice(pixel);
+                }
+            }
+            last_line = reduced.clone();
+        }
+        reduced
+    }
+
+    fn reduce_alpha_to_left(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        for line in self.scan_lines() {
+            let mut line_bytes = Vec::with_capacity(line.data.len());
+            let mut last_pixel = vec![0; bpp];
+            for pixel in line.data.chunks(bpp).rev() {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    line_bytes.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                    for _ in 0..bpc {
+                        line_bytes.push(0);
+                    }
+                } else {
+                    line_bytes.extend_from_slice(pixel);
+                }
+                last_pixel = pixel.to_owned();
+            }
+            reduced.push(line.filter);
+            reduced.extend(line_bytes.chunks(bpp).rev().flatten());
+        }
+        reduced
+    }
+
+    fn reduce_alpha_to_right(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+        let mut reduced = Vec::with_capacity(self.raw_data.len());
+        for line in self.scan_lines() {
+            reduced.push(line.filter);
+            let mut last_pixel = vec![0; bpp];
+            for pixel in line.data.chunks(bpp) {
+                if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
+                    reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                    for _ in 0..bpc {
+                        reduced.push(0);
+                    }
+                } else {
+                    reduced.extend_from_slice(pixel);
+                }
+                last_pixel = pixel.to_owned();
+            }
+        }
+        reduced
     }
 
     /// Convert the image to the specified interlacing type
@@ -932,7 +956,6 @@ impl PngData {
     }
 }
 
-#[inline]
 fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     let mut header_data = Vec::with_capacity(header.len() + 4);
     header_data.extend_from_slice(key);
