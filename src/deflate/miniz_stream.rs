@@ -22,19 +22,22 @@ pub trait Direction {
 }
 
 impl Stream<Compress> {
-    pub fn new_compress(lvl: c_int,
-                        window_bits: c_int,
-                        mem_size: c_int,
-                        strategy: c_int)
-                        -> Stream<Compress> {
+    pub fn new_compress(
+        lvl: c_int,
+        window_bits: c_int,
+        mem_size: c_int,
+        strategy: c_int,
+    ) -> Stream<Compress> {
         unsafe {
             let mut state: miniz_sys::mz_stream = mem::zeroed();
-            let ret = miniz_sys::mz_deflateInit2(&mut state,
-                                                 lvl,
-                                                 miniz_sys::MZ_DEFLATED,
-                                                 window_bits,
-                                                 mem_size,
-                                                 strategy);
+            let ret = miniz_sys::mz_deflateInit2(
+                &mut state,
+                lvl,
+                miniz_sys::MZ_DEFLATED,
+                window_bits,
+                mem_size,
+                strategy,
+            );
             debug_assert_eq!(ret, 0);
             Stream {
                 raw: state,
@@ -91,12 +94,14 @@ impl Stream<Compress> {
         unsafe {
             self.raw.next_in = input.as_mut_ptr().offset(self.total_in() as isize);
             self.raw.next_out = output.as_mut_ptr().offset(self.total_out() as isize);
-            let rc = miniz_sys::mz_deflate(&mut self.raw,
-                                           if self.raw.avail_in > 0 {
-                                               miniz_sys::MZ_NO_FLUSH
-                                           } else {
-                                               miniz_sys::MZ_FINISH
-                                           });
+            let rc = miniz_sys::mz_deflate(
+                &mut self.raw,
+                if self.raw.avail_in > 0 {
+                    miniz_sys::MZ_NO_FLUSH
+                } else {
+                    miniz_sys::MZ_FINISH
+                },
+            );
             output.set_len(self.total_out() as usize);
             rc
         }

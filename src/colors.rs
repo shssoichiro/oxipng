@@ -18,13 +18,17 @@ pub enum ColorType {
 impl fmt::Display for ColorType {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            ColorType::Grayscale => "Grayscale",
-            ColorType::RGB => "RGB",
-            ColorType::Indexed => "Indexed",
-            ColorType::GrayscaleAlpha => "Grayscale + Alpha",
-            ColorType::RGBA => "RGB + Alpha",
-        })
+        write!(
+            f,
+            "{}",
+            match *self {
+                ColorType::Grayscale => "Grayscale",
+                ColorType::RGB => "RGB",
+                ColorType::Indexed => "Indexed",
+                ColorType::GrayscaleAlpha => "Grayscale + Alpha",
+                ColorType::RGBA => "RGB + Alpha",
+            }
+        )
     }
 }
 
@@ -60,13 +64,17 @@ pub enum BitDepth {
 impl fmt::Display for BitDepth {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            BitDepth::One => "1",
-            BitDepth::Two => "2",
-            BitDepth::Four => "4",
-            BitDepth::Eight => "8",
-            BitDepth::Sixteen => "16",
-        })
+        write!(
+            f,
+            "{}",
+            match *self {
+                BitDepth::One => "1",
+                BitDepth::Two => "2",
+                BitDepth::Four => "4",
+                BitDepth::Eight => "8",
+                BitDepth::Sixteen => "16",
+            }
+        )
     }
 }
 
@@ -93,5 +101,35 @@ impl BitDepth {
             16 => BitDepth::Sixteen,
             _ => panic!("Unsupported bit depth"),
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+/// Potential optimization methods for alpha channel
+pub enum AlphaOptim {
+    NoOp,
+    Black,
+    White,
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+impl fmt::Display for AlphaOptim {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match *self {
+                AlphaOptim::NoOp => "_",
+                AlphaOptim::Black => "B",
+                AlphaOptim::White => "W",
+                AlphaOptim::Up => "U",
+                AlphaOptim::Right => "R",
+                AlphaOptim::Down => "D",
+                AlphaOptim::Left => "L",
+            }
+        )
     }
 }

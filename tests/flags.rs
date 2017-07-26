@@ -22,13 +22,15 @@ fn get_opts(input: &Path) -> oxipng::Options {
     options
 }
 
-fn test_it_converts(input: &Path,
-                    output: &Path,
-                    opts: &oxipng::Options,
-                    color_type_in: ColorType,
-                    bit_depth_in: BitDepth,
-                    color_type_out: ColorType,
-                    bit_depth_out: BitDepth) {
+fn test_it_converts(
+    input: &Path,
+    output: &Path,
+    opts: &oxipng::Options,
+    color_type_in: ColorType,
+    bit_depth_in: BitDepth,
+    color_type_out: ColorType,
+    bit_depth_out: BitDepth,
+) {
     let png = png::PngData::new(input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
@@ -61,13 +63,15 @@ fn verbose_mode() {
     opts.verbosity = Some(1);
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGB,
-                     BitDepth::Eight,
-                     ColorType::RGB,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::RGB,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -374,13 +378,15 @@ fn preserve_attrs() {
     opts.preserve_attrs = true;
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGB,
-                     BitDepth::Eight,
-                     ColorType::RGB,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::RGB,
+        BitDepth::Eight,
+    );
 
     // TODO: Actually check permissions
 }
@@ -425,11 +431,13 @@ fn zopfli_mode() {
     opts.deflate = Deflaters::Zopfli;
     let output = opts.out_file.clone();
 
-    test_it_converts(&input,
-                     &output,
-                     &opts,
-                     ColorType::RGB,
-                     BitDepth::Eight,
-                     ColorType::RGB,
-                     BitDepth::Eight);
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::RGB,
+        BitDepth::Eight,
+    );
 }
