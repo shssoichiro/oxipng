@@ -41,33 +41,27 @@ pub fn interlace_image(png: &mut PngData) {
         let bit_vec = BitVec::from_bytes(&line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
-            if i >= (png.ihdr_data.width * bits_per_pixel as u32) as usize {
+            if i >= (png.ihdr_data.width * u32::from(bits_per_pixel)) as usize {
                 break;
             }
             // Copy pixels into interlaced passes
             let pix_modulo = (i / bits_per_pixel as usize) % 8;
             match index % 8 {
-                0 => {
-                    match pix_modulo {
-                        0 => passes[0].push(bit),
-                        4 => passes[1].push(bit),
-                        2 | 6 => passes[3].push(bit),
-                        _ => passes[5].push(bit),
-                    }
-                }
-                4 => {
-                    match pix_modulo {
-                        0 | 4 => passes[2].push(bit),
-                        2 | 6 => passes[3].push(bit),
-                        _ => passes[5].push(bit),
-                    }
-                }
-                2 | 6 => {
-                    match pix_modulo % 2 {
-                        0 => passes[4].push(bit),
-                        _ => passes[5].push(bit),
-                    }
-                }
+                0 => match pix_modulo {
+                    0 => passes[0].push(bit),
+                    4 => passes[1].push(bit),
+                    2 | 6 => passes[3].push(bit),
+                    _ => passes[5].push(bit),
+                },
+                4 => match pix_modulo {
+                    0 | 4 => passes[2].push(bit),
+                    2 | 6 => passes[3].push(bit),
+                    _ => passes[5].push(bit),
+                },
+                2 | 6 => match pix_modulo % 2 {
+                    0 => passes[4].push(bit),
+                    _ => passes[5].push(bit),
+                },
                 _ => {
                     passes[6].push(bit);
                 }
@@ -99,8 +93,8 @@ pub fn deinterlace_image(png: &mut PngData) {
     let mut current_y: usize = pass_constants.y_shift as usize;
     for line in png.scan_lines() {
         let bit_vec = BitVec::from_bytes(&line.data);
-        let bits_in_line = ((png.ihdr_data.width - pass_constants.x_shift as u32) as f32 /
-                                pass_constants.x_step as f32)
+        let bits_in_line = ((png.ihdr_data.width - u32::from(pass_constants.x_shift)) as f32 /
+            f32::from(pass_constants.x_step))
             .ceil() as usize * bits_per_pixel as usize;
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
@@ -150,62 +144,48 @@ struct InterlacedConstants {
 
 fn interlaced_constants(pass: u8) -> InterlacedConstants {
     match pass {
-        1 => {
-            InterlacedConstants {
-                x_shift: 0,
-                y_shift: 0,
-                x_step: 8,
-                y_step: 8,
-            }
-        }
-        2 => {
-            InterlacedConstants {
-                x_shift: 4,
-                y_shift: 0,
-                x_step: 8,
-                y_step: 8,
-            }
-        }
-        3 => {
-            InterlacedConstants {
-                x_shift: 0,
-                y_shift: 4,
-                x_step: 4,
-                y_step: 8,
-            }
-        }
-        4 => {
-            InterlacedConstants {
-                x_shift: 2,
-                y_shift: 0,
-                x_step: 4,
-                y_step: 4,
-            }
-        }
-        5 => {
-            InterlacedConstants {
-                x_shift: 0,
-                y_shift: 2,
-                x_step: 2,
-                y_step: 4,
-            }
-        }
-        6 => {
-            InterlacedConstants {
-                x_shift: 1,
-                y_shift: 0,
-                x_step: 2,
-                y_step: 2,
-            }
-        }
-        7 => {
-            InterlacedConstants {
-                x_shift: 0,
-                y_shift: 1,
-                x_step: 1,
-                y_step: 2,
-            }
-        }
+        1 => InterlacedConstants {
+            x_shift: 0,
+            y_shift: 0,
+            x_step: 8,
+            y_step: 8,
+        },
+        2 => InterlacedConstants {
+            x_shift: 4,
+            y_shift: 0,
+            x_step: 8,
+            y_step: 8,
+        },
+        3 => InterlacedConstants {
+            x_shift: 0,
+            y_shift: 4,
+            x_step: 4,
+            y_step: 8,
+        },
+        4 => InterlacedConstants {
+            x_shift: 2,
+            y_shift: 0,
+            x_step: 4,
+            y_step: 4,
+        },
+        5 => InterlacedConstants {
+            x_shift: 0,
+            y_shift: 2,
+            x_step: 2,
+            y_step: 4,
+        },
+        6 => InterlacedConstants {
+            x_shift: 1,
+            y_shift: 0,
+            x_step: 2,
+            y_step: 2,
+        },
+        7 => InterlacedConstants {
+            x_shift: 0,
+            y_shift: 1,
+            x_step: 1,
+            y_step: 2,
+        },
         _ => unreachable!(),
     }
 }

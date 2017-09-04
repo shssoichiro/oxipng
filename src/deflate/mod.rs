@@ -1,6 +1,5 @@
 use error::PngError;
 use miniz_sys;
-use libc::c_int;
 use std::cmp::max;
 use zopfli;
 
@@ -30,8 +29,12 @@ pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, P
     // Compressed input should be smaller than decompressed, so allocate less than data.len()
     // However, it needs a minimum capacity in order to handle very small images
     let mut output = Vec::with_capacity(max(1024, data.len() / 20));
-    let mut stream =
-        miniz_stream::Stream::new_compress(zc as c_int, zw as c_int, zm as c_int, zs as c_int);
+    let mut stream = miniz_stream::Stream::new_compress(
+        i32::from(zc),
+        i32::from(zw),
+        i32::from(zm),
+        i32::from(zs),
+    );
     loop {
         match stream.compress_vec(input.as_mut(), output.as_mut()) {
             miniz_sys::MZ_OK => output.reserve(max(1024, data.len() / 20)),

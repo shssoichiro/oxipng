@@ -1,12 +1,12 @@
 use bit_vec::BitVec;
 use byteorder::{BigEndian, WriteBytesExt};
-use colors::{BitDepth, ColorType, AlphaOptim};
+use colors::{AlphaOptim, BitDepth, ColorType};
 use crc::crc32;
 use deflate;
 use error::PngError;
 use filters::*;
 use headers::*;
-use interlace::{interlace_image, deinterlace_image};
+use interlace::{deinterlace_image, interlace_image};
 use itertools::Itertools;
 use reduction::*;
 use std::collections::{HashMap, HashSet};
@@ -56,8 +56,8 @@ impl<'a> Iterator for ScanLines<'a> {
                     pass.1 = 0;
                 }
             }
-            let bits_per_pixel = self.png.ihdr_data.bit_depth.as_u8() as u32 *
-                self.png.channels_per_pixel() as u32;
+            let bits_per_pixel = u32::from(self.png.ihdr_data.bit_depth.as_u8()) *
+                u32::from(self.png.channels_per_pixel());
             let y_steps;
             let pixels_factor;
             match self.pass {
@@ -95,21 +95,15 @@ impl<'a> Iterator for ScanLines<'a> {
                     1 | 3 | 5 => {
                         pixels_per_line += 1;
                     }
-                    2 => {
-                        if gap >= 5 {
-                            pixels_per_line += 1;
-                        }
-                    }
-                    4 => {
-                        if gap >= 3 {
-                            pixels_per_line += 1;
-                        }
-                    }
-                    6 => {
-                        if gap >= 2 {
-                            pixels_per_line += 1;
-                        }
-                    }
+                    2 => if gap >= 5 {
+                        pixels_per_line += 1;
+                    },
+                    4 => if gap >= 3 {
+                        pixels_per_line += 1;
+                    },
+                    6 => if gap >= 2 {
+                        pixels_per_line += 1;
+                    },
                     _ => (),
                 };
             }
@@ -324,8 +318,7 @@ impl PngData {
         // Ancillary headers
         for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
             !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")
-        })
-        {
+        }) {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
@@ -340,10 +333,9 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
-            *key == "bKGD" || *key == "hIST" || *key == "tRNS"
-        })
-        {
+        for (key, header) in self.aux_headers.iter().filter(
+            |&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS",
+        ) {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -368,8 +360,8 @@ impl PngData {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
-                       8f32)
+        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) /
+            8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         for line in self.scan_lines() {
@@ -390,8 +382,8 @@ impl PngData {
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        let bpp = (((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel()) as f32) /
-                       8f32)
+        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) /
+            8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
@@ -400,9 +392,8 @@ impl PngData {
                 0 | 1 | 2 | 3 | 4 => {
                     if last_pass == line.pass || filter <= 1 {
                         filtered.push(filter);
-                        filtered.extend_from_slice(
-                            &filter_line(filter, bpp, &line.data, &last_line),
-                        );
+                        filtered
+                            .extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
                     } else {
                         // Avoid vertical filtering on first line of each interlacing pass
                         filtered.push(0);
@@ -423,7 +414,7 @@ impl PngData {
                         .min_by_key(|x| {
                             x.1.iter().fold(0u64, |acc, &x| {
                                 let signed = x as i8;
-                                acc + (signed as i16).abs() as u64
+                                acc + i16::from(signed).abs() as u64
                             })
                         })
                         .unwrap();
@@ -452,8 +443,8 @@ impl PngData {
 
         // Reduce from 16 to 8 bits per channel per pixel
         let mut reduced = Vec::with_capacity(
-            (self.ihdr_data.width * self.ihdr_data.height * self.channels_per_pixel() as u32 +
-                 self.ihdr_data.height) as usize,
+            (self.ihdr_data.width * self.ihdr_data.height * u32::from(self.channels_per_pixel()) +
+                self.ihdr_data.height) as usize,
         );
         let mut high_byte = 0;
 
@@ -543,11 +534,9 @@ impl PngData {
         let mut seen = HashSet::with_capacity(indexed_palette.len());
         for line in self.scan_lines() {
             match self.ihdr_data.bit_depth {
-                BitDepth::Eight => {
-                    for byte in &line.data {
-                        seen.insert(*byte);
-                    }
-                }
+                BitDepth::Eight => for byte in &line.data {
+                    seen.insert(*byte);
+                },
                 BitDepth::Four => {
                     let bitvec = BitVec::from_bytes(&line.data);
                     let mut current = 0u8;
@@ -628,63 +617,57 @@ impl PngData {
         for line in self.scan_lines() {
             new_data.push(line.filter);
             match self.ihdr_data.bit_depth {
-                BitDepth::Eight => {
-                    for byte in &line.data {
-                        if let Some(new_idx) = index_map.get(byte) {
-                            new_data.push(*new_idx);
-                        } else {
-                            new_data.push(*byte);
-                        }
+                BitDepth::Eight => for byte in &line.data {
+                    if let Some(new_idx) = index_map.get(byte) {
+                        new_data.push(*new_idx);
+                    } else {
+                        new_data.push(*byte);
                     }
-                }
-                BitDepth::Four => {
-                    for byte in &line.data {
-                        let upper = *byte & 0b11110000;
-                        let lower = *byte & 0b00001111;
-                        let mut new_byte = 0u8;
-                        new_byte |= if let Some(new_idx) = index_map.get(&upper) {
-                            *new_idx << 4
-                        } else {
-                            upper
-                        };
-                        new_byte |= if let Some(new_idx) = index_map.get(&lower) {
-                            *new_idx
-                        } else {
-                            lower
-                        };
-                        new_data.push(new_byte);
-                    }
-                }
-                BitDepth::Two => {
-                    for byte in &line.data {
-                        let one = *byte & 0b11000000;
-                        let two = *byte & 0b00110000;
-                        let three = *byte & 0b00001100;
-                        let four = *byte & 0b00000011;
-                        let mut new_byte = 0u8;
-                        new_byte |= if let Some(new_idx) = index_map.get(&one) {
-                            *new_idx << 6
-                        } else {
-                            one << 6
-                        };
-                        new_byte |= if let Some(new_idx) = index_map.get(&two) {
-                            *new_idx << 4
-                        } else {
-                            two << 4
-                        };
-                        new_byte |= if let Some(new_idx) = index_map.get(&three) {
-                            *new_idx << 2
-                        } else {
-                            three << 2
-                        };
-                        new_byte |= if let Some(new_idx) = index_map.get(&four) {
-                            *new_idx
-                        } else {
-                            four
-                        };
-                        new_data.push(new_byte);
-                    }
-                }
+                },
+                BitDepth::Four => for byte in &line.data {
+                    let upper = *byte & 0b1111_0000;
+                    let lower = *byte & 0b0000_1111;
+                    let mut new_byte = 0u8;
+                    new_byte |= if let Some(new_idx) = index_map.get(&upper) {
+                        *new_idx << 4
+                    } else {
+                        upper
+                    };
+                    new_byte |= if let Some(new_idx) = index_map.get(&lower) {
+                        *new_idx
+                    } else {
+                        lower
+                    };
+                    new_data.push(new_byte);
+                },
+                BitDepth::Two => for byte in &line.data {
+                    let one = *byte & 0b1100_0000;
+                    let two = *byte & 0b0011_0000;
+                    let three = *byte & 0b0000_1100;
+                    let four = *byte & 0b0000_0011;
+                    let mut new_byte = 0u8;
+                    new_byte |= if let Some(new_idx) = index_map.get(&one) {
+                        *new_idx << 6
+                    } else {
+                        one << 6
+                    };
+                    new_byte |= if let Some(new_idx) = index_map.get(&two) {
+                        *new_idx << 4
+                    } else {
+                        two << 4
+                    };
+                    new_byte |= if let Some(new_idx) = index_map.get(&three) {
+                        *new_idx << 2
+                    } else {
+                        three << 2
+                    };
+                    new_byte |= if let Some(new_idx) = index_map.get(&four) {
+                        *new_idx
+                    } else {
+                        four
+                    };
+                    new_data.push(new_byte);
+                },
                 _ => unreachable!(),
             }
         }
@@ -774,8 +757,7 @@ impl PngData {
 
     pub fn reduce_alpha_channel(&mut self, optim: AlphaOptim) -> bool {
         let (bpc, bpp) = match self.ihdr_data.color_type {
-            ColorType::RGBA |
-            ColorType::GrayscaleAlpha => {
+            ColorType::RGBA | ColorType::GrayscaleAlpha => {
                 let cpp = self.channels_per_pixel();
                 let bpc = self.ihdr_data.bit_depth.as_u8() / 8;
                 (bpc as usize, (bpc * cpp) as usize)

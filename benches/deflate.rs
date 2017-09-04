@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate test;
 extern crate oxipng;
+extern crate test;
 
 use oxipng::png;
 use oxipng::deflate;

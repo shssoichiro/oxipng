@@ -1,5 +1,5 @@
-#![cfg_attr(feature="dev", feature(plugin))]
-#![cfg_attr(feature="dev", plugin(clippy))]
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
 
 extern crate bit_vec;
 extern crate byteorder;
@@ -14,13 +14,13 @@ extern crate zopfli;
 
 use deflate::Deflaters;
 pub use error::PngError;
-use image::{GenericImage, Pixel, ImageFormat};
+use image::{GenericImage, ImageFormat, Pixel};
 use headers::Headers;
 use png::PngData;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
-use std::fs::{File, copy};
-use std::io::{BufWriter, Write, stdout};
+use std::fs::{copy, File};
+use std::io::{stdout, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
 pub mod colors;
@@ -360,38 +360,28 @@ pub fn optimize(filepath: &Path, opts: &Options) -> Result<(), PngError> {
                                             let readonly = metadata.permissions().readonly();
                                             out_meta.permissions().set_readonly(readonly);
                                         }
-                                        Err(_) => {
-                                            if opts.verbosity.is_some() {
-                                                eprintln!(
-                                                    "Failed to set permissions on output file"
-                                                );
-                                            }
-                                        }
+                                        Err(_) => if opts.verbosity.is_some() {
+                                            eprintln!("Failed to set permissions on output file");
+                                        },
                                     }
                                 }
                             }
-                            Err(_) => {
-                                if opts.verbosity.is_some() {
-                                    eprintln!("Failed to read permissions on input file");
-                                }
-                            }
+                            Err(_) => if opts.verbosity.is_some() {
+                                eprintln!("Failed to read permissions on input file");
+                            },
                         }
                     }
-                    Err(_) => {
-                        if opts.verbosity.is_some() {
-                            eprintln!("Failed to read permissions on input file");
-                        }
-                    }
+                    Err(_) => if opts.verbosity.is_some() {
+                        eprintln!("Failed to read permissions on input file");
+                    },
                 };
             }
 
             let mut buffer = BufWriter::new(out_file);
             match buffer.write_all(&optimized_output) {
-                Ok(_) => {
-                    if opts.verbosity.is_some() {
-                        eprintln!("Output: {}", opts.out_file.display());
-                    }
-                }
+                Ok(_) => if opts.verbosity.is_some() {
+                    eprintln!("Output: {}", opts.out_file.display());
+                },
                 Err(_) => {
                     return Err(PngError::new(&format!(
                         "Unable to write to file {}",
@@ -543,42 +533,41 @@ fn optimize_png(
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
-        let best: Option<TrialWithData> =
-            results
-                .into_par_iter()
-                .with_max_len(1)
-                .filter_map(|trial| {
-                    let filtered = &filters[&trial.filter];
-                    let new_idat = if opts.deflate == Deflaters::Zlib {
-                        deflate::deflate(
-                            filtered,
-                            trial.compression,
-                            trial.memory,
-                            trial.strategy,
-                            opts.window,
-                        )
-                    } else {
-                        deflate::zopfli_deflate(filtered)
-                    }.unwrap();
+        let best: Option<TrialWithData> = results
+            .into_par_iter()
+            .with_max_len(1)
+            .filter_map(|trial| {
+                let filtered = &filters[&trial.filter];
+                let new_idat = if opts.deflate == Deflaters::Zlib {
+                    deflate::deflate(
+                        filtered,
+                        trial.compression,
+                        trial.memory,
+                        trial.strategy,
+                        opts.window,
+                    )
+                } else {
+                    deflate::zopfli_deflate(filtered)
+                }.unwrap();
 
-                    if opts.verbosity == Some(1) {
-                        eprintln!(
-                            "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
-                            trial.compression,
-                            trial.memory,
-                            trial.strategy,
-                            trial.filter,
-                            new_idat.len()
-                        );
-                    }
+                if opts.verbosity == Some(1) {
+                    eprintln!(
+                        "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                        trial.compression,
+                        trial.memory,
+                        trial.strategy,
+                        trial.filter,
+                        new_idat.len()
+                    );
+                }
 
-                    if new_idat.len() < original_len || added_interlacing || opts.force {
-                        Some((trial, new_idat))
-                    } else {
-                        None
-                    }
-                })
-                .reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
+                if new_idat.len() < original_len || added_interlacing || opts.force {
+                    Some((trial, new_idat))
+                } else {
+                    None
+                }
+            })
+            .reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
 
         if let Some(better) = best {
             png.idat_data = better.1;
@@ -732,11 +721,9 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
     match opts.strip {
         // Strip headers
         Headers::None => (),
-        Headers::Some(ref hdrs) => {
-            for hdr in hdrs {
-                png.aux_headers.remove(hdr);
-            }
-        }
+        Headers::Some(ref hdrs) => for hdr in hdrs {
+            png.aux_headers.remove(hdr);
+        },
         Headers::Safe => {
             const PRESERVED_HEADERS: [&'static str; 9] = [
                 "cHRM",

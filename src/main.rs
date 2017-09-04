@@ -1,14 +1,14 @@
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
-#![cfg_attr(feature="clippy", warn(enum_glob_use))]
-#![cfg_attr(feature="clippy", warn(if_not_else))]
-#![cfg_attr(feature="clippy", warn(string_add))]
-#![cfg_attr(feature="clippy", warn(string_add_assign))]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
+#![cfg_attr(feature = "clippy", warn(enum_glob_use))]
+#![cfg_attr(feature = "clippy", warn(if_not_else))]
+#![cfg_attr(feature = "clippy", warn(string_add))]
+#![cfg_attr(feature = "clippy", warn(string_add_assign))]
 #![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 
-extern crate oxipng;
 extern crate clap;
+extern crate oxipng;
 extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
@@ -414,8 +414,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
         if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
             if hdrs.len() > 1 {
                 return Err(
-                    "'safe' or 'all' presets for --strip should be used by themselves"
-                        .to_owned(),
+                    "'safe' or 'all' presets for --strip should be used by themselves".to_owned(),
                 );
             }
             if hdrs[0] == "safe" {
@@ -483,11 +482,9 @@ fn parse_numeric_range_opts(
                 items.insert(first);
                 items.insert(second);
             }
-            "-" => {
-                for i in first..second + 1 {
-                    items.insert(i);
-                }
-            }
+            "-" => for i in first..second + 1 {
+                items.insert(i);
+            },
             _ => unreachable!(),
         };
 

@@ -1,6 +1,6 @@
 extern crate oxipng;
 
-use oxipng::colors::{BitDepth, ColorType, AlphaOptim};
+use oxipng::colors::{AlphaOptim, BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
 use std::error::Error;

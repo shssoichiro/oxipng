@@ -7,6 +7,7 @@
     trials for optimizing the alpha channel, using the previously mentioned fast heuristic.
     This option will make optimization of images with transparency somewhat slower,
     but may improve compression.
+ - Code cleanup
 
 ### Version 0.16.3
  - Fix command-line help text ([#70](https://github.com/shssoichiro/oxipng/issues/70))

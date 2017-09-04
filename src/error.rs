@@ -23,6 +23,8 @@ impl fmt::Display for PngError {
 impl PngError {
     #[inline]
     pub fn new(description: &str) -> PngError {
-        PngError { description: description.to_owned() }
+        PngError {
+            description: description.to_owned(),
+        }
     }
 }
