@@ -12,7 +12,6 @@ interface or as a library in other Rust programs.
 ## Installing
 
 Oxipng can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
-Windows users will need to ensure they have the [Visual C++ 2015 Runtime](https://www.microsoft.com/en-us/download/details.aspx?id=48145) installed.
 
 Oxipng can also be installed from Cargo, via the following command:
 ```
@@ -74,6 +73,7 @@ passing it, along with an input filename, into the
 
 Oxipng began as a complete rewrite of the OptiPNG project,
 which was assumed to be dead as no commit had been made to it since March 2014.
+(OptiPNG has since released a new version, after Oxipng was first released.)
 The name has been changed to avoid confusion and potential legal issues.
 
 The core goal of rewriting OptiPNG was to implement multithreading,

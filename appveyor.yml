@@ -30,6 +30,7 @@ test_script:
 
 before_deploy:
   # Generate artifacts for release
+  - SET RUSTFLAGS=-C target-feature=+crt-static
   - cargo build --release
   - mkdir staging
   - copy target\release\oxipng.exe staging
@@ -54,8 +55,8 @@ deploy:
     # channel to use to produce the release artifacts
     # NOTE make sure you only release *once* per target
     CHANNEL: stable
-    appveyor_repo_tag: true
+#    appveyor_repo_tag: true
 
-branches:
-  only:
-    - master
+#branches:
+#  only:
+#    - master
