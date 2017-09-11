@@ -7,6 +7,7 @@
     trials for optimizing the alpha channel, using the previously mentioned fast heuristic.
     This option will make optimization of images with transparency somewhat slower,
     but may improve compression.
+ - Fixed a bug in reducing palettes for images with bit depth of two([#80](https://github.com/shssoichiro/oxipng/issues/80))
  - Code cleanup
 
 ### Version 0.16.3

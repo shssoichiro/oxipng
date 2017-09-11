@@ -543,7 +543,7 @@ impl PngData {
                     for (i, bit) in bitvec.iter().enumerate() {
                         let mod_i = i % 4;
                         if bit {
-                            current += 2u8.pow(3u32 - mod_i as u32);
+                            current += 1u8 << (3 - mod_i);
                         }
                         if mod_i == 3 {
                             seen.insert(current);
@@ -557,7 +557,7 @@ impl PngData {
                     for (i, bit) in bitvec.iter().enumerate() {
                         let mod_i = i % 2;
                         if bit {
-                            current += 2u8.pow(1u32 - mod_i as u32);
+                            current += 1u8 << (1 - mod_i);
                         }
                         if mod_i == 1 {
                             seen.insert(current);
@@ -649,17 +649,17 @@ impl PngData {
                     new_byte |= if let Some(new_idx) = index_map.get(&one) {
                         *new_idx << 6
                     } else {
-                        one << 6
+                        one
                     };
                     new_byte |= if let Some(new_idx) = index_map.get(&two) {
                         *new_idx << 4
                     } else {
-                        two << 4
+                        two
                     };
                     new_byte |= if let Some(new_idx) = index_map.get(&three) {
                         *new_idx << 2
                     } else {
-                        three << 2
+                        three
                     };
                     new_byte |= if let Some(new_idx) = index_map.get(&four) {
                         *new_idx
