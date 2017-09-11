@@ -95,15 +95,15 @@ impl<'a> Iterator for ScanLines<'a> {
                     1 | 3 | 5 => {
                         pixels_per_line += 1;
                     }
-                    2 => if gap >= 5 {
+                    2 if gap >= 5 => {
                         pixels_per_line += 1;
-                    },
-                    4 => if gap >= 3 {
+                    }
+                    4 if gap >= 3 => {
                         pixels_per_line += 1;
-                    },
-                    6 => if gap >= 2 {
+                    }
+                    6 if gap >= 2 => {
                         pixels_per_line += 1;
-                    },
+                    }
                     _ => (),
                 };
             }
@@ -112,7 +112,7 @@ impl<'a> Iterator for ScanLines<'a> {
             } else {
                 None
             };
-            let bytes_per_line = ((pixels_per_line * bits_per_pixel) as f32 / 8f32).ceil() as usize;
+            let bytes_per_line = ((pixels_per_line * bits_per_pixel + 7) / 8) as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
             if let Some(pass) = self.pass.as_mut() {
@@ -138,7 +138,7 @@ impl<'a> Iterator for ScanLines<'a> {
             let bits_per_line = self.png.ihdr_data.width as usize *
                 self.png.ihdr_data.bit_depth.as_u8() as usize *
                 self.png.channels_per_pixel() as usize;
-            let bytes_per_line = (bits_per_line as f32 / 8f32).ceil() as usize;
+            let bytes_per_line = (bits_per_line + 7) / 8 as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
@@ -588,13 +588,13 @@ impl PngData {
 
     fn do_palette_reduction(
         &mut self,
-        indices: &[u8],
+        indices_to_remove: &[u8],
         index_map: &mut HashMap<u8, u8>,
         indexed_palette: &mut Vec<&[u8]>,
     ) {
         let mut new_data = Vec::with_capacity(self.raw_data.len());
         let original_len = indexed_palette.len();
-        for idx in indices.iter().sorted_by(|a, b| b.cmp(a)) {
+        for idx in indices_to_remove.iter().sorted_by(|a, b| b.cmp(a)) {
             for i in (*idx as usize + 1)..original_len {
                 let existing = index_map.entry(i as u8).or_insert(i as u8);
                 if *existing >= *idx {
@@ -628,7 +628,7 @@ impl PngData {
                     let upper = *byte & 0b1111_0000;
                     let lower = *byte & 0b0000_1111;
                     let mut new_byte = 0u8;
-                    new_byte |= if let Some(new_idx) = index_map.get(&upper) {
+                    new_byte |= if let Some(new_idx) = index_map.get(&(upper >> 4)) {
                         *new_idx << 4
                     } else {
                         upper
@@ -646,17 +646,17 @@ impl PngData {
                     let three = *byte & 0b0000_1100;
                     let four = *byte & 0b0000_0011;
                     let mut new_byte = 0u8;
-                    new_byte |= if let Some(new_idx) = index_map.get(&one) {
+                    new_byte |= if let Some(new_idx) = index_map.get(&(one >> 6)) {
                         *new_idx << 6
                     } else {
                         one
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&two) {
+                    new_byte |= if let Some(new_idx) = index_map.get(&(two >> 4)) {
                         *new_idx << 4
                     } else {
                         two
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&three) {
+                    new_byte |= if let Some(new_idx) = index_map.get(&(three >> 2)) {
                         *new_idx << 2
                     } else {
                         three

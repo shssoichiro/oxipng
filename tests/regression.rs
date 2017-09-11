@@ -291,3 +291,20 @@ fn issue_80() {
         BitDepth::One,
     );
 }
+
+#[test]
+fn issue_82() {
+    let input = PathBuf::from("tests/files/issue-82.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::Indexed,
+        BitDepth::Four,
+        ColorType::Indexed,
+        BitDepth::Four,
+    );
+}
