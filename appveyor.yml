@@ -30,6 +30,7 @@ test_script:
 
 before_deploy:
   # Generate artifacts for release
+  - SET RUSTFLAGS=-C target-feature=+crt-static
   - cargo build --release
   - mkdir staging
   - copy target\release\oxipng.exe staging
