@@ -1,4 +1,4 @@
-### Version 0.17.0 (unreleased)
+### Version 0.17.0
  - [SEMVER_MAJOR] Bump minimum required rustc version to 1.19.0
  - [SEMVER_MINOR] Oxipng will now, by default, attempt to change all transparent pixels to `rgba(0, 0, 0, 0)` to improve compression.
     It does fast trials with filters 0 and 5 to see if this is an improvement over
@@ -10,7 +10,7 @@
  - Fixed a bug in reducing palettes for images with bit depth of two ([#80](https://github.com/shssoichiro/oxipng/issues/80))
  - Fixed another bug in reducing palettes for images with bit depth less than eight ([#82](https://github.com/shssoichiro/oxipng/issues/82))
  - Code cleanup
- - Update dependencies
+ - Bump `image` to 0.15
 
 ### Version 0.16.3
  - Fix command-line help text ([#70](https://github.com/shssoichiro/oxipng/issues/70))
