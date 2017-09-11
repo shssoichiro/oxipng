@@ -9,6 +9,7 @@
     but may improve compression.
  - Fixed a bug in reducing palettes for images with bit depth of two([#80](https://github.com/shssoichiro/oxipng/issues/80))
  - Code cleanup
+ - Update dependencies
 
 ### Version 0.16.3
  - Fix command-line help text ([#70](https://github.com/shssoichiro/oxipng/issues/70))
