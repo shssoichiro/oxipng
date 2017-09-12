@@ -258,6 +258,20 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
                 eprintln!("{} is a directory, skipping", input.display());
             }
             continue;
+        } else { // input is a file
+            let ext = input.extension();
+            match ext {
+                Some(ext) => {
+                    if ext != "png" { // not .png
+                        eprintln!("{} is not .png, skipping", input.display());
+                        continue;
+                    }
+                }
+                _ => { // no file extension
+                    eprintln!("{} is not .png, no file extension, skipping", input.display());
+                    continue;
+                }
+            }
         }
         if let Some(ref out_dir) = current_opts.out_dir {
             current_opts.out_file = out_dir.join(input.file_name().unwrap());
