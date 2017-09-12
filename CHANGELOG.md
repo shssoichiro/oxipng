@@ -1,3 +1,6 @@
+### Version 0.17.1
+ - Remove VC++ download requirement for Windows users
+
 ### Version 0.17.0
  - [SEMVER_MAJOR] Bump minimum required rustc version to 1.19.0
  - [SEMVER_MINOR] Oxipng will now, by default, attempt to change all transparent pixels to `rgba(0, 0, 0, 0)` to improve compression.
