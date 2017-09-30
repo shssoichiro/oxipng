@@ -239,6 +239,8 @@ impl PngData {
             };
             if header.0 == "IDAT" {
                 idat_headers.extend(header.1);
+            } else if header.0 == "acTL" {
+                return Err(PngError::new("APNG files are not (yet) supported"));
             } else {
                 aux_headers.insert(header.0, header.1);
             }
