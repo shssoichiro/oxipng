@@ -1,3 +1,8 @@
+### Version 0.17.2
+ - Bump `image` to 0.16
+ - Quickly pass over files that do not have a PNG header ([#85](https://github.com/shssoichiro/oxipng/issues/85) @emielbeinema)
+ - Return an error instead of crashing on APNG files ([#83](https://github.com/shssoichiro/oxipng/issues/83) @emielbeinema)
+
 ### Version 0.17.1
  - Remove VC++ download requirement for Windows users
 
