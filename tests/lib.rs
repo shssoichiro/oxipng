@@ -32,6 +32,19 @@ fn optimize_from_memory_corrupted() {
 }
 
 #[test]
+fn optimize_from_memory_apng() {
+    let mut in_file = File::open("tests/files/apng_file.png").unwrap();
+    let mut in_file_buf: Vec<u8> = Vec::new();
+    in_file.read_to_end(&mut in_file_buf).unwrap();
+
+    let mut opts: oxipng::Options = Default::default();
+    opts.verbosity = Some(1);
+
+    let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
+    assert!(result.is_err());
+}
+
+#[test]
 fn optimize() {
     let mut opts: oxipng::Options = Default::default();
     opts.verbosity = Some(1);
@@ -46,5 +59,14 @@ fn optimize_corrupted() {
     opts.verbosity = Some(1);
 
     let result = oxipng::optimize(Path::new("tests/files/corrupted_header.png"), &opts);
+    assert!(result.is_err());
+}
+
+#[test]
+fn optimize_apng() {
+    let mut opts: oxipng::Options = Default::default();
+    opts.verbosity = Some(1);
+
+    let result = oxipng::optimize(Path::new("tests/files/apng_file.png"), &opts);
     assert!(result.is_err());
 }
