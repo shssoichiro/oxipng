@@ -1,7 +1,8 @@
 ### Version 0.18.0 (unreleased)
  - Bump `itertools` to 0.7
  - Bump `image` to 0.17
- - Bump minimum rustc version to 1.20.0
+ - [SEMVER_MAJOR] Bump minimum rustc version to 1.20.0
+ - Fix parsing of glob paths on Windows ([#90](https://github.com/shssoichiro/oxipng/issues/90))
 
 ### Version 0.17.2
  - Bump `image` to 0.16
