@@ -423,7 +423,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
                 opts.strip = Headers::All;
             }
         } else {
-            const FORBIDDEN_CHUNKS: [&'static str; 5] = ["IHDR", "IDAT", "tRNS", "PLTE", "IEND"];
+            const FORBIDDEN_CHUNKS: [&str; 5] = ["IHDR", "IDAT", "tRNS", "PLTE", "IEND"];
             for i in &hdrs {
                 if FORBIDDEN_CHUNKS.contains(&i.as_ref()) {
                     return Err(format!("{} chunk is not allowed to be stripped", i));

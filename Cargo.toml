@@ -23,7 +23,7 @@ path = "src/main.rs"
 bit-vec = "^0.4.2"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
-itertools = "^0.6.0"
+itertools = "^0.7.0"
 libc = "^0.2.4"
 miniz-sys = "^0.1.7"
 num_cpus = "^1.0.0"
@@ -41,7 +41,7 @@ version = ">=0.0.85"
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
-version = "^0.16.0"
+version = "^0.17.0"
 
 [dependencies.regex]
 optional = true

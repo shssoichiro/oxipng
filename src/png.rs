@@ -228,7 +228,7 @@ impl PngData {
         let mut aux_headers: HashMap<String, Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
         loop {
-            let header = parse_next_header(byte_data.as_ref(), &mut byte_offset, fix_errors);
+            let header = parse_next_header(byte_data, &mut byte_offset, fix_errors);
             let header = match header {
                 Ok(x) => x,
                 Err(x) => return Err(x),

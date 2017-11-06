@@ -725,7 +725,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
             png.aux_headers.remove(hdr);
         },
         Headers::Safe => {
-            const PRESERVED_HEADERS: [&'static str; 9] = [
+            const PRESERVED_HEADERS: [&str; 9] = [
                 "cHRM",
                 "gAMA",
                 "iCCP",

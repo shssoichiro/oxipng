@@ -1,3 +1,8 @@
+### Version 0.18.0 (unreleased)
+ - Bump `itertools` to 0.7
+ - Bump `image` to 0.17
+ - Bump minimum rustc version to 1.20.0
+
 ### Version 0.17.2
  - Bump `image` to 0.16
  - Quickly pass over files that do not have a PNG header ([#85](https://github.com/shssoichiro/oxipng/issues/85) @emielbeinema)
