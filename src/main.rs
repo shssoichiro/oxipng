@@ -8,10 +8,12 @@
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 
 extern crate clap;
+extern crate glob;
 extern crate oxipng;
 extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
+use glob::glob;
 use oxipng::colors::AlphaOptim;
 use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
@@ -235,7 +237,8 @@ fn main() {
         matches
             .values_of("files")
             .unwrap()
-            .map(PathBuf::from)
+            .map(|pattern| glob(pattern).expect("Failed to parse input file path"))
+            .flat_map(|paths| paths.into_iter().map(|path| path.expect("Failed to parse input file path")))
             .collect(),
         &opts,
     );
