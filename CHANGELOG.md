@@ -1,4 +1,4 @@
-### Version 0.18.0 (unreleased)
+### Version 0.18.0
  - Bump `itertools` to 0.7
  - Bump `image` to 0.17
  - [SEMVER_MAJOR] Bump minimum rustc version to 1.20.0
