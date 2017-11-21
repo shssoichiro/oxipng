@@ -1,3 +1,6 @@
+### Version 0.18.1 (unreleased)
+ - Bump `rayon` to 0.9
+
 ### Version 0.18.0
  - Bump `itertools` to 0.7
  - Bump `image` to 0.17
