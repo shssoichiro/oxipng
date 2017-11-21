@@ -1,5 +1,6 @@
 ### Version 0.18.1 (unreleased)
  - Bump `rayon` to 0.9
+ - Fix failure to optimize on certain grayscale images ([#89](https://github.com/shssoichiro/oxipng/issues/89))
 
 ### Version 0.18.0
  - Bump `itertools` to 0.7

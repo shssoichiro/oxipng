@@ -10,7 +10,11 @@ pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
     for line in png.scan_lines() {
         let bit_vec = BitVec::from_bytes(&line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
-            let bit_index = bit_depth - (i % bit_depth);
+            let bit_index = if png.ihdr_data.color_type == ColorType::Indexed {
+                bit_depth - (i % bit_depth)
+            } else {
+                i % bit_depth
+            };
             if bit && bit_index > allowed_bits {
                 allowed_bits = bit_index.next_power_of_two();
                 if allowed_bits == bit_depth {
