@@ -44,7 +44,7 @@ version = ">=0.0.85"
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
-version = "^0.17.0"
+version = "^0.18.0"
 
 [dependencies.regex]
 optional = true

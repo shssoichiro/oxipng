@@ -1,3 +1,6 @@
+### Version 0.18.2 (unreleased)
+ - Bump `image` to 0.18
+
 ### Version 0.18.1
  - Bump `rayon` to 0.9
  - Fix failure to optimize on certain grayscale images ([#89](https://github.com/shssoichiro/oxipng/issues/89))
