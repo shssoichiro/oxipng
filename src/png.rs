@@ -377,7 +377,14 @@ impl PngData {
             8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
+        let mut last_pass = 1;
         for line in self.scan_lines() {
+            if let Some(pass) = line.pass {
+                if pass != last_pass {
+                    last_line = Vec::new();
+                    last_pass = pass;
+                }
+            }
             let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_line);

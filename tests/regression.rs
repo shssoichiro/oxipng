@@ -325,3 +325,41 @@ fn issue_89() {
         BitDepth::Eight,
     );
 }
+
+#[test]
+fn issue_92_filter_0() {
+    let input = PathBuf::from("tests/files/issue-92.png");
+    let opts = get_opts(&input);
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn issue_92_filter_5() {
+    let input = PathBuf::from("tests/files/issue-92.png");
+    let mut opts = get_opts(&input);
+    let mut filter = HashSet::new();
+    filter.insert(5);
+    opts.filter = filter;
+    opts.out_file = input.with_extension("-f5-out.png").to_owned();
+    let output = opts.out_file.clone();
+
+    test_it_converts(
+        &input,
+        &output,
+        &opts,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+    );
+}
