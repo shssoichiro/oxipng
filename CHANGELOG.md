@@ -1,4 +1,4 @@
-### Version 0.18.2 (unreleased)
+### Version 0.18.2
  - Bump `image` to 0.18
  - Fix unfiltering of scan lines in interlaced images ([#92](https://github.com/shssoichiro/oxipng/issues/92))
 
