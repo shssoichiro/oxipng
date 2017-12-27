@@ -17,11 +17,12 @@ use glob::glob;
 use oxipng::colors::AlphaOptim;
 use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
-use oxipng::Options;
+use oxipng::{Options, PngError};
 use regex::Regex;
 use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
+use std::process::exit;
 
 fn main() {
     let matches = App::new("oxipng")
@@ -229,51 +230,55 @@ fn main() {
         Ok(x) => x,
         Err(x) => {
             eprintln!("{}", x);
-            return ();
+            exit(1)
         }
     };
 
-    handle_optimization(
+    if let Err(e) = handle_optimization(
         matches
             .values_of("files")
             .unwrap()
             .map(|pattern| glob(pattern).expect("Failed to parse input file path"))
-            .flat_map(|paths| paths.into_iter().map(|path| path.expect("Failed to parse input file path")))
+            .flat_map(|paths| {
+                paths
+                    .into_iter()
+                    .map(|path| path.expect("Failed to parse input file path"))
+            })
             .collect(),
         &opts,
-    );
+    ) {
+        eprintln!("{}", e);
+        exit(1);
+    }
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) {
-    for input in inputs {
+fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) -> Result<(), PngError> {
+    inputs.into_iter().fold(Ok(()), |res, input| {
         let mut current_opts = opts.clone();
         if input.is_dir() {
             if current_opts.recursive {
-                handle_optimization(
+                let cur_result = handle_optimization(
                     input
                         .read_dir()
                         .unwrap()
                         .map(|x| x.unwrap().path())
                         .collect(),
                     &current_opts,
-                )
+                );
+                return res.and(cur_result);
             } else {
                 eprintln!("{} is a directory, skipping", input.display());
             }
-            continue;
+            return res;
         }
         if let Some(ref out_dir) = current_opts.out_dir {
             current_opts.out_file = out_dir.join(input.file_name().unwrap());
         } else if current_opts.out_file.components().count() == 0 {
             current_opts.out_file = input.clone();
         }
-        match oxipng::optimize(&input, &current_opts) {
-            Ok(_) => (),
-            Err(x) => {
-                eprintln!("{}", x);
-            }
-        };
-    }
+        let cur_result = oxipng::optimize(&input, &current_opts);
+        res.and(cur_result)
+    })
 }
 
 #[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
