@@ -465,10 +465,7 @@ fn parse_numeric_range_opts(
     let multiple_items = Regex::new(
         format!(
             r"^([{}-{}])(,|-)([{}-{}])$",
-            min_value,
-            max_value,
-            min_value,
-            max_value
+            min_value, max_value, min_value, max_value
         ).as_ref(),
     ).unwrap();
     let mut items = HashSet::new();

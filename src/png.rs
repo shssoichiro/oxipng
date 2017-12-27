@@ -56,8 +56,8 @@ impl<'a> Iterator for ScanLines<'a> {
                     pass.1 = 0;
                 }
             }
-            let bits_per_pixel = u32::from(self.png.ihdr_data.bit_depth.as_u8()) *
-                u32::from(self.png.channels_per_pixel());
+            let bits_per_pixel = u32::from(self.png.ihdr_data.bit_depth.as_u8())
+                * u32::from(self.png.channels_per_pixel());
             let y_steps;
             let pixels_factor;
             match self.pass {
@@ -135,9 +135,9 @@ impl<'a> Iterator for ScanLines<'a> {
             })
         } else {
             // Standard, non-interlaced PNG scanlines
-            let bits_per_line = self.png.ihdr_data.width as usize *
-                self.png.ihdr_data.bit_depth.as_u8() as usize *
-                self.png.channels_per_pixel() as usize;
+            let bits_per_line = self.png.ihdr_data.width as usize
+                * self.png.ihdr_data.bit_depth.as_u8() as usize
+                * self.png.channels_per_pixel() as usize;
             let bytes_per_line = (bits_per_line + 7) / 8 as usize;
             self.start = self.end;
             self.end = self.start + bytes_per_line + 1;
@@ -196,7 +196,7 @@ impl PngData {
             Err(_) => return Err(PngError::new("Failed to open file for reading")),
         };
         // Check file for PNG header
-        let mut header =  [0; 8];
+        let mut header = [0; 8];
         if file.read_exact(&mut header).is_err() {
             return Err(PngError::new("Not a PNG file: too small"));
         }
@@ -329,9 +329,10 @@ impl PngData {
         let _ = ihdr_data.write_u8(self.ihdr_data.interlaced);
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in self.aux_headers.iter().filter(|&(key, _)| {
-            !(*key == "bKGD" || *key == "hIST" || *key == "tRNS")
-        }) {
+        for (key, header) in self.aux_headers
+            .iter()
+            .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS"))
+        {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // Palette
@@ -346,9 +347,10 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers.iter().filter(
-            |&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS",
-        ) {
+        for (key, header) in self.aux_headers
+            .iter()
+            .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS")
+        {
             write_png_block(key.as_bytes(), header, &mut output);
         }
         // IDAT data
@@ -373,8 +375,7 @@ impl PngData {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) /
-            8f32)
+        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = 1;
@@ -402,8 +403,7 @@ impl PngData {
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) /
-            8f32)
+        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
             .ceil() as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
@@ -412,8 +412,12 @@ impl PngData {
                 0 | 1 | 2 | 3 | 4 => {
                     if last_pass == line.pass || filter <= 1 {
                         filtered.push(filter);
-                        filtered
-                            .extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
+                        filtered.extend_from_slice(&filter_line(
+                            filter,
+                            bpp,
+                            &line.data,
+                            &last_line,
+                        ));
                     } else {
                         // Avoid vertical filtering on first line of each interlacing pass
                         filtered.push(0);
@@ -453,8 +457,8 @@ impl PngData {
     /// Returns true if the bit depth was reduced, false otherwise
     pub fn reduce_bit_depth(&mut self) -> bool {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
-            if self.ihdr_data.color_type == ColorType::Indexed ||
-                self.ihdr_data.color_type == ColorType::Grayscale
+            if self.ihdr_data.color_type == ColorType::Indexed
+                || self.ihdr_data.color_type == ColorType::Grayscale
             {
                 return reduce_bit_depth_8_or_less(self);
             }
@@ -463,8 +467,8 @@ impl PngData {
 
         // Reduce from 16 to 8 bits per channel per pixel
         let mut reduced = Vec::with_capacity(
-            (self.ihdr_data.width * self.ihdr_data.height * u32::from(self.channels_per_pixel()) +
-                self.ihdr_data.height) as usize,
+            (self.ihdr_data.width * self.ihdr_data.height * u32::from(self.channels_per_pixel())
+                + self.ihdr_data.height) as usize,
         );
         let mut high_byte = 0;
 
@@ -698,9 +702,7 @@ impl PngData {
             .cloned()
             .flatten()
             .enumerate()
-            .filter(|&(i, _)| {
-                !(self.transparency_palette.is_some() && i % 4 == 3)
-            })
+            .filter(|&(i, _)| !(self.transparency_palette.is_some() && i % 4 == 3))
             .map(|(_, x)| *x)
             .collect::<Vec<u8>>();
         self.palette = Some(new_palette);
@@ -723,15 +725,15 @@ impl PngData {
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha &&
-            reduce_grayscale_alpha_to_grayscale(self)
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha
+            && reduce_grayscale_alpha_to_grayscale(self)
         {
             changed = true;
             should_reduce_bit_depth = true;
         }
 
-        if self.ihdr_data.color_type == ColorType::RGB &&
-            (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self))
+        if self.ihdr_data.color_type == ColorType::RGB
+            && (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self))
         {
             changed = true;
             should_reduce_bit_depth = true;

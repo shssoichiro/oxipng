@@ -435,8 +435,7 @@ fn optimize_png(
     if opts.verbosity.is_some() {
         eprintln!(
             "    {}x{} pixels, PNG format",
-            png.ihdr_data.width,
-            png.ihdr_data.height
+            png.ihdr_data.width, png.ihdr_data.height
         );
         if let Some(ref palette) = png.palette {
             eprintln!(
@@ -463,8 +462,8 @@ fn optimize_png(
 
     if opts.use_heuristics {
         // Heuristically determine which set of options to use
-        if png.ihdr_data.bit_depth.as_u8() >= 8 &&
-            png.ihdr_data.color_type != colors::ColorType::Indexed
+        if png.ihdr_data.bit_depth.as_u8() >= 8
+            && png.ihdr_data.color_type != colors::ColorType::Indexed
         {
             if filter.is_empty() {
                 filter.push(5);
@@ -632,8 +631,8 @@ fn optimize_png(
                 .pixels()
                 .map(|x| x.2.channels().to_owned())
                 .filter(|p| !(p.len() == 4 && p[3] == 0))
-                .collect::<Vec<Vec<u8>>>() ==
-                new_png
+                .collect::<Vec<Vec<u8>>>()
+                == new_png
                     .pixels()
                     .map(|x| x.2.channels().to_owned())
                     .filter(|p| !(p.len() == 4 && p[3] == 0))
@@ -726,15 +725,7 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
         },
         Headers::Safe => {
             const PRESERVED_HEADERS: [&str; 9] = [
-                "cHRM",
-                "gAMA",
-                "iCCP",
-                "sBIT",
-                "sRGB",
-                "bKGD",
-                "hIST",
-                "pHYs",
-                "sPLT",
+                "cHRM", "gAMA", "iCCP", "sBIT", "sRGB", "bKGD", "hIST", "pHYs", "sPLT"
             ];
             let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
             for hdr in hdrs {
