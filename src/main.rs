@@ -14,9 +14,9 @@ extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
 use glob::glob;
-use oxipng::colors::AlphaOptim;
-use oxipng::deflate::Deflaters;
-use oxipng::headers::Headers;
+use oxipng::AlphaOptim;
+use oxipng::Deflaters;
+use oxipng::Headers;
 use oxipng::{Options, PngError};
 use regex::Regex;
 use std::collections::HashSet;

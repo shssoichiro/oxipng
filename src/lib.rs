@@ -12,10 +12,7 @@ extern crate num_cpus;
 extern crate rayon;
 extern crate zopfli;
 
-use deflate::Deflaters;
-pub use error::PngError;
 use image::{GenericImage, ImageFormat, Pixel};
-use headers::Headers;
 use png::PngData;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
@@ -23,12 +20,22 @@ use std::fs::{copy, File};
 use std::io::{stdout, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
+pub use colors::AlphaOptim;
+pub use deflate::Deflaters;
+pub use error::PngError;
+pub use headers::Headers;
+
+#[doc(hidden)]
 pub mod colors;
+#[doc(hidden)]
 pub mod deflate;
+#[doc(hidden)]
 pub mod error;
 mod filters;
+#[doc(hidden)]
 pub mod headers;
 mod interlace;
+#[doc(hidden)]
 pub mod png;
 mod reduction;
 

@@ -237,5 +237,7 @@ fn inflate_generic(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png"));
     let png = png::PngData::new(&input, false).unwrap();
 
-    b.iter(|| { deflate::inflate(png.idat_data.as_ref()).ok(); });
+    b.iter(|| {
+        deflate::inflate(png.idat_data.as_ref()).ok();
+    });
 }

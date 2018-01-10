@@ -55,7 +55,6 @@ fn test_it_converts(
     remove_file(output).ok();
 }
 
-
 #[test]
 fn rgba_16_should_be_rgba_16() {
     let input = PathBuf::from("tests/files/rgba_16_should_be_rgba_16.png");
@@ -806,9 +805,7 @@ fn palette_1_should_be_palette_1() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
-    let input = PathBuf::from(
-        "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png",
-    );
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
@@ -825,9 +822,7 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from(
-        "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png",
-    );
+    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 
@@ -844,9 +839,7 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
 
 #[test]
 fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from(
-        "tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png",
-    );
+    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png");
     let opts = get_opts(&input);
     let output = opts.out_file.clone();
 

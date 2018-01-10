@@ -106,11 +106,6 @@ impl Stream<Compress> {
             rc
         }
     }
-
-    #[inline]
-    pub fn reset(&mut self) -> c_int {
-        unsafe { miniz_sys::mz_deflateReset(&mut self.raw) }
-    }
 }
 
 impl Direction for Compress {

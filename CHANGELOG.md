@@ -1,3 +1,9 @@
+### Version 0.18.4
+ - Bump dependencies, reduces binary size by a considerable amount
+ - Hide all modules from documentation, and only export the specific structures that should be public.
+ Previously there were too many implementation details made public. The modules are still public for the purposes of our integration tests,
+ but we strongly advice against using undocumented modules. These may become private in the future.
+
 ### Version 0.18.3
  - Return exit code of 1 if an error occurred while processing a file using the CLI app ([#93](https://github.com/shssoichiro/oxipng/issues/93))
 
