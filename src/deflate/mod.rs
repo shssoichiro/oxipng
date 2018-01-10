@@ -23,7 +23,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
     Ok(output)
 }
 
-/// Compress a data stream using the zlib implementation of the DEFLATE algorithm
+/// Compress a data stream using the DEFLATE algorithm
 pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, PngError> {
     let mut input = data.to_owned();
     // Compressed input should be smaller than decompressed, so allocate less than data.len()
@@ -62,7 +62,7 @@ pub fn zopfli_deflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 /// DEFLATE algorithms supported by oxipng
 pub enum Deflaters {
-    /// Use the Zlib DEFLATE implementation
+    /// Use the Zlib/Miniz DEFLATE implementation
     Zlib,
     /// Use the better but slower Zopfli implementation
     Zopfli,
