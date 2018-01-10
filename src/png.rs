@@ -184,7 +184,7 @@ pub struct PngData {
 impl PngData {
     /// Create a new `PngData` struct by opening a file
     #[inline]
-    #[cfg(test)]
+    #[allow(dead_code)]
     pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, PngError> {
         let byte_data = PngData::read_file(filepath)?;
 
