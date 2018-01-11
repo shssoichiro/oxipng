@@ -1,9 +1,15 @@
-### Version 0.18.4
+### Version 0.19.0
+ - [SEMVER_MAJOR] Default to overwriting the input file if `out_file` is not set.
+ This does not affect the CLI, but with the library, it was easy to forget to set the `out_file`,
+ and there was no warning that no output file would be written.
  - Bump dependencies, reduces binary size by a considerable amount
  - Hide all modules from documentation, and only export the specific structures that should be public.
  Previously there were too many implementation details made public. The modules are still public for the purposes of our integration tests,
  but we strongly advice against using undocumented modules. These may become private in the future.
  - Internal refactoring and code cleanup
+ - Fix an error message that was displaying the wrong file path
+ - Fix an issue where the output file would not be written if the input was already optimized,
+ even if the output path was different from the input path
 
 ### Version 0.18.3
  - Return exit code of 1 if an error occurred while processing a file using the CLI app ([#93](https://github.com/shssoichiro/oxipng/issues/93))

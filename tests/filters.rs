@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> oxipng::Options {
     let mut options = oxipng::Options::default();
-    options.out_file = input.with_extension("out.png").to_owned();
+    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
@@ -60,7 +60,7 @@ fn filter_0_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -79,7 +79,7 @@ fn filter_1_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -98,7 +98,7 @@ fn filter_2_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -117,7 +117,7 @@ fn filter_3_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -136,7 +136,7 @@ fn filter_4_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -155,7 +155,7 @@ fn filter_5_for_rgba_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -174,7 +174,7 @@ fn filter_0_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -193,7 +193,7 @@ fn filter_1_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -212,7 +212,7 @@ fn filter_2_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -231,7 +231,7 @@ fn filter_3_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -250,7 +250,7 @@ fn filter_4_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -269,7 +269,7 @@ fn filter_5_for_rgba_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -288,7 +288,7 @@ fn filter_0_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -307,7 +307,7 @@ fn filter_1_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -326,7 +326,7 @@ fn filter_2_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -345,7 +345,7 @@ fn filter_3_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -364,7 +364,7 @@ fn filter_4_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -383,7 +383,7 @@ fn filter_5_for_rgb_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -402,7 +402,7 @@ fn filter_0_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -421,7 +421,7 @@ fn filter_1_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -440,7 +440,7 @@ fn filter_2_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -459,7 +459,7 @@ fn filter_3_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -478,7 +478,7 @@ fn filter_4_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -497,7 +497,7 @@ fn filter_5_for_rgb_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -516,7 +516,7 @@ fn filter_0_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -535,7 +535,7 @@ fn filter_1_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -554,7 +554,7 @@ fn filter_2_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -573,7 +573,7 @@ fn filter_3_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -592,7 +592,7 @@ fn filter_4_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -611,7 +611,7 @@ fn filter_5_for_grayscale_alpha_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -630,7 +630,7 @@ fn filter_0_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -649,7 +649,7 @@ fn filter_1_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -668,7 +668,7 @@ fn filter_2_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -687,7 +687,7 @@ fn filter_3_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -706,7 +706,7 @@ fn filter_4_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -725,7 +725,7 @@ fn filter_5_for_grayscale_alpha_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -744,7 +744,7 @@ fn filter_0_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -763,7 +763,7 @@ fn filter_1_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -782,7 +782,7 @@ fn filter_2_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -801,7 +801,7 @@ fn filter_3_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -820,7 +820,7 @@ fn filter_4_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -839,7 +839,7 @@ fn filter_5_for_grayscale_16() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -858,7 +858,7 @@ fn filter_0_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -877,7 +877,7 @@ fn filter_1_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -896,7 +896,7 @@ fn filter_2_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -915,7 +915,7 @@ fn filter_3_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -934,7 +934,7 @@ fn filter_4_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -953,7 +953,7 @@ fn filter_5_for_grayscale_8() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -972,7 +972,7 @@ fn filter_0_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -991,7 +991,7 @@ fn filter_1_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1010,7 +1010,7 @@ fn filter_2_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1029,7 +1029,7 @@ fn filter_3_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1048,7 +1048,7 @@ fn filter_4_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1067,7 +1067,7 @@ fn filter_5_for_palette_4() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1086,7 +1086,7 @@ fn filter_0_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1105,7 +1105,7 @@ fn filter_1_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1124,7 +1124,7 @@ fn filter_2_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1143,7 +1143,7 @@ fn filter_3_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1162,7 +1162,7 @@ fn filter_4_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1181,7 +1181,7 @@ fn filter_5_for_palette_2() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1200,7 +1200,7 @@ fn filter_0_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1219,7 +1219,7 @@ fn filter_1_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1238,7 +1238,7 @@ fn filter_2_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1257,7 +1257,7 @@ fn filter_3_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1276,7 +1276,7 @@ fn filter_4_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1295,7 +1295,7 @@ fn filter_5_for_palette_1() {
     let mut opts = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,

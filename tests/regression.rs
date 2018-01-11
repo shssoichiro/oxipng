@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> oxipng::Options {
     let mut options = oxipng::Options::default();
-    options.out_file = input.with_extension("out.png").to_owned();
+    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
@@ -58,7 +58,7 @@ fn test_it_converts(
 fn issue_29() {
     let input = PathBuf::from("tests/files/issue-29.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -76,7 +76,7 @@ fn issue_42() {
     let input = PathBuf::from("tests/files/issue_42.png");
     let mut opts = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -109,7 +109,7 @@ fn issue_42() {
 fn issue_52_01() {
     let input = PathBuf::from("tests/files/issue-52-01.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -126,7 +126,7 @@ fn issue_52_01() {
 fn issue_52_02() {
     let input = PathBuf::from("tests/files/issue-52-02.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -143,7 +143,7 @@ fn issue_52_02() {
 fn issue_52_03() {
     let input = PathBuf::from("tests/files/issue-52-03.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -160,7 +160,7 @@ fn issue_52_03() {
 fn issue_52_04() {
     let input = PathBuf::from("tests/files/issue-52-04.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -177,7 +177,7 @@ fn issue_52_04() {
 fn issue_52_05() {
     let input = PathBuf::from("tests/files/issue-52-05.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -194,7 +194,7 @@ fn issue_52_05() {
 fn issue_52_06() {
     let input = PathBuf::from("tests/files/issue-52-06.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -211,7 +211,7 @@ fn issue_52_06() {
 fn issue_56() {
     let input = PathBuf::from("tests/files/issue-56.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -228,7 +228,7 @@ fn issue_56() {
 fn issue_58() {
     let input = PathBuf::from("tests/files/issue-58.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -245,7 +245,7 @@ fn issue_58() {
 fn issue_59() {
     let input = PathBuf::from("tests/files/issue-59.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -262,7 +262,7 @@ fn issue_59() {
 fn issue_60() {
     let input = PathBuf::from("tests/files/issue-60.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -279,7 +279,7 @@ fn issue_60() {
 fn issue_80() {
     let input = PathBuf::from("tests/files/issue-80.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -296,7 +296,7 @@ fn issue_80() {
 fn issue_82() {
     let input = PathBuf::from("tests/files/issue-82.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -313,7 +313,7 @@ fn issue_82() {
 fn issue_89() {
     let input = PathBuf::from("tests/files/issue-89.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -330,7 +330,7 @@ fn issue_89() {
 fn issue_92_filter_0() {
     let input = PathBuf::from("tests/files/issue-92.png");
     let opts = get_opts(&input);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -350,8 +350,8 @@ fn issue_92_filter_5() {
     let mut filter = HashSet::new();
     filter.insert(5);
     opts.filter = filter;
-    opts.out_file = input.with_extension("-f5-out.png").to_owned();
-    let output = opts.out_file.clone();
+    opts.out_file = Some(input.with_extension("-f5-out.png").to_owned());
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,

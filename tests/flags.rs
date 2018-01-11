@@ -12,7 +12,7 @@ use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> oxipng::Options {
     let mut options = oxipng::Options::default();
-    options.out_file = input.with_extension("out.png").to_owned();
+    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
@@ -61,7 +61,7 @@ fn verbose_mode() {
     let input = PathBuf::from("tests/files/verbose_mode.png");
     let mut opts = get_opts(&input);
     opts.verbosity = Some(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -79,7 +79,7 @@ fn strip_headers_list() {
     let input = PathBuf::from("tests/files/strip_headers_list.png");
     let mut opts = get_opts(&input);
     opts.strip = Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -113,7 +113,7 @@ fn strip_headers_safe() {
     let input = PathBuf::from("tests/files/strip_headers_safe.png");
     let mut opts = get_opts(&input);
     opts.strip = Headers::Safe;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -147,7 +147,7 @@ fn strip_headers_all() {
     let input = PathBuf::from("tests/files/strip_headers_all.png");
     let mut opts = get_opts(&input);
     opts.strip = Headers::All;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -181,7 +181,7 @@ fn strip_headers_none() {
     let input = PathBuf::from("tests/files/strip_headers_none.png");
     let mut opts = get_opts(&input);
     opts.strip = Headers::None;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -215,7 +215,7 @@ fn interlacing_0_to_1() {
     let input = PathBuf::from("tests/files/interlacing_0_to_1.png");
     let mut opts = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -245,7 +245,7 @@ fn interlacing_1_to_0() {
     let input = PathBuf::from("tests/files/interlacing_1_to_0.png");
     let mut opts = get_opts(&input);
     opts.interlace = Some(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -275,7 +275,7 @@ fn interlacing_0_to_1_small_files() {
     let input = PathBuf::from("tests/files/interlacing_0_to_1_small_files.png");
     let mut opts = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -309,7 +309,7 @@ fn interlacing_1_to_0_small_files() {
     let input = PathBuf::from("tests/files/interlacing_1_to_0_small_files.png");
     let mut opts = get_opts(&input);
     opts.interlace = Some(0);
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -346,7 +346,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let mut filter = HashSet::new();
     filter.insert(4);
     opts.filter = filter;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -376,7 +376,7 @@ fn preserve_attrs() {
     let input = PathBuf::from("tests/files/preserve_attrs.png");
     let mut opts = get_opts(&input);
     opts.preserve_attrs = true;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -396,7 +396,7 @@ fn fix_errors() {
     let input = PathBuf::from("tests/files/fix_errors.png");
     let mut opts = get_opts(&input);
     opts.fix_errors = true;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -429,7 +429,7 @@ fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let mut opts = get_opts(&input);
     opts.deflate = Deflaters::Zopfli;
-    let output = opts.out_file.clone();
+    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,

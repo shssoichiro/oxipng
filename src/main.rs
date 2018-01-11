@@ -272,9 +272,7 @@ fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) -> Result<(), PngEr
             return res;
         }
         if let Some(ref out_dir) = current_opts.out_dir {
-            current_opts.out_file = out_dir.join(input.file_name().unwrap());
-        } else if current_opts.out_file.components().count() == 0 {
-            current_opts.out_file = input.clone();
+            current_opts.out_file = Some(out_dir.join(input.file_name().unwrap()));
         }
         let cur_result = oxipng::optimize(&input, &current_opts);
         res.and(cur_result)
@@ -342,7 +340,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
     }
 
     if let Some(x) = matches.value_of("output_file") {
-        opts.out_file = PathBuf::from(x);
+        opts.out_file = Some(PathBuf::from(x));
     }
 
     if matches.is_present("stdout") {
