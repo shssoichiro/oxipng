@@ -14,7 +14,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "0.18.3"
+version = "0.19.0"
 
 [[bin]]
 doc = false
