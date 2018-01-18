@@ -94,31 +94,3 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 0.18.3 (compiled on rustc 1.25.0-nightly (0f9c78475 2018-01-17)) against OptiPNG version 0.7.6 on Intel(R) Core(TM) i7-4980HQ CPU @ 2.80GHz with 8 logical cores
-
-
-
-Benchmark #1: ./target/release/oxipng ./tests/files/rgb_16_should_be_grayscale_8.png
-
-  Time (mean ± σ):     121.5 ms ±   7.9 ms
- 
-  Range (min … max):   113.4 ms … 145.0 ms
- 
-Benchmark #2: optipng ./tests/files/rgb_16_should_be_grayscale_8.png
-
-  Time (mean ± σ):     241.3 ms ±   5.0 ms
- 
-  Range (min … max):   234.4 ms … 249.4 ms
- 
-Benchmark #1: ./target/release/oxipng -o4 ./tests/files/rgb_16_should_be_grayscale_8.png
-
-  Time (mean ± σ):     289.7 ms ±  24.0 ms
- 
-  Range (min … max):   251.1 ms … 332.5 ms
- 
-Benchmark #2: optipng -o 4 ./tests/files/rgb_16_should_be_grayscale_8.png
-
-  Time (mean ± σ):     944.2 ms ± 127.5 ms
- 
-  Range (min … max):   861.5 ms … 1278.4 ms
- 
