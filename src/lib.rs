@@ -42,7 +42,8 @@ mod reduction;
 #[derive(Clone, Debug)]
 /// Options controlling the output of the `optimize` function
 pub struct Options {
-    /// Whether the input file should be backed up before writing the output
+    /// Whether the input file should be backed up before writing the output.
+    ///
     /// Default: `false`
     pub backup: bool,
     /// Path to write the output file to. If not set, the application will default to
@@ -51,82 +52,109 @@ pub struct Options {
     /// Used only in CLI interface
     #[doc(hidden)]
     pub out_dir: Option<PathBuf>,
-    /// Write to stdout instead of a file
+    /// Write to stdout instead of a file.
+    ///
     /// Default: `false`
     pub stdout: bool,
-    /// Attempt to fix errors when decoding the input file rather than returning an `Err`
+    /// Attempt to fix errors when decoding the input file rather than returning an `Err`.
+    ///
     /// Default: `false`
     pub fix_errors: bool,
-    /// Don't actually write any output, just calculate the best results
+    /// Don't actually write any output, just calculate the best results.
+    ///
     /// Default: `false`
     pub pretend: bool,
     /// Used only in CLI interface
     #[doc(hidden)]
     pub recursive: bool,
-    /// Overwrite existing output files
+    /// Overwrite existing output files.
+    ///
     /// Default: `true`
     pub clobber: bool,
-    /// Create new output files if they don't exist
+    /// Create new output files if they don't exist.
+    ///
     /// Default: `true`
     pub create: bool,
-    /// Write to output even if there was no improvement in compression
+    /// Write to output even if there was no improvement in compression.
+    ///
     /// Default: `false`
     pub force: bool,
-    /// Ensure the output file has the same permissions as the input file
+    /// Ensure the output file has the same permissions as the input file.
+    ///
     /// Default: `false`
     pub preserve_attrs: bool,
     /// How verbose the console logging should be (`None` for quiet, `Some(0)` for normal, `Some(1)` for verbose)
+    ///
     /// Default: `Some(0)`
     pub verbosity: Option<u8>,
     /// Which filters to try on the file (0-5)
+    ///
     /// Default: `0,5`
     pub filter: HashSet<u8>,
-    /// Whether to change the interlacing type of the file
-    /// `None` will not change the current interlacing type
-    /// `Some(x)` will change the file to interlacing mode `x`
+    /// Whether to change the interlacing type of the file.
+    ///
+    /// `None` will not change the current interlacing type.
+    ///
+    /// `Some(x)` will change the file to interlacing mode `x`.
+    ///
     /// Default: `None`
     pub interlace: Option<u8>,
     /// Which zlib compression levels to try on the file (1-9)
+    ///
     /// Default: `9`
     pub compression: HashSet<u8>,
     /// Which zlib memory levels to try on the file (1-9)
+    ///
     /// Default: `9`
     pub memory: HashSet<u8>,
     /// Which zlib compression strategies to try on the file (0-3)
+    ///
     /// Default: `0-3`
     pub strategies: HashSet<u8>,
-    /// Window size to use when compressing the file, as `2^window` bytes
-    /// Doesn't affect compression but may affect speed and memory usage
-    /// 8-15 are valid values
+    /// Window size to use when compressing the file, as `2^window` bytes.
+    ///
+    /// Doesn't affect compression but may affect speed and memory usage.
+    /// 8-15 are valid values.
+    ///
     /// Default: `15`
     pub window: u8,
     /// Alpha filtering strategies to use
     pub alphas: HashSet<colors::AlphaOptim>,
     /// Whether to attempt bit depth reduction
+    ///
     /// Default: `true`
     pub bit_depth_reduction: bool,
     /// Whether to attempt color type reduction
+    ///
     /// Default: `true`
     pub color_type_reduction: bool,
     /// Whether to attempt palette reduction
+    ///
     /// Default: `true`
     pub palette_reduction: bool,
     /// Whether to perform IDAT recoding
+    ///
     /// If any type of reduction is performed, IDAT recoding will be performed
     /// regardless of this setting
+    ///
     /// Default: `true`
     pub idat_recoding: bool,
     /// Which headers to strip from the PNG file, if any
+    ///
     /// Default: `None`
     pub strip: Headers,
     /// Which DEFLATE algorithm to use
+    ///
     /// Default: `Zlib`
     pub deflate: Deflaters,
     /// Whether to use heuristics to pick the best filter and compression
+    ///
     /// Intended for use with `-o 1` from the CLI interface
+    ///
     /// Default: `false`
     pub use_heuristics: bool,
     /// Number of threads to use
+    ///
     /// Default: 1.5x CPU cores, rounded down
     pub threads: usize,
 }
