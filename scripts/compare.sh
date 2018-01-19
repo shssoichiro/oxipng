@@ -10,5 +10,5 @@ RUST_VERSION=$(rustc -V)
 echo "Tested $OXIPNG_VERSION (compiled on $RUST_VERSION) against $OPTIPNG_VERSION on $CPU with $CORES logical cores" >> README.md
 echo -e '\n\n' >> README.md
 
-hyperfine --warmup 3 './target/release/oxipng ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md
-hyperfine --warmup 3 './target/release/oxipng -o4 ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng -o 4 ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md
+hyperfine --warmup 3 './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md
+hyperfine --warmup 3 './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md

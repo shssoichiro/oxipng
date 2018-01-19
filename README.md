@@ -94,31 +94,31 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 0.18.3 (compiled on rustc 1.25.0-nightly (0f9c78475 2018-01-17)) against OptiPNG version 0.7.6 on Intel(R) Core(TM) i7-4980HQ CPU @ 2.80GHz with 8 logical cores
+Tested oxipng 0.19.0 (compiled on rustc 1.25.0-nightly (f62f77403 2018-01-10)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
 
-Benchmark #1: ./target/release/oxipng ./tests/files/rgb_16_should_be_grayscale_8.png
+Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     121.5 ms ±   7.9 ms
+  Time (mean ± σ):     137.7 ms ±   3.3 ms
  
-  Range (min … max):   113.4 ms … 145.0 ms
+  Range (min … max):   131.8 ms … 144.2 ms
  
-Benchmark #2: optipng ./tests/files/rgb_16_should_be_grayscale_8.png
+Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     241.3 ms ±   5.0 ms
+  Time (mean ± σ):     293.7 ms ±   7.0 ms
  
-  Range (min … max):   234.4 ms … 249.4 ms
+  Range (min … max):   286.0 ms … 310.2 ms
  
-Benchmark #1: ./target/release/oxipng -o4 ./tests/files/rgb_16_should_be_grayscale_8.png
+Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     289.7 ms ±  24.0 ms
+  Time (mean ± σ):     255.6 ms ±   5.3 ms
  
-  Range (min … max):   251.1 ms … 332.5 ms
+  Range (min … max):   245.7 ms … 261.1 ms
  
-Benchmark #2: optipng -o 4 ./tests/files/rgb_16_should_be_grayscale_8.png
+Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     944.2 ms ± 127.5 ms
+  Time (mean ± σ):     1.001 s ± 0.013 s
  
-  Range (min … max):   861.5 ms … 1278.4 ms
+  Range (min … max):   0.982 s … 1.017 s
  
