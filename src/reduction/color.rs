@@ -1,49 +1,8 @@
-use bit_vec::BitVec;
 use colors::{BitDepth, ColorType};
 use itertools::Itertools;
 use png::PngData;
 
-pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
-    let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
-    let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
-    let mut allowed_bits = 1;
-    for line in png.scan_lines() {
-        let bit_vec = BitVec::from_bytes(&line.data);
-        for (i, bit) in bit_vec.iter().enumerate() {
-            let bit_index = if png.ihdr_data.color_type == ColorType::Indexed {
-                bit_depth - (i % bit_depth)
-            } else {
-                i % bit_depth
-            };
-            if bit && bit_index > allowed_bits {
-                allowed_bits = bit_index.next_power_of_two();
-                if allowed_bits == bit_depth {
-                    // Not reducable
-                    return false;
-                }
-            }
-        }
-    }
-
-    for line in png.scan_lines() {
-        reduced.extend(BitVec::from_bytes(&[line.filter]));
-        let bit_vec = BitVec::from_bytes(&line.data);
-        for (i, bit) in bit_vec.iter().enumerate() {
-            let bit_index = bit_depth - (i % bit_depth);
-            if bit_index <= allowed_bits {
-                reduced.push(bit);
-            }
-        }
-        // Pad end of line to get 8 bits per byte
-        while reduced.len() % 8 != 0 {
-            reduced.push(false);
-        }
-    }
-
-    png.raw_data = reduced.to_bytes();
-    png.ihdr_data.bit_depth = BitDepth::from_u8(allowed_bits as u8);
-    true
-}
+use super::alpha::reduce_alpha_channel;
 
 pub fn reduce_rgba_to_rgb(png: &mut PngData) -> bool {
     if let Some(reduced) = reduce_alpha_channel(png, 4) {
@@ -324,29 +283,4 @@ pub fn reduce_grayscale_alpha_to_grayscale(png: &mut PngData) -> bool {
     } else {
         false
     }
-}
-
-fn reduce_alpha_channel(png: &mut PngData, bpp_factor: usize) -> Option<Vec<u8>> {
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
-    let bpp: usize = bpp_factor * byte_depth as usize;
-    let colored_bytes = bpp - byte_depth as usize;
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
-        for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp >= colored_bytes {
-                if *byte != 255 {
-                    return None;
-                }
-            } else {
-                reduced.push(*byte);
-            }
-        }
-    }
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
-        assert_eq!(sbit_header.len(), bpp_factor);
-        sbit_header.pop();
-    }
-
-    Some(reduced)
 }

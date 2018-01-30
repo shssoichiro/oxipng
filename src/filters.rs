@@ -144,7 +144,6 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> V
     unfiltered
 }
 
-#[inline]
 fn paeth_predictor(a: u8, b: u8, c: u8) -> u8 {
     let p = i32::from(a) + i32::from(b) - i32::from(c);
     let pa = (p - i32::from(a)).abs();
