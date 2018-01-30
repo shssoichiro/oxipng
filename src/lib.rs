@@ -713,15 +713,31 @@ fn perform_backup(input_path: &Path) -> Result<(), PngError> {
     })
 }
 
+#[cfg(not(unix))]
 fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
     if let Ok(f) = File::open(input_path) {
         if let Ok(metadata) = f.metadata() {
-            // TODO: Implement full permission changing on Unix
-            // Not available in stable, requires block cfg statements
-            // See https://github.com/rust-lang/rust/issues/15701
             if let Ok(out_meta) = out_file.metadata() {
                 let readonly = metadata.permissions().readonly();
                 out_meta.permissions().set_readonly(readonly);
+                return;
+            }
+        }
+    };
+    if verbosity.is_some() {
+        eprintln!("Failed to set permissions on output file");
+    }
+}
+
+#[cfg(unix)]
+fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
+    use std::os::unix::fs::PermissionsExt;
+
+    if let Ok(f) = File::open(input_path) {
+        if let Ok(metadata) = f.metadata() {
+            if let Ok(out_meta) = out_file.metadata() {
+                let permissions = metadata.permissions().mode();
+                out_meta.permissions().set_mode(permissions);
                 return;
             }
         }

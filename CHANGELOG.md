@@ -1,5 +1,6 @@
 ### Version 0.19.1 (unreleased)
  - Refactor of internal code.
+ - Implement unix-specific permissions copying for `-p` option
 
 ### Version 0.19.0
  - [SEMVER_MAJOR] Default to overwriting the input file if `out_file` is not set.
