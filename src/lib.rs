@@ -6,7 +6,6 @@ extern crate byteorder;
 extern crate crc;
 extern crate image;
 extern crate itertools;
-extern crate libc;
 extern crate miniz_oxide;
 extern crate num_cpus;
 extern crate rayon;
