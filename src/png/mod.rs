@@ -271,19 +271,13 @@ impl PngData {
         for line in self.scan_lines() {
             match filter {
                 0 | 1 | 2 | 3 | 4 => {
-                    if last_pass == line.pass || filter <= 1 {
-                        filtered.push(filter);
-                        filtered.extend_from_slice(&filter_line(
-                            filter,
-                            bpp,
-                            &line.data,
-                            &last_line,
-                        ));
+                    let filter = if last_pass == line.pass || filter <= 1 {
+                        filter
                     } else {
-                        // Avoid vertical filtering on first line of each interlacing pass
-                        filtered.push(0);
-                        filtered.extend_from_slice(&filter_line(0, bpp, &line.data, &last_line));
-                    }
+                        0
+                    };
+                    filtered.push(filter);
+                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
                 }
                 5 => {
                     // Heuristically guess best filter per line
