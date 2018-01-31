@@ -172,12 +172,7 @@ impl PngData {
     /// Return the number of channels in the image, based on color type
     #[inline]
     pub fn channels_per_pixel(&self) -> u8 {
-        match self.ihdr_data.color_type {
-            ColorType::Grayscale | ColorType::Indexed => 1,
-            ColorType::GrayscaleAlpha => 2,
-            ColorType::RGB => 3,
-            ColorType::RGBA => 4,
-        }
+        self.ihdr_data.color_type.channels_per_pixel()
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream

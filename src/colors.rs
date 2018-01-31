@@ -44,6 +44,16 @@ impl ColorType {
             ColorType::RGBA => 6,
         }
     }
+
+    #[inline]
+    pub fn channels_per_pixel(&self) -> u8 {
+        match *self {
+            ColorType::Grayscale | ColorType::Indexed => 1,
+            ColorType::GrayscaleAlpha => 2,
+            ColorType::RGB => 3,
+            ColorType::RGBA => 4,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
