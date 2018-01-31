@@ -1,7 +1,11 @@
-### Version 0.19.1 (unreleased)
+### Version 0.20.0 (unreleased)
  - Refactor of internal code.
  - Implement unix-specific permissions copying for `-p` option
  - Performance optimizations
+ - Remove the C dependency on miniz, and replace it with a Rust version ([#57](https://github.com/shssoichiro/oxipng/issues/57))
+    - This improves decompression speed by 15%. Compression speed is not affected.
+    - [SEMVER_MAJOR] This also obsoletes the `-zm` command line option and the `memory` key on the `Options` struct.
+    - Presets will be updated automatically. This means that presets 3 and higher will run significantly more quickly.
 
 ### Version 0.19.0
  - [SEMVER_MAJOR] Default to overwriting the input file if `out_file` is not set.

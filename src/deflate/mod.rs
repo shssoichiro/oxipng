@@ -1,5 +1,5 @@
 use error::PngError;
-use miniz_sys;
+use miniz_oxide;
 use std::cmp::max;
 use zopfli;
 
@@ -8,44 +8,13 @@ pub mod miniz_stream;
 
 /// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
-    let mut input = data.to_owned();
-    let mut stream = miniz_stream::Stream::new_decompress();
-    let mut output = Vec::with_capacity(data.len());
-    loop {
-        match stream.decompress_vec(input.as_mut(), output.as_mut()) {
-            miniz_sys::MZ_OK => output.reserve(data.len()),
-            miniz_sys::MZ_STREAM_END => break,
-            c => return Err(PngError::new(&format!("Error code on decompress: {}", c))),
-        }
-    }
-    output.shrink_to_fit();
-
-    Ok(output)
+    miniz_oxide::inflate::decompress_to_vec_zlib(data)
+        .map_err(|e| PngError::new(&format!("Error on decompress: {:?}", e)))
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub fn deflate(data: &[u8], zc: u8, zm: u8, zs: u8, zw: u8) -> Result<Vec<u8>, PngError> {
-    let mut input = data.to_owned();
-    // Compressed input should be smaller than decompressed, so allocate less than data.len()
-    // However, it needs a minimum capacity in order to handle very small images
-    let mut output = Vec::with_capacity(max(1024, data.len() / 20));
-    let mut stream = miniz_stream::Stream::new_compress(
-        i32::from(zc),
-        i32::from(zw),
-        i32::from(zm),
-        i32::from(zs),
-    );
-    loop {
-        match stream.compress_vec(input.as_mut(), output.as_mut()) {
-            miniz_sys::MZ_OK => output.reserve(max(1024, data.len() / 20)),
-            miniz_sys::MZ_STREAM_END => break,
-            c => return Err(PngError::new(&format!("Error code on compress: {}", c))),
-        }
-    }
-
-    output.shrink_to_fit();
-
-    Ok(output)
+pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8) -> Vec<u8> {
+    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into())
 }
 
 pub fn zopfli_deflate(data: &[u8]) -> Result<Vec<u8>, PngError> {

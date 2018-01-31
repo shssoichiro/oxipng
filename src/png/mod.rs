@@ -17,7 +17,6 @@ use std::iter::Iterator;
 use std::path::Path;
 
 const STD_COMPRESSION: u8 = 8;
-const STD_MEMORY: u8 = 9;
 const STD_STRATEGY: u8 = 2; // Huffman only
 const STD_WINDOW: u8 = 15;
 const STD_FILTERS: [u8; 2] = [0, 5];
@@ -616,11 +615,9 @@ impl PngData {
                         deflate::deflate(
                             &image.filter_image(*f),
                             STD_COMPRESSION,
-                            STD_MEMORY,
                             STD_STRATEGY,
                             STD_WINDOW,
-                        ).unwrap()
-                            .len()
+                        ).len()
                     })
                     .min()
                     .unwrap();

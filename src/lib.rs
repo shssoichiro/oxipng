@@ -7,7 +7,7 @@ extern crate crc;
 extern crate image;
 extern crate itertools;
 extern crate libc;
-extern crate miniz_sys;
+extern crate miniz_oxide;
 extern crate num_cpus;
 extern crate rayon;
 extern crate zopfli;
@@ -103,10 +103,6 @@ pub struct Options {
     ///
     /// Default: `9`
     pub compression: HashSet<u8>,
-    /// Which zlib memory levels to try on the file (1-9)
-    ///
-    /// Default: `9`
-    pub memory: HashSet<u8>,
     /// Which zlib compression strategies to try on the file (0-3)
     ///
     /// Default: `0-3`
@@ -193,9 +189,8 @@ impl Options {
         self
     }
 
-    fn apply_preset_3(mut self) -> Self {
-        self.memory.insert(8);
-        self
+    fn apply_preset_3(self) -> Self {
+        self.apply_preset_2()
     }
 
     fn apply_preset_4(mut self) -> Self {
@@ -216,7 +211,6 @@ impl Options {
         for i in 1..3 {
             self.compression.insert(i);
         }
-        self.memory.insert(7);
         self.apply_preset_5()
     }
 }
@@ -229,8 +223,6 @@ impl Default for Options {
         filter.insert(5);
         let mut compression = HashSet::new();
         compression.insert(9);
-        let mut memory = HashSet::new();
-        memory.insert(9);
         let mut strategies = HashSet::new();
         for i in 0..4 {
             strategies.insert(i);
@@ -259,7 +251,6 @@ impl Default for Options {
             filter,
             interlace: None,
             compression,
-            memory,
             strategies,
             window: 15,
             alphas,
@@ -381,7 +372,6 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngE
 struct TrialOptions {
     pub filter: u8,
     pub compression: u8,
-    pub memory: u8,
     pub strategy: u8,
 }
 
@@ -423,7 +413,6 @@ fn optimize_png(
 
     let mut filter = opts.filter.iter().cloned().collect::<Vec<u8>>();
     let compression = &opts.compression;
-    let memory = &opts.memory;
     let mut strategies = opts.strategies.clone();
 
     if opts.use_heuristics {
@@ -452,7 +441,7 @@ fn optimize_png(
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
         let combinations = if opts.deflate == Deflaters::Zlib {
-            filter.len() * compression.len() * memory.len() * strategies.len()
+            filter.len() * compression.len() * strategies.len()
         } else {
             filter.len()
         };
@@ -464,15 +453,12 @@ fn optimize_png(
         for f in &filter {
             if opts.deflate == Deflaters::Zlib {
                 for zc in compression {
-                    for zm in memory {
-                        for zs in &strategies {
-                            results.push(TrialOptions {
-                                filter: *f,
-                                compression: *zc,
-                                memory: *zm,
-                                strategy: *zs,
-                            });
-                        }
+                    for zs in &strategies {
+                        results.push(TrialOptions {
+                            filter: *f,
+                            compression: *zc,
+                            strategy: *zs,
+                        });
                     }
                 }
             } else {
@@ -480,7 +466,6 @@ fn optimize_png(
                 results.push(TrialOptions {
                     filter: *f,
                     compression: 0,
-                    memory: 0,
                     strategy: 0,
                 });
             }
@@ -504,22 +489,15 @@ fn optimize_png(
             .filter_map(|trial| {
                 let filtered = &filters[&trial.filter];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
-                    deflate::deflate(
-                        filtered,
-                        trial.compression,
-                        trial.memory,
-                        trial.strategy,
-                        opts.window,
-                    )
+                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window)
                 } else {
-                    deflate::zopfli_deflate(filtered)
-                }.unwrap();
+                    deflate::zopfli_deflate(filtered).unwrap()
+                };
 
                 if opts.verbosity == Some(1) {
                     eprintln!(
-                        "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                        "    zc = {}  zs = {}  f = {}        {} bytes",
                         trial.compression,
-                        trial.memory,
                         trial.strategy,
                         trial.filter,
                         new_idat.len()
@@ -540,9 +518,8 @@ fn optimize_png(
                 let opts = better.0;
                 eprintln!("Found better combination:");
                 eprintln!(
-                    "    zc = {}  zm = {}  zs = {}  f = {}        {} bytes",
+                    "    zc = {}  zs = {}  f = {}        {} bytes",
                     opts.compression,
-                    opts.memory,
                     opts.strategy,
                     opts.filter,
                     png.idat_data.len()
