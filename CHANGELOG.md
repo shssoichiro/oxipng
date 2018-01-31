@@ -6,6 +6,9 @@
     - This improves decompression speed by 15%. Compression speed is not affected.
     - [SEMVER_MAJOR] This also obsoletes the `-zm` command line option and the `memory` key on the `Options` struct.
     - Presets will be updated automatically. This means that presets 3 and higher will run significantly more quickly.
+ - Adjust the presets, now that memory is no longer an option.
+    - `-o3` now tests all filter types. This will result in 50% more trials than before, but may give up to 10% more compression gain.
+    - `-o4` and higher now test all alpha optimization types. This adds 5 trials specific to the alpha channel. Only transparent images are affected. 
 
 ### Version 0.19.0
  - [SEMVER_MAJOR] Default to overwriting the input file if `out_file` is not set.

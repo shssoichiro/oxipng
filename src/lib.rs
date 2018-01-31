@@ -188,14 +188,19 @@ impl Options {
         self
     }
 
-    fn apply_preset_3(self) -> Self {
-        self.apply_preset_2()
-    }
-
-    fn apply_preset_4(mut self) -> Self {
+    fn apply_preset_3(mut self) -> Self {
         for i in 1..5 {
             self.filter.insert(i);
         }
+        self
+    }
+
+    fn apply_preset_4(mut self) -> Self {
+        self.alphas.insert(AlphaOptim::White);
+        self.alphas.insert(AlphaOptim::Up);
+        self.alphas.insert(AlphaOptim::Down);
+        self.alphas.insert(AlphaOptim::Left);
+        self.alphas.insert(AlphaOptim::Right);
         self.apply_preset_3()
     }
 
