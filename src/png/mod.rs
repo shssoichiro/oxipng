@@ -73,7 +73,8 @@ impl PngData {
             return Err(PngError::new("Failed to read from file"));
         }
         // Read raw png data into memory
-        let mut byte_data: Vec<u8> = Vec::new();
+        let mut byte_data: Vec<u8> =
+            Vec::with_capacity(file.metadata().map(|m| m.len() as usize).unwrap_or(0));
         match file.read_to_end(&mut byte_data) {
             Ok(_) => (),
             Err(_) => return Err(PngError::new("Failed to read from file")),
