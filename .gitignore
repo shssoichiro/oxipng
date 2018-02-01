@@ -3,4 +3,5 @@ target
 .DS_Store
 *.out.png
 /.idea
+/.vscode
 /node_modules

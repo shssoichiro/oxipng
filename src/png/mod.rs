@@ -1,6 +1,6 @@
 use atomicmin::AtomicMin;
 use bit_vec::BitVec;
-use byteorder::{BigEndian, WriteBytesExt};
+use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use colors::{AlphaOptim, BitDepth, ColorType};
 use crc::crc32;
 use deflate;
@@ -15,7 +15,7 @@ use reduction::bit_depth::*;
 use reduction::color::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::iter::Iterator;
 use std::path::Path;
 
@@ -24,17 +24,19 @@ const STD_STRATEGY: u8 = 2; // Huffman only
 const STD_WINDOW: u8 = 15;
 const STD_FILTERS: [u8; 2] = [0, 5];
 
+mod apng;
 mod scan_lines;
 
+use self::apng::{ApngFrame, ApngHeaders};
 use self::scan_lines::{ScanLine, ScanLines};
 
 #[derive(Debug, Clone)]
 /// Contains all data relevant to a PNG image
 pub struct PngData {
-    /// The filtered and compressed data of the IDAT chunk
-    pub idat_data: Vec<u8>,
     /// The headers stored in the IHDR chunk
     pub ihdr_data: IhdrData,
+    /// The filtered and compressed data of the IDAT chunk
+    pub idat_data: Vec<u8>,
     /// The uncompressed, optionally filtered data from the IDAT chunk
     pub raw_data: Vec<u8>,
     /// The palette containing colors used in an Indexed image
@@ -46,11 +48,16 @@ pub struct PngData {
     pub transparency_palette: Option<Vec<u8>>,
     /// All non-critical headers from the PNG are stored here
     pub aux_headers: HashMap<[u8; 4], Vec<u8>>,
+    /// Header data for an animated PNG: Number of frames and number of plays
+    pub apng_headers: Option<ApngHeaders>,
+    /// Frame data for an animated PNG
+    pub apng_data: Option<Vec<ApngFrame>>,
 }
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
     #[inline]
+    #[allow(dead_code)]
     pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, PngError> {
         let byte_data = PngData::read_file(filepath)?;
 
@@ -95,14 +102,42 @@ impl PngData {
         // Read the data headers
         let mut aux_headers: HashMap<[u8; 4], Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
+        let mut apng_headers = None;
+        let mut apng_data: Vec<ApngFrame> = Vec::new();
         while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
             match &header.name {
-                b"IDAT" => idat_headers.extend(header.data),
-                b"acTL" => return Err(PngError::APNGNotSupported),
+                b"IDAT" => {
+                    idat_headers.extend(header.data);
+                }
+                b"acTL" => {
+                    let mut cursor = Cursor::new(&header.data);
+                    apng_headers = Some(ApngHeaders {
+                        frames: cursor
+                            .read_u32::<BigEndian>()
+                            .map_err(|e| PngError::new(&e.to_string()))?,
+                        plays: cursor
+                            .read_u32::<BigEndian>()
+                            .map_err(|e| PngError::new(&e.to_string()))?,
+                    })
+                }
+                b"fcTL" => {
+                    if header.data.len() != 26 {
+                        return Err(PngError::new("Invalid length of fcTL header"));
+                    }
+                    apng_data.push(ApngFrame::from(header.data));
+                }
+                b"fdAT" => match apng_data.last_mut() {
+                    Some(ref mut frame) => {
+                        frame.frame_data.extend_from_slice(&header.data[4..]);
+                    }
+                    None => {
+                        return Err(PngError::new("fdAT with no preceding fcTL header"));
+                    }
+                },
                 _ => {
                     aux_headers.insert(header.name, header.data.to_owned());
                 }
-            }
+            };
         }
         // Parse the headers into our PngData
         if idat_headers.is_empty() {
@@ -114,6 +149,16 @@ impl PngData {
         };
         let ihdr_header = parse_ihdr_header(&ihdr)?;
         let raw_data = deflate::inflate(idat_headers.as_ref())?;
+        for (i, frame) in apng_data.iter_mut().enumerate() {
+            if !frame.frame_data.is_empty() {
+                frame.raw_data = match deflate::inflate(idat_headers.as_ref()) {
+                    Ok(x) => x,
+                    Err(x) => return Err(x),
+                };
+            } else if i > 0 {
+                return Err(PngError::new("APNG frame contained no data"));
+            }
+        }
         // Handle transparency header
         let mut has_transparency_pixel = false;
         let mut has_transparency_palette = false;
@@ -140,6 +185,12 @@ impl PngData {
                 None
             },
             aux_headers,
+            apng_headers,
+            apng_data: if apng_headers.is_some() {
+                Some(apng_data)
+            } else {
+                None
+            },
         };
         png_data.raw_data = png_data.unfilter_image();
         // Return the PngData
@@ -203,8 +254,11 @@ impl PngData {
         {
             write_png_block(key, header, &mut output);
         }
+        // acTL chunk: TODO
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);
+        // fcTL chunks: TODO
+        // fdAT chunks: TODO
         // Stream end
         write_png_block(b"IEND", &[], &mut output);
 

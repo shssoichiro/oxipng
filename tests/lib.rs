@@ -12,8 +12,7 @@ fn optimize_from_memory() {
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
     let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
-
+    opts.pretend = true;
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
     assert!(result.is_ok());
 }
@@ -25,8 +24,7 @@ fn optimize_from_memory_corrupted() {
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
     let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
-
+    opts.pretend = true;
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
     assert!(result.is_err());
 }
@@ -38,10 +36,9 @@ fn optimize_from_memory_apng() {
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
     let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
-
+    opts.pretend = true;
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
-    assert!(result.is_err());
+    assert!(result.is_ok());
 }
 
 #[test]
@@ -80,5 +77,8 @@ fn optimize_apng() {
         &OutFile::Path(None),
         &opts,
     );
-    assert!(result.is_err());
+    assert!(result.is_ok());
+    let new_png = oxipng::PngData::new(&opts.out_file.unwrap(), false).unwrap();
+    assert!(new_png.apng_headers.is_some());
+    assert!(new_png.apng_data.is_some());
 }
