@@ -1,3 +1,7 @@
+### Version 1.0.1
+ - Bump rayon to 1.0 ([#99](https://github.com/shssoichiro/oxipng/pull/99) @cuviper)
+ - Bump minor versions of other dependencies for binary distribution
+
 ### Version 1.0.0
  - Remove the C dependency on miniz, and replace it with a Rust version ([#57](https://github.com/shssoichiro/oxipng/issues/57))
     - This improves decompression speed by 15%. Compression speed is not affected.
