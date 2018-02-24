@@ -14,6 +14,8 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
+travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
+maintenance = { status = "actively-developed" }
 version = "1.0.1"
 
 [[bin]]
