@@ -1,3 +1,6 @@
+### Version 1.0.2
+ - Fix a change that breaks Itertools::flatten with recent Rust nightlies
+
 ### Version 1.0.1
  - Bump rayon to 1.0 ([#99](https://github.com/shssoichiro/oxipng/pull/99) @cuviper)
  - Bump minor versions of other dependencies for binary distribution

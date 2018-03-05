@@ -14,7 +14,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "1.0.1"
+version = "1.0.2"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
@@ -30,7 +30,7 @@ bit-vec = "^0.4.2"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
 glob = "0.2.11"
-itertools = "^0.7.0"
+itertools = "^0.7.7"
 num_cpus = "^1.0.0"
 rayon = "^1.0.0"
 zopfli = "^0.3.4"

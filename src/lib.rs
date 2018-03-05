@@ -274,7 +274,9 @@ impl Default for Options {
 pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    let _ = rayon::ThreadPoolBuilder::new().num_threads(thread_count).build_global();
+    let _ = rayon::ThreadPoolBuilder::new()
+        .num_threads(thread_count)
+        .build_global();
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
@@ -351,7 +353,9 @@ pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
     // Initialize the thread pool with correct number of threads
     let thread_count = opts.threads;
-    let _ = rayon::ThreadPoolBuilder::new().num_threads(thread_count).build_global();
+    let _ = rayon::ThreadPoolBuilder::new()
+        .num_threads(thread_count)
+        .build_global();
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {

@@ -7,7 +7,7 @@ use error::PngError;
 use filters::*;
 use headers::*;
 use interlace::{deinterlace_image, interlace_image};
-use itertools::Itertools;
+use itertools::{flatten, Itertools};
 use reduction::bit_depth::*;
 use reduction::color::*;
 use std::collections::{HashMap, HashSet};
@@ -138,7 +138,7 @@ impl PngData {
         let mut png_data = PngData {
             idat_data: idat_headers,
             ihdr_data: ihdr_header,
-            raw_data: raw_data,
+            raw_data,
             palette: aux_headers.remove("PLTE"),
             transparency_pixel: if has_transparency_pixel {
                 aux_headers.remove("tRNS")
@@ -150,7 +150,7 @@ impl PngData {
             } else {
                 None
             },
-            aux_headers: aux_headers,
+            aux_headers,
         };
         png_data.raw_data = png_data.unfilter_image();
         // Return the PngData
@@ -551,10 +551,7 @@ impl PngData {
         }
         index_map.clear();
         self.raw_data = new_data;
-        let new_palette = indexed_palette
-            .iter()
-            .cloned()
-            .flatten()
+        let new_palette = flatten(indexed_palette.iter().cloned())
             .enumerate()
             .filter(|&(i, _)| !(self.transparency_palette.is_some() && i % 4 == 3))
             .map(|(_, x)| *x)
@@ -726,7 +723,7 @@ impl PngData {
             lines.push(current_line.clone());
             current_line.clear();
         }
-        lines.into_iter().rev().flatten().collect()
+        flatten(lines.into_iter().rev()).collect()
     }
 
     fn reduce_alpha_to_down(&self, bpc: usize, bpp: usize) -> Vec<u8> {
@@ -766,7 +763,7 @@ impl PngData {
                 last_pixel = pixel.to_owned();
             }
             reduced.push(line.filter);
-            reduced.extend(line_bytes.chunks(bpp).rev().flatten());
+            reduced.extend(flatten(line_bytes.chunks(bpp).rev()));
         }
         reduced
     }
