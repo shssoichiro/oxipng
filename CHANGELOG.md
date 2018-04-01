@@ -1,3 +1,6 @@
+### Version 1.0.3 (unreleased)
+ - Bump dependencies
+
 ### Version 1.0.2
  - Fix a change that breaks Itertools::flatten with recent Rust nightlies
 

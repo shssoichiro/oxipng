@@ -67,7 +67,6 @@ nightly = []
 nightly-binary = [
     "binary",
     "nightly",
-    "regex/simd-accel",
 ]
 
 [lib]
