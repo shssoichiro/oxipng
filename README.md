@@ -94,7 +94,7 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 1.0.2 (compiled on rustc 1.26.0-nightly (517f24025 2018-03-31)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
+Tested oxipng 1.0.3 (compiled on rustc 1.26.0-nightly (517f24025 2018-03-31)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
 

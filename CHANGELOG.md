@@ -1,4 +1,4 @@
-### Version 1.0.3 (unreleased)
+### Version 1.0.3
  - Bump dependencies
 
 ### Version 1.0.2
