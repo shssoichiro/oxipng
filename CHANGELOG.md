@@ -1,3 +1,8 @@
+### Version 1.0.4
+ - Bump `image` to 0.19.0
+ - Bump `bit-vec` to 0.5.0
+ - Bump `regex` to 1.0.0
+
 ### Version 1.0.3
  - Bump dependencies
 
