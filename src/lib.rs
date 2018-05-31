@@ -10,6 +10,8 @@ extern crate miniz_oxide;
 extern crate num_cpus;
 extern crate rayon;
 extern crate zopfli;
+#[cfg(feature = "cfzlib")]
+extern crate cloudflare_zlib_sys;
 
 use image::{DynamicImage, GenericImage, ImageFormat, Pixel};
 use png::PngData;

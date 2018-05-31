@@ -44,6 +44,10 @@ version = "^2.10.0"
 optional = true
 version = ">=0.0.85"
 
+[dependencies.cloudflare-zlib-sys]
+optional = true
+version = "^0.1.2"
+
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
@@ -59,6 +63,7 @@ binary = [
     "regex",
 ]
 default = ["binary"]
+cfzlib = ["cloudflare-zlib-sys"]
 dev = [
     "nightly-binary",
     "clippy",
