@@ -13,13 +13,34 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-#[cfg(not(feature = "cfzlib"))]
 pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8) -> Vec<u8> {
+    #[cfg(feature = "cfzlib")]
+    {
+        if is_cfzlib_supported() {
+            return cfzlib_deflate(data, zc, zs, zw)
+        }
+    }
+
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into())
 }
 
 #[cfg(feature = "cfzlib")]
-pub fn deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8) -> Vec<u8> {
+fn is_cfzlib_supported() -> bool {
+    #[cfg(target_arch = "x86_64")] {
+        if is_x86_feature_detected!("sse4.2") && is_x86_feature_detected!("pclmulqdq") {
+            return true;
+        }
+    }
+    #[cfg(target_arch = "aarch64")] {
+        if is_arm_feature_detected!("neon") && is_arm_feature_detected!("crc") {
+            return true;
+        }
+    }
+    false
+}
+
+#[cfg(feature = "cfzlib")]
+pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8) -> Vec<u8> {
     use std::mem;
     use cloudflare_zlib_sys::*;
 

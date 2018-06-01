@@ -68,7 +68,7 @@ dev = [
     "nightly-binary",
     "clippy",
 ]
-nightly = []
+nightly = ["cfzlib"]
 nightly-binary = [
     "binary",
     "nightly",
