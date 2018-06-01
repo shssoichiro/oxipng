@@ -603,27 +603,28 @@ impl PngData {
         assert!(!alphas.is_empty());
         let best = alphas
             .iter()
-            .map(|alpha| {
+            .filter_map(|alpha| {
                 let mut image = self.clone();
                 image.reduce_alpha_channel(*alpha);
-                let size = STD_FILTERS
+                STD_FILTERS
                     .iter()
-                    .map(|f| {
+                    .filter_map(|f| {
                         deflate::deflate(
                             &image.filter_image(*f),
                             STD_COMPRESSION,
                             STD_STRATEGY,
                             STD_WINDOW,
-                        ).len()
+                        ).ok()
+                        .as_ref().map(|l| l.len())
                     })
                     .min()
-                    .unwrap();
-                (size, image)
+                    .map(|size| (size, image))
             })
-            .min_by_key(|&(size, _)| size)
-            .unwrap();
+            .min_by_key(|&(size, _)| size);
 
-        self.raw_data = best.1.raw_data;
+        if let Some(best) = best {
+            self.raw_data = best.1.raw_data;
+        }
     }
 
     pub fn reduce_alpha_channel(&mut self, optim: AlphaOptim) -> bool {

@@ -501,7 +501,10 @@ fn optimize_png(
                 let new_idat = if opts.deflate == Deflaters::Zlib {
                     deflate::deflate(filtered, trial.compression, trial.strategy, opts.window)
                 } else {
-                    deflate::zopfli_deflate(filtered).unwrap()
+                    deflate::zopfli_deflate(filtered)
+                };
+                let new_idat = if let Ok(n) = new_idat {n} else {
+                    return None;
                 };
 
                 if opts.verbosity == Some(1) {

@@ -13,7 +13,7 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8) -> Vec<u8> {
+pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8) -> Result<Vec<u8>, PngError> {
     #[cfg(feature = "cfzlib")]
     {
         if is_cfzlib_supported() {
@@ -21,7 +21,7 @@ pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8) -> Vec<u8> {
         }
     }
 
-    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into())
+    Ok(miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into()))
 }
 
 #[cfg(feature = "cfzlib")]
@@ -40,20 +40,22 @@ fn is_cfzlib_supported() -> bool {
 }
 
 #[cfg(feature = "cfzlib")]
-pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8) -> Vec<u8> {
+pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8) -> Result<Vec<u8>, PngError> {
     use std::mem;
     use cloudflare_zlib_sys::*;
 
     assert!(data.len() < u32::max_value() as usize);
     unsafe {
         let mut stream = mem::zeroed();
-        assert_eq!(Z_OK, deflateInit2(
+        if Z_OK != deflateInit2(
                     &mut stream,
                     level.into(),
                     Z_DEFLATED,
                     window_bits.into(),
                     MAX_MEM_LEVEL,
-                    strategy.into()));
+                    strategy.into()) {
+            return Err(PngError::new("deflateInit2"));
+        }
 
         let max_size = deflateBound(&mut stream, data.len() as uLong) as usize;
         // it's important to have the capacity pre-allocated,
@@ -65,11 +67,15 @@ pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8) -> 
         stream.avail_in = data.len() as uInt;
         stream.next_out = out.as_mut_ptr();
         stream.avail_out = out.capacity() as uInt;
-        assert_eq!(Z_STREAM_END, deflate(&mut stream, Z_FINISH));
-        assert_eq!(Z_OK, deflateEnd(&mut stream));
+        if Z_STREAM_END != deflate(&mut stream, Z_FINISH) {
+            return Err(PngError::new("deflate"));
+        }
+        if Z_OK != deflateEnd(&mut stream) {
+            return Err(PngError::new("deflateEnd"));
+        }
         debug_assert!(stream.total_out as usize <= out.capacity());
         out.set_len(stream.total_out as usize);
-        return out;
+        return Ok(out);
     }
 }
 
