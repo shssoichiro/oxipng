@@ -8,6 +8,9 @@ environment:
       CHANNEL: stable
     - TARGET: x86_64-pc-windows-msvc
       CHANNEL: stable
+    - TARGET: x86_64-pc-windows-msvc
+      CHANNEL: nightly
+      TESTFLAGS: --features=cfzlib
 
 # Install Rust and Cargo
 # (Based on from https://github.com/rust-lang/libc/blob/master/appveyor.yml)
@@ -26,7 +29,7 @@ build: false
 # Equivalent to Travis' `script` phase
 test_script:
   - cargo build
-  - cargo test
+  - cargo test %TESTFLAGS%
 
 before_deploy:
   # Generate artifacts for release
