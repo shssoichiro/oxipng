@@ -15,6 +15,7 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
 use std::path::Path;
+use rayon::prelude::*;
 
 const STD_COMPRESSION: u8 = 8;
 const STD_STRATEGY: u8 = 2; // Huffman only
@@ -601,13 +602,16 @@ impl PngData {
 
     pub fn try_alpha_reduction(&mut self, alphas: &HashSet<AlphaOptim>) {
         assert!(!alphas.is_empty());
+        let alphas = alphas.iter().collect::<Vec<_>>();
         let best = alphas
-            .iter()
-            .filter_map(|alpha| {
+            .par_iter()
+            .with_max_len(1)
+            .filter_map(|&alpha| {
                 let mut image = self.clone();
                 image.reduce_alpha_channel(*alpha);
                 STD_FILTERS
-                    .iter()
+                    .par_iter()
+                    .with_max_len(1)
                     .filter_map(|f| {
                         deflate::deflate(
                             &image.filter_image(*f),
