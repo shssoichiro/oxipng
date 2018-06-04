@@ -439,11 +439,11 @@ fn parse_numeric_range_opts(
     min_value: u8,
     max_value: u8,
 ) -> Result<HashSet<u8>, String> {
-    let error_message = "Not a valid input";
+    const ERROR_MESSAGE: &str = "Not a valid input";
     let mut items = HashSet::new();
 
     // one value
-    if let Some(one_value) = input.parse::<u8>().ok() {
+    if let Ok(one_value) = input.parse::<u8>() {
         if (min_value <= one_value) && (one_value <= max_value) {
             items.insert(one_value);
             return Ok(items);
@@ -453,9 +453,9 @@ fn parse_numeric_range_opts(
     // a range ("A-B")
     let range_values = input.split('-').collect::<Vec<&str>>();
     if range_values.len() == 2 {
-        let first_opt = range_values[0].parse::<u8>().ok();
-        let second_opt = range_values[1].parse::<u8>().ok();
-        if let (Some(first), Some(second)) = (first_opt, second_opt) {
+        let first_opt = range_values[0].parse::<u8>();
+        let second_opt = range_values[1].parse::<u8>();
+        if let (Ok(first), Ok(second)) = (first_opt, second_opt) {
             if min_value <= first && first < second && second <= max_value {
                 for i in first..second + 1 {
                     items.insert(i);
@@ -463,17 +463,23 @@ fn parse_numeric_range_opts(
                 return Ok(items);
             }
         }
+        return Err(ERROR_MESSAGE.to_owned());
     }
 
     // a list ("A,B[,…]")
-    for value in input.split(',') {
-        if let Some(value_int) = value.parse::<u8>().ok() {
-            if (min_value <= value_int) && (value_int <= max_value) && !items.contains(&value_int) {
-                items.insert(value_int);
-                continue;
+    let list_items = input.split(',').collect::<Vec<&str>>();;
+    if list_items.len() > 1 {
+        for value in list_items {
+            if let Ok(value_int) = value.parse::<u8>() {
+                if (min_value <= value_int) && (value_int <= max_value) && !items.contains(&value_int) {
+                    items.insert(value_int);
+                    continue;
+                }
             }
+            return Err(ERROR_MESSAGE.to_owned());
         }
-        return Err(error_message.to_owned());
+        return Ok(items);
     }
-    return Ok(items);
+
+    return Err(ERROR_MESSAGE.to_owned());
 }
