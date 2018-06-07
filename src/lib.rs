@@ -583,7 +583,7 @@ fn optimize_png(
 
     if let Ok(new_png) = new_png {
         if let Ok(old_png) = old_png {
-            if image_to_pixel_array(&old_png) == image_to_pixel_array(&new_png) {
+            if images_equal(&old_png, &new_png) {
                 return Ok(output);
             }
         } else {
@@ -737,10 +737,13 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
     }
 }
 
-fn image_to_pixel_array(image: &DynamicImage) -> Vec<Vec<u8>> {
-    image
-        .pixels()
+/// Compares images pixel by pixel for equivalent content
+fn images_equal(old_png: &DynamicImage, new_png: &DynamicImage) -> bool {
+    let a = old_png.pixels()
         .map(|x| x.2.channels().to_owned())
-        .filter(|p| !(p.len() == 4 && p[3] == 0))
-        .collect()
+        .filter(|p| !(p.len() == 4 && p[3] == 0));
+    let b = new_png.pixels()
+        .map(|x| x.2.channels().to_owned())
+        .filter(|p| !(p.len() == 4 && p[3] == 0));
+    a.eq(b)
 }
