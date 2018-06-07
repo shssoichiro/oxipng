@@ -10,7 +10,6 @@
 extern crate clap;
 extern crate glob;
 extern crate oxipng;
-extern crate regex;
 
 use clap::{App, Arg, ArgMatches};
 use glob::glob;
@@ -18,7 +17,6 @@ use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::{Options, PngError};
-use regex::Regex;
 use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
@@ -441,40 +439,47 @@ fn parse_numeric_range_opts(
     min_value: u8,
     max_value: u8,
 ) -> Result<HashSet<u8>, String> {
-    let one_item = Regex::new(format!(r"^[{}-{}]$", min_value, max_value).as_ref()).unwrap();
-    let multiple_items = Regex::new(
-        format!(
-            r"^([{}-{}])(,|-)([{}-{}])$",
-            min_value, max_value, min_value, max_value
-        ).as_ref(),
-    ).unwrap();
+    const ERROR_MESSAGE: &str = "Not a valid input";
     let mut items = HashSet::new();
 
-    if one_item.is_match(input) {
-        items.insert(input.parse::<u8>().unwrap());
-        return Ok(items);
-    }
-
-    if let Some(captures) = multiple_items.captures(input) {
-        let first = captures[1].parse::<u8>().unwrap();
-        let second = captures[3].parse::<u8>().unwrap();
-        if first >= second {
-            return Err("Not a valid input".to_owned());
+    // one value
+    if let Ok(one_value) = input.parse::<u8>() {
+        if (min_value <= one_value) && (one_value <= max_value) {
+            items.insert(one_value);
+            return Ok(items);
         }
+    }
 
-        match &captures[2] {
-            "," => {
-                items.insert(first);
-                items.insert(second);
+    // a range ("A-B")
+    let range_values = input.split('-').collect::<Vec<&str>>();
+    if range_values.len() == 2 {
+        let first_opt = range_values[0].parse::<u8>();
+        let second_opt = range_values[1].parse::<u8>();
+        if let (Ok(first), Ok(second)) = (first_opt, second_opt) {
+            if min_value <= first && first < second && second <= max_value {
+                for i in first..second + 1 {
+                    items.insert(i);
+                }
+                return Ok(items);
             }
-            "-" => for i in first..second + 1 {
-                items.insert(i);
-            },
-            _ => unreachable!(),
-        };
+        }
+        return Err(ERROR_MESSAGE.to_owned());
+    }
 
+    // a list ("A,B[,…]")
+    let list_items = input.split(',').collect::<Vec<&str>>();;
+    if list_items.len() > 1 {
+        for value in list_items {
+            if let Ok(value_int) = value.parse::<u8>() {
+                if (min_value <= value_int) && (value_int <= max_value) && !items.contains(&value_int) {
+                    items.insert(value_int);
+                    continue;
+                }
+            }
+            return Err(ERROR_MESSAGE.to_owned());
+        }
         return Ok(items);
     }
 
-    Err("Not a valid input".to_owned())
+    return Err(ERROR_MESSAGE.to_owned());
 }

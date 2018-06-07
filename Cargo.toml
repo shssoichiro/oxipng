@@ -54,14 +54,9 @@ default-features = false
 features = ["png_codec"]
 version = "^0.19.0"
 
-[dependencies.regex]
-optional = true
-version = "^1.0.0"
-
 [features]
 binary = [
     "clap",
-    "regex",
 ]
 default = ["binary"]
 cfzlib = ["cloudflare-zlib-sys"]
