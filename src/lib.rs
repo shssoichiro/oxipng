@@ -20,6 +20,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{copy, File};
 use std::io::{stdout, BufWriter, Write};
 use std::path::{Path, PathBuf};
+use atomicmin::AtomicMin;
 
 pub use colors::AlphaOptim;
 pub use deflate::Deflaters;
@@ -39,6 +40,7 @@ mod interlace;
 #[doc(hidden)]
 pub mod png;
 mod reduction;
+mod atomicmin;
 
 #[derive(Clone, Debug)]
 /// Options controlling the output of the `optimize` function
@@ -493,19 +495,35 @@ fn optimize_png(
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
+        let best_size = AtomicMin::new(if opts.force {None} else {Some(original_len)});
         let best: Option<TrialWithData> = results
             .into_par_iter()
             .with_max_len(1)
             .filter_map(|trial| {
                 let filtered = &filters[&trial.filter];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
-                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window)
+                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window, best_size.get())
                 } else {
                     deflate::zopfli_deflate(filtered)
                 };
-                let new_idat = if let Ok(n) = new_idat {n} else {
-                    return None;
+                let new_idat = match new_idat {
+                    Ok(n) => n,
+                    Err(PngError::DeflatedDataTooLong(max)) if opts.verbosity == Some(1) => {
+                        eprintln!(
+                            "    zc = {}  zs = {}  f = {}       >{} bytes",
+                            trial.compression,
+                            trial.strategy,
+                            trial.filter,
+                            max,
+                        );
+                        return None;
+                    },
+                    _ => return None,
                 };
+
+                // update best size across all threads
+                let new_size = new_idat.len();
+                best_size.set_min(new_size);
 
                 if opts.verbosity == Some(1) {
                     eprintln!(
@@ -517,7 +535,7 @@ fn optimize_png(
                     );
                 }
 
-                if new_idat.len() < original_len || added_interlacing || opts.force {
+                if new_size < original_len || added_interlacing || opts.force {
                     Some((trial, new_idat))
                 } else {
                     None
