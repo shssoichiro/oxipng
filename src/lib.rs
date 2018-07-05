@@ -8,6 +8,7 @@ extern crate image;
 extern crate itertools;
 extern crate miniz_oxide;
 extern crate num_cpus;
+#[cfg(feature = "parallel")]
 extern crate rayon;
 extern crate zopfli;
 #[cfg(feature = "cfzlib")]
@@ -15,6 +16,7 @@ extern crate cloudflare_zlib_sys;
 
 use image::{DynamicImage, GenericImage, ImageFormat, Pixel};
 use png::PngData;
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::{copy, File};
@@ -277,7 +279,9 @@ impl Default for Options {
 /// Perform optimization on the input file using the options provided
 pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
+    #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
+    #[cfg(feature = "parallel")]
     let _ = rayon::ThreadPoolBuilder::new()
         .num_threads(thread_count)
         .build_global();
@@ -356,7 +360,9 @@ pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
 /// loaded in-memory
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
     // Initialize the thread pool with correct number of threads
+    #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
+    #[cfg(feature = "parallel")]
     let _ = rayon::ThreadPoolBuilder::new()
         .num_threads(thread_count)
         .build_global();
@@ -483,9 +489,11 @@ fn optimize_png(
             }
         }
 
-        let filters: HashMap<u8, Vec<u8>> = filter
-            .par_iter()
-            .with_max_len(1)
+        #[cfg(feature = "parallel")]
+        let filter_iter = filter.par_iter().with_max_len(1);
+        #[cfg(not(feature = "parallel"))]
+        let filter_iter = filter.iter();
+        let filters: HashMap<u8, Vec<u8>> = filter_iter
             .map(|f| {
                 let png = png.clone();
                 (*f, png.filter_image(*f))
@@ -496,9 +504,11 @@ fn optimize_png(
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
         let best_size = AtomicMin::new(if opts.force {None} else {Some(original_len)});
-        let best: Option<TrialWithData> = results
-            .into_par_iter()
-            .with_max_len(1)
+        #[cfg(feature = "parallel")]
+        let results_iter = results.into_par_iter().with_max_len(1);
+        #[cfg(not(feature = "parallel"))]
+        let results_iter = results.into_iter();
+        let best = results_iter
             .filter_map(|trial| {
                 let filtered = &filters[&trial.filter];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
@@ -540,8 +550,18 @@ fn optimize_png(
                 } else {
                     None
                 }
-            })
+            });
+        #[cfg(feature = "parallel")]
+        let best: Option<TrialWithData> = best
             .reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
+        #[cfg(not(feature = "parallel"))]
+        let best: Option<TrialWithData> = best.fold(None, |i, j| {
+                if let Some(i) = i {
+                    if i.1.len() <= j.1.len() { Some(i) } else { Some(j) }
+                } else {
+                    Some(j)
+                }
+            });
 
         if let Some(better) = best {
             png.idat_data = better.1;

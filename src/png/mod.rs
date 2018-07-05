@@ -15,6 +15,7 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
 use std::path::Path;
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use atomicmin::AtomicMin;
 
@@ -605,15 +606,19 @@ impl PngData {
         assert!(!alphas.is_empty());
         let alphas = alphas.iter().collect::<Vec<_>>();
         let best_size = AtomicMin::new(None);
-        let best = alphas
-            .par_iter()
-            .with_max_len(1)
+        #[cfg(feature = "parallel")]
+        let alphas_iter = alphas.par_iter().with_max_len(1);
+        #[cfg(not(feature = "parallel"))]
+        let alphas_iter = alphas.iter();
+        let best = alphas_iter
             .filter_map(|&alpha| {
                 let mut image = self.clone();
                 image.reduce_alpha_channel(*alpha);
-                STD_FILTERS
-                    .par_iter()
-                    .with_max_len(1)
+                #[cfg(feature = "parallel")]
+                let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
+                #[cfg(not(feature = "parallel"))]
+                let filters_iter = STD_FILTERS.iter();
+                filters_iter
                     .filter_map(|f| {
                         deflate::deflate(
                             &image.filter_image(*f),

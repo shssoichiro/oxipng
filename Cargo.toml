@@ -33,9 +33,12 @@ crc = "^1.2.0"
 glob = "0.2.11"
 itertools = "^0.7.7"
 num_cpus = "^1.0.0"
-rayon = "^1.0.0"
 zopfli = "^0.3.4"
 miniz_oxide = "0.1.2"
+
+[dependencies.rayon]
+optional = true
+version = "^1.0.0"
 
 [dependencies.clap]
 optional = true
@@ -58,7 +61,8 @@ version = "^0.19.0"
 binary = [
     "clap",
 ]
-default = ["binary"]
+default = ["binary", "parallel"]
+parallel = ["rayon"]
 cfzlib = ["cloudflare-zlib-sys"]
 dev = [
     "nightly-binary",
