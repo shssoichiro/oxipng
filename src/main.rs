@@ -8,11 +8,10 @@
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 
 extern crate clap;
-extern crate glob;
+extern crate wild;
 extern crate oxipng;
 
 use clap::{App, Arg, ArgMatches};
-use glob::glob;
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
@@ -208,7 +207,7 @@ fn main() {
 
     Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
     regardless of the order you write the arguments.")
-        .get_matches();
+        .get_matches_from(wild::args());
 
     let opts = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
@@ -219,16 +218,8 @@ fn main() {
     };
 
     if let Err(e) = handle_optimization(
-        matches
-            .values_of("files")
-            .unwrap()
-            .map(|pattern| glob(pattern).expect("Failed to parse input file path"))
-            .flat_map(|paths| {
-                paths
-                    .into_iter()
-                    .map(|path| path.expect("Failed to parse input file path"))
-            })
-            .collect(),
+        matches.values_of("files").unwrap()
+            .map(PathBuf::from).collect(),
         &opts,
     ) {
         eprintln!("{}", e);
