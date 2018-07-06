@@ -3,7 +3,6 @@ extern crate oxipng;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
-use std::error::Error;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -36,7 +35,7 @@ fn test_it_converts(
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -44,7 +43,7 @@ fn test_it_converts(
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 
@@ -86,7 +85,7 @@ fn issue_42() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -94,7 +93,7 @@ fn issue_42() {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 

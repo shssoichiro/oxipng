@@ -3,7 +3,6 @@ extern crate oxipng;
 use oxipng::colors::{AlphaOptim, BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
-use std::error::Error;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -37,7 +36,7 @@ fn test_it_converts(
 
     match oxipng::optimize(input, opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -45,7 +44,7 @@ fn test_it_converts(
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 
@@ -987,7 +986,7 @@ fn palette_should_be_reduced_with_dupes() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -995,7 +994,7 @@ fn palette_should_be_reduced_with_dupes() {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 
@@ -1020,7 +1019,7 @@ fn palette_should_be_reduced_with_unused() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -1028,7 +1027,7 @@ fn palette_should_be_reduced_with_unused() {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 
@@ -1053,7 +1052,7 @@ fn palette_should_be_reduced_with_both() {
 
     match oxipng::optimize(&input, &opts) {
         Ok(_) => (),
-        Err(x) => panic!(x.description().to_owned()),
+        Err(x) => panic!("{}", x),
     };
     assert!(output.exists());
 
@@ -1061,7 +1060,7 @@ fn palette_should_be_reduced_with_both() {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
-            panic!(x.description().to_owned())
+            panic!("{}", x)
         }
     };
 
