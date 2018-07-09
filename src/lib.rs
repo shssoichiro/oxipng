@@ -22,6 +22,8 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{copy, File};
 use std::io::{stdout, BufWriter, Write};
 use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
+use std::sync::Mutex;
 use atomicmin::AtomicMin;
 
 pub use colors::AlphaOptim;
@@ -164,6 +166,10 @@ pub struct Options {
     ///
     /// Default: 1.5x CPU cores, rounded down
     pub threads: usize,
+
+    /// Maximum amount of time to spend on optimizations.
+    /// Further potential optimizations are skipped if the timeout is exceeded.
+    pub timeout: Option<Duration>,
 }
 
 impl Options {
@@ -275,6 +281,7 @@ impl Default for Options {
             deflate: Deflaters::Zlib,
             use_heuristics: false,
             threads: thread_count,
+            timeout: None,
         }
     }
 }
@@ -395,6 +402,8 @@ fn optimize_png(
 ) -> Result<Vec<u8>, PngError> {
     type TrialWithData = (TrialOptions, Vec<u8>);
 
+    let deadline = Deadline::new(opts);
+
     let original_png = png.clone();
 
     // Print png info
@@ -448,7 +457,7 @@ fn optimize_png(
         }
     }
 
-    let reduction_occurred = perform_reductions(png, opts);
+    let reduction_occurred = perform_reductions(png, opts, &deadline);
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
@@ -481,6 +490,10 @@ fn optimize_png(
                     strategy: 0,
                 });
             }
+
+            if deadline.passed() {
+                break;
+            }
         }
 
         #[cfg(feature = "parallel")]
@@ -504,6 +517,9 @@ fn optimize_png(
         let results_iter = results.into_iter();
         let best = results_iter
             .filter_map(|trial| {
+                if deadline.passed() {
+                    return None;
+                }
                 let filtered = &filters[&trial.filter];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
                     deflate::deflate(filtered, trial.compression, trial.strategy, opts.window, &best_size)
@@ -634,7 +650,7 @@ fn optimize_png(
 
 /// Attempt all reduction operations requested by the given `Options` struct
 /// and apply them directly to the `PngData` passed in
-fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
+fn perform_reductions(png: &mut png::PngData, opts: &Options, deadline: &Deadline) -> bool {
     let mut reduction_occurred = false;
 
     if opts.palette_reduction && png.reduce_palette() {
@@ -644,11 +660,19 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         }
     }
 
+    if deadline.passed() {
+        return reduction_occurred;
+    }
+
     if opts.bit_depth_reduction && png.reduce_bit_depth() {
         reduction_occurred = true;
         if opts.verbosity == Some(1) {
             report_reduction(png);
         }
+    }
+
+    if deadline.passed() {
+        return reduction_occurred;
     }
 
     if opts.color_type_reduction && png.reduce_color_type() {
@@ -669,9 +693,48 @@ fn perform_reductions(png: &mut png::PngData, opts: &Options) -> bool {
         }
     }
 
+    if deadline.passed() {
+        return reduction_occurred;
+    }
+
     png.try_alpha_reduction(&opts.alphas);
 
     reduction_occurred
+}
+
+
+/// Keep track of processing timeout
+struct Deadline {
+    start: Instant,
+    timeout: Option<Duration>,
+    print_message: Mutex<bool>,
+}
+
+impl Deadline {
+    pub fn new(opts: &Options) -> Self {
+         Self {
+            start: Instant::now(),
+            timeout: opts.timeout,
+            print_message: Mutex::new(opts.verbosity.is_some()),
+        }
+    }
+
+    /// True if the timeout has passed, and no new work should be done.
+    ///
+    /// If the verbose option is on, it also prints a timeout message once.
+    pub fn passed(&self) -> bool {
+        if let Some(timeout) = self.timeout {
+            if self.start.elapsed() > timeout {
+                let mut print_message = self.print_message.lock().unwrap();
+                if *print_message {
+                    *print_message = false;
+                    eprintln!("Timed out after {} second(s)", timeout.as_secs());
+                }
+                return true;
+            }
+        }
+        false
+    }
 }
 
 /// Display the status of the image data after a reduction has taken place

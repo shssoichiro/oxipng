@@ -21,6 +21,7 @@ use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
 use std::process::exit;
+use std::time::Duration;
 
 fn main() {
     let matches = App::new("oxipng")
@@ -87,6 +88,11 @@ fn main() {
             .help("Do not write any files, only calculate compression gains")
             .short("P")
             .long("pretend"))
+        .arg(Arg::with_name("timeout")
+            .help("Maximum amount of time, in seconds, to spend on optimizations")
+            .takes_value(true)
+            .value_name("secs")
+            .long("timeout"))
         .arg(Arg::with_name("preserve")
             .help("Preserve file attributes if possible")
             .short("p")
@@ -291,6 +297,11 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathB
 
     if let Some(x) = matches.value_of("strategies") {
         opts.strategies = parse_numeric_range_opts(x, 0, 3).unwrap();
+    }
+
+    if let Some(x) = matches.value_of("timeout") {
+        let num = x.parse().map_err(|_| "Timeout must be a number".to_owned())?;
+        opts.timeout = Some(Duration::from_secs(num));
     }
 
     match matches.value_of("window") {
