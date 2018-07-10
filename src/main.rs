@@ -15,7 +15,7 @@ use clap::{App, Arg, ArgMatches};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
-use oxipng::OutFile;
+use oxipng::{InFile, OutFile};
 use oxipng::{Options, PngError};
 use std::collections::HashSet;
 use std::fs::DirBuilder;
@@ -28,7 +28,7 @@ fn main() {
         .author("Joshua Holmer <jholmer.in@gmail.com>")
         .about("Losslessly improves compression of PNG files")
         .arg(Arg::with_name("files")
-            .help("File(s) to compress")
+            .help("File(s) to compress (use \"-\" for stdin)")
             .index(1)
             .multiple(true)
             .use_delimiter(false)
@@ -227,7 +227,7 @@ fn main() {
     };
 
     let files = collect_files(matches.values_of("files").unwrap()
-            .map(PathBuf::from).collect(), &out_dir, &out_file, opts.recursive);
+            .map(PathBuf::from).collect(), &out_dir, &out_file, opts.recursive, true);
 
     let res: Result<(), PngError> = files.into_iter().map(|(input, output)| {
          oxipng::optimize(&input, &output, &opts)
@@ -239,30 +239,38 @@ fn main() {
     }
 }
 
-fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutFile, recursive: bool) -> Vec<(PathBuf, OutFile)> {
-    let mut out = Vec::new();
+fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutFile, recursive: bool, allow_stdin: bool) -> Vec<(InFile, OutFile)> {
+    let mut in_out_pairs = Vec::new();
+    let allow_stdin = allow_stdin && files.len() == 1;
     for input in files {
-        if input.is_dir() {
+        let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
+        if !using_stdin && input.is_dir() {
             if recursive {
                 let files = input
                     .read_dir()
                     .unwrap()
                     .map(|x| x.unwrap().path().to_owned())
                     .collect();
-                out.extend(collect_files(files, out_dir, out_file, recursive));
+                in_out_pairs.extend(collect_files(files, out_dir, out_file, recursive, false));
             } else {
                 eprintln!("{} is a directory, skipping", input.display());
             }
+            continue;
+        };
+        let out_file = if let Some(ref out_dir) = *out_dir {
+            let out_path = Some(out_dir.join(input.file_name().unwrap()));
+            OutFile::Path(out_path)
         } else {
-            out.push(if let Some(ref out_dir) = *out_dir {
-                let out_path = Some(out_dir.join(input.file_name().unwrap()));
-                (input, OutFile::Path(out_path))
-            } else {
-                (input, (*out_file).clone())
-            });
-        }
+            (*out_file).clone()
+        };
+        let in_file = if using_stdin {
+            InFile::StdIn
+        } else {
+            InFile::Path(input)
+        };
+        in_out_pairs.push((in_file, out_file));
     }
-    out
+    in_out_pairs
 }
 
 #[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]

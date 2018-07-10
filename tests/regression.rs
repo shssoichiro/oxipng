@@ -2,7 +2,7 @@ extern crate oxipng;
 
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
-use oxipng::OutFile;
+use oxipng::{InFile, OutFile};
 use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
@@ -34,7 +34,7 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -79,7 +79,7 @@ fn issue_42() {
     assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };

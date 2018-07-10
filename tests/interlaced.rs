@@ -1,6 +1,6 @@
 extern crate oxipng;
 
-use oxipng::OutFile;
+use oxipng::{InFile, OutFile};
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
@@ -34,7 +34,7 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
     assert_eq!(png.ihdr_data.interlaced, 1);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
