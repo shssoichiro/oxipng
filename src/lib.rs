@@ -506,7 +506,7 @@ fn optimize_png(
             .filter_map(|trial| {
                 let filtered = &filters[&trial.filter];
                 let new_idat = if opts.deflate == Deflaters::Zlib {
-                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window, best_size.get())
+                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window, &best_size)
                 } else {
                     deflate::zopfli_deflate(filtered)
                 };
