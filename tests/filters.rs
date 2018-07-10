@@ -2,26 +2,26 @@ extern crate oxipng;
 
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
+use oxipng::OutFile;
 use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
-fn get_opts(input: &Path) -> oxipng::Options {
+fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
     filter.insert(0);
     options.filter = filter;
 
-    options
+    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
 }
 
 fn test_it_converts(
     input: &Path,
-    output: &Path,
+    output: &OutFile,
     opts: &oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
@@ -33,10 +33,11 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(input, opts) {
+    match oxipng::optimize(input, output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(output, opts.fix_errors) {
@@ -56,10 +57,9 @@ fn test_it_converts(
 #[test]
 fn filter_0_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_0_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -75,10 +75,9 @@ fn filter_0_for_rgba_16() {
 #[test]
 fn filter_1_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_1_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -94,10 +93,9 @@ fn filter_1_for_rgba_16() {
 #[test]
 fn filter_2_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_2_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -113,10 +111,9 @@ fn filter_2_for_rgba_16() {
 #[test]
 fn filter_3_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_3_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -132,10 +129,9 @@ fn filter_3_for_rgba_16() {
 #[test]
 fn filter_4_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_4_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -151,10 +147,9 @@ fn filter_4_for_rgba_16() {
 #[test]
 fn filter_5_for_rgba_16() {
     let input = PathBuf::from("tests/files/filter_5_for_rgba_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -170,10 +165,9 @@ fn filter_5_for_rgba_16() {
 #[test]
 fn filter_0_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_0_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -189,10 +183,9 @@ fn filter_0_for_rgba_8() {
 #[test]
 fn filter_1_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_1_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -208,10 +201,9 @@ fn filter_1_for_rgba_8() {
 #[test]
 fn filter_2_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_2_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -227,10 +219,9 @@ fn filter_2_for_rgba_8() {
 #[test]
 fn filter_3_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_3_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -246,10 +237,9 @@ fn filter_3_for_rgba_8() {
 #[test]
 fn filter_4_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_4_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -265,10 +255,9 @@ fn filter_4_for_rgba_8() {
 #[test]
 fn filter_5_for_rgba_8() {
     let input = PathBuf::from("tests/files/filter_5_for_rgba_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -284,10 +273,9 @@ fn filter_5_for_rgba_8() {
 #[test]
 fn filter_0_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_0_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -303,10 +291,9 @@ fn filter_0_for_rgb_16() {
 #[test]
 fn filter_1_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_1_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -322,10 +309,9 @@ fn filter_1_for_rgb_16() {
 #[test]
 fn filter_2_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_2_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -341,10 +327,9 @@ fn filter_2_for_rgb_16() {
 #[test]
 fn filter_3_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_3_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -360,10 +345,9 @@ fn filter_3_for_rgb_16() {
 #[test]
 fn filter_4_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_4_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -379,10 +363,9 @@ fn filter_4_for_rgb_16() {
 #[test]
 fn filter_5_for_rgb_16() {
     let input = PathBuf::from("tests/files/filter_5_for_rgb_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -398,10 +381,9 @@ fn filter_5_for_rgb_16() {
 #[test]
 fn filter_0_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_0_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -417,10 +399,9 @@ fn filter_0_for_rgb_8() {
 #[test]
 fn filter_1_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_1_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -436,10 +417,9 @@ fn filter_1_for_rgb_8() {
 #[test]
 fn filter_2_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_2_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -455,10 +435,9 @@ fn filter_2_for_rgb_8() {
 #[test]
 fn filter_3_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_3_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -474,10 +453,9 @@ fn filter_3_for_rgb_8() {
 #[test]
 fn filter_4_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_4_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -493,10 +471,9 @@ fn filter_4_for_rgb_8() {
 #[test]
 fn filter_5_for_rgb_8() {
     let input = PathBuf::from("tests/files/filter_5_for_rgb_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -512,10 +489,9 @@ fn filter_5_for_rgb_8() {
 #[test]
 fn filter_0_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_0_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -531,10 +507,9 @@ fn filter_0_for_grayscale_alpha_16() {
 #[test]
 fn filter_1_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_1_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -550,10 +525,9 @@ fn filter_1_for_grayscale_alpha_16() {
 #[test]
 fn filter_2_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_2_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -569,10 +543,9 @@ fn filter_2_for_grayscale_alpha_16() {
 #[test]
 fn filter_3_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_3_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -588,10 +561,9 @@ fn filter_3_for_grayscale_alpha_16() {
 #[test]
 fn filter_4_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_4_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -607,10 +579,9 @@ fn filter_4_for_grayscale_alpha_16() {
 #[test]
 fn filter_5_for_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/filter_5_for_grayscale_alpha_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -626,10 +597,9 @@ fn filter_5_for_grayscale_alpha_16() {
 #[test]
 fn filter_0_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_0_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -645,10 +615,9 @@ fn filter_0_for_grayscale_alpha_8() {
 #[test]
 fn filter_1_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_1_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -664,10 +633,9 @@ fn filter_1_for_grayscale_alpha_8() {
 #[test]
 fn filter_2_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_2_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -683,10 +651,9 @@ fn filter_2_for_grayscale_alpha_8() {
 #[test]
 fn filter_3_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_3_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -702,10 +669,9 @@ fn filter_3_for_grayscale_alpha_8() {
 #[test]
 fn filter_4_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_4_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -721,10 +687,9 @@ fn filter_4_for_grayscale_alpha_8() {
 #[test]
 fn filter_5_for_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/filter_5_for_grayscale_alpha_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -740,10 +705,9 @@ fn filter_5_for_grayscale_alpha_8() {
 #[test]
 fn filter_0_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_0_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -759,10 +723,9 @@ fn filter_0_for_grayscale_16() {
 #[test]
 fn filter_1_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_1_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -778,10 +741,9 @@ fn filter_1_for_grayscale_16() {
 #[test]
 fn filter_2_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_2_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -797,10 +759,9 @@ fn filter_2_for_grayscale_16() {
 #[test]
 fn filter_3_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_3_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -816,10 +777,9 @@ fn filter_3_for_grayscale_16() {
 #[test]
 fn filter_4_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_4_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -835,10 +795,9 @@ fn filter_4_for_grayscale_16() {
 #[test]
 fn filter_5_for_grayscale_16() {
     let input = PathBuf::from("tests/files/filter_5_for_grayscale_16.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -854,10 +813,9 @@ fn filter_5_for_grayscale_16() {
 #[test]
 fn filter_0_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_0_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -873,10 +831,9 @@ fn filter_0_for_grayscale_8() {
 #[test]
 fn filter_1_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_1_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -892,10 +849,9 @@ fn filter_1_for_grayscale_8() {
 #[test]
 fn filter_2_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_2_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -911,10 +867,9 @@ fn filter_2_for_grayscale_8() {
 #[test]
 fn filter_3_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_3_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -930,10 +885,9 @@ fn filter_3_for_grayscale_8() {
 #[test]
 fn filter_4_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_4_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -949,10 +903,9 @@ fn filter_4_for_grayscale_8() {
 #[test]
 fn filter_5_for_grayscale_8() {
     let input = PathBuf::from("tests/files/filter_5_for_grayscale_8.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -968,10 +921,9 @@ fn filter_5_for_grayscale_8() {
 #[test]
 fn filter_0_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_0_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -987,10 +939,9 @@ fn filter_0_for_palette_4() {
 #[test]
 fn filter_1_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_1_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1006,10 +957,9 @@ fn filter_1_for_palette_4() {
 #[test]
 fn filter_2_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_2_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1025,10 +975,9 @@ fn filter_2_for_palette_4() {
 #[test]
 fn filter_3_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_3_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1044,10 +993,9 @@ fn filter_3_for_palette_4() {
 #[test]
 fn filter_4_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_4_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1063,10 +1011,9 @@ fn filter_4_for_palette_4() {
 #[test]
 fn filter_5_for_palette_4() {
     let input = PathBuf::from("tests/files/filter_5_for_palette_4.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1082,10 +1029,9 @@ fn filter_5_for_palette_4() {
 #[test]
 fn filter_0_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_0_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1101,10 +1047,9 @@ fn filter_0_for_palette_2() {
 #[test]
 fn filter_1_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_1_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1120,10 +1065,9 @@ fn filter_1_for_palette_2() {
 #[test]
 fn filter_2_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_2_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1139,10 +1083,9 @@ fn filter_2_for_palette_2() {
 #[test]
 fn filter_3_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_3_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1158,10 +1101,9 @@ fn filter_3_for_palette_2() {
 #[test]
 fn filter_4_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_4_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1177,10 +1119,9 @@ fn filter_4_for_palette_2() {
 #[test]
 fn filter_5_for_palette_2() {
     let input = PathBuf::from("tests/files/filter_5_for_palette_2.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1196,10 +1137,9 @@ fn filter_5_for_palette_2() {
 #[test]
 fn filter_0_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_0_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(0);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1215,10 +1155,9 @@ fn filter_0_for_palette_1() {
 #[test]
 fn filter_1_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_1_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1234,10 +1173,9 @@ fn filter_1_for_palette_1() {
 #[test]
 fn filter_2_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_2_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(2);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1253,10 +1191,9 @@ fn filter_2_for_palette_1() {
 #[test]
 fn filter_3_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_3_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(3);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1272,10 +1209,9 @@ fn filter_3_for_palette_1() {
 #[test]
 fn filter_4_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_4_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(4);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -1291,10 +1227,9 @@ fn filter_4_for_palette_1() {
 #[test]
 fn filter_5_for_palette_1() {
     let input = PathBuf::from("tests/files/filter_5_for_palette_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.filter = HashSet::new();
     opts.filter.insert(5);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,

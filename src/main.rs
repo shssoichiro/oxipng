@@ -15,6 +15,7 @@ use clap::{App, Arg, ArgMatches};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
+use oxipng::OutFile;
 use oxipng::{Options, PngError};
 use std::collections::HashSet;
 use std::fs::DirBuilder;
@@ -209,7 +210,7 @@ fn main() {
     regardless of the order you write the arguments.")
         .get_matches_from(wild::args());
 
-    let opts = match parse_opts_into_struct(&matches) {
+    let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
         Err(x) => {
             eprintln!("{}", x);
@@ -217,45 +218,47 @@ fn main() {
         }
     };
 
-    if let Err(e) = handle_optimization(
-        matches.values_of("files").unwrap()
-            .map(PathBuf::from).collect(),
-        &opts,
-    ) {
+    let files = collect_files(matches.values_of("files").unwrap()
+            .map(PathBuf::from).collect(), &out_dir, &out_file, opts.recursive);
+
+    let res: Result<(), PngError> = files.into_iter().map(|(input, output)| {
+         oxipng::optimize(&input, &output, &opts)
+    }).collect();
+
+    if let Err(e) = res {
         eprintln!("{}", e);
         exit(1);
     }
 }
 
-fn handle_optimization(inputs: Vec<PathBuf>, opts: &Options) -> Result<(), PngError> {
-    inputs.into_iter().fold(Ok(()), |res, input| {
-        let mut current_opts = opts.clone();
+fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutFile, recursive: bool) -> Vec<(PathBuf, OutFile)> {
+    let mut out = Vec::new();
+    for input in files {
         if input.is_dir() {
-            if current_opts.recursive {
-                let cur_result = handle_optimization(
-                    input
-                        .read_dir()
-                        .unwrap()
-                        .map(|x| x.unwrap().path())
-                        .collect(),
-                    &current_opts,
-                );
-                return res.and(cur_result);
+            if recursive {
+                let files = input
+                    .read_dir()
+                    .unwrap()
+                    .map(|x| x.unwrap().path().to_owned())
+                    .collect();
+                out.extend(collect_files(files, out_dir, out_file, recursive));
             } else {
                 eprintln!("{} is a directory, skipping", input.display());
             }
-            return res;
+        } else {
+            out.push(if let Some(ref out_dir) = *out_dir {
+                let out_path = Some(out_dir.join(input.file_name().unwrap()));
+                (input, OutFile::Path(out_path))
+            } else {
+                (input, (*out_file).clone())
+            });
         }
-        if let Some(ref out_dir) = current_opts.out_dir {
-            current_opts.out_file = Some(out_dir.join(input.file_name().unwrap()));
-        }
-        let cur_result = oxipng::optimize(&input, &current_opts);
-        res.and(cur_result)
-    })
+    }
+    out
 }
 
 #[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
-fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
+fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathBuf>, Options), String> {
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
             Options::from_preset(opt)
@@ -294,7 +297,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
         _ => (),
     }
 
-    if let Some(x) = matches.value_of("output_dir") {
+    let out_dir = if let Some(x) = matches.value_of("output_dir") {
         let path = PathBuf::from(x);
         if !path.exists() {
             match DirBuilder::new().recursive(true).create(&path) {
@@ -307,16 +310,18 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
                 x
             ));
         }
-        opts.out_dir = Some(path);
-    }
+        Some(path)
+    } else {
+        None
+    };
 
-    if let Some(x) = matches.value_of("output_file") {
-        opts.out_file = Some(PathBuf::from(x));
-    }
-
-    if matches.is_present("stdout") {
-        opts.stdout = true;
-    }
+    let out_file = if matches.is_present("stdout") {
+        OutFile::StdOut
+    } else if let Some(x) = matches.value_of("output_file") {
+        OutFile::Path(Some(PathBuf::from(x)))
+    } else {
+        OutFile::Path(None)
+    };
 
     if matches.is_present("alpha") {
         opts.alphas.insert(AlphaOptim::White);
@@ -422,7 +427,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<Options, String> {
         opts.threads = x.parse::<usize>().unwrap();
     }
 
-    Ok(opts)
+    Ok((out_file, out_dir, opts))
 }
 
 fn parse_numeric_range_opts(

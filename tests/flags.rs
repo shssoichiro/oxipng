@@ -1,5 +1,6 @@
 extern crate oxipng;
 
+use oxipng::OutFile;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
@@ -9,21 +10,20 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
-fn get_opts(input: &Path) -> oxipng::Options {
+fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
     filter.insert(0);
     options.filter = filter;
 
-    options
+    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
 }
 
 fn test_it_converts(
     input: &Path,
-    output: &Path,
+    output: &OutFile,
     opts: &oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
@@ -35,10 +35,11 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(input, opts) {
+    match oxipng::optimize(input, output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(output, opts.fix_errors) {
@@ -58,9 +59,8 @@ fn test_it_converts(
 #[test]
 fn verbose_mode() {
     let input = PathBuf::from("tests/files/verbose_mode.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.verbosity = Some(1);
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -76,9 +76,8 @@ fn verbose_mode() {
 #[test]
 fn strip_headers_list() {
     let input = PathBuf::from("tests/files/strip_headers_list.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.strip = Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -86,10 +85,11 @@ fn strip_headers_list() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -110,9 +110,8 @@ fn strip_headers_list() {
 #[test]
 fn strip_headers_safe() {
     let input = PathBuf::from("tests/files/strip_headers_safe.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.strip = Headers::Safe;
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -120,10 +119,11 @@ fn strip_headers_safe() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -144,9 +144,8 @@ fn strip_headers_safe() {
 #[test]
 fn strip_headers_all() {
     let input = PathBuf::from("tests/files/strip_headers_all.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.strip = Headers::All;
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -154,10 +153,11 @@ fn strip_headers_all() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -178,9 +178,8 @@ fn strip_headers_all() {
 #[test]
 fn strip_headers_none() {
     let input = PathBuf::from("tests/files/strip_headers_none.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.strip = Headers::None;
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -188,10 +187,11 @@ fn strip_headers_none() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -212,18 +212,18 @@ fn strip_headers_none() {
 #[test]
 fn interlacing_0_to_1() {
     let input = PathBuf::from("tests/files/interlacing_0_to_1.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 0);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -242,18 +242,18 @@ fn interlacing_0_to_1() {
 #[test]
 fn interlacing_1_to_0() {
     let input = PathBuf::from("tests/files/interlacing_1_to_0.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(0);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 1);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -272,9 +272,8 @@ fn interlacing_1_to_0() {
 #[test]
 fn interlacing_0_to_1_small_files() {
     let input = PathBuf::from("tests/files/interlacing_0_to_1_small_files.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -282,10 +281,11 @@ fn interlacing_0_to_1_small_files() {
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -306,9 +306,8 @@ fn interlacing_0_to_1_small_files() {
 #[test]
 fn interlacing_1_to_0_small_files() {
     let input = PathBuf::from("tests/files/interlacing_1_to_0_small_files.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(0);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -316,10 +315,11 @@ fn interlacing_1_to_0_small_files() {
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -340,21 +340,21 @@ fn interlacing_1_to_0_small_files() {
 #[test]
 fn interlaced_0_to_1_other_filter_mode() {
     let input = PathBuf::from("tests/files/interlaced_0_to_1_other_filter_mode.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
     let mut filter = HashSet::new();
     filter.insert(4);
     opts.filter = filter;
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.interlaced, 0);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -373,9 +373,8 @@ fn interlaced_0_to_1_other_filter_mode() {
 #[test]
 fn preserve_attrs() {
     let input = PathBuf::from("tests/files/preserve_attrs.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.preserve_attrs = true;
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,
@@ -393,19 +392,19 @@ fn preserve_attrs() {
 #[test]
 fn fix_errors() {
     let input = PathBuf::from("tests/files/fix_errors.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.fix_errors = true;
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, false) {
@@ -426,9 +425,8 @@ fn fix_errors() {
 #[test]
 fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.deflate = Deflaters::Zopfli;
-    let output = opts.out_file.clone().unwrap();
 
     test_it_converts(
         &input,

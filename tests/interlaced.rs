@@ -1,5 +1,6 @@
 extern crate oxipng;
 
+use oxipng::OutFile;
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
 use std::collections::HashSet;
@@ -7,21 +8,20 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
-fn get_opts(input: &Path) -> oxipng::Options {
+fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
     filter.insert(0);
     options.filter = filter;
 
-    options
+    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
 }
 
 fn test_it_converts(
     input: &Path,
-    output: &Path,
+    output: &OutFile,
     opts: &oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
@@ -34,10 +34,11 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
     assert_eq!(png.ihdr_data.interlaced, 1);
 
-    match oxipng::optimize(input, opts) {
+    match oxipng::optimize(input, output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(output, opts.fix_errors) {
@@ -57,8 +58,7 @@ fn test_it_converts(
 #[test]
 fn interlaced_rgba_16_should_be_rgba_16() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_rgba_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -74,8 +74,7 @@ fn interlaced_rgba_16_should_be_rgba_16() {
 #[test]
 fn interlaced_rgba_16_should_be_rgba_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_rgba_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -91,8 +90,7 @@ fn interlaced_rgba_16_should_be_rgba_8() {
 #[test]
 fn interlaced_rgba_8_should_be_rgba_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_rgba_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -108,8 +106,7 @@ fn interlaced_rgba_8_should_be_rgba_8() {
 #[test]
 fn interlaced_rgba_16_should_be_rgb_16() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_rgb_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -125,8 +122,7 @@ fn interlaced_rgba_16_should_be_rgb_16() {
 #[test]
 fn interlaced_rgba_16_should_be_rgb_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_rgb_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -142,8 +138,7 @@ fn interlaced_rgba_16_should_be_rgb_8() {
 #[test]
 fn interlaced_rgba_8_should_be_rgb_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_rgb_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -159,8 +154,7 @@ fn interlaced_rgba_8_should_be_rgb_8() {
 #[test]
 fn interlaced_rgba_16_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_palette_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -176,8 +170,7 @@ fn interlaced_rgba_16_should_be_palette_8() {
 #[test]
 fn interlaced_rgba_8_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_palette_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -193,8 +186,7 @@ fn interlaced_rgba_8_should_be_palette_8() {
 #[test]
 fn interlaced_rgba_16_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -210,8 +202,7 @@ fn interlaced_rgba_16_should_be_palette_4() {
 #[test]
 fn interlaced_rgba_8_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -227,8 +218,7 @@ fn interlaced_rgba_8_should_be_palette_4() {
 #[test]
 fn interlaced_rgba_16_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -244,8 +234,7 @@ fn interlaced_rgba_16_should_be_palette_2() {
 #[test]
 fn interlaced_rgba_8_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -261,8 +250,7 @@ fn interlaced_rgba_8_should_be_palette_2() {
 #[test]
 fn interlaced_rgba_16_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -278,8 +266,7 @@ fn interlaced_rgba_16_should_be_palette_1() {
 #[test]
 fn interlaced_rgba_8_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -295,8 +282,7 @@ fn interlaced_rgba_8_should_be_palette_1() {
 #[test]
 fn interlaced_rgba_16_should_be_grayscale_alpha_16() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_grayscale_alpha_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -312,8 +298,7 @@ fn interlaced_rgba_16_should_be_grayscale_alpha_16() {
 #[test]
 fn interlaced_rgba_16_should_be_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_grayscale_alpha_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -329,8 +314,7 @@ fn interlaced_rgba_16_should_be_grayscale_alpha_8() {
 #[test]
 fn interlaced_rgba_8_should_be_grayscale_alpha_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_grayscale_alpha_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -346,8 +330,7 @@ fn interlaced_rgba_8_should_be_grayscale_alpha_8() {
 #[test]
 fn interlaced_rgba_16_should_be_grayscale_16() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_grayscale_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -363,8 +346,7 @@ fn interlaced_rgba_16_should_be_grayscale_16() {
 #[test]
 fn interlaced_rgba_16_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_16_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -380,8 +362,7 @@ fn interlaced_rgba_16_should_be_grayscale_8() {
 #[test]
 fn interlaced_rgba_8_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_rgba_8_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -397,8 +378,7 @@ fn interlaced_rgba_8_should_be_grayscale_8() {
 #[test]
 fn interlaced_rgb_16_should_be_rgb_16() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_rgb_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -414,8 +394,7 @@ fn interlaced_rgb_16_should_be_rgb_16() {
 #[test]
 fn interlaced_rgb_16_should_be_rgb_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_rgb_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -431,8 +410,7 @@ fn interlaced_rgb_16_should_be_rgb_8() {
 #[test]
 fn interlaced_rgb_8_should_be_rgb_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_rgb_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -448,8 +426,7 @@ fn interlaced_rgb_8_should_be_rgb_8() {
 #[test]
 fn interlaced_rgb_16_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_palette_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -465,8 +442,7 @@ fn interlaced_rgb_16_should_be_palette_8() {
 #[test]
 fn interlaced_rgb_8_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_palette_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -482,8 +458,7 @@ fn interlaced_rgb_8_should_be_palette_8() {
 #[test]
 fn interlaced_rgb_16_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -499,8 +474,7 @@ fn interlaced_rgb_16_should_be_palette_4() {
 #[test]
 fn interlaced_rgb_8_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -516,8 +490,7 @@ fn interlaced_rgb_8_should_be_palette_4() {
 #[test]
 fn interlaced_rgb_16_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -533,8 +506,7 @@ fn interlaced_rgb_16_should_be_palette_2() {
 #[test]
 fn interlaced_rgb_8_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -550,8 +522,7 @@ fn interlaced_rgb_8_should_be_palette_2() {
 #[test]
 fn interlaced_rgb_16_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -567,8 +538,7 @@ fn interlaced_rgb_16_should_be_palette_1() {
 #[test]
 fn interlaced_rgb_8_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -584,8 +554,7 @@ fn interlaced_rgb_8_should_be_palette_1() {
 #[test]
 fn interlaced_rgb_16_should_be_grayscale_16() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_grayscale_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -601,8 +570,7 @@ fn interlaced_rgb_16_should_be_grayscale_16() {
 #[test]
 fn interlaced_rgb_16_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_16_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -618,8 +586,7 @@ fn interlaced_rgb_16_should_be_grayscale_8() {
 #[test]
 fn interlaced_rgb_8_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_rgb_8_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -635,8 +602,7 @@ fn interlaced_rgb_8_should_be_grayscale_8() {
 #[test]
 fn interlaced_palette_8_should_be_palette_8() {
     let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_palette_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -652,8 +618,7 @@ fn interlaced_palette_8_should_be_palette_8() {
 #[test]
 fn interlaced_palette_8_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -669,8 +634,7 @@ fn interlaced_palette_8_should_be_palette_4() {
 #[test]
 fn interlaced_palette_4_should_be_palette_4() {
     let input = PathBuf::from("tests/files/interlaced_palette_4_should_be_palette_4.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -686,8 +650,7 @@ fn interlaced_palette_4_should_be_palette_4() {
 #[test]
 fn interlaced_palette_8_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -703,8 +666,7 @@ fn interlaced_palette_8_should_be_palette_2() {
 #[test]
 fn interlaced_palette_4_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_palette_4_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -720,8 +682,7 @@ fn interlaced_palette_4_should_be_palette_2() {
 #[test]
 fn interlaced_palette_2_should_be_palette_2() {
     let input = PathBuf::from("tests/files/interlaced_palette_2_should_be_palette_2.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -737,8 +698,7 @@ fn interlaced_palette_2_should_be_palette_2() {
 #[test]
 fn interlaced_palette_8_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_palette_8_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -754,8 +714,7 @@ fn interlaced_palette_8_should_be_palette_1() {
 #[test]
 fn interlaced_palette_4_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_palette_4_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -771,8 +730,7 @@ fn interlaced_palette_4_should_be_palette_1() {
 #[test]
 fn interlaced_palette_2_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_palette_2_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -788,8 +746,7 @@ fn interlaced_palette_2_should_be_palette_1() {
 #[test]
 fn interlaced_palette_1_should_be_palette_1() {
     let input = PathBuf::from("tests/files/interlaced_palette_1_should_be_palette_1.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -806,8 +763,7 @@ fn interlaced_palette_1_should_be_palette_1() {
 fn interlaced_grayscale_alpha_16_should_be_grayscale_alpha_16() {
     let input =
         PathBuf::from("tests/files/interlaced_grayscale_alpha_16_should_be_grayscale_alpha_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -824,8 +780,7 @@ fn interlaced_grayscale_alpha_16_should_be_grayscale_alpha_16() {
 fn interlaced_grayscale_alpha_16_should_be_grayscale_alpha_8() {
     let input =
         PathBuf::from("tests/files/interlaced_grayscale_alpha_16_should_be_grayscale_alpha_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -842,8 +797,7 @@ fn interlaced_grayscale_alpha_16_should_be_grayscale_alpha_8() {
 fn interlaced_grayscale_alpha_8_should_be_grayscale_alpha_8() {
     let input =
         PathBuf::from("tests/files/interlaced_grayscale_alpha_8_should_be_grayscale_alpha_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -860,8 +814,7 @@ fn interlaced_grayscale_alpha_8_should_be_grayscale_alpha_8() {
 fn interlaced_grayscale_alpha_16_should_be_grayscale_16() {
     let input =
         PathBuf::from("tests/files/interlaced_grayscale_alpha_16_should_be_grayscale_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -878,8 +831,7 @@ fn interlaced_grayscale_alpha_16_should_be_grayscale_16() {
 fn interlaced_grayscale_alpha_16_should_be_grayscale_8() {
     let input =
         PathBuf::from("tests/files/interlaced_grayscale_alpha_16_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -895,8 +847,7 @@ fn interlaced_grayscale_alpha_16_should_be_grayscale_8() {
 #[test]
 fn interlaced_grayscale_alpha_8_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_grayscale_alpha_8_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -912,8 +863,7 @@ fn interlaced_grayscale_alpha_8_should_be_grayscale_8() {
 #[test]
 fn interlaced_grayscale_16_should_be_grayscale_16() {
     let input = PathBuf::from("tests/files/interlaced_grayscale_16_should_be_grayscale_16.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -929,8 +879,7 @@ fn interlaced_grayscale_16_should_be_grayscale_16() {
 #[test]
 fn interlaced_grayscale_16_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_grayscale_16_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -946,8 +895,7 @@ fn interlaced_grayscale_16_should_be_grayscale_8() {
 #[test]
 fn interlaced_grayscale_8_should_be_grayscale_8() {
     let input = PathBuf::from("tests/files/interlaced_grayscale_8_should_be_grayscale_8.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -963,8 +911,7 @@ fn interlaced_grayscale_8_should_be_grayscale_8() {
 #[test]
 fn interlaced_small_files() {
     let input = PathBuf::from("tests/files/interlaced_small_files.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -980,8 +927,7 @@ fn interlaced_small_files() {
 #[test]
 fn interlaced_odd_width() {
     let input = PathBuf::from("tests/files/interlaced_odd_width.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,

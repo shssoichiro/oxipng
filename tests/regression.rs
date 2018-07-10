@@ -2,26 +2,26 @@ extern crate oxipng;
 
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::png;
+use oxipng::OutFile;
 use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
-fn get_opts(input: &Path) -> oxipng::Options {
+fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.out_file = Some(input.with_extension("out.png").to_owned());
     options.verbosity = None;
     options.force = true;
     let mut filter = HashSet::new();
     filter.insert(0);
     options.filter = filter;
 
-    options
+    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
 }
 
 fn test_it_converts(
     input: &Path,
-    output: &Path,
+    output: &OutFile,
     opts: &oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
@@ -33,10 +33,11 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(input, opts) {
+    match oxipng::optimize(input, output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(output, opts.fix_errors) {
@@ -56,8 +57,7 @@ fn test_it_converts(
 #[test]
 fn issue_29() {
     let input = PathBuf::from("tests/files/issue-29.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -73,9 +73,8 @@ fn issue_29() {
 #[test]
 fn issue_42() {
     let input = PathBuf::from("tests/files/issue_42.png");
-    let mut opts = get_opts(&input);
+    let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
-    let output = opts.out_file.clone().unwrap();
 
     let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -83,10 +82,11 @@ fn issue_42() {
     assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
+    let output = output.path().unwrap();
     assert!(output.exists());
 
     let png = match png::PngData::new(&output, opts.fix_errors) {
@@ -107,8 +107,7 @@ fn issue_42() {
 #[test]
 fn issue_52_01() {
     let input = PathBuf::from("tests/files/issue-52-01.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -124,8 +123,7 @@ fn issue_52_01() {
 #[test]
 fn issue_52_02() {
     let input = PathBuf::from("tests/files/issue-52-02.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -141,8 +139,7 @@ fn issue_52_02() {
 #[test]
 fn issue_52_03() {
     let input = PathBuf::from("tests/files/issue-52-03.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -158,8 +155,7 @@ fn issue_52_03() {
 #[test]
 fn issue_52_04() {
     let input = PathBuf::from("tests/files/issue-52-04.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -175,8 +171,7 @@ fn issue_52_04() {
 #[test]
 fn issue_52_05() {
     let input = PathBuf::from("tests/files/issue-52-05.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -192,8 +187,7 @@ fn issue_52_05() {
 #[test]
 fn issue_52_06() {
     let input = PathBuf::from("tests/files/issue-52-06.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -209,8 +203,7 @@ fn issue_52_06() {
 #[test]
 fn issue_56() {
     let input = PathBuf::from("tests/files/issue-56.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -226,8 +219,7 @@ fn issue_56() {
 #[test]
 fn issue_58() {
     let input = PathBuf::from("tests/files/issue-58.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -243,8 +235,7 @@ fn issue_58() {
 #[test]
 fn issue_59() {
     let input = PathBuf::from("tests/files/issue-59.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -260,8 +251,7 @@ fn issue_59() {
 #[test]
 fn issue_60() {
     let input = PathBuf::from("tests/files/issue-60.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -277,8 +267,7 @@ fn issue_60() {
 #[test]
 fn issue_80() {
     let input = PathBuf::from("tests/files/issue-80.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -294,8 +283,7 @@ fn issue_80() {
 #[test]
 fn issue_82() {
     let input = PathBuf::from("tests/files/issue-82.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -311,8 +299,7 @@ fn issue_82() {
 #[test]
 fn issue_89() {
     let input = PathBuf::from("tests/files/issue-89.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -328,8 +315,7 @@ fn issue_89() {
 #[test]
 fn issue_92_filter_0() {
     let input = PathBuf::from("tests/files/issue-92.png");
-    let opts = get_opts(&input);
-    let output = opts.out_file.clone().unwrap();
+    let (output, opts) = get_opts(&input);
 
     test_it_converts(
         &input,
@@ -345,12 +331,11 @@ fn issue_92_filter_0() {
 #[test]
 fn issue_92_filter_5() {
     let input = PathBuf::from("tests/files/issue-92.png");
-    let mut opts = get_opts(&input);
+    let (_, mut opts) = get_opts(&input);
     let mut filter = HashSet::new();
     filter.insert(5);
     opts.filter = filter;
-    opts.out_file = Some(input.with_extension("-f5-out.png").to_owned());
-    let output = opts.out_file.clone().unwrap();
+    let output = OutFile::Path(Some(input.with_extension("-f5-out.png").to_owned()));
 
     test_it_converts(
         &input,

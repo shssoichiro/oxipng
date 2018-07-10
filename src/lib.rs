@@ -45,22 +45,28 @@ mod reduction;
 mod atomicmin;
 
 #[derive(Clone, Debug)]
+pub enum OutFile {
+    /// Path(None) means same as input
+    Path(Option<PathBuf>),
+    StdOut,
+}
+
+impl OutFile {
+    pub fn path(&self) -> Option<&Path> {
+        match *self {
+            OutFile::Path(Some(ref p)) => Some(p.as_path()),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 /// Options controlling the output of the `optimize` function
 pub struct Options {
     /// Whether the input file should be backed up before writing the output.
     ///
     /// Default: `false`
     pub backup: bool,
-    /// Path to write the output file to. If not set, the application will default to
-    /// overwriting the input file.
-    pub out_file: Option<PathBuf>,
-    /// Used only in CLI interface
-    #[doc(hidden)]
-    pub out_dir: Option<PathBuf>,
-    /// Write to stdout instead of a file.
-    ///
-    /// Default: `false`
-    pub stdout: bool,
     /// Attempt to fix errors when decoding the input file rather than returning an `Err`.
     ///
     /// Default: `false`
@@ -247,9 +253,6 @@ impl Default for Options {
 
         Options {
             backup: false,
-            out_file: None,
-            out_dir: None,
-            stdout: false,
             pretend: false,
             recursive: false,
             fix_errors: false,
@@ -277,7 +280,7 @@ impl Default for Options {
 }
 
 /// Perform optimization on the input file using the options provided
-pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
+pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
@@ -293,19 +296,20 @@ pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
 
     let in_data = PngData::read_file(input_path)?;
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
-    let output_path = opts.out_file
-        .clone()
-        .unwrap_or_else(|| input_path.to_path_buf());
 
     // Run the optimizer on the decoded PNG.
     let mut optimized_output = optimize_png(&mut png, &in_data, opts)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         eprintln!("File already optimized");
-        if input_path == output_path {
-            return Ok(());
-        } else {
-            optimized_output = in_data;
+        match *output {
+            // if p is None, it also means same as the input path
+            OutFile::Path(ref p) if p.as_ref().map_or(true, |p| p == input_path) => {
+                return Ok(());
+            },
+            _ => {
+                optimized_output = in_data;
+            }
         }
     }
 
@@ -313,45 +317,35 @@ pub fn optimize(input_path: &Path, opts: &Options) -> Result<(), PngError> {
         if opts.verbosity.is_some() {
             eprintln!("Running in pretend mode, no output");
         }
-    } else {
-        if opts.backup {
-            perform_backup(input_path)?;
-        }
+        return Ok(());
+    }
 
-        if opts.stdout {
+    match *output {
+        OutFile::StdOut => {
             let mut buffer = BufWriter::new(stdout());
-            match buffer.write_all(&optimized_output) {
-                Ok(_) => (),
-                Err(_) => return Err(PngError::new("Unable to write to stdout")),
+            buffer.write_all(&optimized_output)
+                .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
+        },
+        OutFile::Path(ref output_path) => {
+            let output_path = output_path.as_ref().map(|p| p.as_path()).unwrap_or(input_path);
+            if opts.backup {
+                perform_backup(output_path)?;
             }
-        } else {
-            let out_file = match File::create(&output_path) {
-                Ok(x) => x,
-                Err(_) => {
-                    return Err(PngError::new(&format!(
-                        "Unable to write to file {}",
-                        output_path.display()
-                    )))
-                }
-            };
-
+            let out_file = File::create(output_path)
+                .map_err(|err| PngError::new(&format!(
+                    "Unable to write to file {}: {}", output_path.display(), err
+                )))?;
             if opts.preserve_attrs {
                 copy_permissions(input_path, &out_file, opts.verbosity);
             }
 
             let mut buffer = BufWriter::new(out_file);
-            match buffer.write_all(&optimized_output) {
-                Ok(_) => if opts.verbosity.is_some() {
-                    eprintln!("Output: {}", output_path.display());
-                },
-                Err(_) => {
-                    return Err(PngError::new(&format!(
-                        "Unable to write to file {}",
-                        output_path.display()
-                    )))
-                }
+            buffer.write_all(&optimized_output)
+                .map_err(|e| PngError::new(&format!("Unable to write to {}: {}", output_path.display(), e)))?;
+            if opts.verbosity.is_some() {
+                eprintln!("Output: {}", output_path.display());
             }
-        }
+        },
     }
     Ok(())
 }

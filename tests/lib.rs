@@ -1,5 +1,6 @@
 extern crate oxipng;
 
+use oxipng::OutFile;
 use std::default::Default;
 use std::fs::File;
 use std::path::Path;
@@ -49,7 +50,7 @@ fn optimize() {
     let mut opts: oxipng::Options = Default::default();
     opts.verbosity = Some(1);
 
-    let result = oxipng::optimize(Path::new("tests/files/fully_optimized.png"), &opts);
+    let result = oxipng::optimize(Path::new("tests/files/fully_optimized.png"), &OutFile::Path(None), &opts);
     assert!(result.is_ok());
 }
 
@@ -58,7 +59,7 @@ fn optimize_corrupted() {
     let mut opts: oxipng::Options = Default::default();
     opts.verbosity = Some(1);
 
-    let result = oxipng::optimize(Path::new("tests/files/corrupted_header.png"), &opts);
+    let result = oxipng::optimize(Path::new("tests/files/corrupted_header.png"), &OutFile::Path(None), &opts);
     assert!(result.is_err());
 }
 
@@ -67,6 +68,6 @@ fn optimize_apng() {
     let mut opts: oxipng::Options = Default::default();
     opts.verbosity = Some(1);
 
-    let result = oxipng::optimize(Path::new("tests/files/apng_file.png"), &opts);
+    let result = oxipng::optimize(Path::new("tests/files/apng_file.png"), &OutFile::Path(None), &opts);
     assert!(result.is_err());
 }
