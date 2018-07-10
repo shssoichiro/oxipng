@@ -38,6 +38,7 @@ fn main() {
             .short("o")
             .long("opt")
             .takes_value(true)
+            .value_name("level")
             .possible_value("0")
             .possible_value("1")
             .possible_value("2")
@@ -61,12 +62,14 @@ fn main() {
             .help("Write output file(s) to <directory>")
             .long("dir")
             .takes_value(true)
+            .value_name("directory")
             .conflicts_with("output_file")
             .conflicts_with("stdout"))
         .arg(Arg::with_name("output_file")
             .help("Write output file to <file>")
             .long("out")
             .takes_value(true)
+            .value_name("file")
             .conflicts_with("output_dir")
             .conflicts_with("stdout"))
         .arg(Arg::with_name("stdout")
@@ -114,12 +117,14 @@ fn main() {
             .short("i")
             .long("interlace")
             .takes_value(true)
+            .value_name("0/1")
             .possible_value("0")
             .possible_value("1"))
         .arg(Arg::with_name("compression")
             .help("zlib compression levels (1-9) - Default: 9")
             .long("zc")
             .takes_value(true)
+            .value_name("levels")
             .validator(|x| {
                 match parse_numeric_range_opts(&x, 1, 9) {
                     Ok(_) => Ok(()),
@@ -140,6 +145,7 @@ fn main() {
             .help("zlib window size - Default: 32k")
             .long("zw")
             .takes_value(true)
+            .value_name("size")
             .possible_value("256")
             .possible_value("512")
             .possible_value("1k")
@@ -171,6 +177,7 @@ fn main() {
             .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
             .long("strip")
             .takes_value(true)
+            .value_name("mode")
             .conflicts_with("strip-safe"))
         .arg(Arg::with_name("strip-safe")
             .help("Strip safely-removable metadata objects")
@@ -185,6 +192,7 @@ fn main() {
             .long("threads")
             .short("t")
             .takes_value(true)
+            .value_name("num")
             .validator(|x| {
                 match x.parse::<usize>() {
                     Ok(val) => {
