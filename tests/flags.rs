@@ -22,20 +22,20 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 }
 
 fn test_it_converts(
-    input: &Path,
-    output: &OutFile,
-    opts: &oxipng::Options,
+    input: PathBuf,
+    output: OutFile,
+    opts: oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
     color_type_out: ColorType,
     bit_depth_out: BitDepth,
 ) {
-    let png = png::PngData::new(input, opts.fix_errors).unwrap();
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(input, output, opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -63,9 +63,9 @@ fn verbose_mode() {
     opts.verbosity = Some(1);
 
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        input,
+        output,
+        opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -377,9 +377,9 @@ fn preserve_attrs() {
     opts.preserve_attrs = true;
 
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        input,
+        output,
+        opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -429,9 +429,8 @@ fn zopfli_mode() {
     opts.deflate = Deflaters::Zopfli;
 
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        input,
+        output, opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
