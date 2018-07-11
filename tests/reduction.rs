@@ -20,21 +20,25 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 }
 
 fn test_it_converts(
-    input: &Path,
-    output: &OutFile,
-    opts: &oxipng::Options,
+    input: &str,
+    alpha: Option<AlphaOptim>,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
     color_type_out: ColorType,
     bit_depth_out: BitDepth,
 ) {
-    let png = png::PngData::new(input, opts.fix_errors).unwrap();
+    let input = PathBuf::from(input);
+    let (output, mut opts) = get_opts(&input);
+    if let Some(alpha) = alpha {
+        opts.alphas = [alpha].iter().cloned().collect();
+    }
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
     assert_eq!(png.ihdr_data.interlaced, 0);
 
-    match oxipng::optimize(input, output, opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -57,13 +61,9 @@ fn test_it_converts(
 
 #[test]
 fn rgba_16_should_be_rgba_16() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_rgba_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_rgba_16.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -73,13 +73,9 @@ fn rgba_16_should_be_rgba_16() {
 
 #[test]
 fn rgba_16_should_be_rgba_8() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_rgba_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_rgba_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -89,13 +85,9 @@ fn rgba_16_should_be_rgba_8() {
 
 #[test]
 fn rgba_8_should_be_rgba_8() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_rgba_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_rgba_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -105,13 +97,9 @@ fn rgba_8_should_be_rgba_8() {
 
 #[test]
 fn rgba_16_should_be_rgb_16() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_rgb_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_rgb_16.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGB,
@@ -121,13 +109,9 @@ fn rgba_16_should_be_rgb_16() {
 
 #[test]
 fn rgba_16_should_be_rgb_8() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_rgb_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_rgb_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGB,
@@ -137,13 +121,9 @@ fn rgba_16_should_be_rgb_8() {
 
 #[test]
 fn rgba_8_should_be_rgb_8() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_rgb_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_rgb_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGB,
@@ -153,13 +133,9 @@ fn rgba_8_should_be_rgb_8() {
 
 #[test]
 fn rgba_16_should_be_palette_8() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_palette_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -169,13 +145,9 @@ fn rgba_16_should_be_palette_8() {
 
 #[test]
 fn rgba_8_should_be_palette_8() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_palette_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -185,13 +157,9 @@ fn rgba_8_should_be_palette_8() {
 
 #[test]
 fn rgba_16_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_palette_4.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -201,13 +169,9 @@ fn rgba_16_should_be_palette_4() {
 
 #[test]
 fn rgba_8_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_palette_4.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -217,13 +181,9 @@ fn rgba_8_should_be_palette_4() {
 
 #[test]
 fn rgba_16_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_palette_2.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -233,13 +193,9 @@ fn rgba_16_should_be_palette_2() {
 
 #[test]
 fn rgba_8_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_palette_2.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -249,13 +205,9 @@ fn rgba_8_should_be_palette_2() {
 
 #[test]
 fn rgba_16_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_palette_1.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -265,13 +217,9 @@ fn rgba_16_should_be_palette_1() {
 
 #[test]
 fn rgba_8_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_palette_1.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -281,13 +229,9 @@ fn rgba_8_should_be_palette_1() {
 
 #[test]
 fn rgba_16_should_be_grayscale_alpha_16() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_alpha_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_grayscale_alpha_16.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -297,13 +241,9 @@ fn rgba_16_should_be_grayscale_alpha_16() {
 
 #[test]
 fn rgba_16_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_alpha_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_grayscale_alpha_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -313,13 +253,9 @@ fn rgba_16_should_be_grayscale_alpha_8() {
 
 #[test]
 fn rgba_8_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_grayscale_alpha_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_grayscale_alpha_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -329,13 +265,9 @@ fn rgba_8_should_be_grayscale_alpha_8() {
 
 #[test]
 fn rgba_16_should_be_grayscale_16() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_grayscale_16.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -345,13 +277,9 @@ fn rgba_16_should_be_grayscale_16() {
 
 #[test]
 fn rgba_16_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/rgba_16_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_should_be_grayscale_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -361,13 +289,9 @@ fn rgba_16_should_be_grayscale_8() {
 
 #[test]
 fn rgba_8_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/rgba_8_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_should_be_grayscale_8.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -377,13 +301,9 @@ fn rgba_8_should_be_grayscale_8() {
 
 #[test]
 fn rgb_16_should_be_rgb_16() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_rgb_16.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::RGB,
@@ -393,13 +313,9 @@ fn rgb_16_should_be_rgb_16() {
 
 #[test]
 fn rgb_16_should_be_rgb_8() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_rgb_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::RGB,
@@ -409,13 +325,9 @@ fn rgb_16_should_be_rgb_8() {
 
 #[test]
 fn rgb_8_should_be_rgb_8() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_rgb_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -425,13 +337,9 @@ fn rgb_8_should_be_rgb_8() {
 
 #[test]
 fn rgb_16_should_be_palette_8() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_palette_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -441,13 +349,9 @@ fn rgb_16_should_be_palette_8() {
 
 #[test]
 fn rgb_8_should_be_palette_8() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_palette_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -457,13 +361,9 @@ fn rgb_8_should_be_palette_8() {
 
 #[test]
 fn rgb_16_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_palette_4.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -473,13 +373,9 @@ fn rgb_16_should_be_palette_4() {
 
 #[test]
 fn rgb_8_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_palette_4.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -489,13 +385,9 @@ fn rgb_8_should_be_palette_4() {
 
 #[test]
 fn rgb_16_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_palette_2.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -505,13 +397,9 @@ fn rgb_16_should_be_palette_2() {
 
 #[test]
 fn rgb_8_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_palette_2.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -521,13 +409,9 @@ fn rgb_8_should_be_palette_2() {
 
 #[test]
 fn rgb_16_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_palette_1.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Indexed,
@@ -537,13 +421,9 @@ fn rgb_16_should_be_palette_1() {
 
 #[test]
 fn rgb_8_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_palette_1.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -553,13 +433,9 @@ fn rgb_8_should_be_palette_1() {
 
 #[test]
 fn rgb_16_should_be_grayscale_16() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_grayscale_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_grayscale_16.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -569,13 +445,9 @@ fn rgb_16_should_be_grayscale_16() {
 
 #[test]
 fn rgb_16_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/rgb_16_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_16_should_be_grayscale_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -585,13 +457,9 @@ fn rgb_16_should_be_grayscale_8() {
 
 #[test]
 fn rgb_8_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgb_8_should_be_grayscale_8.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -601,13 +469,9 @@ fn rgb_8_should_be_grayscale_8() {
 
 #[test]
 fn palette_8_should_be_palette_8() {
-    let input = PathBuf::from("tests/files/palette_8_should_be_palette_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_8_should_be_palette_8.png",
+        None,
         ColorType::Indexed,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -617,13 +481,9 @@ fn palette_8_should_be_palette_8() {
 
 #[test]
 fn palette_8_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/palette_8_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_8_should_be_palette_4.png",
+        None,
         ColorType::Indexed,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -633,13 +493,9 @@ fn palette_8_should_be_palette_4() {
 
 #[test]
 fn palette_4_should_be_palette_4() {
-    let input = PathBuf::from("tests/files/palette_4_should_be_palette_4.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_4_should_be_palette_4.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -649,13 +505,9 @@ fn palette_4_should_be_palette_4() {
 
 #[test]
 fn palette_8_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/palette_8_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_8_should_be_palette_2.png",
+        None,
         ColorType::Indexed,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -665,13 +517,9 @@ fn palette_8_should_be_palette_2() {
 
 #[test]
 fn palette_4_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/palette_4_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_4_should_be_palette_2.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -681,13 +529,9 @@ fn palette_4_should_be_palette_2() {
 
 #[test]
 fn palette_2_should_be_palette_2() {
-    let input = PathBuf::from("tests/files/palette_2_should_be_palette_2.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_2_should_be_palette_2.png",
+        None,
         ColorType::Indexed,
         BitDepth::Two,
         ColorType::Indexed,
@@ -697,13 +541,9 @@ fn palette_2_should_be_palette_2() {
 
 #[test]
 fn palette_8_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/palette_8_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_8_should_be_palette_1.png",
+        None,
         ColorType::Indexed,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -713,13 +553,9 @@ fn palette_8_should_be_palette_1() {
 
 #[test]
 fn palette_4_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/palette_4_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_4_should_be_palette_1.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -729,13 +565,9 @@ fn palette_4_should_be_palette_1() {
 
 #[test]
 fn palette_2_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/palette_2_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_2_should_be_palette_1.png",
+        None,
         ColorType::Indexed,
         BitDepth::Two,
         ColorType::Indexed,
@@ -745,13 +577,9 @@ fn palette_2_should_be_palette_1() {
 
 #[test]
 fn palette_1_should_be_palette_1() {
-    let input = PathBuf::from("tests/files/palette_1_should_be_palette_1.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/palette_1_should_be_palette_1.png",
+        None,
         ColorType::Indexed,
         BitDepth::One,
         ColorType::Indexed,
@@ -761,13 +589,9 @@ fn palette_1_should_be_palette_1() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -777,13 +601,9 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -793,13 +613,9 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
 
 #[test]
 fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -809,13 +625,9 @@ fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_16() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_should_be_grayscale_16.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -825,13 +637,9 @@ fn grayscale_alpha_16_should_be_grayscale_16() {
 
 #[test]
 fn grayscale_alpha_16_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_should_be_grayscale_8.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -841,13 +649,9 @@ fn grayscale_alpha_16_should_be_grayscale_8() {
 
 #[test]
 fn grayscale_alpha_8_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_should_be_grayscale_8.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -857,13 +661,9 @@ fn grayscale_alpha_8_should_be_grayscale_8() {
 
 #[test]
 fn grayscale_16_should_be_grayscale_16() {
-    let input = PathBuf::from("tests/files/grayscale_16_should_be_grayscale_16.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_16_should_be_grayscale_16.png",
+        None,
         ColorType::Grayscale,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -873,13 +673,9 @@ fn grayscale_16_should_be_grayscale_16() {
 
 #[test]
 fn grayscale_16_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/grayscale_16_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_16_should_be_grayscale_8.png",
+        None,
         ColorType::Grayscale,
         BitDepth::Sixteen,
         ColorType::Grayscale,
@@ -889,13 +685,9 @@ fn grayscale_16_should_be_grayscale_8() {
 
 #[test]
 fn grayscale_8_should_be_grayscale_8() {
-    let input = PathBuf::from("tests/files/grayscale_8_should_be_grayscale_8.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_8_should_be_grayscale_8.png",
+        None,
         ColorType::Grayscale,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -905,13 +697,9 @@ fn grayscale_8_should_be_grayscale_8() {
 
 #[test]
 fn small_files() {
-    let input = PathBuf::from("tests/files/small_files.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/small_files.png",
+        None,
         ColorType::Indexed,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -1020,13 +808,9 @@ fn palette_should_be_reduced_with_both() {
 
 #[test]
 fn rgba_16_reduce_alpha_black() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_black.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_black.png",
+        None,
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1036,13 +820,9 @@ fn rgba_16_reduce_alpha_black() {
 
 #[test]
 fn rgba_8_reduce_alpha_black() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_black.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_black.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1052,13 +832,9 @@ fn rgba_8_reduce_alpha_black() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_black() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_black.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_black.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1068,13 +844,9 @@ fn grayscale_alpha_16_reduce_alpha_black() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_black() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_black.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_black.png",
+        None,
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -1084,15 +856,9 @@ fn grayscale_alpha_8_reduce_alpha_black() {
 
 #[test]
 fn rgba_16_reduce_alpha_white() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_white.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::White);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_white.png",
+        Some(AlphaOptim::White),
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1102,15 +868,9 @@ fn rgba_16_reduce_alpha_white() {
 
 #[test]
 fn rgba_8_reduce_alpha_white() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_white.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::White);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_white.png",
+        Some(AlphaOptim::White),
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1120,15 +880,9 @@ fn rgba_8_reduce_alpha_white() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_white() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_white.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::White);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_white.png",
+        Some(AlphaOptim::White),
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1138,15 +892,9 @@ fn grayscale_alpha_16_reduce_alpha_white() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_white() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_white.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::White);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_white.png",
+        Some(AlphaOptim::White),
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -1156,15 +904,9 @@ fn grayscale_alpha_8_reduce_alpha_white() {
 
 #[test]
 fn rgba_16_reduce_alpha_down() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_down.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Down);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_down.png",
+        Some(AlphaOptim::Down),
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1174,15 +916,9 @@ fn rgba_16_reduce_alpha_down() {
 
 #[test]
 fn rgba_8_reduce_alpha_down() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_down.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Down);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_down.png",
+        Some(AlphaOptim::Down),
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1192,15 +928,9 @@ fn rgba_8_reduce_alpha_down() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_down() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_down.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Down);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_down.png",
+        Some(AlphaOptim::Down),
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1210,15 +940,9 @@ fn grayscale_alpha_16_reduce_alpha_down() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_down() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_down.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Down);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_down.png",
+        Some(AlphaOptim::Down),
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -1228,15 +952,9 @@ fn grayscale_alpha_8_reduce_alpha_down() {
 
 #[test]
 fn rgba_16_reduce_alpha_up() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_up.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Up);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_up.png",
+        Some(AlphaOptim::Up),
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1246,15 +964,9 @@ fn rgba_16_reduce_alpha_up() {
 
 #[test]
 fn rgba_8_reduce_alpha_up() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_up.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Up);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_up.png",
+        Some(AlphaOptim::Up),
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1264,15 +976,9 @@ fn rgba_8_reduce_alpha_up() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_up() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_up.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Up);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_up.png",
+        Some(AlphaOptim::Up),
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1282,15 +988,9 @@ fn grayscale_alpha_16_reduce_alpha_up() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_up() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_up.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Up);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_up.png",
+        Some(AlphaOptim::Up),
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -1300,15 +1000,9 @@ fn grayscale_alpha_8_reduce_alpha_up() {
 
 #[test]
 fn rgba_16_reduce_alpha_left() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_left.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Left);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_left.png",
+        Some(AlphaOptim::Left),
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1318,15 +1012,9 @@ fn rgba_16_reduce_alpha_left() {
 
 #[test]
 fn rgba_8_reduce_alpha_left() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_left.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Left);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_left.png",
+        Some(AlphaOptim::Left),
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1336,15 +1024,9 @@ fn rgba_8_reduce_alpha_left() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_left() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_left.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Left);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_left.png",
+        Some(AlphaOptim::Left),
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1354,15 +1036,9 @@ fn grayscale_alpha_16_reduce_alpha_left() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_left() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_left.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Left);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_left.png",
+        Some(AlphaOptim::Left),
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -1372,15 +1048,9 @@ fn grayscale_alpha_8_reduce_alpha_left() {
 
 #[test]
 fn rgba_16_reduce_alpha_right() {
-    let input = PathBuf::from("tests/files/rgba_16_reduce_alpha_right.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Right);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_16_reduce_alpha_right.png",
+        Some(AlphaOptim::Right),
         ColorType::RGBA,
         BitDepth::Sixteen,
         ColorType::RGBA,
@@ -1390,15 +1060,9 @@ fn rgba_16_reduce_alpha_right() {
 
 #[test]
 fn rgba_8_reduce_alpha_right() {
-    let input = PathBuf::from("tests/files/rgba_8_reduce_alpha_right.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Right);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/rgba_8_reduce_alpha_right.png",
+        Some(AlphaOptim::Right),
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -1408,15 +1072,9 @@ fn rgba_8_reduce_alpha_right() {
 
 #[test]
 fn grayscale_alpha_16_reduce_alpha_right() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_16_reduce_alpha_right.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Right);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_16_reduce_alpha_right.png",
+        Some(AlphaOptim::Right),
         ColorType::GrayscaleAlpha,
         BitDepth::Sixteen,
         ColorType::GrayscaleAlpha,
@@ -1426,15 +1084,9 @@ fn grayscale_alpha_16_reduce_alpha_right() {
 
 #[test]
 fn grayscale_alpha_8_reduce_alpha_right() {
-    let input = PathBuf::from("tests/files/grayscale_alpha_8_reduce_alpha_right.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.alphas = HashSet::with_capacity(1);
-    opts.alphas.insert(AlphaOptim::Right);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/grayscale_alpha_8_reduce_alpha_right.png",
+        Some(AlphaOptim::Right),
         ColorType::GrayscaleAlpha,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,

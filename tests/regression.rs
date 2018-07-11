@@ -20,20 +20,21 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 }
 
 fn test_it_converts(
-    input: &Path,
-    output: &OutFile,
-    opts: &oxipng::Options,
+    input: &str,
+    custom: Option<(OutFile, oxipng::Options)>,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
     color_type_out: ColorType,
     bit_depth_out: BitDepth,
 ) {
-    let png = png::PngData::new(input, opts.fix_errors).unwrap();
+    let input = PathBuf::from(input);
+    let (output, opts) = custom.unwrap_or_else(|| get_opts(&input));
+    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(input, output, opts) {
+    match oxipng::optimize(&input, &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -56,13 +57,9 @@ fn test_it_converts(
 
 #[test]
 fn issue_29() {
-    let input = PathBuf::from("tests/files/issue-29.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-29.png",
+        None,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -106,13 +103,9 @@ fn issue_42() {
 
 #[test]
 fn issue_52_01() {
-    let input = PathBuf::from("tests/files/issue-52-01.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-01.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -122,13 +115,9 @@ fn issue_52_01() {
 
 #[test]
 fn issue_52_02() {
-    let input = PathBuf::from("tests/files/issue-52-02.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-02.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -138,13 +127,9 @@ fn issue_52_02() {
 
 #[test]
 fn issue_52_03() {
-    let input = PathBuf::from("tests/files/issue-52-03.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-03.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -154,13 +139,9 @@ fn issue_52_03() {
 
 #[test]
 fn issue_52_04() {
-    let input = PathBuf::from("tests/files/issue-52-04.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-04.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -170,13 +151,9 @@ fn issue_52_04() {
 
 #[test]
 fn issue_52_05() {
-    let input = PathBuf::from("tests/files/issue-52-05.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-05.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -186,13 +163,9 @@ fn issue_52_05() {
 
 #[test]
 fn issue_52_06() {
-    let input = PathBuf::from("tests/files/issue-52-06.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-52-06.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Indexed,
@@ -202,13 +175,9 @@ fn issue_52_06() {
 
 #[test]
 fn issue_56() {
-    let input = PathBuf::from("tests/files/issue-56.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-56.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -218,13 +187,9 @@ fn issue_56() {
 
 #[test]
 fn issue_58() {
-    let input = PathBuf::from("tests/files/issue-58.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-58.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -234,13 +199,9 @@ fn issue_58() {
 
 #[test]
 fn issue_59() {
-    let input = PathBuf::from("tests/files/issue-59.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-59.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::RGBA,
@@ -250,13 +211,9 @@ fn issue_59() {
 
 #[test]
 fn issue_60() {
-    let input = PathBuf::from("tests/files/issue-60.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-60.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::GrayscaleAlpha,
@@ -266,13 +223,9 @@ fn issue_60() {
 
 #[test]
 fn issue_80() {
-    let input = PathBuf::from("tests/files/issue-80.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-80.png",
+        None,
         ColorType::Indexed,
         BitDepth::Two,
         ColorType::Indexed,
@@ -282,13 +235,9 @@ fn issue_80() {
 
 #[test]
 fn issue_82() {
-    let input = PathBuf::from("tests/files/issue-82.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-82.png",
+        None,
         ColorType::Indexed,
         BitDepth::Four,
         ColorType::Indexed,
@@ -298,13 +247,9 @@ fn issue_82() {
 
 #[test]
 fn issue_89() {
-    let input = PathBuf::from("tests/files/issue-89.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-89.png",
+        None,
         ColorType::RGBA,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -314,13 +259,9 @@ fn issue_89() {
 
 #[test]
 fn issue_92_filter_0() {
-    let input = PathBuf::from("tests/files/issue-92.png");
-    let (output, opts) = get_opts(&input);
-
     test_it_converts(
-        &input,
-        &output,
-        &opts,
+        "tests/files/issue-92.png",
+        None,
         ColorType::Grayscale,
         BitDepth::Eight,
         ColorType::Grayscale,
@@ -330,17 +271,14 @@ fn issue_92_filter_0() {
 
 #[test]
 fn issue_92_filter_5() {
-    let input = PathBuf::from("tests/files/issue-92.png");
-    let (_, mut opts) = get_opts(&input);
-    let mut filter = HashSet::new();
-    filter.insert(5);
-    opts.filter = filter;
-    let output = OutFile::Path(Some(input.with_extension("-f5-out.png").to_owned()));
+    let input = "tests/files/issue-92.png";
+    let (_, mut opts) = get_opts(Path::new(input));
+    opts.filter = [5].iter().cloned().collect();
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-f5-out.png").to_owned()));
 
     test_it_converts(
         &input,
-        &output,
-        &opts,
+        Some((output, opts)),
         ColorType::Grayscale,
         BitDepth::Eight,
         ColorType::Grayscale,
