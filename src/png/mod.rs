@@ -625,7 +625,7 @@ impl PngData {
                             STD_COMPRESSION,
                             STD_STRATEGY,
                             STD_WINDOW,
-                            best_size.get(),
+                            &best_size,
                         ).ok()
                         .as_ref().map(|l| {
                             best_size.set_min(l.len());
