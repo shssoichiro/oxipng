@@ -43,70 +43,38 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
     *bytes == expected_header
 }
 
-pub fn parse_next_header(
-    byte_data: &[u8],
+pub fn parse_next_header<'a>(
+    byte_data: &'a [u8],
     byte_offset: &mut usize,
     fix_errors: bool,
-) -> Result<Option<(String, Vec<u8>)>, PngError> {
-    let mut rdr = Cursor::new(
-        byte_data
-            .iter()
-            .skip(*byte_offset)
-            .take(4)
-            .cloned()
-            .collect::<Vec<u8>>(),
-    );
-    let length: u32 = match rdr.read_u32::<BigEndian>() {
-        Ok(x) => x,
-        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
-    };
+    ) -> Result<Option<(&'a [u8], &'a [u8])>, PngError> {
+    let mut rdr = Cursor::new(byte_data.get(*byte_offset..*byte_offset + 4).ok_or(PngError::TruncatedData)?);
+    let length = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
 
-    let mut header_bytes: Vec<u8> = byte_data
-        .iter()
-        .skip(*byte_offset)
-        .take(4)
-        .cloned()
-        .collect();
-    let header = match String::from_utf8(header_bytes.clone()) {
-        Ok(x) => x,
-        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
-    };
-    if header == "IEND" {
+    let header_start = *byte_offset;
+    let chunk_name = byte_data.get(header_start..header_start + 4).ok_or(PngError::TruncatedData)?;
+    if chunk_name == b"IEND" {
         // End of data
         return Ok(None);
     }
     *byte_offset += 4;
 
-    let data: Vec<u8> = byte_data
-        .iter()
-        .skip(*byte_offset)
-        .take(length as usize)
-        .cloned()
-        .collect();
+    let data = byte_data.get(*byte_offset..*byte_offset + length as usize).ok_or(PngError::TruncatedData)?;
     *byte_offset += length as usize;
-    let mut rdr = Cursor::new(
-        byte_data
-            .iter()
-            .skip(*byte_offset)
-            .take(4)
-            .cloned()
-            .collect::<Vec<u8>>(),
-    );
-    let crc: u32 = match rdr.read_u32::<BigEndian>() {
-        Ok(x) => x,
-        Err(_) => return Err(PngError::new("Invalid data found; unable to read PNG file")),
-    };
+    let mut rdr = Cursor::new(byte_data.get(*byte_offset..*byte_offset + 4).ok_or(PngError::TruncatedData)?);
+    let crc = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
-    header_bytes.extend_from_slice(&data);
-    if !fix_errors && crc32::checksum_ieee(header_bytes.as_ref()) != crc {
+
+    let header_bytes = byte_data.get(header_start..header_start + 4 + length as usize).ok_or(PngError::TruncatedData)?;
+    if !fix_errors && crc32::checksum_ieee(header_bytes) != crc {
         return Err(PngError::new(&format!(
             "CRC Mismatch in {} header; May be recoverable by using --fix",
-            header
+            String::from_utf8_lossy(chunk_name)
         )));
     }
 
-    Ok(Some((header, data)))
+    Ok(Some((chunk_name, data)))
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, PngError> {
