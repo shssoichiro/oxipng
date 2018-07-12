@@ -19,8 +19,9 @@ use png::PngData;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 use std::fs::{copy, File};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 use std::sync::Mutex;
@@ -59,6 +60,37 @@ impl OutFile {
             OutFile::Path(Some(ref p)) => Some(p.as_path()),
             _ => None,
         }
+    }
+}
+
+/// Where to read images from
+#[derive(Clone, Debug)]
+pub enum InFile {
+    Path(PathBuf),
+    StdIn,
+}
+
+impl InFile {
+    pub fn path(&self) -> Option<&Path> {
+        match *self {
+            InFile::Path(ref p) => Some(p.as_path()),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for InFile {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            InFile::Path(ref p) => write!(f, "{}", p.display()),
+            InFile::StdIn => f.write_str("stdin"),
+        }
+    }
+}
+
+impl<T: Into<PathBuf>> From<T> for InFile {
+    fn from(s: T) -> Self {
+        InFile::Path(s.into())
     }
 }
 
@@ -287,7 +319,7 @@ impl Default for Options {
 }
 
 /// Perform optimization on the input file using the options provided
-pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(), PngError> {
+pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), PngError> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
@@ -298,10 +330,18 @@ pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(
 
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
-        eprintln!("Processing: {}", input_path.to_str().unwrap());
+        eprintln!("Processing: {}", input);
     }
 
-    let in_data = PngData::read_file(input_path)?;
+    let in_data = match *input {
+        InFile::Path(ref input_path) => PngData::read_file(input_path)?,
+        InFile::StdIn => {
+            let mut data = Vec::new();
+            stdin().read_to_end(&mut data)
+                .map_err(|e| PngError::new(&format!("Error reading stdin: {}", e)))?;
+            data
+        }
+    };
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
@@ -309,9 +349,9 @@ pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         eprintln!("File already optimized");
-        match *output {
+        match (output, input) {
             // if p is None, it also means same as the input path
-            OutFile::Path(ref p) if p.as_ref().map_or(true, |p| p == input_path) => {
+            (&OutFile::Path(ref p), &InFile::Path(ref input_path)) if p.as_ref().map_or(true, |p| p == input_path) => {
                 return Ok(());
             },
             _ => {
@@ -327,14 +367,15 @@ pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(
         return Ok(());
     }
 
-    match *output {
-        OutFile::StdOut => {
+    match (output, input) {
+        (&OutFile::StdOut, _) |
+        (&OutFile::Path(None), &InFile::StdIn) => {
             let mut buffer = BufWriter::new(stdout());
             buffer.write_all(&optimized_output)
                 .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
         },
-        OutFile::Path(ref output_path) => {
-            let output_path = output_path.as_ref().map(|p| p.as_path()).unwrap_or(input_path);
+        (&OutFile::Path(ref output_path), _) => {
+            let output_path = output_path.as_ref().map(|p| p.as_path()).unwrap_or_else(|| input.path().unwrap());
             if opts.backup {
                 perform_backup(output_path)?;
             }
@@ -343,7 +384,9 @@ pub fn optimize(input_path: &Path, output: &OutFile, opts: &Options) -> Result<(
                     "Unable to write to file {}: {}", output_path.display(), err
                 )))?;
             if opts.preserve_attrs {
-                copy_permissions(input_path, &out_file, opts.verbosity);
+                if let Some(input_path) = input.path() {
+                    copy_permissions(input_path, &out_file, opts.verbosity);
+                }
             }
 
             let mut buffer = BufWriter::new(out_file);

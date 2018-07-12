@@ -1,6 +1,6 @@
 extern crate oxipng;
 
-use oxipng::OutFile;
+use oxipng::{InFile, OutFile};
 use oxipng::colors::{BitDepth, ColorType};
 use oxipng::deflate::Deflaters;
 use oxipng::headers::Headers;
@@ -35,7 +35,7 @@ fn test_it_converts(
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -85,7 +85,7 @@ fn strip_headers_list() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -119,7 +119,7 @@ fn strip_headers_safe() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -153,7 +153,7 @@ fn strip_headers_all() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -187,7 +187,7 @@ fn strip_headers_none() {
     assert!(png.aux_headers.contains_key("iTXt"));
     assert!(png.aux_headers.contains_key("iCCP"));
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -219,7 +219,7 @@ fn interlacing_0_to_1() {
 
     assert_eq!(png.ihdr_data.interlaced, 0);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -249,7 +249,7 @@ fn interlacing_1_to_0() {
 
     assert_eq!(png.ihdr_data.interlaced, 1);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -281,7 +281,7 @@ fn interlacing_0_to_1_small_files() {
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -315,7 +315,7 @@ fn interlacing_1_to_0_small_files() {
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -350,7 +350,7 @@ fn interlaced_0_to_1_other_filter_mode() {
 
     assert_eq!(png.ihdr_data.interlaced, 0);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -400,7 +400,7 @@ fn fix_errors() {
     assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
 
-    match oxipng::optimize(&input, &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
