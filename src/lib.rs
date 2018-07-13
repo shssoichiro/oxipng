@@ -803,7 +803,12 @@ fn perform_strip(png: &mut png::PngData, opts: &Options) {
     match opts.strip {
         // Strip headers
         Headers::None => (),
-        Headers::Some(ref hdrs) => for hdr in hdrs {
+        Headers::Keep(ref hdrs) => {
+            png.aux_headers.retain(|chunk, _| {
+                hdrs.contains(chunk)
+            });
+        },
+        Headers::Strip(ref hdrs) => for hdr in hdrs {
             png.aux_headers.remove(hdr);
         },
         Headers::Safe => {

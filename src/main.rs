@@ -94,6 +94,13 @@ fn main() {
             .takes_value(true)
             .value_name("mode")
             .conflicts_with("strip-safe"))
+        .arg(Arg::with_name("keep")
+            .help("Strip all optional metadata except objects in the comma-separated list")
+            .long("keep")
+            .takes_value(true)
+            .value_name("list")
+            .conflicts_with("strip")
+            .conflicts_with("strip-safe"))
         .arg(Arg::with_name("alpha")
             .help("Perform additional alpha optimizations")
             .short("a")
@@ -411,6 +418,12 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathB
         opts.idat_recoding = false;
     }
 
+    if let Some(hdrs) = matches.value_of("keep") {
+        opts.strip = Headers::Keep(hdrs.split(',')
+            .map(|x| x.trim().to_owned())
+            .collect())
+    }
+
     if let Some(hdrs) = matches.value_of("strip") {
         let hdrs = hdrs.split(',')
             .map(|x| x.trim().to_owned())
@@ -433,7 +446,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathB
                     return Err(format!("{} chunk is not allowed to be stripped", i));
                 }
             }
-            opts.strip = Headers::Some(hdrs);
+            opts.strip = Headers::Strip(hdrs);
         }
     }
 
