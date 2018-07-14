@@ -1,10 +1,14 @@
 use std::error::Error;
 use std::fmt;
 
+// TODO: Use `#[non_exhaustive]` once stabilized
+// https://github.com/rust-lang/rust/issues/44109
 #[derive(Debug, Clone)]
 pub enum PngError {
     DeflatedDataTooLong(usize),
     Other(Box<str>),
+    #[doc(hidden)]
+    _Nonexhaustive,
 }
 
 impl Error for PngError {
@@ -20,6 +24,7 @@ impl fmt::Display for PngError {
         match *self {
             PngError::DeflatedDataTooLong(_) => f.write_str("deflated data too long"),
             PngError::Other(ref s) => f.write_str(s),
+            PngError::_Nonexhaustive => unreachable!(),
         }
     }
 }
