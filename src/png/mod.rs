@@ -87,47 +87,39 @@ impl PngData {
     pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, PngError> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
-        let header: Vec<u8> = byte_data.iter().take(8).cloned().collect();
-        if !file_header_is_valid(header.as_ref()) {
-            return Err(PngError::new("Invalid PNG header detected"));
+        let header = byte_data.get(0..8).ok_or(PngError::TruncatedData)?;
+        if !file_header_is_valid(header) {
+            return Err(PngError::NotPNG);
         }
         byte_offset += 8;
         // Read the data headers
         let mut aux_headers: HashMap<String, Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
         loop {
-            let header = parse_next_header(byte_data, &mut byte_offset, fix_errors);
-            let header = match header {
-                Ok(x) => x,
-                Err(x) => return Err(x),
-            };
-            let header = match header {
+            let header = parse_next_header(byte_data, &mut byte_offset, fix_errors)?;
+            let (name, data) = match header {
                 Some(x) => x,
                 None => break,
             };
-            if header.0 == "IDAT" {
-                idat_headers.extend(header.1);
-            } else if header.0 == "acTL" {
-                return Err(PngError::new("APNG files are not (yet) supported"));
-            } else {
-                aux_headers.insert(header.0, header.1);
+            match name {
+                b"IDAT" => idat_headers.extend(data),
+                b"acTL" => return Err(PngError::APNGNotSupported),
+                _ => {
+                    let name = String::from_utf8(name.to_owned()).map_err(|_| PngError::InvalidData)?;
+                    aux_headers.insert(name, data.to_owned());
+                },
             }
         }
         // Parse the headers into our PngData
         if idat_headers.is_empty() {
-            return Err(PngError::new("Image data was empty, skipping"));
+            return Err(PngError::ChunkMissing("IDAT"));
         }
-        if aux_headers.get("IHDR").is_none() {
-            return Err(PngError::new("Image header data was missing, skipping"));
-        }
-        let ihdr_header = match parse_ihdr_header(aux_headers.remove("IHDR").unwrap().as_ref()) {
-            Ok(x) => x,
-            Err(x) => return Err(x),
+        let ihdr = match aux_headers.remove("IHDR") {
+            Some(ihdr) => ihdr,
+            None => return Err(PngError::ChunkMissing("IHDR")),
         };
-        let raw_data = match deflate::inflate(idat_headers.as_ref()) {
-            Ok(x) => x,
-            Err(x) => return Err(x),
-        };
+        let ihdr_header = parse_ihdr_header(&ihdr)?;
+        let raw_data = deflate::inflate(idat_headers.as_ref())?;
         // Handle transparency header
         let mut has_transparency_pixel = false;
         let mut has_transparency_palette = false;
@@ -160,8 +152,7 @@ impl PngData {
         Ok(png_data)
     }
 
-    #[doc(hidden)]
-    pub fn reset_from_original(&mut self, original: &PngData) {
+    pub(crate) fn reset_from_original(&mut self, original: &PngData) {
         self.idat_data = original.idat_data.clone();
         self.ihdr_data = original.ihdr_data;
         self.raw_data = original.raw_data.clone();
