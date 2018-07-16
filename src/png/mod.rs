@@ -295,7 +295,7 @@ impl PngData {
                 }
                 _ => unreachable!(),
             }
-            last_line = line.data;
+            last_line = line.data.to_vec();
             last_pass = line.pass;
         }
         filtered
@@ -322,17 +322,17 @@ impl PngData {
 
         for line in self.scan_lines() {
             reduced.push(line.filter);
-            for (i, byte) in line.data.iter().enumerate() {
+            for (i, &byte) in line.data.iter().enumerate() {
                 if i % 2 == 0 {
                     // High byte
-                    high_byte = *byte;
+                    high_byte = byte;
                 } else {
                     // Low byte
-                    if high_byte != *byte {
+                    if high_byte != byte {
                         // Can't reduce, exit early
                         return false;
                     }
-                    reduced.push(*byte);
+                    reduced.push(byte);
                 }
             }
         }
@@ -406,8 +406,8 @@ impl PngData {
         let mut seen = HashSet::with_capacity(indexed_palette.len());
         for line in self.scan_lines() {
             match self.ihdr_data.bit_depth {
-                BitDepth::Eight => for byte in &line.data {
-                    seen.insert(*byte);
+                BitDepth::Eight => for &byte in line.data {
+                    seen.insert(byte);
                 },
                 BitDepth::Four => {
                     let bitvec = BitVec::from_bytes(&line.data);
@@ -489,52 +489,52 @@ impl PngData {
         for line in self.scan_lines() {
             new_data.push(line.filter);
             match self.ihdr_data.bit_depth {
-                BitDepth::Eight => for byte in &line.data {
-                    if let Some(new_idx) = index_map.get(byte) {
-                        new_data.push(*new_idx);
+                BitDepth::Eight => for &byte in line.data {
+                    if let Some(&new_idx) = index_map.get(&byte) {
+                        new_data.push(new_idx);
                     } else {
-                        new_data.push(*byte);
+                        new_data.push(byte);
                     }
                 },
-                BitDepth::Four => for byte in &line.data {
-                    let upper = *byte & 0b1111_0000;
-                    let lower = *byte & 0b0000_1111;
+                BitDepth::Four => for &byte in line.data {
+                    let upper = byte & 0b1111_0000;
+                    let lower = byte & 0b0000_1111;
                     let mut new_byte = 0u8;
-                    new_byte |= if let Some(new_idx) = index_map.get(&(upper >> 4)) {
-                        *new_idx << 4
+                    new_byte |= if let Some(&new_idx) = index_map.get(&(upper >> 4)) {
+                        new_idx << 4
                     } else {
                         upper
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&lower) {
-                        *new_idx
+                    new_byte |= if let Some(&new_idx) = index_map.get(&lower) {
+                        new_idx
                     } else {
                         lower
                     };
                     new_data.push(new_byte);
                 },
-                BitDepth::Two => for byte in &line.data {
-                    let one = *byte & 0b1100_0000;
-                    let two = *byte & 0b0011_0000;
-                    let three = *byte & 0b0000_1100;
-                    let four = *byte & 0b0000_0011;
+                BitDepth::Two => for &byte in line.data {
+                    let one = byte & 0b1100_0000;
+                    let two = byte & 0b0011_0000;
+                    let three = byte & 0b0000_1100;
+                    let four = byte & 0b0000_0011;
                     let mut new_byte = 0u8;
-                    new_byte |= if let Some(new_idx) = index_map.get(&(one >> 6)) {
-                        *new_idx << 6
+                    new_byte |= if let Some(&new_idx) = index_map.get(&(one >> 6)) {
+                        new_idx << 6
                     } else {
                         one
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&(two >> 4)) {
-                        *new_idx << 4
+                    new_byte |= if let Some(&new_idx) = index_map.get(&(two >> 4)) {
+                        new_idx << 4
                     } else {
                         two
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&(three >> 2)) {
-                        *new_idx << 2
+                    new_byte |= if let Some(&new_idx) = index_map.get(&(three >> 2)) {
+                        new_idx << 2
                     } else {
                         three
                     };
-                    new_byte |= if let Some(new_idx) = index_map.get(&four) {
-                        *new_idx
+                    new_byte |= if let Some(&new_idx) = index_map.get(&four) {
+                        new_idx
                     } else {
                         four
                     };
