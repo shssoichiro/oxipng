@@ -74,7 +74,7 @@ fn verbose_mode() {
 fn strip_headers_list() {
     let input = PathBuf::from("tests/files/strip_headers_list.png");
     let (output, mut opts) = get_opts(&input);
-    opts.strip = Headers::Some(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
+    opts.strip = Headers::Strip(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 

@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use byteorder::{BigEndian, ReadBytesExt};
 use colors::{BitDepth, ColorType};
 use crc::crc32;
@@ -28,10 +29,12 @@ pub struct IhdrData {
 pub enum Headers {
     /// None
     None,
-    /// Some, with a list of 4-character chunk codes
-    Some(Vec<String>),
+    /// Remove specific chunks
+    Strip(Vec<String>),
     /// Headers that won't affect rendering (all but cHRM, gAMA, iCCP, sBIT, sRGB, bKGD, hIST, pHYs, sPLT)
     Safe,
+    /// Remove all non-critical chunks except these
+    Keep(HashSet<String>),
     /// All non-critical headers
     All,
 }
