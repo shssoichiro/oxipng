@@ -32,20 +32,25 @@ pub use deflate::Deflaters;
 pub use error::PngError;
 pub use headers::Headers;
 
-#[doc(hidden)]
-pub mod colors;
-#[doc(hidden)]
-pub mod deflate;
-#[doc(hidden)]
-pub mod error;
+mod colors;
+mod deflate;
+mod error;
 mod filters;
-#[doc(hidden)]
-pub mod headers;
+mod headers;
 mod interlace;
-#[doc(hidden)]
-pub mod png;
+mod png;
 mod reduction;
 mod atomicmin;
+
+/// Private to oxipng; don't use outside tests and benches
+#[doc(hidden)]
+pub mod internal_tests {
+    pub use atomicmin::*;
+    pub use deflate::*;
+    pub use colors::*;
+    pub use headers::*;
+    pub use png::*;
+}
 
 #[derive(Clone, Debug)]
 pub enum OutFile {
@@ -693,7 +698,7 @@ fn optimize_png(
 
 /// Attempt all reduction operations requested by the given `Options` struct
 /// and apply them directly to the `PngData` passed in
-fn perform_reductions(png: &mut png::PngData, opts: &Options, deadline: &Deadline) -> bool {
+fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) -> bool {
     let mut reduction_occurred = false;
 
     if opts.palette_reduction && png.reduce_palette() {
@@ -781,7 +786,7 @@ impl Deadline {
 }
 
 /// Display the status of the image data after a reduction has taken place
-fn report_reduction(png: &png::PngData) {
+fn report_reduction(png: &PngData) {
     if let Some(ref palette) = png.palette {
         eprintln!(
             "Reducing image to {} bits/pixel, {} colors in palette",
@@ -799,7 +804,7 @@ fn report_reduction(png: &png::PngData) {
 }
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
-fn perform_strip(png: &mut png::PngData, opts: &Options) {
+fn perform_strip(png: &mut PngData, opts: &Options) {
     match opts.strip {
         // Strip headers
         Headers::None => (),
