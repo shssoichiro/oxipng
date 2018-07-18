@@ -1,8 +1,7 @@
 extern crate oxipng;
 
 use oxipng::{InFile, OutFile};
-use oxipng::colors::{BitDepth, ColorType};
-use oxipng::png;
+use oxipng::internal_tests::*;
 use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
@@ -28,7 +27,7 @@ fn test_it_converts(
 ) {
     let input = PathBuf::from(input);
     let (output, opts) = get_opts(&input);
-    let png = png::PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.ihdr_data.color_type, color_type_in);
     assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
@@ -41,7 +40,7 @@ fn test_it_converts(
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match png::PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
