@@ -12,7 +12,7 @@ pub struct ScanLines<'a> {
 }
 
 impl<'a> Iterator for ScanLines<'a> {
-    type Item = ScanLine;
+    type Item = ScanLine<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         if self.end == self.png.raw_data.len() {
             None
@@ -109,7 +109,7 @@ impl<'a> Iterator for ScanLines<'a> {
             }
             Some(ScanLine {
                 filter: self.png.raw_data[self.start],
-                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                data: &self.png.raw_data[(self.start + 1)..self.end],
                 pass: current_pass,
             })
         } else {
@@ -122,7 +122,7 @@ impl<'a> Iterator for ScanLines<'a> {
             self.end = self.start + bytes_per_line + 1;
             Some(ScanLine {
                 filter: self.png.raw_data[self.start],
-                data: self.png.raw_data[(self.start + 1)..self.end].to_owned(),
+                data: &self.png.raw_data[(self.start + 1)..self.end],
                 pass: None,
             })
         }
@@ -131,11 +131,11 @@ impl<'a> Iterator for ScanLines<'a> {
 
 #[derive(Debug, Clone)]
 /// A scan line in a PNG image
-pub struct ScanLine {
+pub struct ScanLine<'a> {
     /// The filter type used to encode the current scan line (0-4)
     pub filter: u8,
     /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
-    pub data: Vec<u8>,
+    pub data: &'a[u8],
     /// The current pass if the image is interlaced
     pub pass: Option<u8>,
 }

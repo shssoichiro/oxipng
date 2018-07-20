@@ -16,16 +16,18 @@ pub fn reduce_rgba_to_rgb(png: &mut PngData) -> bool {
 
 pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
-    let bpp: usize = 4 * byte_depth as usize;
-    let colored_bytes = bpp - byte_depth as usize;
+    let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let bpp = 4 * byte_depth;
+    let bpp_mask = bpp - 1;
+    assert_eq!(0, bpp & bpp_mask);
+    let colored_bytes = bpp - byte_depth;
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let mut low_bytes = Vec::with_capacity(4);
         let mut high_bytes = Vec::with_capacity(4);
         let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
         for (i, byte) in line.data.iter().enumerate() {
-            if i % bpp < colored_bytes {
+            if i as u8 & bpp_mask < colored_bytes {
                 if byte_depth == 1 || i % 2 == 1 {
                     low_bytes.push(*byte);
                 } else {
@@ -35,7 +37,7 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
                 trans_bytes.push(*byte);
             }
 
-            if i % bpp == bpp - 1 {
+            if (i as u8 & bpp_mask) == bpp - 1 {
                 if low_bytes.iter().unique().count() > 1 {
                     return false;
                 }
