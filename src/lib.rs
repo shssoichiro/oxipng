@@ -8,7 +8,6 @@ extern crate num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
 extern crate zopfli;
-#[cfg(feature = "cfzlib")]
 extern crate cloudflare_zlib_sys;
 
 use image::{DynamicImage, GenericImage, ImageFormat, Pixel};

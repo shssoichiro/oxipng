@@ -275,7 +275,6 @@ fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutF
     in_out_pairs
 }
 
-#[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
 fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathBuf>, Options), String> {
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
