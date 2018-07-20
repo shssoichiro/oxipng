@@ -1,3 +1,4 @@
+use atomicmin::AtomicMin;
 use bit_vec::BitVec;
 use byteorder::{BigEndian, WriteBytesExt};
 use colors::{AlphaOptim, BitDepth, ColorType};
@@ -8,6 +9,8 @@ use filters::*;
 use headers::*;
 use interlace::{deinterlace_image, interlace_image};
 use itertools::{flatten, Itertools};
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 use reduction::bit_depth::*;
 use reduction::color::*;
 use std::collections::{HashMap, HashSet};
@@ -15,9 +18,6 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
 use std::path::Path;
-#[cfg(feature = "parallel")]
-use rayon::prelude::*;
-use atomicmin::AtomicMin;
 
 const STD_COMPRESSION: u8 = 8;
 const STD_STRATEGY: u8 = 2; // Huffman only
@@ -105,9 +105,10 @@ impl PngData {
                 b"IDAT" => idat_headers.extend(data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
                 _ => {
-                    let name = String::from_utf8(name.to_owned()).map_err(|_| PngError::InvalidData)?;
+                    let name =
+                        String::from_utf8(name.to_owned()).map_err(|_| PngError::InvalidData)?;
                     aux_headers.insert(name, data.to_owned());
-                },
+                }
             }
         }
         // Parse the headers into our PngData
@@ -618,10 +619,11 @@ impl PngData {
                             STD_WINDOW,
                             &best_size,
                         ).ok()
-                        .as_ref().map(|l| {
-                            best_size.set_min(l.len());
-                            l.len()
-                        })
+                            .as_ref()
+                            .map(|l| {
+                                best_size.set_min(l.len());
+                                l.len()
+                            })
                     })
                     .min()
                     .map(|size| (size, image))

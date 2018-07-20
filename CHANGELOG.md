@@ -1,3 +1,16 @@
+### Version 2.0.0
+ - [SEMVER_MAJOR] Make PngError a proper Error enum
+ - [SEMVER_MINOR] Bump minimum Rust version to 1.27.0
+ - [SEMVER_MINOR] Make Rayon an optional dependency (enabled by default)
+ - [SEMVER_MINOR] Option to limit wall clock time spent in optimization trials
+ - [SEMVER_MINOR] `--keep` option (works similar to `--strip`, but takes a comma-separated list of headers to keep, and removes all other non-critical headers)
+ - Use faster Cloudflare zlib compression on platforms that support it
+ - Allow specifying more than 2 filter types via the CLI
+ - Avoid double glob processing on unix
+ - Fix reading from stdin
+ - Cleanup help text
+ - Various performance improvements
+
 ### Version 1.0.4
  - Bump `image` to 0.19.0
  - Bump `bit-vec` to 0.5.0

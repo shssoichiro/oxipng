@@ -1,7 +1,7 @@
 extern crate oxipng;
 
-use oxipng::{InFile, OutFile};
 use oxipng::internal_tests::*;
+use oxipng::{InFile, OutFile};
 use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
@@ -15,7 +15,10 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(0);
     options.filter = filter;
 
-    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
+    (
+        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        options,
+    )
 }
 
 fn test_it_converts(
@@ -427,7 +430,8 @@ fn zopfli_mode() {
 
     test_it_converts(
         input,
-        output, opts,
+        output,
+        opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,

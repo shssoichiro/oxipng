@@ -2,10 +2,10 @@
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 
 extern crate clap;
-extern crate wild;
 extern crate oxipng;
+extern crate wild;
 
-use clap::{App, Arg, ArgMatches, AppSettings};
+use clap::{App, AppSettings, Arg, ArgMatches};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
@@ -228,12 +228,22 @@ fn main() {
         }
     };
 
-    let files = collect_files(matches.values_of("files").unwrap()
-            .map(PathBuf::from).collect(), &out_dir, &out_file, opts.recursive, true);
+    let files = collect_files(
+        matches
+            .values_of("files")
+            .unwrap()
+            .map(PathBuf::from)
+            .collect(),
+        &out_dir,
+        &out_file,
+        opts.recursive,
+        true,
+    );
 
-    let res: Result<(), PngError> = files.into_iter().map(|(input, output)| {
-         oxipng::optimize(&input, &output, &opts)
-    }).collect();
+    let res: Result<(), PngError> = files
+        .into_iter()
+        .map(|(input, output)| oxipng::optimize(&input, &output, &opts))
+        .collect();
 
     if let Err(e) = res {
         eprintln!("{}", e);
@@ -241,7 +251,13 @@ fn main() {
     }
 }
 
-fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutFile, recursive: bool, allow_stdin: bool) -> Vec<(InFile, OutFile)> {
+fn collect_files(
+    files: Vec<PathBuf>,
+    out_dir: &Option<PathBuf>,
+    out_file: &OutFile,
+    recursive: bool,
+    allow_stdin: bool,
+) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
     let allow_stdin = allow_stdin && files.len() == 1;
     for input in files {
@@ -275,7 +291,9 @@ fn collect_files(files: Vec<PathBuf>, out_dir: &Option<PathBuf>, out_file: &OutF
     in_out_pairs
 }
 
-fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathBuf>, Options), String> {
+fn parse_opts_into_struct(
+    matches: &ArgMatches,
+) -> Result<(OutFile, Option<PathBuf>, Options), String> {
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
             Options::from_preset(opt)
@@ -303,7 +321,8 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathB
     }
 
     if let Some(x) = matches.value_of("timeout") {
-        let num = x.parse().map_err(|_| "Timeout must be a number".to_owned())?;
+        let num = x.parse()
+            .map_err(|_| "Timeout must be a number".to_owned())?;
         opts.timeout = Some(Duration::from_secs(num));
     }
 
@@ -412,9 +431,7 @@ fn parse_opts_into_struct(matches: &ArgMatches) -> Result<(OutFile, Option<PathB
     }
 
     if let Some(hdrs) = matches.value_of("keep") {
-        opts.strip = Headers::Keep(hdrs.split(',')
-            .map(|x| x.trim().to_owned())
-            .collect())
+        opts.strip = Headers::Keep(hdrs.split(',').map(|x| x.trim().to_owned()).collect())
     }
 
     if let Some(hdrs) = matches.value_of("strip") {
@@ -491,11 +508,14 @@ fn parse_numeric_range_opts(
     }
 
     // a list ("A,B[,…]")
-    let list_items = input.split(',').collect::<Vec<&str>>();;
+    let list_items = input.split(',').collect::<Vec<&str>>();
     if list_items.len() > 1 {
         for value in list_items {
             if let Ok(value_int) = value.parse::<u8>() {
-                if (min_value <= value_int) && (value_int <= max_value) && !items.contains(&value_int) {
+                if (min_value <= value_int)
+                    && (value_int <= max_value)
+                    && !items.contains(&value_int)
+                {
                     items.insert(value_int);
                     continue;
                 }

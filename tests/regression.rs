@@ -15,7 +15,10 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(0);
     options.filter = filter;
 
-    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
+    (
+        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        options,
+    )
 }
 
 fn test_it_converts(
@@ -273,7 +276,9 @@ fn issue_92_filter_5() {
     let input = "tests/files/issue-92.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.filter = [5].iter().cloned().collect();
-    let output = OutFile::Path(Some(Path::new(input).with_extension("-f5-out.png").to_owned()));
+    let output = OutFile::Path(Some(
+        Path::new(input).with_extension("-f5-out.png").to_owned(),
+    ));
 
     test_it_converts(
         &input,

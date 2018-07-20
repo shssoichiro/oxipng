@@ -4,8 +4,8 @@ extern crate oxipng;
 extern crate test;
 
 use oxipng::internal_tests::*;
-use test::Bencher;
 use std::path::PathBuf;
+use test::Bencher;
 
 #[bench]
 fn deflate_16_bits_strategy_0(b: &mut Bencher) {
@@ -256,7 +256,5 @@ fn inflate_generic(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        inflate(png.idat_data.as_ref())
-    });
+    b.iter(|| inflate(png.idat_data.as_ref()));
 }

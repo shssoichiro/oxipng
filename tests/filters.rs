@@ -15,7 +15,10 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(0);
     options.filter = filter;
 
-    (OutFile::Path(Some(input.with_extension("out.png").to_owned())), options)
+    (
+        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        options,
+    )
 }
 
 fn test_it_converts(

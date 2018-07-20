@@ -265,7 +265,7 @@ dependencies = [
 
 [[package]]
 name = "oxipng"
-version = "1.0.4"
+version = "2.0.0"
 dependencies = [
  "bit-vec 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",

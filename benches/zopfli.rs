@@ -4,8 +4,8 @@ extern crate oxipng;
 extern crate test;
 
 use oxipng::internal_tests::*;
-use test::Bencher;
 use std::path::PathBuf;
+use test::Bencher;
 
 #[bench]
 fn zopfli_16_bits_strategy_0(b: &mut Bencher) {

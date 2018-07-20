@@ -1,5 +1,6 @@
 extern crate bit_vec;
 extern crate byteorder;
+extern crate cloudflare_zlib_sys;
 extern crate crc;
 extern crate image;
 extern crate itertools;
@@ -8,8 +9,8 @@ extern crate num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
 extern crate zopfli;
-extern crate cloudflare_zlib_sys;
 
+use atomicmin::AtomicMin;
 use image::{DynamicImage, GenericImage, ImageFormat, Pixel};
 use png::PngData;
 #[cfg(feature = "parallel")]
@@ -19,15 +20,15 @@ use std::fmt;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant};
 use std::sync::Mutex;
-use atomicmin::AtomicMin;
+use std::time::{Duration, Instant};
 
 pub use colors::AlphaOptim;
 pub use deflate::Deflaters;
 pub use error::PngError;
 pub use headers::Headers;
 
+mod atomicmin;
 mod colors;
 mod deflate;
 mod error;
@@ -36,14 +37,13 @@ mod headers;
 mod interlace;
 mod png;
 mod reduction;
-mod atomicmin;
 
 /// Private to oxipng; don't use outside tests and benches
 #[doc(hidden)]
 pub mod internal_tests {
     pub use atomicmin::*;
-    pub use deflate::*;
     pub use colors::*;
+    pub use deflate::*;
     pub use headers::*;
     pub use png::*;
 }
@@ -338,7 +338,8 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), 
         InFile::Path(ref input_path) => PngData::read_file(input_path)?,
         InFile::StdIn => {
             let mut data = Vec::new();
-            stdin().read_to_end(&mut data)
+            stdin()
+                .read_to_end(&mut data)
                 .map_err(|e| PngError::new(&format!("Error reading stdin: {}", e)))?;
             data
         }
@@ -352,9 +353,11 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), 
         eprintln!("File already optimized");
         match (output, input) {
             // if p is None, it also means same as the input path
-            (&OutFile::Path(ref p), &InFile::Path(ref input_path)) if p.as_ref().map_or(true, |p| p == input_path) => {
+            (&OutFile::Path(ref p), &InFile::Path(ref input_path))
+                if p.as_ref().map_or(true, |p| p == input_path) =>
+            {
                 return Ok(());
-            },
+            }
             _ => {
                 optimized_output = in_data;
             }
@@ -369,21 +372,27 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), 
     }
 
     match (output, input) {
-        (&OutFile::StdOut, _) |
-        (&OutFile::Path(None), &InFile::StdIn) => {
+        (&OutFile::StdOut, _) | (&OutFile::Path(None), &InFile::StdIn) => {
             let mut buffer = BufWriter::new(stdout());
-            buffer.write_all(&optimized_output)
+            buffer
+                .write_all(&optimized_output)
                 .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
-        },
+        }
         (&OutFile::Path(ref output_path), _) => {
-            let output_path = output_path.as_ref().map(|p| p.as_path()).unwrap_or_else(|| input.path().unwrap());
+            let output_path = output_path
+                .as_ref()
+                .map(|p| p.as_path())
+                .unwrap_or_else(|| input.path().unwrap());
             if opts.backup {
                 perform_backup(output_path)?;
             }
-            let out_file = File::create(output_path)
-                .map_err(|err| PngError::new(&format!(
-                    "Unable to write to file {}: {}", output_path.display(), err
-                )))?;
+            let out_file = File::create(output_path).map_err(|err| {
+                PngError::new(&format!(
+                    "Unable to write to file {}: {}",
+                    output_path.display(),
+                    err
+                ))
+            })?;
             if opts.preserve_attrs {
                 if let Some(input_path) = input.path() {
                     copy_permissions(input_path, &out_file, opts.verbosity);
@@ -391,12 +400,17 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), 
             }
 
             let mut buffer = BufWriter::new(out_file);
-            buffer.write_all(&optimized_output)
-                .map_err(|e| PngError::new(&format!("Unable to write to {}: {}", output_path.display(), e)))?;
+            buffer.write_all(&optimized_output).map_err(|e| {
+                PngError::new(&format!(
+                    "Unable to write to {}: {}",
+                    output_path.display(),
+                    e
+                ))
+            })?;
             if opts.verbosity.is_some() {
                 eprintln!("Output: {}", output_path.display());
             }
-        },
+        }
     }
     Ok(())
 }
@@ -554,68 +568,74 @@ fn optimize_png(
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
 
-        let best_size = AtomicMin::new(if opts.force {None} else {Some(original_len)});
+        let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
         #[cfg(feature = "parallel")]
         let results_iter = results.into_par_iter().with_max_len(1);
         #[cfg(not(feature = "parallel"))]
         let results_iter = results.into_iter();
-        let best = results_iter
-            .filter_map(|trial| {
-                if deadline.passed() {
+        let best = results_iter.filter_map(|trial| {
+            if deadline.passed() {
+                return None;
+            }
+            let filtered = &filters[&trial.filter];
+            let new_idat = if opts.deflate == Deflaters::Zlib {
+                deflate::deflate(
+                    filtered,
+                    trial.compression,
+                    trial.strategy,
+                    opts.window,
+                    &best_size,
+                )
+            } else {
+                deflate::zopfli_deflate(filtered)
+            };
+            let new_idat = match new_idat {
+                Ok(n) => n,
+                Err(PngError::DeflatedDataTooLong(max)) if opts.verbosity == Some(1) => {
+                    eprintln!(
+                        "    zc = {}  zs = {}  f = {}       >{} bytes",
+                        trial.compression, trial.strategy, trial.filter, max,
+                    );
                     return None;
                 }
-                let filtered = &filters[&trial.filter];
-                let new_idat = if opts.deflate == Deflaters::Zlib {
-                    deflate::deflate(filtered, trial.compression, trial.strategy, opts.window, &best_size)
-                } else {
-                    deflate::zopfli_deflate(filtered)
-                };
-                let new_idat = match new_idat {
-                    Ok(n) => n,
-                    Err(PngError::DeflatedDataTooLong(max)) if opts.verbosity == Some(1) => {
-                        eprintln!(
-                            "    zc = {}  zs = {}  f = {}       >{} bytes",
-                            trial.compression,
-                            trial.strategy,
-                            trial.filter,
-                            max,
-                        );
-                        return None;
-                    },
-                    _ => return None,
-                };
+                _ => return None,
+            };
 
-                // update best size across all threads
-                let new_size = new_idat.len();
-                best_size.set_min(new_size);
+            // update best size across all threads
+            let new_size = new_idat.len();
+            best_size.set_min(new_size);
 
-                if opts.verbosity == Some(1) {
-                    eprintln!(
-                        "    zc = {}  zs = {}  f = {}        {} bytes",
-                        trial.compression,
-                        trial.strategy,
-                        trial.filter,
-                        new_idat.len()
-                    );
-                }
+            if opts.verbosity == Some(1) {
+                eprintln!(
+                    "    zc = {}  zs = {}  f = {}        {} bytes",
+                    trial.compression,
+                    trial.strategy,
+                    trial.filter,
+                    new_idat.len()
+                );
+            }
 
-                if new_size < original_len || added_interlacing || opts.force {
-                    Some((trial, new_idat))
-                } else {
-                    None
-                }
-            });
+            if new_size < original_len || added_interlacing || opts.force {
+                Some((trial, new_idat))
+            } else {
+                None
+            }
+        });
         #[cfg(feature = "parallel")]
-        let best: Option<TrialWithData> = best
-            .reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
+        let best: Option<TrialWithData> =
+            best.reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
         #[cfg(not(feature = "parallel"))]
         let best: Option<TrialWithData> = best.fold(None, |i, j| {
-                if let Some(i) = i {
-                    if i.1.len() <= j.1.len() { Some(i) } else { Some(j) }
+            if let Some(i) = i {
+                if i.1.len() <= j.1.len() {
+                    Some(i)
                 } else {
                     Some(j)
                 }
-            });
+            } else {
+                Some(j)
+            }
+        });
 
         if let Some(better) = best {
             png.idat_data = better.1;
@@ -746,7 +766,6 @@ fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) ->
     reduction_occurred
 }
 
-
 /// Keep track of processing timeout
 struct Deadline {
     start: Instant,
@@ -756,7 +775,7 @@ struct Deadline {
 
 impl Deadline {
     pub fn new(opts: &Options) -> Self {
-         Self {
+        Self {
             start: Instant::now(),
             timeout: opts.timeout,
             print_message: Mutex::new(opts.verbosity.is_some()),
@@ -805,16 +824,14 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            png.aux_headers.retain(|chunk, _| {
-                hdrs.contains(chunk)
-            });
-        },
+            png.aux_headers.retain(|chunk, _| hdrs.contains(chunk));
+        }
         Headers::Strip(ref hdrs) => for hdr in hdrs {
             png.aux_headers.remove(hdr);
         },
         Headers::Safe => {
             const PRESERVED_HEADERS: [&str; 9] = [
-                "cHRM", "gAMA", "iCCP", "sBIT", "sRGB", "bKGD", "hIST", "pHYs", "sPLT"
+                "cHRM", "gAMA", "iCCP", "sBIT", "sRGB", "bKGD", "hIST", "pHYs", "sPLT",
             ];
             let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
             for hdr in hdrs {
@@ -883,10 +900,12 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
 
 /// Compares images pixel by pixel for equivalent content
 fn images_equal(old_png: &DynamicImage, new_png: &DynamicImage) -> bool {
-    let a = old_png.pixels()
+    let a = old_png
+        .pixels()
         .map(|x| x.2.channels().to_owned())
         .filter(|p| !(p.len() == 4 && p[3] == 0));
-    let b = new_png.pixels()
+    let b = new_png
+        .pixels()
         .map(|x| x.2.channels().to_owned())
         .filter(|p| !(p.len() == 4 && p[3] == 0));
     a.eq(b)

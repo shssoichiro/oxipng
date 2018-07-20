@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use byteorder::{BigEndian, ReadBytesExt};
 use colors::{BitDepth, ColorType};
 use crc::crc32;
 use error::PngError;
+use std::collections::HashSet;
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Copy)]
@@ -50,26 +50,36 @@ pub fn parse_next_header<'a>(
     byte_data: &'a [u8],
     byte_offset: &mut usize,
     fix_errors: bool,
-    ) -> Result<Option<(&'a [u8], &'a [u8])>, PngError> {
-    let mut rdr = Cursor::new(byte_data.get(*byte_offset..*byte_offset + 4).ok_or(PngError::TruncatedData)?);
+) -> Result<Option<(&'a [u8], &'a [u8])>, PngError> {
+    let mut rdr = Cursor::new(byte_data
+        .get(*byte_offset..*byte_offset + 4)
+        .ok_or(PngError::TruncatedData)?);
     let length = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
 
     let header_start = *byte_offset;
-    let chunk_name = byte_data.get(header_start..header_start + 4).ok_or(PngError::TruncatedData)?;
+    let chunk_name = byte_data
+        .get(header_start..header_start + 4)
+        .ok_or(PngError::TruncatedData)?;
     if chunk_name == b"IEND" {
         // End of data
         return Ok(None);
     }
     *byte_offset += 4;
 
-    let data = byte_data.get(*byte_offset..*byte_offset + length as usize).ok_or(PngError::TruncatedData)?;
+    let data = byte_data
+        .get(*byte_offset..*byte_offset + length as usize)
+        .ok_or(PngError::TruncatedData)?;
     *byte_offset += length as usize;
-    let mut rdr = Cursor::new(byte_data.get(*byte_offset..*byte_offset + 4).ok_or(PngError::TruncatedData)?);
+    let mut rdr = Cursor::new(byte_data
+        .get(*byte_offset..*byte_offset + 4)
+        .ok_or(PngError::TruncatedData)?);
     let crc = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
 
-    let header_bytes = byte_data.get(header_start..header_start + 4 + length as usize).ok_or(PngError::TruncatedData)?;
+    let header_bytes = byte_data
+        .get(header_start..header_start + 4 + length as usize)
+        .ok_or(PngError::TruncatedData)?;
     if !fix_errors && crc32::checksum_ieee(header_bytes) != crc {
         return Err(PngError::new(&format!(
             "CRC Mismatch in {} header; May be recoverable by using --fix",

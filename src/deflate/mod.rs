@@ -14,21 +14,29 @@ pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> Result<Vec<u8>, PngError> {
+pub fn deflate(
+    data: &[u8],
+    zc: u8,
+    zs: u8,
+    zw: u8,
+    max_size: &AtomicMin,
+) -> Result<Vec<u8>, PngError> {
     if is_cfzlib_supported() {
-        return cfzlib_deflate(data, zc, zs, zw, max_size)
+        return cfzlib_deflate(data, zc, zs, zw, max_size);
     }
 
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
 }
 
 fn is_cfzlib_supported() -> bool {
-    #[cfg(target_arch = "x86_64")] {
+    #[cfg(target_arch = "x86_64")]
+    {
         if is_x86_feature_detected!("sse4.2") && is_x86_feature_detected!("pclmulqdq") {
             return true;
         }
     }
-    #[cfg(target_arch = "aarch64")] {
+    #[cfg(target_arch = "aarch64")]
+    {
         if is_arm_feature_detected!("neon") && is_arm_feature_detected!("crc") {
             return true;
         }
@@ -36,20 +44,27 @@ fn is_cfzlib_supported() -> bool {
     false
 }
 
-pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8, max_size: &AtomicMin) -> Result<Vec<u8>, PngError> {
-    use std::mem;
+pub fn cfzlib_deflate(
+    data: &[u8],
+    level: u8,
+    strategy: u8,
+    window_bits: u8,
+    max_size: &AtomicMin,
+) -> Result<Vec<u8>, PngError> {
     use cloudflare_zlib_sys::*;
+    use std::mem;
 
     assert!(data.len() < u32::max_value() as usize);
     unsafe {
         let mut stream = mem::zeroed();
         if Z_OK != deflateInit2(
-                    &mut stream,
-                    level.into(),
-                    Z_DEFLATED,
-                    window_bits.into(),
-                    MAX_MEM_LEVEL,
-                    strategy.into()) {
+            &mut stream,
+            level.into(),
+            Z_DEFLATED,
+            window_bits.into(),
+            MAX_MEM_LEVEL,
+            strategy.into(),
+        ) {
             return Err(PngError::new("deflateInit2"));
         }
 
@@ -65,7 +80,7 @@ pub fn cfzlib_deflate(data: &[u8], level: u8, strategy: u8, window_bits: u8, max
         stream.next_out = out.as_mut_ptr();
         stream.avail_out = out.capacity() as uInt;
         match deflate(&mut stream, Z_FINISH) {
-            Z_STREAM_END => {},
+            Z_STREAM_END => {}
             Z_OK => return Err(PngError::DeflatedDataTooLong(stream.total_out as usize)),
             _ => return Err(PngError::new("deflate")),
         }

@@ -135,7 +135,7 @@ pub struct ScanLine<'a> {
     /// The filter type used to encode the current scan line (0-4)
     pub filter: u8,
     /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
-    pub data: &'a[u8],
+    pub data: &'a [u8],
     /// The current pass if the image is interlaced
     pub pass: Option<u8>,
 }

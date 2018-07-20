@@ -2,7 +2,13 @@ use atomicmin::AtomicMin;
 use error::PngError;
 use miniz_oxide::deflate::core::*;
 
-pub fn compress_to_vec_oxipng(input: &[u8], level: u8, window_bits: i32, strategy: i32, max_size: &AtomicMin) -> Result<Vec<u8>, PngError> {
+pub fn compress_to_vec_oxipng(
+    input: &[u8],
+    level: u8,
+    window_bits: i32,
+    strategy: i32,
+    max_size: &AtomicMin,
+) -> Result<Vec<u8>, PngError> {
     // The comp flags function sets the zlib flag if the window_bits parameter is > 0.
     let flags = create_comp_flags_from_zip_params(level.into(), window_bits, strategy);
     let mut compressor = CompressorOxide::new(flags);
@@ -35,7 +41,7 @@ pub fn compress_to_vec_oxipng(input: &[u8], level: u8, window_bits: i32, strateg
             TDEFLStatus::Okay => {
                 if let Some(max) = max_size.get() {
                     if output.len() > max {
-                        return Err(PngError::DeflatedDataTooLong(output.len()))
+                        return Err(PngError::DeflatedDataTooLong(output.len()));
                     }
                 }
                 // We need more space, so extend the vector.
