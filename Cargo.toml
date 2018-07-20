@@ -47,10 +47,6 @@ version = "^2.10.0"
 optional = true
 version = "1.0.1"
 
-[dependencies.clippy]
-optional = true
-version = ">=0.0.85"
-
 [dependencies.cloudflare-zlib-sys]
 optional = true
 version = "^0.1.2"
@@ -70,7 +66,6 @@ parallel = ["rayon"]
 cfzlib = ["cloudflare-zlib-sys"]
 dev = [
     "nightly-binary",
-    "clippy",
 ]
 nightly = ["cfzlib"]
 nightly-binary = [

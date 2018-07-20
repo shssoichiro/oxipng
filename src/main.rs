@@ -1,9 +1,3 @@
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
-#![cfg_attr(feature = "clippy", warn(enum_glob_use))]
-#![cfg_attr(feature = "clippy", warn(if_not_else))]
-#![cfg_attr(feature = "clippy", warn(string_add))]
-#![cfg_attr(feature = "clippy", warn(string_add_assign))]
 #![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 

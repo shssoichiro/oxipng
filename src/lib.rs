@@ -1,6 +1,3 @@
-#![cfg_attr(feature = "dev", feature(plugin))]
-#![cfg_attr(feature = "dev", plugin(clippy))]
-
 extern crate bit_vec;
 extern crate byteorder;
 extern crate crc;
