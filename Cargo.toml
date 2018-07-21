@@ -48,6 +48,7 @@ optional = true
 version = "1.0.1"
 
 [dependencies.cloudflare-zlib-sys]
+optional = true
 version = "^0.1.2"
 
 [dependencies.image]
@@ -62,10 +63,11 @@ binary = [
 ]
 default = ["binary", "parallel"]
 parallel = ["rayon"]
+cfzlib = ["cloudflare-zlib-sys"]
 dev = [
     "nightly-binary",
 ]
-nightly = []
+nightly = ["cfzlib"]
 nightly-binary = [
     "binary",
     "nightly",

@@ -21,13 +21,17 @@ pub fn deflate(
     zw: u8,
     max_size: &AtomicMin,
 ) -> Result<Vec<u8>, PngError> {
-    if is_cfzlib_supported() {
-        return cfzlib_deflate(data, zc, zs, zw, max_size);
+    #[cfg(feature = "cfzlib")]
+    {
+        if is_cfzlib_supported() {
+            return cfzlib_deflate(data, zc, zs, zw, max_size);
+        }
     }
 
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
 }
 
+#[cfg(feature = "cfzlib")]
 fn is_cfzlib_supported() -> bool {
     #[cfg(target_arch = "x86_64")]
     {
@@ -44,6 +48,7 @@ fn is_cfzlib_supported() -> bool {
     false
 }
 
+#[cfg(feature = "cfzlib")]
 pub fn cfzlib_deflate(
     data: &[u8],
     level: u8,
