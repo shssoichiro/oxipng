@@ -3,6 +3,7 @@
 
 ### Version 2.0.1
  - Revert making Cloudflare zlib the default, as it introduced a major memory leak. It will be put back behind a feature flag, and reenabled when the issue is fixed.
+ - Revert minimum Rust version to 1.24.0
 
 ### Version 2.0.0
  - [SEMVER_MAJOR] Make PngError a proper Error enum
