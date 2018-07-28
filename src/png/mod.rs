@@ -713,10 +713,14 @@ impl PngData {
 
     fn reduce_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut lines = Vec::new();
-        let scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
+        let scan_lines = self.scan_lines()
+            .collect::<Vec<ScanLine>>()
+            .into_iter()
+            .rev()
+            .collect::<Vec<ScanLine>>();
         let mut last_line = vec![0; scan_lines[0].data.len()];
         let mut current_line = Vec::with_capacity(last_line.len());
-        for line in scan_lines.into_iter().rev() {
+        for line in scan_lines.into_iter() {
             current_line.push(line.filter);
             for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
                 if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {

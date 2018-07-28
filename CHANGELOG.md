@@ -1,3 +1,6 @@
+### Version 2.0.2
+ - Fix an issue in alpha optimization on interlaced images ([#113](https://github.com/shssoichiro/oxipng/issues/113))
+
 ### Version 2.0.1
  - Revert making Cloudflare zlib the default, as it introduced a major memory leak. It will be put back behind a feature flag, and reenabled when the issue is fixed.
 

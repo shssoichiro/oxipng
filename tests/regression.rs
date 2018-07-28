@@ -289,3 +289,23 @@ fn issue_92_filter_5() {
         BitDepth::Eight,
     );
 }
+
+#[test]
+fn issue_113() {
+    let input = "tests/files/issue-113.png";
+    let (_, mut opts) = get_opts(Path::new(input));
+    opts.interlace = Some(1);
+    opts.alphas = HashSet::new();
+    opts.alphas.insert(AlphaOptim::Up);
+    let output = OutFile::Path(Some(
+        Path::new(input).with_extension("-f5-out.png").to_owned(),
+    ));
+    test_it_converts(
+        input,
+        Some((output, opts)),
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::GrayscaleAlpha,
+        BitDepth::Eight,
+    );
+}
