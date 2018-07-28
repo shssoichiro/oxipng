@@ -713,11 +713,9 @@ impl PngData {
 
     fn reduce_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut lines = Vec::new();
-        let scan_lines = self.scan_lines()
-            .collect::<Vec<ScanLine>>()
-            .into_iter()
-            .rev()
+        let mut scan_lines = self.scan_lines()
             .collect::<Vec<ScanLine>>();
+        scan_lines.reverse();
         let mut last_line = vec![0; scan_lines[0].data.len()];
         let mut current_line = Vec::with_capacity(last_line.len());
         for line in scan_lines.into_iter() {
