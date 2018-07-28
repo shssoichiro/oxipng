@@ -4,6 +4,7 @@ use crc::crc32;
 use error::PngError;
 use std::collections::HashSet;
 use std::io::Cursor;
+use PngResult;
 
 #[derive(Debug, Clone, Copy)]
 /// Headers from the IHDR chunk of the image
@@ -46,14 +47,22 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
     *bytes == expected_header
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct RawHeader<'a> {
+    pub name: &'a [u8],
+    pub data: &'a [u8],
+}
+
 pub fn parse_next_header<'a>(
     byte_data: &'a [u8],
     byte_offset: &mut usize,
     fix_errors: bool,
-) -> Result<Option<(&'a [u8], &'a [u8])>, PngError> {
-    let mut rdr = Cursor::new(byte_data
-        .get(*byte_offset..*byte_offset + 4)
-        .ok_or(PngError::TruncatedData)?);
+) -> PngResult<Option<RawHeader<'a>>> {
+    let mut rdr = Cursor::new(
+        byte_data
+            .get(*byte_offset..*byte_offset + 4)
+            .ok_or(PngError::TruncatedData)?,
+    );
     let length = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
 
@@ -71,9 +80,11 @@ pub fn parse_next_header<'a>(
         .get(*byte_offset..*byte_offset + length as usize)
         .ok_or(PngError::TruncatedData)?;
     *byte_offset += length as usize;
-    let mut rdr = Cursor::new(byte_data
-        .get(*byte_offset..*byte_offset + 4)
-        .ok_or(PngError::TruncatedData)?);
+    let mut rdr = Cursor::new(
+        byte_data
+            .get(*byte_offset..*byte_offset + 4)
+            .ok_or(PngError::TruncatedData)?,
+    );
     let crc = rdr.read_u32::<BigEndian>().unwrap();
     *byte_offset += 4;
 
@@ -87,10 +98,13 @@ pub fn parse_next_header<'a>(
         )));
     }
 
-    Ok(Some((chunk_name, data)))
+    Ok(Some(RawHeader {
+        name: chunk_name,
+        data,
+    }))
 }
 
-pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, PngError> {
+pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {

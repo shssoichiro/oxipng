@@ -8,10 +8,8 @@ pub fn reduce_alpha_channel(png: &mut PngData, channels: u8) -> Option<Vec<u8>> 
     let colored_bytes = bpp - byte_depth;
     for line in png.scan_lines() {
         for (i, &byte) in line.data.iter().enumerate() {
-            if i as u8 & bpp_mask >= colored_bytes {
-                if byte != 255 {
-                    return None;
-                }
+            if i as u8 & bpp_mask >= colored_bytes && byte != 255 {
+                return None;
             }
         }
     }

@@ -9,8 +9,9 @@ use clap::{App, AppSettings, Arg, ArgMatches};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
+use oxipng::Options;
+use oxipng::PngResult;
 use oxipng::{InFile, OutFile};
-use oxipng::{Options, PngError};
 use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
@@ -240,7 +241,7 @@ fn main() {
         true,
     );
 
-    let res: Result<(), PngError> = files
+    let res: PngResult<()> = files
         .into_iter()
         .map(|(input, output)| oxipng::optimize(&input, &output, &opts))
         .collect();
@@ -321,7 +322,8 @@ fn parse_opts_into_struct(
     }
 
     if let Some(x) = matches.value_of("timeout") {
-        let num = x.parse()
+        let num = x
+            .parse()
             .map_err(|_| "Timeout must be a number".to_owned())?;
         opts.timeout = Some(Duration::from_secs(num));
     }
@@ -435,7 +437,8 @@ fn parse_opts_into_struct(
     }
 
     if let Some(hdrs) = matches.value_of("strip") {
-        let hdrs = hdrs.split(',')
+        let hdrs = hdrs
+            .split(',')
             .map(|x| x.trim().to_owned())
             .collect::<Vec<String>>();
         if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
@@ -525,5 +528,5 @@ fn parse_numeric_range_opts(
         return Ok(items);
     }
 
-    return Err(ERROR_MESSAGE.to_owned());
+    Err(ERROR_MESSAGE.to_owned())
 }

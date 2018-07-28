@@ -95,19 +95,14 @@ impl PngData {
         // Read the data headers
         let mut aux_headers: HashMap<String, Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
-        loop {
-            let header = parse_next_header(byte_data, &mut byte_offset, fix_errors)?;
-            let (name, data) = match header {
-                Some(x) => x,
-                None => break,
-            };
-            match name {
-                b"IDAT" => idat_headers.extend(data),
+        while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
+            match header.name {
+                b"IDAT" => idat_headers.extend(header.data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
                 _ => {
-                    let name =
-                        String::from_utf8(name.to_owned()).map_err(|_| PngError::InvalidData)?;
-                    aux_headers.insert(name, data.to_owned());
+                    let name = String::from_utf8(header.name.to_owned())
+                        .map_err(|_| PngError::InvalidData)?;
+                    aux_headers.insert(name, header.data.to_owned());
                 }
             }
         }
@@ -184,7 +179,8 @@ impl PngData {
         let _ = ihdr_data.write_u8(self.ihdr_data.interlaced);
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in self.aux_headers
+        for (key, header) in self
+            .aux_headers
             .iter()
             .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS"))
         {
@@ -202,7 +198,8 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.aux_headers
+        for (key, header) in self
+            .aux_headers
             .iter()
             .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS")
         {
@@ -713,12 +710,11 @@ impl PngData {
 
     fn reduce_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut lines = Vec::new();
-        let mut scan_lines = self.scan_lines()
-            .collect::<Vec<ScanLine>>();
+        let mut scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
         scan_lines.reverse();
         let mut last_line = vec![0; scan_lines[0].data.len()];
         let mut current_line = Vec::with_capacity(last_line.len());
-        for line in scan_lines.into_iter() {
+        for line in scan_lines {
             current_line.push(line.filter);
             for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
                 if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {

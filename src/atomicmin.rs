@@ -25,7 +25,8 @@ impl AtomicMin {
         let mut current_val = self.val.load(Relaxed);
         loop {
             if new_val < current_val {
-                if let Err(v) = self.val
+                if let Err(v) = self
+                    .val
                     .compare_exchange(current_val, new_val, SeqCst, Relaxed)
                 {
                     current_val = v;

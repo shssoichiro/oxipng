@@ -3,24 +3,19 @@ use error::PngError;
 use miniz_oxide;
 use std::cmp::max;
 use zopfli;
+use PngResult;
 
 #[doc(hidden)]
 pub mod miniz_stream;
 
 /// Decompress a data stream using the DEFLATE algorithm
-pub fn inflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
+pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
     miniz_oxide::inflate::decompress_to_vec_zlib(data)
         .map_err(|e| PngError::new(&format!("Error on decompress: {:?}", e)))
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub fn deflate(
-    data: &[u8],
-    zc: u8,
-    zs: u8,
-    zw: u8,
-    max_size: &AtomicMin,
-) -> Result<Vec<u8>, PngError> {
+pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
     #[cfg(feature = "cfzlib")]
     {
         if is_cfzlib_supported() {
@@ -55,7 +50,7 @@ pub fn cfzlib_deflate(
     strategy: u8,
     window_bits: u8,
     max_size: &AtomicMin,
-) -> Result<Vec<u8>, PngError> {
+) -> PngResult<Vec<u8>> {
     use cloudflare_zlib_sys::*;
     use std::mem;
 
@@ -98,7 +93,7 @@ pub fn cfzlib_deflate(
     }
 }
 
-pub fn zopfli_deflate(data: &[u8]) -> Result<Vec<u8>, PngError> {
+pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
     let mut output = Vec::with_capacity(max(1024, data.len() / 20));
     let options = zopfli::Options::default();
     match zopfli::compress(&options, &zopfli::Format::Zlib, data, &mut output) {

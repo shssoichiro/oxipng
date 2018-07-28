@@ -21,7 +21,7 @@ use std::fmt;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 pub use colors::AlphaOptim;
@@ -95,6 +95,8 @@ impl<T: Into<PathBuf>> From<T> for InFile {
         InFile::Path(s.into())
     }
 }
+
+pub type PngResult<T> = Result<T, PngError>;
 
 #[derive(Clone, Debug)]
 /// Options controlling the output of the `optimize` function
@@ -321,7 +323,7 @@ impl Default for Options {
 }
 
 /// Perform optimization on the input file using the options provided
-pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), PngError> {
+pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
@@ -418,7 +420,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> Result<(), 
 
 /// Perform optimization on the input file using the options provided, where the file is already
 /// loaded in-memory
-pub fn optimize_from_memory(data: &[u8], opts: &Options) -> Result<Vec<u8>, PngError> {
+pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
     let thread_count = opts.threads;
@@ -454,11 +456,7 @@ struct TrialOptions {
 }
 
 /// Perform optimization on the input PNG object using the options provided
-fn optimize_png(
-    png: &mut PngData,
-    original_data: &[u8],
-    opts: &Options,
-) -> Result<Vec<u8>, PngError> {
+fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     type TrialWithData = (TrialOptions, Vec<u8>);
 
     let deadline = Deadline::new(opts);
@@ -771,7 +769,7 @@ fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) ->
 struct Deadline {
     start: Instant,
     timeout: Option<Duration>,
-    print_message: Mutex<bool>,
+    print_message: AtomicBool,
 }
 
 impl Deadline {
@@ -779,7 +777,7 @@ impl Deadline {
         Self {
             start: Instant::now(),
             timeout: opts.timeout,
-            print_message: Mutex::new(opts.verbosity.is_some()),
+            print_message: AtomicBool::new(opts.verbosity.is_some()),
         }
     }
 
@@ -789,9 +787,8 @@ impl Deadline {
     pub fn passed(&self) -> bool {
         if let Some(timeout) = self.timeout {
             if self.start.elapsed() > timeout {
-                let mut print_message = self.print_message.lock().unwrap();
-                if *print_message {
-                    *print_message = false;
+                if self.print_message.load(Ordering::Relaxed) {
+                    self.print_message.store(false, Ordering::Relaxed);
                     eprintln!("Timed out after {} second(s)", timeout.as_secs());
                 }
                 return true;
@@ -852,7 +849,7 @@ fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Option
     original_size <= optimized_size && !opts.force && opts.interlace.is_none()
 }
 
-fn perform_backup(input_path: &Path) -> Result<(), PngError> {
+fn perform_backup(input_path: &Path) -> PngResult<()> {
     let backup_file = input_path.with_extension(format!(
         "bak.{}",
         input_path.extension().unwrap().to_str().unwrap()

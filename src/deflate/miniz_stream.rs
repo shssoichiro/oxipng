@@ -1,6 +1,7 @@
 use atomicmin::AtomicMin;
 use error::PngError;
 use miniz_oxide::deflate::core::*;
+use PngResult;
 
 pub fn compress_to_vec_oxipng(
     input: &[u8],
@@ -8,7 +9,7 @@ pub fn compress_to_vec_oxipng(
     window_bits: i32,
     strategy: i32,
     max_size: &AtomicMin,
-) -> Result<Vec<u8>, PngError> {
+) -> PngResult<Vec<u8>> {
     // The comp flags function sets the zlib flag if the window_bits parameter is > 0.
     let flags = create_comp_flags_from_zip_params(level.into(), window_bits, strategy);
     let mut compressor = CompressorOxide::new(flags);
