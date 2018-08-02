@@ -23,8 +23,8 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 
 fn test_it_converts(
     input: PathBuf,
-    output: OutFile,
-    opts: oxipng::Options,
+    output: &OutFile,
+    opts: &oxipng::Options,
     color_type_in: ColorType,
     bit_depth_in: BitDepth,
     color_type_out: ColorType,
@@ -64,8 +64,8 @@ fn verbose_mode() {
 
     test_it_converts(
         input,
-        output,
-        opts,
+        &output,
+        &opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -378,8 +378,8 @@ fn preserve_attrs() {
 
     test_it_converts(
         input,
-        output,
-        opts,
+        &output,
+        &opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,
@@ -430,8 +430,8 @@ fn zopfli_mode() {
 
     test_it_converts(
         input,
-        output,
-        opts,
+        &output,
+        &opts,
         ColorType::RGB,
         BitDepth::Eight,
         ColorType::RGB,

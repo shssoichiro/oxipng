@@ -89,7 +89,7 @@ pub fn cfzlib_deflate(
         }
         debug_assert!(stream.total_out as usize <= out.capacity());
         out.set_len(stream.total_out as usize);
-        return Ok(out);
+        Ok(out)
     }
 }
 
