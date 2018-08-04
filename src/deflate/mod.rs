@@ -81,8 +81,14 @@ pub fn cfzlib_deflate(
         stream.avail_out = out.capacity() as uInt;
         match deflate(&mut stream, Z_FINISH) {
             Z_STREAM_END => {}
-            Z_OK => return Err(PngError::DeflatedDataTooLong(stream.total_out as usize)),
-            _ => return Err(PngError::new("deflate")),
+            Z_OK => {
+                deflateEnd(&mut stream);
+                return Err(PngError::DeflatedDataTooLong(stream.total_out as usize));
+            },
+            _ => {
+                deflateEnd(&mut stream);
+                return Err(PngError::new("deflate"));
+            },
         }
         if Z_OK != deflateEnd(&mut stream) {
             return Err(PngError::new("deflateEnd"));
