@@ -94,37 +94,37 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 2.0.0 (compiled on rustc 1.27.2 (58cc626de 2018-07-18)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-4770 CPU @ 3.40GHz with 8 logical cores
+Tested oxipng 2.1.0 (compiled on rustc 1.29.0-nightly (6a1c0637c 2018-07-23)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
 
 Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):      91.2 ms ±   2.4 ms    [User: 173.7 ms, System: 15.7 ms]
+  Time (mean ± σ):      91.5 ms ±   2.8 ms    [User: 174.2 ms, System: 23.5 ms]
  
-  Range (min … max):    86.4 ms …  97.7 ms
+  Range (min … max):    87.8 ms …  96.9 ms
  
 Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     281.0 ms ±   2.1 ms    [User: 280.4 ms, System: 0.8 ms]
+  Time (mean ± σ):     280.6 ms ±   2.9 ms    [User: 279.0 ms, System: 1.5 ms]
  
-  Range (min … max):   279.3 ms … 286.4 ms
+  Range (min … max):   277.3 ms … 286.1 ms
  
 Summary
 
   './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    3.08x faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+    3.07x faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
 Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     116.5 ms ±   3.0 ms    [User: 438.8 ms, System: 20.0 ms]
+  Time (mean ± σ):     118.1 ms ±   3.1 ms    [User: 449.8 ms, System: 29.6 ms]
  
-  Range (min … max):   111.6 ms … 122.3 ms
+  Range (min … max):   113.0 ms … 124.6 ms
  
 Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     942.6 ms ±   1.4 ms    [User: 939.3 ms, System: 2.7 ms]
+  Time (mean ± σ):     955.3 ms ±  13.0 ms    [User: 953.2 ms, System: 1.7 ms]
  
-  Range (min … max):   941.0 ms … 945.5 ms
+  Range (min … max):   940.1 ms … 986.0 ms
  
 Summary
 

@@ -1,3 +1,9 @@
+### Version 2.1.0
+ - [SEMVER_MINOR] Bump minimum Rust version to 1.27.0
+ - [SEMVER_MINOR] Reenable faster Cloudflare zlib compression on platforms that support it
+ - Fix memory leak with Cloudflare zlib ([#126](https://github.com/shssoichiro/oxipng/issues/126))
+ - Minor fixes and cleanup 
+
 ### Version 2.0.2
  - Fix an issue in alpha optimization on interlaced images ([#113](https://github.com/shssoichiro/oxipng/issues/113))
 
