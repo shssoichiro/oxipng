@@ -1,6 +1,5 @@
 extern crate bit_vec;
 extern crate byteorder;
-#[cfg(feature = "cfzlib")]
 extern crate cloudflare_zlib_sys;
 extern crate crc;
 extern crate image;
