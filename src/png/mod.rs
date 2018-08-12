@@ -286,8 +286,7 @@ impl PngData {
                                 let signed = x as i8;
                                 acc + i16::from(signed).abs() as u64
                             })
-                        })
-                        .unwrap();
+                        }).unwrap();
                     filtered.push(*best_filter);
                     filtered.extend_from_slice(best_line);
                 }
@@ -364,8 +363,7 @@ impl PngData {
                     let mut pixel = pixel.to_owned();
                     pixel.push(*trns);
                     pixel
-                })
-                .collect()
+                }).collect()
         } else {
             self.palette.clone().unwrap()
         };
@@ -374,8 +372,7 @@ impl PngData {
                 4
             } else {
                 3
-            })
-            .collect();
+            }).collect();
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
 
@@ -616,16 +613,14 @@ impl PngData {
                             STD_WINDOW,
                             &best_size,
                         ).ok()
-                            .as_ref()
-                            .map(|l| {
-                                best_size.set_min(l.len());
-                                l.len()
-                            })
-                    })
-                    .min()
+                        .as_ref()
+                        .map(|l| {
+                            best_size.set_min(l.len());
+                            l.len()
+                        })
+                    }).min()
                     .map(|size| (size, image))
-            })
-            .min_by_key(|&(size, _)| size);
+            }).min_by_key(|&(size, _)| size);
 
         if let Some(best) = best {
             self.raw_data = best.1.raw_data;

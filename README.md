@@ -94,39 +94,39 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 2.1.0 (compiled on rustc 1.29.0-nightly (6a1c0637c 2018-07-23)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
+Tested oxipng 2.1.1 (compiled on rustc 1.30.0-nightly (73c78734b 2018-08-05)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
 
 Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):      91.5 ms ±   2.8 ms    [User: 174.2 ms, System: 23.5 ms]
+  Time (mean ± σ):      91.0 ms ±   1.9 ms    [User: 173.7 ms, System: 25.7 ms]
  
-  Range (min … max):    87.8 ms …  96.9 ms
+  Range (min … max):    88.1 ms …  96.2 ms
  
 Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     280.6 ms ±   2.9 ms    [User: 279.0 ms, System: 1.5 ms]
+  Time (mean ± σ):     276.1 ms ±   3.8 ms    [User: 274.1 ms, System: 1.9 ms]
  
-  Range (min … max):   277.3 ms … 286.1 ms
+  Range (min … max):   271.1 ms … 283.4 ms
  
 Summary
 
   './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    3.07x faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+    3.03x faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
 Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     118.1 ms ±   3.1 ms    [User: 449.8 ms, System: 29.6 ms]
+  Time (mean ± σ):     118.4 ms ±   2.7 ms    [User: 449.4 ms, System: 23.5 ms]
  
-  Range (min … max):   113.0 ms … 124.6 ms
+  Range (min … max):   114.5 ms … 124.3 ms
  
 Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
-  Time (mean ± σ):     955.3 ms ±  13.0 ms    [User: 953.2 ms, System: 1.7 ms]
+  Time (mean ± σ):     932.1 ms ±   8.6 ms    [User: 928.2 ms, System: 3.2 ms]
  
-  Range (min … max):   940.1 ms … 986.0 ms
+  Range (min … max):   923.9 ms … 952.9 ms
  
 Summary
 
   './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    8.09x faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+    7.88x faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'

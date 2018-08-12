@@ -560,8 +560,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
             .map(|f| {
                 let png = png.clone();
                 (*f, png.filter_image(*f))
-            })
-            .collect();
+            }).collect();
 
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;

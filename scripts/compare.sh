@@ -4,7 +4,7 @@ cp README.template.md README.md
 
 CORES=$(sysctl -n hw.ncpu 2>/dev/null || grep -c ^processor /proc/cpuinfo)
 CPU=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || grep '^model name' /proc/cpuinfo | sed 's/model name.\+: //g' | head -n 1)
-OXIPNG_VERSION=$(oxipng -V)
+OXIPNG_VERSION=$(./target/release/oxipng -V)
 OPTIPNG_VERSION=$(optipng -v | head -n 1)
 RUST_VERSION=$(rustc -V)
 echo "Tested $OXIPNG_VERSION (compiled on $RUST_VERSION) against $OPTIPNG_VERSION on $CPU with $CORES logical cores" >> README.md
