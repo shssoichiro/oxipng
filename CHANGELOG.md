@@ -1,3 +1,6 @@
+### Version 2.1.2
+ - Fix issue with PNG to Indexed reduction on images with transparency pixel ([#129](https://github.com/shssoichiro/oxipng/issues/129))
+
 ### Version 2.1.1
  - More fixes for alpha optimization on interlaced images ([#133](https://github.com/shssoichiro/oxipng/issues/133))
 

@@ -411,6 +411,19 @@ fn issue_113_down() {
 }
 
 #[test]
+fn issue_129() {
+    let input = "tests/files/issue-129.png";
+    test_it_converts(
+        input,
+        None,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn issue_133_black() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));

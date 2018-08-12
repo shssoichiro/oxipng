@@ -169,6 +169,13 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = Vec::with_capacity(256);
+    if let Some(ref trns) = png.transparency_pixel {
+        assert_eq!(trns.len(), 6);
+        if trns[0] != trns[1] || trns[2] != trns[3] || trns[4] != trns[5] {
+            return false;
+        }
+        palette.push(vec![trns[0], trns[2], trns[4]]);
+    }
     let bpp: usize = (3 * png.ihdr_data.bit_depth.as_u8() as usize) >> 3;
     for line in png.scan_lines() {
         reduced.push(line.filter);
@@ -227,6 +234,10 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
     png.raw_data = reduced;
     png.palette = Some(color_palette);
     png.ihdr_data.color_type = ColorType::Indexed;
+    if png.transparency_pixel.is_some() {
+        png.transparency_pixel = None;
+        png.transparency_palette = Some(vec![0]);
+    };
     true
 }
 
@@ -262,6 +273,13 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
                 cur_pixel.clear();
             }
         }
+    }
+    if let Some(ref mut trns) = png.transparency_pixel {
+        assert_eq!(trns.len(), 6);
+        if trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
+            return false;
+        }
+        *trns = trns[0..2].to_owned();
     }
     if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
         assert_eq!(sbit_header.len(), 3);
