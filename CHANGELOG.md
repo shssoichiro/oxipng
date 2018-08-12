@@ -1,3 +1,6 @@
+### Version 2.1.1
+ - More fixes for alpha optimization on interlaced images ([#133](https://github.com/shssoichiro/oxipng/issues/133))
+
 ### Version 2.1.0
  - [SEMVER_MINOR] Bump minimum Rust version to 1.27.0
  - [SEMVER_MINOR] Reenable faster Cloudflare zlib compression on platforms that support it

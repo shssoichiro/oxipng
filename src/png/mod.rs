@@ -712,9 +712,12 @@ impl PngData {
         let mut lines = Vec::new();
         let mut scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
         scan_lines.reverse();
-        let mut last_line = vec![0; scan_lines[0].data.len()];
+        let mut last_line = Vec::new();
         let mut current_line = Vec::with_capacity(last_line.len());
         for line in scan_lines {
+            if line.data.len() != last_line.len() {
+                last_line = vec![0; line.data.len()];
+            }
             current_line.push(line.filter);
             for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
                 if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
@@ -735,8 +738,11 @@ impl PngData {
 
     fn reduce_alpha_to_down(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
-        let mut last_line = vec![0; self.scan_lines().next().unwrap().data.len()];
+        let mut last_line = Vec::new();
         for line in self.scan_lines() {
+            if line.data.len() != last_line.len() {
+                last_line = vec![0; line.data.len()];
+            }
             reduced.push(line.filter);
             for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
                 if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
