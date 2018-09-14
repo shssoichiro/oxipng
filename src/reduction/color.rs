@@ -56,12 +56,12 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
         }
     }
 
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         assert_eq!(sbit_header.len(), 4);
         sbit_header.remove(1);
         sbit_header.remove(1);
     }
-    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
         bkgd_header.truncate(2);
     }
@@ -100,7 +100,7 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
     }
 
     let mut color_palette = Vec::with_capacity(
-        palette.len() * 3 + if png.aux_headers.contains_key(&"bKGD".to_string()) {
+        palette.len() * 3 + if png.aux_headers.contains_key(b"bKGD") {
             6
         } else {
             0
@@ -123,7 +123,7 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
         return false;
     }
 
-    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
         let header_pixels = bkgd_header
             .iter()
@@ -144,7 +144,7 @@ pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
             *bkgd_header = vec![entry as u8];
         }
     }
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         assert_eq!(sbit_header.len(), 4);
         sbit_header.pop();
     }
@@ -209,7 +209,7 @@ pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
         return false;
     }
 
-    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
         let header_pixels = bkgd_header
             .iter()
@@ -281,11 +281,11 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
         }
         *trns = trns[0..2].to_owned();
     }
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         assert_eq!(sbit_header.len(), 3);
         sbit_header.truncate(1);
     }
-    if let Some(bkgd_header) = png.aux_headers.get_mut(&"bKGD".to_string()) {
+    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
         bkgd_header.truncate(2);
     }

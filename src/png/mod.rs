@@ -45,7 +45,7 @@ pub struct PngData {
     /// A map of how transparent each color in the palette should be
     pub transparency_palette: Option<Vec<u8>>,
     /// All non-critical headers from the PNG are stored here
-    pub aux_headers: HashMap<String, Vec<u8>>,
+    pub aux_headers: HashMap<[u8; 4], Vec<u8>>,
 }
 
 impl PngData {
@@ -93,16 +93,14 @@ impl PngData {
         }
         byte_offset += 8;
         // Read the data headers
-        let mut aux_headers: HashMap<String, Vec<u8>> = HashMap::new();
+        let mut aux_headers: HashMap<[u8; 4], Vec<u8>> = HashMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
         while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
-            match header.name {
+            match &header.name {
                 b"IDAT" => idat_headers.extend(header.data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
                 _ => {
-                    let name = String::from_utf8(header.name.to_owned())
-                        .map_err(|_| PngError::InvalidData)?;
-                    aux_headers.insert(name, header.data.to_owned());
+                    aux_headers.insert(header.name, header.data.to_owned());
                 }
             }
         }
@@ -110,7 +108,7 @@ impl PngData {
         if idat_headers.is_empty() {
             return Err(PngError::ChunkMissing("IDAT"));
         }
-        let ihdr = match aux_headers.remove("IHDR") {
+        let ihdr = match aux_headers.remove(b"IHDR") {
             Some(ihdr) => ihdr,
             None => return Err(PngError::ChunkMissing("IHDR")),
         };
@@ -119,7 +117,7 @@ impl PngData {
         // Handle transparency header
         let mut has_transparency_pixel = false;
         let mut has_transparency_palette = false;
-        if aux_headers.contains_key("tRNS") {
+        if aux_headers.contains_key(b"tRNS") {
             if ihdr_header.color_type == ColorType::Indexed {
                 has_transparency_palette = true;
             } else {
@@ -130,14 +128,14 @@ impl PngData {
             idat_data: idat_headers,
             ihdr_data: ihdr_header,
             raw_data,
-            palette: aux_headers.remove("PLTE"),
+            palette: aux_headers.remove(b"PLTE"),
             transparency_pixel: if has_transparency_pixel {
-                aux_headers.remove("tRNS")
+                aux_headers.remove(b"tRNS")
             } else {
                 None
             },
             transparency_palette: if has_transparency_palette {
-                aux_headers.remove("tRNS")
+                aux_headers.remove(b"tRNS")
             } else {
                 None
             },
@@ -182,9 +180,9 @@ impl PngData {
         for (key, header) in self
             .aux_headers
             .iter()
-            .filter(|&(key, _)| !(*key == "bKGD" || *key == "hIST" || *key == "tRNS"))
+            .filter(|&(key, _)| !(key == b"bKGD" || key == b"hIST" || key == b"tRNS"))
         {
-            write_png_block(key.as_bytes(), header, &mut output);
+            write_png_block(key, header, &mut output);
         }
         // Palette
         if let Some(ref palette) = self.palette {
@@ -201,9 +199,9 @@ impl PngData {
         for (key, header) in self
             .aux_headers
             .iter()
-            .filter(|&(key, _)| *key == "bKGD" || *key == "hIST" || *key == "tRNS")
+            .filter(|&(key, _)| key == b"bKGD" || key == b"hIST" || key == b"tRNS")
         {
-            write_png_block(key.as_bytes(), header, &mut output);
+            write_png_block(key, header, &mut output);
         }
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);

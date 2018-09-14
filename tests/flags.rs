@@ -81,9 +81,9 @@ fn strip_headers_list() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -100,9 +100,9 @@ fn strip_headers_list() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(!png.aux_headers.contains_key("iCCP"));
+    assert!(!png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(!png.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -115,9 +115,9 @@ fn strip_headers_safe() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -134,9 +134,9 @@ fn strip_headers_safe() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key("tEXt"));
-    assert!(!png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(!png.aux_headers.contains_key(b"tEXt"));
+    assert!(!png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -149,9 +149,9 @@ fn strip_headers_all() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -168,9 +168,9 @@ fn strip_headers_all() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key("tEXt"));
-    assert!(!png.aux_headers.contains_key("iTXt"));
-    assert!(!png.aux_headers.contains_key("iCCP"));
+    assert!(!png.aux_headers.contains_key(b"tEXt"));
+    assert!(!png.aux_headers.contains_key(b"iTXt"));
+    assert!(!png.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -183,9 +183,9 @@ fn strip_headers_none() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -202,9 +202,9 @@ fn strip_headers_none() {
         }
     };
 
-    assert!(png.aux_headers.contains_key("tEXt"));
-    assert!(png.aux_headers.contains_key("iTXt"));
-    assert!(png.aux_headers.contains_key("iCCP"));
+    assert!(png.aux_headers.contains_key(b"tEXt"));
+    assert!(png.aux_headers.contains_key(b"iTXt"));
+    assert!(png.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }

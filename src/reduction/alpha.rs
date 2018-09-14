@@ -28,7 +28,7 @@ pub fn reduce_alpha_channel(png: &mut PngData, channels: u8) -> Option<Vec<u8>> 
 
     // sBIT contains information about alpha channel's original depth,
     // and alpha has just been removed
-    if let Some(sbit_header) = png.aux_headers.get_mut(&"sBIT".to_string()) {
+    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         assert_eq!(sbit_header.len(), channels as usize);
         sbit_header.pop();
     }
