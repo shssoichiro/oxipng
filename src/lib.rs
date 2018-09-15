@@ -905,11 +905,15 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
 fn images_equal(old_png: &DynamicImage, new_png: &DynamicImage) -> bool {
     let a = old_png
         .pixels()
-        .map(|x| x.2.channels().to_owned())
-        .filter(|p| !(p.len() == 4 && p[3] == 0));
+        .filter(|x| {
+            let p = x.2.channels();
+            !(p.len() == 4 && p[3] == 0)
+        });
     let b = new_png
         .pixels()
-        .map(|x| x.2.channels().to_owned())
-        .filter(|p| !(p.len() == 4 && p[3] == 0));
+        .filter(|x| {
+            let p = x.2.channels();
+            !(p.len() == 4 && p[3] == 0)
+        });
     a.eq(b)
 }
