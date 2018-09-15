@@ -687,8 +687,15 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         }
     }
 
-    let old_png = image::load_from_memory_with_format(original_data, ImageFormat::PNG);
-    let new_png = image::load_from_memory_with_format(&output, ImageFormat::PNG);
+    let (old_png, new_png) = {
+        let old_png = || image::load_from_memory_with_format(original_data, ImageFormat::PNG);
+        let new_png = || image::load_from_memory_with_format(&output, ImageFormat::PNG);
+        #[cfg(feature = "parallel")]
+        let res = rayon::join(old_png, new_png);
+        #[cfg(not(feature = "parallel"))]
+        let res = (old_png(), new_png());
+        res
+    };
 
     if let Ok(new_png) = new_png {
         if let Ok(old_png) = old_png {
