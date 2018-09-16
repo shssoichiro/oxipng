@@ -47,8 +47,8 @@ version = "^2.10.0"
 optional = true
 version = "1.0.1"
 
-[dependencies.cloudflare-zlib-sys]
-version = "^0.1.2"
+[target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies]
+cloudflare-zlib-sys = "^0.1.2"
 
 [dependencies.image]
 default-features = false

@@ -15,6 +15,7 @@ pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
     if is_cfzlib_supported() {
         return cfzlib_deflate(data, zc, zs, zw, max_size);
@@ -23,22 +24,29 @@ pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> Png
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
 }
 
+/// Compress a data stream using the DEFLATE algorithm
+#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
+    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
+}
+
+#[cfg(target_arch = "x86_64")]
 fn is_cfzlib_supported() -> bool {
-    #[cfg(target_arch = "x86_64")]
-    {
-        if is_x86_feature_detected!("sse4.2") && is_x86_feature_detected!("pclmulqdq") {
-            return true;
-        }
-    }
-    #[cfg(target_arch = "aarch64")]
-    {
-        if is_arm_feature_detected!("neon") && is_arm_feature_detected!("crc") {
-            return true;
-        }
+    if is_x86_feature_detected!("sse4.2") && is_x86_feature_detected!("pclmulqdq") {
+        return true;
     }
     false
 }
 
+#[cfg(target_arch = "aarch64")]
+fn is_cfzlib_supported() -> bool {
+    if is_arm_feature_detected!("neon") && is_arm_feature_detected!("crc") {
+        return true;
+    }
+    false
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 pub fn cfzlib_deflate(
     data: &[u8],
     level: u8,
