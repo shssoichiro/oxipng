@@ -828,21 +828,16 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            png.aux_headers.retain(|chunk, _| hdrs.contains(chunk));
+            png.aux_headers.retain(|chunk, _| std::str::from_utf8(chunk).ok().map_or(false, |name| hdrs.contains(name)));
         }
         Headers::Strip(ref hdrs) => for hdr in hdrs {
-            png.aux_headers.remove(hdr);
+            png.aux_headers.remove(hdr.as_bytes());
         },
         Headers::Safe => {
-            const PRESERVED_HEADERS: [&str; 9] = [
-                "cHRM", "gAMA", "iCCP", "sBIT", "sRGB", "bKGD", "hIST", "pHYs", "sPLT",
+            const PRESERVED_HEADERS: [[u8; 4]; 9] = [
+                *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs", *b"sPLT",
             ];
-            let hdrs = png.aux_headers.keys().cloned().collect::<Vec<String>>();
-            for hdr in hdrs {
-                if !PRESERVED_HEADERS.contains(&hdr.as_ref()) {
-                    png.aux_headers.remove(&hdr);
-                }
-            }
+            png.aux_headers.retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
         }
         Headers::All => {
             png.aux_headers = HashMap::new();

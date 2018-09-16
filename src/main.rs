@@ -453,9 +453,9 @@ fn parse_opts_into_struct(
                 opts.strip = Headers::All;
             }
         } else {
-            const FORBIDDEN_CHUNKS: [&str; 5] = ["IHDR", "IDAT", "tRNS", "PLTE", "IEND"];
+            const FORBIDDEN_CHUNKS: [[u8; 4]; 5] = [*b"IHDR", *b"IDAT", *b"tRNS", *b"PLTE", *b"IEND"];
             for i in &hdrs {
-                if FORBIDDEN_CHUNKS.contains(&i.as_ref()) {
+                if FORBIDDEN_CHUNKS.iter().any(|chunk| chunk == i.as_bytes()) {
                     return Err(format!("{} chunk is not allowed to be stripped", i));
                 }
             }

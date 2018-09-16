@@ -49,7 +49,7 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
 
 #[derive(Debug, Clone, Copy)]
 pub struct RawHeader<'a> {
-    pub name: &'a [u8],
+    pub name: [u8; 4],
     pub data: &'a [u8],
 }
 
@@ -98,10 +98,9 @@ pub fn parse_next_header<'a>(
         )));
     }
 
-    Ok(Some(RawHeader {
-        name: chunk_name,
-        data,
-    }))
+    let mut name = [0u8; 4];
+    name.copy_from_slice(chunk_name);
+    Ok(Some(RawHeader {name, data}))
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
