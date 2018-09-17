@@ -453,7 +453,8 @@ fn parse_opts_into_struct(
                 opts.strip = Headers::All;
             }
         } else {
-            const FORBIDDEN_CHUNKS: [[u8; 4]; 5] = [*b"IHDR", *b"IDAT", *b"tRNS", *b"PLTE", *b"IEND"];
+            const FORBIDDEN_CHUNKS: [[u8; 4]; 5] =
+                [*b"IHDR", *b"IDAT", *b"tRNS", *b"PLTE", *b"IEND"];
             for i in &hdrs {
                 if FORBIDDEN_CHUNKS.iter().any(|chunk| chunk == i.as_bytes()) {
                     return Err(format!("{} chunk is not allowed to be stripped", i));
@@ -501,7 +502,7 @@ fn parse_numeric_range_opts(
         let second_opt = range_values[1].parse::<u8>();
         if let (Ok(first), Ok(second)) = (first_opt, second_opt) {
             if min_value <= first && first < second && second <= max_value {
-                for i in first..second + 1 {
+                for i in first..=second {
                     items.insert(i);
                 }
                 return Ok(items);

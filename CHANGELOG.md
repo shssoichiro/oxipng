@@ -1,3 +1,7 @@
+### Version 2.1.3
+ - Fix i686 builds
+ - Performance improvements
+
 ### Version 2.1.2
  - Fix issue with PNG to Indexed reduction on images with transparency pixel ([#129](https://github.com/shssoichiro/oxipng/issues/129))
 

@@ -100,7 +100,7 @@ pub fn parse_next_header<'a>(
 
     let mut name = [0u8; 4];
     name.copy_from_slice(chunk_name);
-    Ok(Some(RawHeader {name, data}))
+    Ok(Some(RawHeader { name, data }))
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {

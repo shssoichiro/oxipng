@@ -828,16 +828,22 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            png.aux_headers.retain(|chunk, _| std::str::from_utf8(chunk).ok().map_or(false, |name| hdrs.contains(name)));
+            png.aux_headers.retain(|chunk, _| {
+                std::str::from_utf8(chunk)
+                    .ok()
+                    .map_or(false, |name| hdrs.contains(name))
+            });
         }
         Headers::Strip(ref hdrs) => for hdr in hdrs {
             png.aux_headers.remove(hdr.as_bytes());
         },
         Headers::Safe => {
             const PRESERVED_HEADERS: [[u8; 4]; 9] = [
-                *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs", *b"sPLT",
+                *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
+                *b"sPLT",
             ];
-            png.aux_headers.retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
+            png.aux_headers
+                .retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
         }
         Headers::All => {
             png.aux_headers = HashMap::new();
@@ -899,17 +905,13 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
 
 /// Compares images pixel by pixel for equivalent content
 fn images_equal(old_png: &DynamicImage, new_png: &DynamicImage) -> bool {
-    let a = old_png
-        .pixels()
-        .filter(|x| {
-            let p = x.2.channels();
-            !(p.len() == 4 && p[3] == 0)
-        });
-    let b = new_png
-        .pixels()
-        .filter(|x| {
-            let p = x.2.channels();
-            !(p.len() == 4 && p[3] == 0)
-        });
+    let a = old_png.pixels().filter(|x| {
+        let p = x.2.channels();
+        !(p.len() == 4 && p[3] == 0)
+    });
+    let b = new_png.pixels().filter(|x| {
+        let p = x.2.channels();
+        !(p.len() == 4 && p[3] == 0)
+    });
     a.eq(b)
 }
