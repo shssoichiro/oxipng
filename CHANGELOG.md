@@ -1,3 +1,6 @@
+### Version 2.1.4
+ - Bump `image` crate to 0.20.0
+
 ### Version 2.1.3
  - Fix i686 builds
  - Performance improvements

@@ -12,7 +12,7 @@ extern crate rayon;
 extern crate zopfli;
 
 use atomicmin::AtomicMin;
-use image::{DynamicImage, GenericImage, ImageFormat, Pixel};
+use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use png::PngData;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
