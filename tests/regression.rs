@@ -536,3 +536,15 @@ fn issue_133_left() {
         BitDepth::Eight,
     );
 }
+
+#[test]
+fn issue_140() {
+    test_it_converts(
+        "tests/files/issue-140.png",
+        None,
+        ColorType::Grayscale,
+        BitDepth::Two,
+        ColorType::Grayscale,
+        BitDepth::Two,
+    );
+}
