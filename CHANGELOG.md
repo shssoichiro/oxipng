@@ -1,3 +1,6 @@
+### Version 2.1.5
+ - Fix issue where some images will incorrectly reduce bit depth ([#140](https://github.com/shssoichiro/oxipng/issues/140))
+
 ### Version 2.1.4
  - Bump `image` crate to 0.20.0
 
