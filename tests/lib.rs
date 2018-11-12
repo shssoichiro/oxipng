@@ -1,7 +1,9 @@
 extern crate oxipng;
 
 use oxipng::OutFile;
+use oxipng::Headers;
 use std::default::Default;
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -81,4 +83,17 @@ fn optimize_apng() {
         &opts,
     );
     assert!(result.is_err());
+}
+
+#[test]
+fn optimize_srgb_icc() {
+    let file = fs::read("tests/files/badsrgb.png").unwrap();
+    let mut opts: oxipng::Options = Default::default();
+
+    let result = oxipng::optimize_from_memory(&file, &opts);
+    assert!(result.unwrap().len() > 1000);
+
+    opts.strip = Headers::Safe;
+    let result = oxipng::optimize_from_memory(&file, &opts);
+    assert!(result.unwrap().len() < 1000);
 }
