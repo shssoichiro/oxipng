@@ -14,6 +14,8 @@ extern crate zopfli;
 use atomicmin::AtomicMin;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use png::PngData;
+use deflate::inflate;
+use crc::crc32;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
@@ -848,6 +850,67 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         Headers::All => {
             png.aux_headers = HashMap::new();
         }
+    }
+
+    let may_replace_iccp = match opts.strip {
+        Headers::None => false,
+        Headers::Keep(ref hdrs) => hdrs.contains("sRGB"),
+        Headers::Strip(ref hdrs) => !hdrs.iter().any(|v| v == "sRGB"),
+        Headers::Safe => true,
+        Headers::All => false,
+    };
+
+    if may_replace_iccp {
+        if png.aux_headers.get(b"sRGB").is_some() {
+            // Files aren't supposed to have both chunks, so we chose to honor sRGB
+            png.aux_headers.remove(b"iCCP");
+        } else if let Some(intent) = png.aux_headers.get(b"iCCP")
+            .and_then(|iccp| srgb_rendering_intent(iccp)) {
+            // sRGB-like profile can be safely replaced with
+            // an sRGB chunk with the same rendering intent
+            png.aux_headers.remove(b"iCCP");
+            png.aux_headers.insert(*b"sRGB", vec![intent]);
+        }
+    }
+}
+
+/// If the profile is sRGB, extracts the rendering intent value from it
+fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
+    // Skip (useless) profile name
+    loop {
+        let (&n, rest) = iccp.split_first()?;
+        iccp = rest;
+        if n == 0 {break;}
+    }
+
+    let (&compression_method, compressed_data) = iccp.split_first()?;
+    if compression_method != 0 {
+        return None; // The profile is supposed to be compressed (method 0)
+    }
+    let icc_data = inflate(compressed_data).ok()?;
+
+    let rendering_intent = *icc_data.get(67)?;
+
+    // The known profiles are the same as in libpng's `png_sRGB_checks`.
+    // The Profile ID header of ICC has a fixed layout,
+    // and is supposed to contain MD5 of profile data at this offset
+    match icc_data.get(84..100)? {
+        b"\x29\xf8\x3d\xde\xaf\xf2\x55\xae\x78\x42\xfa\xe4\xca\x83\x39\x0d" |
+        b"\xc9\x5b\xd6\x37\xe9\x5d\x8a\x3b\x0d\xf3\x8f\x99\xc1\x32\x03\x89" |
+        b"\xfc\x66\x33\x78\x37\xe2\x88\x6b\xfd\x72\xe9\x83\x82\x28\xf1\xb8" |
+        b"\x34\x56\x2a\xbf\x99\x4c\xcd\x06\x6d\x2c\x57\x21\xd0\xd6\x8c\x5d" => {
+            Some(rendering_intent)
+        },
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" => {
+            // Known-bad profiles are identified by their CRC
+            match (crc32::checksum_ieee(&icc_data), icc_data.len()) {
+               (0x5d5129ce, 3024) |
+               (0x182ea552, 3144) |
+               (0xf29e526d, 3144) => Some(rendering_intent),
+               _ => None,
+            }
+        },
+        _ => None,
     }
 }
 

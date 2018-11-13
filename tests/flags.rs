@@ -136,7 +136,7 @@ fn strip_headers_safe() {
 
     assert!(!png.aux_headers.contains_key(b"tEXt"));
     assert!(!png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.aux_headers.contains_key(b"sRGB"));
 
     remove_file(output).ok();
 }
