@@ -597,8 +597,10 @@ impl PngData {
         let alphas_iter = alphas.iter();
         let best = alphas_iter
             .filter_map(|&alpha| {
-                let mut image = self.clone();
-                image.reduce_alpha_channel(*alpha);
+                let image = match self.reduced_alpha_channel(*alpha) {
+                    Some(image) => image,
+                    None => return None,
+                };
                 #[cfg(feature = "parallel")]
                 let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
                 #[cfg(not(feature = "parallel"))]
@@ -628,7 +630,9 @@ impl PngData {
         false
     }
 
-    pub fn reduce_alpha_channel(&mut self, optim: AlphaOptim) -> bool {
+    /// It doesn't recompress `idat_data`, so this field is out of date
+    /// after the reduction.
+    pub fn reduced_alpha_channel(&self, optim: AlphaOptim) -> Option<Self> {
         let (bpc, bpp) = match self.ihdr_data.color_type {
             ColorType::RGBA | ColorType::GrayscaleAlpha => {
                 let cpp = self.channels_per_pixel();
@@ -636,38 +640,32 @@ impl PngData {
                 (bpc as usize, (bpc * cpp) as usize)
             }
             _ => {
-                return false;
+                return None;
             }
         };
 
-        match optim {
-            AlphaOptim::NoOp => {
-                return false;
-            }
-            AlphaOptim::Black => {
-                self.raw_data = self.reduce_alpha_to_black(bpc, bpp);
-            }
-            AlphaOptim::White => {
-                self.raw_data = self.reduce_alpha_to_white(bpc, bpp);
-            }
-            AlphaOptim::Up => {
-                self.raw_data = self.reduce_alpha_to_up(bpc, bpp);
-            }
-            AlphaOptim::Down => {
-                self.raw_data = self.reduce_alpha_to_down(bpc, bpp);
-            }
-            AlphaOptim::Left => {
-                self.raw_data = self.reduce_alpha_to_left(bpc, bpp);
-            }
-            AlphaOptim::Right => {
-                self.raw_data = self.reduce_alpha_to_right(bpc, bpp);
-            }
-        }
+        let raw_data = match optim {
+            AlphaOptim::NoOp => return None,
+            AlphaOptim::Black => self.reduced_alpha_to_black(bpc, bpp),
+            AlphaOptim::White => self.reduced_alpha_to_white(bpc, bpp),
+            AlphaOptim::Up => self.reduced_alpha_to_up(bpc, bpp),
+            AlphaOptim::Down => self.reduced_alpha_to_down(bpc, bpp),
+            AlphaOptim::Left => self.reduced_alpha_to_left(bpc, bpp),
+            AlphaOptim::Right => self.reduced_alpha_to_right(bpc, bpp),
+        };
 
-        true
+        Some(Self {
+            raw_data,
+            idat_data: vec![],
+            ihdr_data: self.ihdr_data,
+            palette: self.palette.clone(),
+            transparency_pixel: self.transparency_pixel.clone(),
+            transparency_palette: self.transparency_palette.clone(),
+            aux_headers: self.aux_headers.clone(),
+        })
     }
 
-    fn reduce_alpha_to_black(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_black(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
         for line in self.scan_lines() {
             reduced.push(line.filter);
@@ -684,7 +682,7 @@ impl PngData {
         reduced
     }
 
-    fn reduce_alpha_to_white(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_white(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
         for line in self.scan_lines() {
             reduced.push(line.filter);
@@ -704,7 +702,7 @@ impl PngData {
         reduced
     }
 
-    fn reduce_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_up(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut lines = Vec::new();
         let mut scan_lines = self.scan_lines().collect::<Vec<ScanLine>>();
         scan_lines.reverse();
@@ -732,7 +730,7 @@ impl PngData {
         flatten(lines.into_iter().rev()).collect()
     }
 
-    fn reduce_alpha_to_down(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_down(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
         let mut last_line = Vec::new();
         for line in self.scan_lines() {
@@ -755,7 +753,7 @@ impl PngData {
         reduced
     }
 
-    fn reduce_alpha_to_left(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_left(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
         for line in self.scan_lines() {
             let mut line_bytes = Vec::with_capacity(line.data.len());
@@ -777,7 +775,7 @@ impl PngData {
         reduced
     }
 
-    fn reduce_alpha_to_right(&self, bpc: usize, bpp: usize) -> Vec<u8> {
+    fn reduced_alpha_to_right(&self, bpc: usize, bpp: usize) -> Vec<u8> {
         let mut reduced = Vec::with_capacity(self.raw_data.len());
         for line in self.scan_lines() {
             reduced.push(line.filter);
