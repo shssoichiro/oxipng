@@ -20,7 +20,8 @@ use std::iter::Iterator;
 use std::path::Path;
 
 const STD_COMPRESSION: u8 = 8;
-const STD_STRATEGY: u8 = 2; // Huffman only
+/// Must use normal compression, as faster ones (Huffman/RLE-only) are not representative
+const STD_STRATEGY: u8 = 0;
 const STD_WINDOW: u8 = 15;
 const STD_FILTERS: [u8; 2] = [0, 5];
 
