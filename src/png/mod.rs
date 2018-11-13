@@ -587,7 +587,7 @@ impl PngData {
         changed
     }
 
-    pub fn try_alpha_reduction(&mut self, alphas: &HashSet<AlphaOptim>) {
+    pub fn try_alpha_reduction(&mut self, alphas: &HashSet<AlphaOptim>) -> bool {
         assert!(!alphas.is_empty());
         let alphas = alphas.iter().collect::<Vec<_>>();
         let best_size = AtomicMin::new(None);
@@ -623,7 +623,9 @@ impl PngData {
 
         if let Some(best) = best {
             self.raw_data = best.1.raw_data;
+            return true;
         }
+        false
     }
 
     pub fn reduce_alpha_channel(&mut self, optim: AlphaOptim) -> bool {
