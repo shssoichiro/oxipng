@@ -768,7 +768,9 @@ fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) ->
         return reduction_occurred;
     }
 
-    png.try_alpha_reduction(&opts.alphas);
+    if png.try_alpha_reduction(&opts.alphas) {
+        reduction_occurred = true;
+    }
 
     reduction_occurred
 }
