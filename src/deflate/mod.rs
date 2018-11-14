@@ -15,18 +15,14 @@ pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
-    if is_cfzlib_supported() {
-        return cfzlib_deflate(data, zc, zs, zw, max_size);
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+    {
+        if is_cfzlib_supported() {
+            return cfzlib_deflate(data, zc, zs, zw, max_size);
+        }
     }
 
-    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
-}
-
-/// Compress a data stream using the DEFLATE algorithm
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
 }
 
