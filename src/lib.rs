@@ -1,7 +1,7 @@
 extern crate bit_vec;
 extern crate byteorder;
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
-extern crate cloudflare_zlib_sys;
+extern crate cloudflare_zlib;
 extern crate crc;
 extern crate image;
 extern crate rgb;

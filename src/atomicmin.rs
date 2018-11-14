@@ -21,6 +21,11 @@ impl AtomicMin {
         }
     }
 
+    /// Unset value is usize_max
+    pub fn as_atomic_usize(&self) -> &AtomicUsize {
+        &self.val
+    }
+
     pub fn set_min(&self, new_val: usize) {
         let mut current_val = self.val.load(Relaxed);
         loop {
