@@ -93,9 +93,8 @@ pub fn deinterlace_image(png: &mut PngData) {
     let mut current_y: usize = pass_constants.y_shift as usize;
     for line in png.scan_lines() {
         let bit_vec = BitVec::from_bytes(&line.data);
-        let bits_in_line = ((png.ihdr_data.width - u32::from(pass_constants.x_shift)) as f32
-            / f32::from(pass_constants.x_step)).ceil() as usize
-            * bits_per_pixel as usize;
+        let bits_in_line = ((png.ihdr_data.width - u32::from(pass_constants.x_shift) + u32::from(pass_constants.x_step) - 1)
+            / u32::from(pass_constants.x_step)) as usize * bits_per_pixel as usize;
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= bits_in_line {

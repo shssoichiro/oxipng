@@ -226,8 +226,7 @@ impl PngData {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
-            .ceil() as usize;
+        let bpp = ((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = 1;
         for line in self.scan_lines() {
@@ -254,8 +253,7 @@ impl PngData {
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
-            .ceil() as usize;
+        let bpp = ((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
