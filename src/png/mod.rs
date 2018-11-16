@@ -16,7 +16,7 @@ use reduction::color::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::iter::Iterator;
+use std::iter::{Iterator, repeat};
 use std::path::Path;
 
 const STD_COMPRESSION: u8 = 8;
@@ -350,26 +350,20 @@ impl PngData {
         }
 
         // A palette with RGB or RGBA slices
-        let palette = if let Some(ref trns) = self.transparency_palette {
-            self.palette
-                .clone()
-                .unwrap()
-                .chunks(3)
-                .zip(trns.iter().chain([255].iter().cycle()))
-                .flat_map(|(pixel, trns)| {
-                    let mut pixel = pixel.to_owned();
-                    pixel.push(*trns);
-                    pixel
-                }).collect()
+        let mut palette_tmp;
+        let mut indexed_palette: Vec<_> = if let Some(ref trns) = self.transparency_palette {
+            palette_tmp = Vec::with_capacity(1024);
+            for (pixel, trns) in self.palette.as_ref().unwrap().chunks(3)
+                .zip(trns.iter().cloned().chain(repeat(255))) {
+                palette_tmp.extend_from_slice(pixel);
+                palette_tmp.push(trns);
+            }
+            palette_tmp.chunks(4).collect()
         } else {
-            self.palette.clone().unwrap()
+            palette_tmp = self.palette.clone().unwrap();
+            palette_tmp.chunks(3).collect()
         };
-        let mut indexed_palette: Vec<&[u8]> = palette
-            .chunks(if self.transparency_palette.is_some() {
-                4
-            } else {
-                3
-            }).collect();
+
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
 
@@ -378,13 +372,13 @@ impl PngData {
         {
             // Find duplicate entries in the palette
             let mut seen: HashMap<&[u8], u8> = HashMap::with_capacity(indexed_palette.len());
-            for (i, color) in indexed_palette.iter().enumerate() {
+            for (i, color) in indexed_palette.iter().cloned().enumerate() {
                 if seen.contains_key(color) {
-                    let index = &seen[color];
+                    let index = seen[color];
                     duplicates.push(i as u8);
-                    index_map.insert(i as u8, *index);
+                    index_map.insert(i as u8, index);
                 } else {
-                    seen.insert(*color, i as u8);
+                    seen.insert(color, i as u8);
                 }
             }
         }
