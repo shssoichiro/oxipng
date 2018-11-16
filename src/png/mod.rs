@@ -254,7 +254,7 @@ impl PngData {
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
         let bpp = ((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
-        let mut last_line: Vec<u8> = Vec::new();
+        let mut last_line: &[u8] = &[];
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
             match filter {
@@ -265,21 +265,21 @@ impl PngData {
                         0
                     };
                     filtered.push(filter);
-                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
+                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, last_line));
                 }
                 5 => {
                     // Heuristically guess best filter per line
                     // Uses MSAD algorithm mentioned in libpng reference docs
                     // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
+                    let mut trials: Vec<(u8, Vec<u8>)> = Vec::with_capacity(5);
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
+                        trials.push((filter, filter_line(filter, bpp, &line.data, last_line)));
                     }
                     let (best_filter, best_line) = trials
                         .iter()
-                        .min_by_key(|x| {
-                            x.1.iter().fold(0u64, |acc, &x| {
+                        .min_by_key(|(_, line)| {
+                            line.iter().fold(0u64, |acc, &x| {
                                 let signed = x as i8;
                                 acc + i16::from(signed).abs() as u64
                             })
@@ -289,7 +289,7 @@ impl PngData {
                 }
                 _ => unreachable!(),
             }
-            last_line = line.data.to_vec();
+            last_line = line.data;
             last_pass = line.pass;
         }
         filtered
