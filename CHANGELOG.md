@@ -1,3 +1,8 @@
+### Version 2.1.6
+ - Identify and drop useless sRGB profiles ([#143](https://github.com/shssoichiro/oxipng/pull/143))
+ - Alpha heuristic improvements ([#144](https://github.com/shssoichiro/oxipng/pull/144))
+ - Bump `miniz_oxide` and `cloudflare-zlib-sys` to 0.2.0
+
 ### Version 2.1.5
  - Fix issue where some images will incorrectly reduce bit depth ([#140](https://github.com/shssoichiro/oxipng/issues/140))
 

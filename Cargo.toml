@@ -14,7 +14,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "2.1.5"
+version = "2.1.6"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
@@ -33,7 +33,7 @@ crc = "^1.2.0"
 itertools = "^0.7.7"
 num_cpus = "^1.0.0"
 zopfli = "^0.3.4"
-miniz_oxide = "0.1.2"
+miniz_oxide = "0.2.0"
 
 [dependencies.rayon]
 optional = true
@@ -48,7 +48,7 @@ optional = true
 version = "2.0.0"
 
 [target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies]
-cloudflare-zlib-sys = "^0.1.2"
+cloudflare-zlib-sys = "^0.2.0"
 
 [dependencies.image]
 default-features = false
