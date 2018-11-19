@@ -4,6 +4,7 @@ extern crate byteorder;
 extern crate cloudflare_zlib_sys;
 extern crate crc;
 extern crate image;
+extern crate rgb;
 extern crate itertools;
 extern crate miniz_oxide;
 extern crate num_cpus;

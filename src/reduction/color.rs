@@ -1,6 +1,9 @@
+use std::hash::Hash;
+use rgb::{RGBA8, RGB8, FromSlice};
 use colors::{BitDepth, ColorType};
 use itertools::Itertools;
 use png::PngData;
+use std::collections::HashMap;
 
 use super::alpha::reduce_alpha_channel;
 
@@ -71,173 +74,88 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     true
 }
 
-pub fn reduce_rgba_to_palette(png: &mut PngData) -> bool {
+fn reduce_scanline_to_palette<T>(iter: impl IntoIterator<Item=T>, palette: &mut HashMap<T, u8>, reduced: &mut Vec<u8>) -> bool
+    where T: Eq + Hash {
+    for pixel in iter {
+        let idx = if let Some(&idx) = palette.get(&pixel) {
+            idx
+        } else {
+            let len = palette.len();
+            if len == 256 {
+                return false;
+            }
+            let idx = len as u8;
+            palette.insert(pixel, idx);
+            idx
+        };
+        reduced.push(idx);
+    }
+    true
+}
+
+pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
     if png.ihdr_data.bit_depth != BitDepth::Eight {
         return false;
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = Vec::with_capacity(256);
-    let bpp: usize = (4 * png.ihdr_data.bit_depth.as_u8() as usize) >> 3;
+    let mut palette = HashMap::with_capacity(257);
+    let transparency_pixel = png.transparency_pixel.as_ref().map(|t| RGB8::new(t[1], t[3], t[5]));
     for line in png.scan_lines() {
         reduced.push(line.filter);
-        let mut cur_pixel = Vec::with_capacity(bpp);
-        for (i, byte) in line.data.iter().enumerate() {
-            cur_pixel.push(*byte);
-            if i % bpp == bpp - 1 {
-                if let Some(idx) = palette.iter().position(|x| x == &cur_pixel) {
-                    reduced.push(idx as u8);
-                } else {
-                    let len = palette.len();
-                    if len == 256 {
-                        return false;
-                    }
-                    palette.push(cur_pixel);
-                    reduced.push(len as u8);
-                }
-                cur_pixel = Vec::with_capacity(bpp);
-            }
-        }
-    }
-
-    let mut color_palette = Vec::with_capacity(
-        palette.len() * 3 + if png.aux_headers.contains_key(b"bKGD") {
-            6
+        let ok = if png.ihdr_data.color_type == ColorType::RGB {
+            reduce_scanline_to_palette(line.data.as_rgb().iter().cloned().map(|px| {
+                px.alpha(if Some(px) != transparency_pixel {255} else {0})
+            }), &mut palette, &mut reduced)
         } else {
-            0
-        },
-    );
-    let mut trans_palette = Vec::with_capacity(palette.len());
-    for color in &palette {
-        for (i, byte) in color.iter().enumerate() {
-            if i < 3 {
-                color_palette.push(*byte);
-            } else {
-                trans_palette.push(*byte);
-            }
+            debug_assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
+            reduce_scanline_to_palette(line.data.as_rgba().iter().cloned(), &mut palette, &mut reduced)
+        };
+        if !ok {
+            return false;
         }
     }
 
-    let headers_size = color_palette.len() + trans_palette.len() + 8;
-    if reduced.len() + headers_size > png.raw_data.len() * 4 {
+    let num_transparent = palette.iter()
+        .filter_map(|(px, &idx)| if px.a != 255 {Some(idx as usize +1)} else {None})
+        .max();
+    let trns_size = num_transparent.map(|n| n+8).unwrap_or(0);
+
+    let headers_size = palette.len()*3 + 8 + trns_size;
+    if reduced.len() + headers_size > png.raw_data.len() {
         // Reduction would result in a larger image
         return false;
     }
 
     if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
-        let header_pixels = bkgd_header
-            .iter()
-            .skip(1)
-            .step(2)
-            .cloned()
-            .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette
-            .chunks(3)
-            .position(|x| x == header_pixels.as_slice())
-        {
-            *bkgd_header = vec![entry as u8];
-        } else if color_palette.len() / 3 == 256 {
-            return false;
+        // In bKGD 16-bit values are used even for 8-bit images
+        let bg = RGBA8::new(bkgd_header[1], bkgd_header[3], bkgd_header[5], 255);
+        let entry = if let Some(&entry) = palette.get(&bg) {
+            entry
+        } else if palette.len() < 256 {
+            let entry = palette.len() as u8;
+            palette.insert(bg, entry);
+            entry
         } else {
-            let entry = color_palette.len() / 3;
-            color_palette.extend_from_slice(&header_pixels);
-            *bkgd_header = vec![entry as u8];
-        }
+            return false;
+        };
+        *bkgd_header = vec![entry];
     }
+
     if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         assert_eq!(sbit_header.len(), 4);
         sbit_header.pop();
     }
 
-    png.raw_data = reduced;
-    png.palette = Some(color_palette);
-    if trans_palette.iter().any(|x| *x != 255) {
-        while let Some(255) = trans_palette.last().cloned() {
-            trans_palette.pop();
-        }
-        png.transparency_palette = Some(trans_palette);
-    } else {
-        png.transparency_palette = None;
-    }
-    png.ihdr_data.color_type = ColorType::Indexed;
-    true
-}
-
-pub fn reduce_rgb_to_palette(png: &mut PngData) -> bool {
-    if png.ihdr_data.bit_depth != BitDepth::Eight {
-        return false;
-    }
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
-    let mut palette = Vec::with_capacity(256);
-    if let Some(ref trns) = png.transparency_pixel {
-        assert_eq!(trns.len(), 6);
-        if trns[0] != trns[1] || trns[2] != trns[3] || trns[4] != trns[5] {
-            return false;
-        }
-        palette.push(vec![trns[0], trns[2], trns[4]]);
-    }
-    let bpp: usize = (3 * png.ihdr_data.bit_depth.as_u8() as usize) >> 3;
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
-        let mut cur_pixel = Vec::with_capacity(bpp);
-        for (i, byte) in line.data.iter().enumerate() {
-            cur_pixel.push(*byte);
-            if i % bpp == bpp - 1 {
-                if let Some(idx) = palette.iter().position(|x| x == &cur_pixel) {
-                    reduced.push(idx as u8);
-                } else {
-                    let len = palette.len();
-                    if len == 256 {
-                        return false;
-                    }
-                    palette.push(cur_pixel);
-                    reduced.push(len as u8);
-                }
-                cur_pixel = Vec::with_capacity(bpp);
-            }
-        }
-    }
-
-    let mut color_palette = Vec::with_capacity(palette.len() * 3);
-    for color in &palette {
-        color_palette.extend_from_slice(color);
-    }
-
-    let headers_size = color_palette.len() + 4;
-    if reduced.len() + headers_size > png.raw_data.len() * 3 {
-        // Reduction would result in a larger image
-        return false;
-    }
-
-    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
-        assert_eq!(bkgd_header.len(), 6);
-        let header_pixels = bkgd_header
-            .iter()
-            .skip(1)
-            .step(2)
-            .cloned()
-            .collect::<Vec<u8>>();
-        if let Some(entry) = color_palette
-            .chunks(3)
-            .position(|x| x == header_pixels.as_slice())
-        {
-            *bkgd_header = vec![entry as u8];
-        } else if color_palette.len() == 255 {
-            return false;
-        } else {
-            let entry = color_palette.len() / 3;
-            color_palette.extend_from_slice(&header_pixels);
-            *bkgd_header = vec![entry as u8];
-        }
+    let mut palette_vec = vec![RGBA8::new(0,0,0,0); palette.len()];
+    for (color, idx) in palette {
+        palette_vec[idx as usize] = color;
     }
 
     png.raw_data = reduced;
-    png.palette = Some(color_palette);
+    png.transparency_pixel = None;
+    png.palette = Some(palette_vec);
     png.ihdr_data.color_type = ColorType::Indexed;
-    if png.transparency_pixel.is_some() {
-        png.transparency_pixel = None;
-        png.transparency_palette = Some(vec![0]);
-    };
     true
 }
 
