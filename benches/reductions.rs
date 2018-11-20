@@ -262,7 +262,7 @@ fn reductions_alpha_black(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::Black);
+        safe_png.reduced_alpha_channel(AlphaOptim::Black);
     });
 }
 
@@ -273,7 +273,7 @@ fn reductions_alpha_white(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::White);
+        safe_png.reduced_alpha_channel(AlphaOptim::White);
     });
 }
 
@@ -284,7 +284,7 @@ fn reductions_alpha_left(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::Left);
+        safe_png.reduced_alpha_channel(AlphaOptim::Left);
     });
 }
 
@@ -295,7 +295,7 @@ fn reductions_alpha_right(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::Right);
+        safe_png.reduced_alpha_channel(AlphaOptim::Right);
     });
 }
 
@@ -306,7 +306,7 @@ fn reductions_alpha_up(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::Up);
+        safe_png.reduced_alpha_channel(AlphaOptim::Up);
     });
 }
 
@@ -317,6 +317,6 @@ fn reductions_alpha_down(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.reduce_alpha_channel(AlphaOptim::Down);
+        safe_png.reduced_alpha_channel(AlphaOptim::Down);
     });
 }
