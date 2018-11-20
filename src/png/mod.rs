@@ -16,7 +16,7 @@ use reduction::color::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::iter::Iterator;
+use std::iter::{Iterator, repeat};
 use std::path::Path;
 
 const STD_COMPRESSION: u8 = 8;
@@ -226,8 +226,7 @@ impl PngData {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
-            .ceil() as usize;
+        let bpp = ((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = 1;
         for line in self.scan_lines() {
@@ -254,9 +253,8 @@ impl PngData {
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.raw_data.len());
-        let bpp = ((f32::from(self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel())) / 8f32)
-            .ceil() as usize;
-        let mut last_line: Vec<u8> = Vec::new();
+        let bpp = ((self.ihdr_data.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
+        let mut last_line: &[u8] = &[];
         let mut last_pass: Option<u8> = None;
         for line in self.scan_lines() {
             match filter {
@@ -267,21 +265,21 @@ impl PngData {
                         0
                     };
                     filtered.push(filter);
-                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, &last_line));
+                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, last_line));
                 }
                 5 => {
                     // Heuristically guess best filter per line
                     // Uses MSAD algorithm mentioned in libpng reference docs
                     // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut trials: HashMap<u8, Vec<u8>> = HashMap::with_capacity(5);
+                    let mut trials: Vec<(u8, Vec<u8>)> = Vec::with_capacity(5);
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        trials.insert(filter, filter_line(filter, bpp, &line.data, &last_line));
+                        trials.push((filter, filter_line(filter, bpp, &line.data, last_line)));
                     }
                     let (best_filter, best_line) = trials
                         .iter()
-                        .min_by_key(|x| {
-                            x.1.iter().fold(0u64, |acc, &x| {
+                        .min_by_key(|(_, line)| {
+                            line.iter().fold(0u64, |acc, &x| {
                                 let signed = x as i8;
                                 acc + i16::from(signed).abs() as u64
                             })
@@ -291,7 +289,7 @@ impl PngData {
                 }
                 _ => unreachable!(),
             }
-            last_line = line.data.to_vec();
+            last_line = line.data;
             last_pass = line.pass;
         }
         filtered
@@ -352,26 +350,20 @@ impl PngData {
         }
 
         // A palette with RGB or RGBA slices
-        let palette = if let Some(ref trns) = self.transparency_palette {
-            self.palette
-                .clone()
-                .unwrap()
-                .chunks(3)
-                .zip(trns.iter().chain([255].iter().cycle()))
-                .flat_map(|(pixel, trns)| {
-                    let mut pixel = pixel.to_owned();
-                    pixel.push(*trns);
-                    pixel
-                }).collect()
+        let mut palette_tmp;
+        let mut indexed_palette: Vec<_> = if let Some(ref trns) = self.transparency_palette {
+            palette_tmp = Vec::with_capacity(1024);
+            for (pixel, trns) in self.palette.as_ref().unwrap().chunks(3)
+                .zip(trns.iter().cloned().chain(repeat(255))) {
+                palette_tmp.extend_from_slice(pixel);
+                palette_tmp.push(trns);
+            }
+            palette_tmp.chunks(4).collect()
         } else {
-            self.palette.clone().unwrap()
+            palette_tmp = self.palette.clone().unwrap();
+            palette_tmp.chunks(3).collect()
         };
-        let mut indexed_palette: Vec<&[u8]> = palette
-            .chunks(if self.transparency_palette.is_some() {
-                4
-            } else {
-                3
-            }).collect();
+
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
 
@@ -380,13 +372,13 @@ impl PngData {
         {
             // Find duplicate entries in the palette
             let mut seen: HashMap<&[u8], u8> = HashMap::with_capacity(indexed_palette.len());
-            for (i, color) in indexed_palette.iter().enumerate() {
+            for (i, color) in indexed_palette.iter().cloned().enumerate() {
                 if seen.contains_key(color) {
-                    let index = &seen[color];
+                    let index = seen[color];
                     duplicates.push(i as u8);
-                    index_map.insert(i as u8, *index);
+                    index_map.insert(i as u8, index);
                 } else {
-                    seen.insert(*color, i as u8);
+                    seen.insert(color, i as u8);
                 }
             }
         }
