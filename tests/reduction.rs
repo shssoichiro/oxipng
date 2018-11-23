@@ -718,7 +718,7 @@ fn palette_should_be_reduced_with_dupes() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 43 * 3);
+    assert_eq!(png.palette.unwrap().len(), 43);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -737,7 +737,7 @@ fn palette_should_be_reduced_with_dupes() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 35 * 3);
+    assert_eq!(png.palette.unwrap().len(), 35);
 
     remove_file(output).ok();
 }
@@ -751,7 +751,7 @@ fn palette_should_be_reduced_with_unused() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 35 * 3);
+    assert_eq!(png.palette.unwrap().len(), 35);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -770,7 +770,7 @@ fn palette_should_be_reduced_with_unused() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 33 * 3);
+    assert_eq!(png.palette.unwrap().len(), 33);
 
     remove_file(output).ok();
 }
@@ -784,7 +784,7 @@ fn palette_should_be_reduced_with_both() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 43 * 3);
+    assert_eq!(png.palette.unwrap().len(), 43);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -803,7 +803,7 @@ fn palette_should_be_reduced_with_both() {
 
     assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
     assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 33 * 3);
+    assert_eq!(png.palette.unwrap().len(), 33);
 
     remove_file(output).ok();
 }

@@ -1,3 +1,5 @@
+use rgb::RGBA8;
+use rgb::ComponentSlice;
 use atomicmin::AtomicMin;
 use bit_vec::BitVec;
 use byteorder::{BigEndian, WriteBytesExt};
@@ -16,7 +18,7 @@ use reduction::color::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::iter::{Iterator, repeat};
+use std::iter::Iterator;
 use std::path::Path;
 
 const STD_COMPRESSION: u8 = 8;
@@ -40,11 +42,9 @@ pub struct PngData {
     pub raw_data: Vec<u8>,
     /// The palette containing colors used in an Indexed image
     /// Contains 3 bytes per color (R+G+B), up to 768
-    pub palette: Option<Vec<u8>>,
+    pub palette: Option<Vec<RGBA8>>,
     /// The pixel value that should be rendered as transparent
     pub transparency_pixel: Option<Vec<u8>>,
-    /// A map of how transparent each color in the palette should be
-    pub transparency_palette: Option<Vec<u8>>,
     /// All non-critical headers from the PNG are stored here
     pub aux_headers: HashMap<[u8; 4], Vec<u8>>,
 }
@@ -52,10 +52,10 @@ pub struct PngData {
 impl PngData {
     /// Create a new `PngData` struct by opening a file
     #[inline]
-    pub fn new(filepath: &Path, fix_errors: bool) -> Result<PngData, PngError> {
-        let byte_data = PngData::read_file(filepath)?;
+    pub fn new(filepath: &Path, fix_errors: bool) -> Result<Self, PngError> {
+        let byte_data = Self::read_file(filepath)?;
 
-        PngData::from_slice(&byte_data, fix_errors)
+        Self::from_slice(&byte_data, fix_errors)
     }
 
     pub fn read_file(filepath: &Path) -> Result<Vec<u8>, PngError> {
@@ -85,7 +85,7 @@ impl PngData {
     }
 
     /// Create a new `PngData` struct by reading a slice
-    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<PngData, PngError> {
+    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<Self, PngError> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
         let header = byte_data.get(0..8).ok_or(PngError::TruncatedData)?;
@@ -115,31 +115,15 @@ impl PngData {
         };
         let ihdr_header = parse_ihdr_header(&ihdr)?;
         let raw_data = deflate::inflate(idat_headers.as_ref())?;
-        // Handle transparency header
-        let mut has_transparency_pixel = false;
-        let mut has_transparency_palette = false;
-        if aux_headers.contains_key(b"tRNS") {
-            if ihdr_header.color_type == ColorType::Indexed {
-                has_transparency_palette = true;
-            } else {
-                has_transparency_pixel = true;
-            }
-        }
-        let mut png_data = PngData {
+
+        let (palette, transparency_pixel) = Self::palette_to_rgba(ihdr_header.color_type, aux_headers.remove(b"PLTE"), aux_headers.remove(b"tRNS"))?;
+
+        let mut png_data = Self {
             idat_data: idat_headers,
             ihdr_data: ihdr_header,
             raw_data,
-            palette: aux_headers.remove(b"PLTE"),
-            transparency_pixel: if has_transparency_pixel {
-                aux_headers.remove(b"tRNS")
-            } else {
-                None
-            },
-            transparency_palette: if has_transparency_palette {
-                aux_headers.remove(b"tRNS")
-            } else {
-                None
-            },
+            palette,
+            transparency_pixel,
             aux_headers,
         };
         png_data.raw_data = png_data.unfilter_image();
@@ -147,13 +131,31 @@ impl PngData {
         Ok(png_data)
     }
 
-    pub(crate) fn reset_from_original(&mut self, original: &PngData) {
+    /// Handle transparency header
+    fn palette_to_rgba(color_type: ColorType, palette_data: Option<Vec<u8>>, trns_data: Option<Vec<u8>>) -> Result<(Option<Vec<RGBA8>>, Option<Vec<u8>>), PngError> {
+        if color_type == ColorType::Indexed {
+            let palette_data = palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
+            let mut palette: Vec<_> = palette_data.chunks(3)
+                .map(|color| RGBA8::new(color[0], color[1], color[2], 255))
+                .collect();
+
+            if let Some(trns_data) = trns_data {
+                for (color, trns) in palette.iter_mut().zip(trns_data) {
+                    color.a = trns;
+                }
+            }
+            Ok((Some(palette), None))
+        } else {
+            Ok((None, trns_data))
+        }
+    }
+
+    pub(crate) fn reset_from_original(&mut self, original: &Self) {
         self.idat_data = original.idat_data.clone();
         self.ihdr_data = original.ihdr_data;
         self.raw_data = original.raw_data.clone();
         self.palette = original.palette.clone();
         self.transparency_pixel = original.transparency_pixel.clone();
-        self.transparency_palette = original.transparency_palette.clone();
         self.aux_headers = original.aux_headers.clone();
     }
 
@@ -187,10 +189,17 @@ impl PngData {
         }
         // Palette
         if let Some(ref palette) = self.palette {
-            write_png_block(b"PLTE", palette, &mut output);
-            if let Some(ref transparency_palette) = self.transparency_palette {
-                // Transparency pixel
-                write_png_block(b"tRNS", transparency_palette, &mut output);
+            let mut palette_data = Vec::with_capacity(palette.len()*3);
+            for px in palette {
+                palette_data.extend_from_slice(px.rgb().as_slice());
+            }
+            write_png_block(b"PLTE", &palette_data, &mut output);
+            let num_transparent = palette.iter().enumerate().fold(0, |prev, (index, px)| {
+                if px.a != 255 {index+1} else {prev}
+            });
+            if num_transparent > 0 {
+                let trns_data: Vec<_> = palette[0..num_transparent].iter().map(|px| px.a).collect();
+                write_png_block(b"tRNS", &trns_data, &mut output);
             }
         } else if let Some(ref transparency_pixel) = self.transparency_pixel {
             // Transparency pixel
@@ -349,32 +358,22 @@ impl PngData {
             return false;
         }
 
-        // A palette with RGB or RGBA slices
-        let mut palette_tmp;
-        let mut indexed_palette: Vec<_> = if let Some(ref trns) = self.transparency_palette {
-            palette_tmp = Vec::with_capacity(1024);
-            for (pixel, trns) in self.palette.as_ref().unwrap().chunks(3)
-                .zip(trns.iter().cloned().chain(repeat(255))) {
-                palette_tmp.extend_from_slice(pixel);
-                palette_tmp.push(trns);
-            }
-            palette_tmp.chunks(4).collect()
-        } else {
-            palette_tmp = self.palette.clone().unwrap();
-            palette_tmp.chunks(3).collect()
-        };
-
         // A map of old indexes to new ones, for any moved
         let mut index_map: HashMap<u8, u8> = HashMap::new();
+
+        let mut palette = match self.palette {
+            Some(ref p) => p.clone(),
+            None => return false,
+        };
 
         // A list of (original) indices that are duplicates and no longer needed
         let mut duplicates: Vec<u8> = Vec::new();
         {
             // Find duplicate entries in the palette
-            let mut seen: HashMap<&[u8], u8> = HashMap::with_capacity(indexed_palette.len());
-            for (i, color) in indexed_palette.iter().cloned().enumerate() {
-                if seen.contains_key(color) {
-                    let index = seen[color];
+            let mut seen: HashMap<RGBA8, u8> = HashMap::with_capacity(palette.len());
+            for (i, color) in palette.iter().cloned().enumerate() {
+                if seen.contains_key(&color) {
+                    let index = seen[&color];
                     duplicates.push(i as u8);
                     index_map.insert(i as u8, index);
                 } else {
@@ -385,11 +384,11 @@ impl PngData {
 
         // Remove duplicates from the data
         if !duplicates.is_empty() {
-            self.do_palette_reduction(&duplicates, &mut index_map, &mut indexed_palette);
+            self.do_palette_reduction(&duplicates, &mut index_map, &mut palette);
         }
 
         // Find palette entries that are never used
-        let mut seen = HashSet::with_capacity(indexed_palette.len());
+        let mut seen = HashSet::with_capacity(palette.len());
         for line in self.scan_lines() {
             match self.ihdr_data.bit_depth {
                 BitDepth::Eight => for &byte in line.data {
@@ -426,7 +425,7 @@ impl PngData {
                 _ => unreachable!(),
             }
 
-            if seen.len() == indexed_palette.len() {
+            if seen.len() == palette.len() {
                 // Exit early if no further possible optimizations
                 // Check at the end of each line
                 // Checking after every pixel would be overly expensive
@@ -434,12 +433,12 @@ impl PngData {
             }
         }
 
-        let unused: Vec<u8> = (0..indexed_palette.len() as u8)
+        let unused: Vec<u8> = (0..palette.len() as u8)
             .filter(|i| !seen.contains(i))
             .collect();
 
         // Remove unused palette indices
-        self.do_palette_reduction(&unused, &mut index_map, &mut indexed_palette);
+        self.do_palette_reduction(&unused, &mut index_map, &mut palette);
 
         true
     }
@@ -448,29 +447,20 @@ impl PngData {
         &mut self,
         indices_to_remove: &[u8],
         index_map: &mut HashMap<u8, u8>,
-        indexed_palette: &mut Vec<&[u8]>,
+        palette: &mut Vec<RGBA8>,
     ) {
         let mut new_data = Vec::with_capacity(self.raw_data.len());
-        let original_len = indexed_palette.len();
-        for idx in indices_to_remove.iter().sorted_by(|a, b| b.cmp(a)) {
-            for i in (*idx as usize + 1)..original_len {
+        let original_len = palette.len();
+        for idx in indices_to_remove.iter().cloned().sorted_by(|a, b| b.cmp(a)) {
+            for i in (idx as usize + 1)..original_len {
                 let existing = index_map.entry(i as u8).or_insert(i as u8);
-                if *existing >= *idx {
+                if *existing >= idx {
                     *existing -= 1;
                 }
             }
-            indexed_palette.remove(*idx as usize);
-            if let Some(ref mut alpha) = self.transparency_palette {
-                if (*idx as usize) < alpha.len() {
-                    alpha.remove(*idx as usize);
-                }
-            }
+            palette.remove(idx as usize);
         }
-        if let Some(ref mut alpha) = self.transparency_palette {
-            while let Some(255) = alpha.last().cloned() {
-                alpha.pop();
-            }
-        }
+
         // Reassign data bytes to new indices
         for line in self.scan_lines() {
             new_data.push(line.filter);
@@ -531,12 +521,8 @@ impl PngData {
         }
         index_map.clear();
         self.raw_data = new_data;
-        let new_palette = flatten(indexed_palette.iter().cloned())
-            .enumerate()
-            .filter(|&(i, _)| !(self.transparency_palette.is_some() && i % 4 == 3))
-            .map(|(_, x)| *x)
-            .collect::<Vec<u8>>();
-        self.palette = Some(new_palette);
+        self.transparency_pixel = None;
+        self.palette = Some(palette.clone());
     }
 
     /// Attempt to reduce the color type of the image
@@ -550,7 +536,7 @@ impl PngData {
         if self.ihdr_data.color_type == ColorType::RGBA {
             if reduce_rgba_to_grayscale_alpha(self) || reduce_rgba_to_rgb(self) {
                 changed = true;
-            } else if reduce_rgba_to_palette(self) {
+            } else if reduce_color_to_palette(self) {
                 changed = true;
                 should_reduce_bit_depth = true;
             }
@@ -564,7 +550,7 @@ impl PngData {
         }
 
         if self.ihdr_data.color_type == ColorType::RGB
-            && (reduce_rgb_to_grayscale(self) || reduce_rgb_to_palette(self))
+            && (reduce_rgb_to_grayscale(self) || reduce_color_to_palette(self))
         {
             changed = true;
             should_reduce_bit_depth = true;
@@ -652,7 +638,6 @@ impl PngData {
             ihdr_data: self.ihdr_data,
             palette: self.palette.clone(),
             transparency_pixel: self.transparency_pixel.clone(),
-            transparency_palette: self.transparency_palette.clone(),
             aux_headers: self.aux_headers.clone(),
         })
     }
