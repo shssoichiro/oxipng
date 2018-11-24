@@ -224,12 +224,7 @@ impl PngData {
     /// Return an iterator over the scanlines of the image
     #[inline]
     pub fn scan_lines(&self) -> ScanLines {
-        ScanLines {
-            png: self,
-            start: 0,
-            end: 0,
-            pass: None,
-        }
+        ScanLines::new(self)
     }
 
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream

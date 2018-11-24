@@ -4,125 +4,103 @@ use super::PngData;
 /// An iterator over the scan lines of a PNG image
 pub struct ScanLines<'a> {
     /// A reference to the PNG image being iterated upon
-    pub png: &'a PngData,
-    pub start: usize,
-    pub end: usize,
+    start: usize,
     /// Current pass number, and 0-indexed row within the pass
-    pub pass: Option<(u8, u32)>,
+    pass: Option<(u8, u32)>,
+    bits_per_pixel: u8,
+    width: u32,
+    height: u32,
+    raw_data: &'a [u8],
+}
+
+impl<'a> ScanLines<'a> {
+    pub fn new(png: &'a PngData) -> Self {
+        Self {
+            bits_per_pixel: png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel(),
+            width: png.ihdr_data.width,
+            height: png.ihdr_data.height,
+            raw_data: &png.raw_data,
+            start: 0,
+            pass: if png.ihdr_data.interlaced == 1 {Some((1, 0))} else {None},
+       }
+    }
 }
 
 impl<'a> Iterator for ScanLines<'a> {
     type Item = ScanLine<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.end == self.png.raw_data.len() {
+        if self.start >= self.raw_data.len() {
             None
-        } else if self.png.ihdr_data.interlaced == 1 {
+        } else if let Some(ref mut pass) = self.pass {
             // Scanlines for interlaced PNG files
-            if self.pass.is_none() {
-                self.pass = Some((1, 0));
-            }
             // Handle edge cases for images smaller than 5 pixels in either direction
-            if self.png.ihdr_data.width < 5 && self.pass.unwrap().0 == 2 {
-                if let Some(pass) = self.pass.as_mut() {
-                    pass.0 = 3;
-                    pass.1 = 4;
-                }
+            if self.width < 5 && pass.0 == 2 {
+                pass.0 = 3;
+                pass.1 = 4;
             }
             // Intentionally keep these separate so that they can be applied one after another
-            if self.png.ihdr_data.height < 5 && self.pass.unwrap().0 == 3 {
-                if let Some(pass) = self.pass.as_mut() {
-                    pass.0 = 4;
-                    pass.1 = 0;
-                }
+            if self.height < 5 && pass.0 == 3 {
+                pass.0 = 4;
+                pass.1 = 0;
             }
-            let bits_per_pixel = u32::from(self.png.ihdr_data.bit_depth.as_u8())
-                * u32::from(self.png.channels_per_pixel());
-            let y_steps;
-            let pixels_factor;
-            match self.pass {
-                Some((1, _)) | Some((2, _)) => {
-                    pixels_factor = 8;
-                    y_steps = 8;
-                }
-                Some((3, _)) => {
-                    pixels_factor = 4;
-                    y_steps = 8;
-                }
-                Some((4, _)) => {
-                    pixels_factor = 4;
-                    y_steps = 4;
-                }
-                Some((5, _)) => {
-                    pixels_factor = 2;
-                    y_steps = 4;
-                }
-                Some((6, _)) => {
-                    pixels_factor = 2;
-                    y_steps = 2;
-                }
-                Some((7, _)) => {
-                    pixels_factor = 1;
-                    y_steps = 2;
-                }
+            let (pixels_factor, y_steps) = match pass {
+                (1, _) | (2, _) => (8, 8),
+                (3, _) => (4, 8),
+                (4, _) => (4, 4),
+                (5, _) => (2, 4),
+                (6, _) => (2, 2),
+                (7, _) => (1, 2),
                 _ => unreachable!(),
-            }
-            let mut pixels_per_line = self.png.ihdr_data.width / pixels_factor as u32;
-            // Determine whether to add pixels if there is a final, incomplete 8x8 block
-            let gap = self.png.ihdr_data.width % pixels_factor;
-            if gap > 0 {
-                match self.pass.unwrap().0 {
-                    1 | 3 | 5 => {
-                        pixels_per_line += 1;
-                    }
-                    2 if gap >= 5 => {
-                        pixels_per_line += 1;
-                    }
-                    4 if gap >= 3 => {
-                        pixels_per_line += 1;
-                    }
-                    6 if gap >= 2 => {
-                        pixels_per_line += 1;
-                    }
-                    _ => (),
-                };
-            }
-            let current_pass = if let Some(pass) = self.pass {
-                Some(pass.0)
-            } else {
-                None
             };
-            let bytes_per_line = ((pixels_per_line * bits_per_pixel + 7) / 8) as usize;
-            self.start = self.end;
-            self.end = self.start + bytes_per_line + 1;
-            if let Some(pass) = self.pass.as_mut() {
-                if pass.1 + y_steps >= self.png.ihdr_data.height {
-                    pass.0 += 1;
-                    pass.1 = match pass.0 {
-                        3 => 4,
-                        5 => 2,
-                        7 => 1,
-                        _ => 0,
-                    };
-                } else {
-                    pass.1 += y_steps;
+            let mut pixels_per_line = self.width / pixels_factor as u32;
+            // Determine whether to add pixels if there is a final, incomplete 8x8 block
+            let gap = self.width % pixels_factor;
+            match pass.0 {
+                1 | 3 | 5 if gap > 0 => {
+                    pixels_per_line += 1;
                 }
+                2 if gap >= 5 => {
+                    pixels_per_line += 1;
+                }
+                4 if gap >= 3 => {
+                    pixels_per_line += 1;
+                }
+                6 if gap >= 2 => {
+                    pixels_per_line += 1;
+                }
+                _ => (),
+            };
+            let current_pass = Some(pass.0);
+            let bytes_per_line = ((pixels_per_line * self.bits_per_pixel as u32 + 7) / 8) as usize;
+            if pass.1 + y_steps >= self.height {
+                pass.0 += 1;
+                pass.1 = match pass.0 {
+                    3 => 4,
+                    5 => 2,
+                    7 => 1,
+                    _ => 0,
+                };
+            } else {
+                pass.1 += y_steps;
             }
+            let start = self.start;
+            let len = bytes_per_line + 1;
+            self.start += len;
             Some(ScanLine {
-                filter: self.png.raw_data[self.start],
-                data: &self.png.raw_data[(self.start + 1)..self.end],
+                filter: self.raw_data[start],
+                data: &self.raw_data[(start + 1)..(start + len)],
                 pass: current_pass,
             })
         } else {
             // Standard, non-interlaced PNG scanlines
-            let bits_per_line = self.png.ihdr_data.width as usize
-                * self.png.ihdr_data.bit_depth.as_u8() as usize
-                * self.png.channels_per_pixel() as usize;
-            let bytes_per_line = (bits_per_line + 7) / 8 as usize;
-            self.start = self.end;
-            self.end = self.start + bytes_per_line + 1;
+            let bits_per_line = self.width * self.bits_per_pixel as u32;
+            let bytes_per_line = ((bits_per_line + 7) / 8) as usize;
+            let start = self.start;
+            let len = bytes_per_line + 1;
+            self.start += len;
             Some(ScanLine {
-                filter: self.png.raw_data[self.start],
-                data: &self.png.raw_data[(self.start + 1)..self.end],
+                filter: self.raw_data[start],
+                data: &self.raw_data[(start + 1)..(start + len)],
                 pass: None,
             })
         }
