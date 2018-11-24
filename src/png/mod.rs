@@ -29,7 +29,7 @@ const STD_FILTERS: [u8; 2] = [0, 5];
 
 mod scan_lines;
 
-use self::scan_lines::{ScanLine, ScanLines};
+use self::scan_lines::{ScanLine, ScanLines, ScanLinesMut};
 
 #[derive(Debug, Clone)]
 /// Contains all data relevant to a PNG image
@@ -227,6 +227,12 @@ impl PngData {
         ScanLines::new(self)
     }
 
+    /// Return an iterator over the scanlines of the image
+    #[inline]
+    pub fn scan_lines_mut(&mut self) -> ScanLinesMut {
+        ScanLinesMut::new(self)
+    }
+
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     pub fn unfilter_image(&self) -> Vec<u8> {
         let mut unfiltered = Vec::with_capacity(self.raw_data.len());
@@ -410,7 +416,6 @@ impl PngData {
     }
 
     fn do_palette_reduction(&mut self, palette_map: &[u8; 256], used: &[bool; 256]) {
-        let mut new_data = Vec::with_capacity(self.raw_data.len());
         let mut byte_map = *palette_map;
 
         // low bit-depths can be pre-computed for every byte value
@@ -429,14 +434,12 @@ impl PngData {
         }
 
         // Reassign data bytes to new indices
-        for line in self.scan_lines() {
-            new_data.push(line.filter);
-            for &byte in line.data {
-                new_data.push(byte_map[byte as usize])
+        for line in self.scan_lines_mut() {
+            for byte in line.data {
+                *byte = byte_map[*byte as usize];
             }
         }
 
-        self.raw_data = new_data;
         self.transparency_pixel = None;
         if let Some(palette) = self.palette.take() {
             let max_index = palette_map.iter().max().cloned().unwrap_or(0) as usize;
