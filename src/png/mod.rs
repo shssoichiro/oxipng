@@ -1,6 +1,3 @@
-use std::collections::hash_map::Entry::*;
-use rgb::RGBA8;
-use rgb::ComponentSlice;
 use atomicmin::AtomicMin;
 use byteorder::{BigEndian, WriteBytesExt};
 use colors::{AlphaOptim, BitDepth, ColorType};
@@ -15,6 +12,9 @@ use itertools::flatten;
 use rayon::prelude::*;
 use reduction::bit_depth::*;
 use reduction::color::*;
+use rgb::ComponentSlice;
+use rgb::RGBA8;
+use std::collections::hash_map::Entry::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -48,6 +48,8 @@ pub struct PngData {
     /// All non-critical headers from the PNG are stored here
     pub aux_headers: HashMap<[u8; 4], Vec<u8>>,
 }
+
+type PaletteWithTrns = (Option<Vec<RGBA8>>, Option<Vec<u8>>);
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
@@ -116,7 +118,11 @@ impl PngData {
         let ihdr_header = parse_ihdr_header(&ihdr)?;
         let raw_data = deflate::inflate(idat_headers.as_ref())?;
 
-        let (palette, transparency_pixel) = Self::palette_to_rgba(ihdr_header.color_type, aux_headers.remove(b"PLTE"), aux_headers.remove(b"tRNS"))?;
+        let (palette, transparency_pixel) = Self::palette_to_rgba(
+            ihdr_header.color_type,
+            aux_headers.remove(b"PLTE"),
+            aux_headers.remove(b"tRNS"),
+        )?;
 
         let mut png_data = Self {
             idat_data: idat_headers,
@@ -132,10 +138,16 @@ impl PngData {
     }
 
     /// Handle transparency header
-    fn palette_to_rgba(color_type: ColorType, palette_data: Option<Vec<u8>>, trns_data: Option<Vec<u8>>) -> Result<(Option<Vec<RGBA8>>, Option<Vec<u8>>), PngError> {
+    fn palette_to_rgba(
+        color_type: ColorType,
+        palette_data: Option<Vec<u8>>,
+        trns_data: Option<Vec<u8>>,
+    ) -> Result<PaletteWithTrns, PngError> {
         if color_type == ColorType::Indexed {
-            let palette_data = palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
-            let mut palette: Vec<_> = palette_data.chunks(3)
+            let palette_data =
+                palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
+            let mut palette: Vec<_> = palette_data
+                .chunks(3)
                 .map(|color| RGBA8::new(color[0], color[1], color[2], 255))
                 .collect();
 
@@ -189,14 +201,22 @@ impl PngData {
         }
         // Palette
         if let Some(ref palette) = self.palette {
-            let mut palette_data = Vec::with_capacity(palette.len()*3);
+            let mut palette_data = Vec::with_capacity(palette.len() * 3);
             for px in palette {
                 palette_data.extend_from_slice(px.rgb().as_slice());
             }
             write_png_block(b"PLTE", &palette_data, &mut output);
-            let num_transparent = palette.iter().enumerate().fold(0, |prev, (index, px)| {
-                if px.a != 255 {index+1} else {prev}
-            });
+            let num_transparent =
+                palette.iter().enumerate().fold(
+                    0,
+                    |prev, (index, px)| {
+                        if px.a != 255 {
+                            index + 1
+                        } else {
+                            prev
+                        }
+                    },
+                );
             if num_transparent > 0 {
                 let trns_data: Vec<_> = palette[0..num_transparent].iter().map(|px| px.a).collect();
                 write_png_block(b"tRNS", &trns_data, &mut output);
@@ -389,21 +409,26 @@ impl PngData {
 
             let mut next_index = 0;
             let mut seen = HashMap::with_capacity(palette.len());
-            for (i, (used, palette_map)) in used.iter().cloned().zip(palette_map.iter_mut()).enumerate() {
+            for (i, (used, palette_map)) in
+                used.iter().cloned().zip(palette_map.iter_mut()).enumerate()
+            {
                 if !used {
                     continue;
                 }
                 // There are invalid files that use pixel indices beyond palette size
-                let color = palette.get(i).cloned().unwrap_or(RGBA8::new(0,0,0,255));
+                let color = palette
+                    .get(i)
+                    .cloned()
+                    .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
                 match seen.entry(color) {
                     Vacant(new) => {
                         *palette_map = next_index;
                         new.insert(next_index);
                         next_index += 1;
-                    },
+                    }
                     Occupied(remap_to) => {
                         *palette_map = *remap_to.get();
-                    },
+                    }
                 }
             }
             if (0..palette.len()).all(|i| palette_map[i] == i as u8) {
@@ -421,14 +446,14 @@ impl PngData {
         // low bit-depths can be pre-computed for every byte value
         match self.ihdr_data.bit_depth {
             BitDepth::Four => for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[(byte & 0x0F) as usize] |
-                    (palette_map[(byte >> 4) as usize] << 4);
+                byte_map[byte as usize] =
+                    palette_map[(byte & 0x0F) as usize] | (palette_map[(byte >> 4) as usize] << 4);
             },
             BitDepth::Two => for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[(byte & 0x03) as usize] |
-                    (palette_map[((byte >> 2) & 0x03) as usize] << 2) |
-                    (palette_map[((byte >> 4) & 0x03) as usize] << 4) |
-                    (palette_map[((byte >> 6)) as usize] << 6);
+                byte_map[byte as usize] = palette_map[(byte & 0x03) as usize]
+                    | (palette_map[((byte >> 2) & 0x03) as usize] << 2)
+                    | (palette_map[((byte >> 4) & 0x03) as usize] << 4)
+                    | (palette_map[(byte >> 6) as usize] << 6);
             },
             _ => {}
         }
@@ -443,8 +468,11 @@ impl PngData {
         self.transparency_pixel = None;
         if let Some(palette) = self.palette.take() {
             let max_index = palette_map.iter().max().cloned().unwrap_or(0) as usize;
-            let mut new_palette = vec![RGBA8::new(0,0,0,255); max_index+1];
-            for (color, (map_to, used)) in palette.into_iter().zip(palette_map.iter().cloned().zip(used.iter().cloned())) {
+            let mut new_palette = vec![RGBA8::new(0, 0, 0, 255); max_index + 1];
+            for (color, (map_to, used)) in palette
+                .into_iter()
+                .zip(palette_map.iter().cloned().zip(used.iter().cloned()))
+            {
                 if used {
                     new_palette[map_to as usize] = color;
                 }

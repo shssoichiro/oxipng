@@ -1,7 +1,7 @@
 extern crate oxipng;
 
-use oxipng::OutFile;
 use oxipng::Headers;
+use oxipng::OutFile;
 use std::default::Default;
 use std::fs;
 use std::fs::File;

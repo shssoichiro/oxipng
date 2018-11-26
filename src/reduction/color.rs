@@ -1,9 +1,9 @@
-use std::hash::Hash;
-use rgb::{RGBA8, RGB8, FromSlice};
 use colors::{BitDepth, ColorType};
 use itertools::Itertools;
 use png::PngData;
+use rgb::{FromSlice, RGB8, RGBA8};
 use std::collections::HashMap;
+use std::hash::Hash;
 
 use super::alpha::reduce_alpha_channel;
 
@@ -74,8 +74,14 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     true
 }
 
-fn reduce_scanline_to_palette<T>(iter: impl IntoIterator<Item=T>, palette: &mut HashMap<T, u8>, reduced: &mut Vec<u8>) -> bool
-    where T: Eq + Hash {
+fn reduce_scanline_to_palette<T>(
+    iter: impl IntoIterator<Item = T>,
+    palette: &mut HashMap<T, u8>,
+    reduced: &mut Vec<u8>,
+) -> bool
+where
+    T: Eq + Hash,
+{
     for pixel in iter {
         let idx = if let Some(&idx) = palette.get(&pixel) {
             idx
@@ -99,28 +105,49 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
     }
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let mut palette = HashMap::with_capacity(257);
-    let transparency_pixel = png.transparency_pixel.as_ref().map(|t| RGB8::new(t[1], t[3], t[5]));
+    let transparency_pixel = png
+        .transparency_pixel
+        .as_ref()
+        .map(|t| RGB8::new(t[1], t[3], t[5]));
     for line in png.scan_lines() {
         reduced.push(line.filter);
         let ok = if png.ihdr_data.color_type == ColorType::RGB {
-            reduce_scanline_to_palette(line.data.as_rgb().iter().cloned().map(|px| {
-                px.alpha(if Some(px) != transparency_pixel {255} else {0})
-            }), &mut palette, &mut reduced)
+            reduce_scanline_to_palette(
+                line.data.as_rgb().iter().cloned().map(|px| {
+                    px.alpha(if Some(px) != transparency_pixel {
+                        255
+                    } else {
+                        0
+                    })
+                }),
+                &mut palette,
+                &mut reduced,
+            )
         } else {
             debug_assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
-            reduce_scanline_to_palette(line.data.as_rgba().iter().cloned(), &mut palette, &mut reduced)
+            reduce_scanline_to_palette(
+                line.data.as_rgba().iter().cloned(),
+                &mut palette,
+                &mut reduced,
+            )
         };
         if !ok {
             return false;
         }
     }
 
-    let num_transparent = palette.iter()
-        .filter_map(|(px, &idx)| if px.a != 255 {Some(idx as usize +1)} else {None})
-        .max();
-    let trns_size = num_transparent.map(|n| n+8).unwrap_or(0);
+    let num_transparent = palette
+        .iter()
+        .filter_map(|(px, &idx)| {
+            if px.a != 255 {
+                Some(idx as usize + 1)
+            } else {
+                None
+            }
+        }).max();
+    let trns_size = num_transparent.map(|n| n + 8).unwrap_or(0);
 
-    let headers_size = palette.len()*3 + 8 + trns_size;
+    let headers_size = palette.len() * 3 + 8 + trns_size;
     if reduced.len() + headers_size > png.raw_data.len() {
         // Reduction would result in a larger image
         return false;
@@ -147,7 +174,7 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
         sbit_header.pop();
     }
 
-    let mut palette_vec = vec![RGBA8::new(0,0,0,0); palette.len()];
+    let mut palette_vec = vec![RGBA8::new(0, 0, 0, 0); palette.len()];
     for (color, idx) in palette {
         palette_vec[idx as usize] = color;
     }

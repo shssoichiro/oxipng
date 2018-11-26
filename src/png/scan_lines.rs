@@ -25,11 +25,7 @@ impl<'a> Iterator for ScanLines<'a> {
             let (data, rest) = self.raw_data.split_at(len);
             self.raw_data = rest;
             let (&filter, data) = data.split_first().unwrap();
-            ScanLine {
-                filter,
-                data,
-                pass,
-            }
+            ScanLine { filter, data, pass }
         })
     }
 }
@@ -60,11 +56,7 @@ impl<'a> Iterator for ScanLinesMut<'a> {
             let (data, rest) = tmp.split_at_mut(len);
             self.raw_data = Some(rest);
             let (&mut filter, data) = data.split_first_mut().unwrap();
-            ScanLineMut {
-                filter,
-                data,
-                pass,
-            }
+            ScanLineMut { filter, data, pass }
         })
     }
 }
@@ -87,7 +79,11 @@ impl ScanLineRanges {
             width: png.ihdr_data.width,
             height: png.ihdr_data.height,
             left: png.raw_data.len(),
-            pass: if png.ihdr_data.interlaced == 1 {Some((1, 0))} else {None},
+            pass: if png.ihdr_data.interlaced == 1 {
+                Some((1, 0))
+            } else {
+                None
+            },
         }
     }
 }
@@ -154,7 +150,7 @@ impl Iterator for ScanLineRanges {
             // Standard, non-interlaced PNG scanlines
             (self.width, None)
         };
-        let bits_per_line = pixels_per_line * self.bits_per_pixel as u32;
+        let bits_per_line = pixels_per_line * u32::from(self.bits_per_pixel);
         let bytes_per_line = ((bits_per_line + 7) / 8) as usize;
         let len = bytes_per_line + 1;
         self.left -= len;
@@ -172,7 +168,6 @@ pub struct ScanLine<'a> {
     /// The current pass if the image is interlaced
     pub pass: Option<u8>,
 }
-
 
 #[derive(Debug)]
 /// A scan line in a PNG image
