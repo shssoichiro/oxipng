@@ -1,3 +1,4 @@
+use reduction::ReducedPng;
 use colors::{BitDepth, ColorType};
 use itertools::Itertools;
 use png::PngData;
@@ -99,18 +100,18 @@ where
     true
 }
 
-pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
+pub fn reduced_color_to_palette(png: &mut PngData) -> Option<ReducedPng> {
     if png.ihdr_data.bit_depth != BitDepth::Eight {
-        return false;
+        return None;
     }
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let mut raw_data = Vec::with_capacity(png.raw_data.len());
     let mut palette = HashMap::with_capacity(257);
     let transparency_pixel = png
         .transparency_pixel
         .as_ref()
         .map(|t| RGB8::new(t[1], t[3], t[5]));
     for line in png.scan_lines() {
-        reduced.push(line.filter);
+        raw_data.push(line.filter);
         let ok = if png.ihdr_data.color_type == ColorType::RGB {
             reduce_scanline_to_palette(
                 line.data.as_rgb().iter().cloned().map(|px| {
@@ -121,18 +122,18 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
                     })
                 }),
                 &mut palette,
-                &mut reduced,
+                &mut raw_data,
             )
         } else {
             debug_assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
             reduce_scanline_to_palette(
                 line.data.as_rgba().iter().cloned(),
                 &mut palette,
-                &mut reduced,
+                &mut raw_data,
             )
         };
         if !ok {
-            return false;
+            return None;
         }
     }
 
@@ -148,12 +149,13 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
     let trns_size = num_transparent.map(|n| n + 8).unwrap_or(0);
 
     let headers_size = palette.len() * 3 + 8 + trns_size;
-    if reduced.len() + headers_size > png.raw_data.len() {
+    if raw_data.len() + headers_size > png.raw_data.len() {
         // Reduction would result in a larger image
-        return false;
+        return None;
     }
 
-    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
+    let mut aux_headers = HashMap::new();
+    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
         assert_eq!(bkgd_header.len(), 6);
         // In bKGD 16-bit values are used even for 8-bit images
         let bg = RGBA8::new(bkgd_header[1], bkgd_header[3], bkgd_header[5], 255);
@@ -164,17 +166,14 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
             palette.insert(bg, entry);
             entry
         } else {
-            return false;
+            return None; // No space in palette to store the bg as an index
         };
-        *bkgd_header = vec![entry];
+        aux_headers.insert(*b"bKGD", Some(vec![entry]));
     }
 
-    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
+    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
         // Some programs save the sBIT header as RGB even if the image is RGBA.
-        // Only remove the alpha channel if it's actually there.
-        if sbit_header.len() == 4 {
-            sbit_header.pop();
-        }
+        aux_headers.insert(*b"sBIT", Some(sbit_header.iter().cloned().take(3).collect()));
     }
 
     let mut palette_vec = vec![RGBA8::new(0, 0, 0, 0); palette.len()];
@@ -182,11 +181,12 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
         palette_vec[idx as usize] = color;
     }
 
-    png.raw_data = reduced;
-    png.transparency_pixel = None;
-    png.palette = Some(palette_vec);
-    png.ihdr_data.color_type = ColorType::Indexed;
-    true
+    Some(ReducedPng {
+        color_type: ColorType::Indexed,
+        aux_headers,
+        raw_data,
+        palette: Some(palette_vec),
+    })
 }
 
 pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {

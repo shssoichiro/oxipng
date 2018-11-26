@@ -12,6 +12,7 @@ extern crate rayon;
 extern crate rgb;
 extern crate zopfli;
 
+use reduction::*;
 use atomicmin::AtomicMin;
 use crc::crc32;
 use deflate::inflate;
@@ -725,10 +726,13 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
 fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) -> bool {
     let mut reduction_occurred = false;
 
-    if opts.palette_reduction && png.reduce_palette() {
-        reduction_occurred = true;
-        if opts.verbosity == Some(1) {
-            report_reduction(png);
+    if opts.palette_reduction {
+        if let Some(reduced) = reduced_palette(png) {
+            png.apply_reduction(reduced);
+            reduction_occurred = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(png);
+            }
         }
     }
 
