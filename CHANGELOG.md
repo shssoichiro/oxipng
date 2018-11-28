@@ -1,3 +1,9 @@
+### Version 2.1.7
+ - 80x faster palette reduction ([#150](https://github.com/shssoichiro/oxipng/pull/150))
+ - Optimize RGB to palette conversion ([#148](https://github.com/shssoichiro/oxipng/pull/148))
+ - Various microoptimizations ([#146](https://github.com/shssoichiro/oxipng/pull/146))
+ - Introduce third-party safe wrapper around cloudflare-zlib ([#149](https://github.com/shssoichiro/oxipng/pull/149))
+
 ### Version 2.1.6
  - Identify and drop useless sRGB profiles ([#143](https://github.com/shssoichiro/oxipng/pull/143))
  - Alpha heuristic improvements ([#144](https://github.com/shssoichiro/oxipng/pull/144))
