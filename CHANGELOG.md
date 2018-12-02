@@ -1,3 +1,6 @@
+### Version 2.1.8
+ - Fix non-standard sBIT headers in other code locations ([#153](https://github.com/shssoichiro/oxipng/issues/153))
+
 ### Version 2.1.7
  - 80x faster palette reduction ([#150](https://github.com/shssoichiro/oxipng/pull/150))
  - Optimize RGB to palette conversion ([#148](https://github.com/shssoichiro/oxipng/pull/148))

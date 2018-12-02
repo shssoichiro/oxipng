@@ -31,7 +31,7 @@ pub fn reduce_alpha_channel(png: &mut PngData, channels: u8) -> Option<Vec<u8>> 
     if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
         // Some programs save the sBIT header as RGB even if the image is RGBA.
         // Only remove the alpha channel if it's actually there.
-        if sbit_header.len() == channels as usize {
+        if sbit_header.len() == 4 {
             sbit_header.pop();
         }
     }

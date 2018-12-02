@@ -60,7 +60,7 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     }
 
     if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
-        assert_eq!(sbit_header.len(), 4);
+        assert!(sbit_header.len() >= 3);
         sbit_header.remove(1);
         sbit_header.remove(1);
     }
@@ -170,8 +170,11 @@ pub fn reduce_color_to_palette(png: &mut PngData) -> bool {
     }
 
     if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
-        assert_eq!(sbit_header.len(), 4);
-        sbit_header.pop();
+        // Some programs save the sBIT header as RGB even if the image is RGBA.
+        // Only remove the alpha channel if it's actually there.
+        if sbit_header.len() == 4 {
+            sbit_header.pop();
+        }
     }
 
     let mut palette_vec = vec![RGBA8::new(0, 0, 0, 0); palette.len()];
