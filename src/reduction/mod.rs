@@ -4,19 +4,24 @@ use std::collections::hash_map::Entry::*;
 use png::PngData;
 use rgb::RGBA8;
 
-mod alpha;
+pub mod alpha;
 pub mod bit_depth;
 pub mod color;
 
+/// Fields to replace in PngData to apply the reduction
 pub struct ReducedPng {
-    pub raw_data: Vec<u8>,
-    pub palette: Option<Vec<RGBA8>>,
-    pub aux_headers: HashMap<[u8; 4], Option<Vec<u8>>>,
     pub color_type: ColorType,
+    pub raw_data: Vec<u8>,
+    /// replace if Some
+    pub palette: Option<Vec<RGBA8>>,
+    /// replace if Some
+    pub transparency_pixel: Option<Vec<u8>>,
+    /// replace if Some, delete if None
+    pub aux_headers: HashMap<[u8; 4], Option<Vec<u8>>>,
 }
 
 /// Attempt to reduce the number of colors in the palette
-/// Returns true if the palette was reduced, false otherwise
+/// Returns `None` if palette hasn't changed
 pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
     if png.ihdr_data.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
@@ -101,6 +106,7 @@ fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Optio
     Some(ReducedPng {
         color_type: ColorType::Indexed,
         raw_data,
+        transparency_pixel: None,
         palette: Some(reordered_palette(png.palette.as_ref()?, palette_map)),
         aux_headers,
     })

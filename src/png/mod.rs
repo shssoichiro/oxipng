@@ -13,6 +13,7 @@ use itertools::flatten;
 use rayon::prelude::*;
 use reduction::bit_depth::*;
 use reduction::color::*;
+use reduction::alpha::*;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
 use std::collections::{HashMap, HashSet};
@@ -377,7 +378,8 @@ impl PngData {
         if self.ihdr_data.color_type == ColorType::RGBA {
             if reduce_rgba_to_grayscale_alpha(self) {
                 changed = true;
-            } else if reduce_rgba_to_rgb(self) {
+            } else if let Some(reduced) = reduced_alpha_channel(self) {
+                self.apply_reduction(reduced);
                 changed = true;
             } else if let Some(reduced) = reduced_color_to_palette(self) {
                 self.apply_reduction(reduced);
@@ -386,11 +388,12 @@ impl PngData {
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha
-            && reduce_grayscale_alpha_to_grayscale(self)
-        {
-            changed = true;
-            should_reduce_bit_depth = true;
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
+            if let Some(reduced) = reduced_alpha_channel(self) {
+                self.apply_reduction(reduced);
+                changed = true;
+                should_reduce_bit_depth = true;
+            }
         }
 
         if self.ihdr_data.color_type == ColorType::RGB {
@@ -413,12 +416,15 @@ impl PngData {
         changed
     }
 
-    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, raw_data, palette, aux_headers}: ReducedPng) {
+    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, raw_data, palette, transparency_pixel, aux_headers}: ReducedPng) {
         self.ihdr_data.color_type = color_type;
         self.raw_data = raw_data;
-        if let Some(palette) = palette {
+        if palette.is_some() {
             self.transparency_pixel = None;
-            self.palette = Some(palette);
+            self.palette = palette;
+        }
+        if transparency_pixel.is_some() {
+            self.transparency_pixel = transparency_pixel;
         }
         self.idat_data.clear(); // this field is out of date and needs to be replaced
 

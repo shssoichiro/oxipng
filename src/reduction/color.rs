@@ -6,18 +6,6 @@ use rgb::{FromSlice, RGB8, RGBA8};
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use super::alpha::reduce_alpha_channel;
-
-pub fn reduce_rgba_to_rgb(png: &mut PngData) -> bool {
-    if let Some(reduced) = reduce_alpha_channel(png, 4) {
-        png.raw_data = reduced;
-        png.ihdr_data.color_type = ColorType::RGB;
-        true
-    } else {
-        false
-    }
-}
-
 pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
@@ -185,6 +173,7 @@ pub fn reduced_color_to_palette(png: &mut PngData) -> Option<ReducedPng> {
         color_type: ColorType::Indexed,
         aux_headers,
         raw_data,
+        transparency_pixel: None,
         palette: Some(palette_vec),
     })
 }
@@ -241,14 +230,4 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
     png.raw_data = reduced;
     png.ihdr_data.color_type = ColorType::Grayscale;
     true
-}
-
-pub fn reduce_grayscale_alpha_to_grayscale(png: &mut PngData) -> bool {
-    if let Some(reduced) = reduce_alpha_channel(png, 2) {
-        png.raw_data = reduced;
-        png.ihdr_data.color_type = ColorType::Grayscale;
-        true
-    } else {
-        false
-    }
 }
