@@ -61,6 +61,7 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<ReducedPng> {
     Some(ReducedPng {
         raw_data: reduced,
         bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
         color_type: ColorType::GrayscaleAlpha,
         palette: None,
         transparency_pixel: None,
@@ -178,6 +179,7 @@ pub fn reduced_color_to_palette(png: &PngData) -> Option<ReducedPng> {
     Some(ReducedPng {
         color_type: ColorType::Indexed,
         bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
         aux_headers,
         raw_data,
         transparency_pixel: None,
@@ -242,6 +244,7 @@ pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<ReducedPng> {
         raw_data: reduced,
         color_type: ColorType::Grayscale,
         bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
         palette: None,
         transparency_pixel,
         aux_headers,

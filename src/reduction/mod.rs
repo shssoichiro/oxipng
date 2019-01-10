@@ -19,6 +19,7 @@ pub struct ReducedPng {
     pub transparency_pixel: Option<Vec<u8>>,
     /// replace if Some, delete if None
     pub aux_headers: HashMap<[u8; 4], Option<Vec<u8>>>,
+    pub interlaced: u8,
 }
 
 /// Attempt to reduce the number of colors in the palette
@@ -109,6 +110,7 @@ fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Optio
     Some(ReducedPng {
         color_type: ColorType::Indexed,
         bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
         raw_data,
         transparency_pixel: None,
         palette: Some(reordered_palette(png.palette.as_ref()?, palette_map)),

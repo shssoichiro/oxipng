@@ -47,6 +47,7 @@ pub fn reduced_alpha_channel(png: &PngData) -> Option<ReducedPng> {
     Some(ReducedPng {
         raw_data,
         bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
         color_type: target_color_type,
         aux_headers,
         transparency_pixel: None,

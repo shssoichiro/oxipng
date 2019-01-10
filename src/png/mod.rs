@@ -365,6 +365,7 @@ impl PngData {
 
         Some(ReducedPng {
             color_type: self.ihdr_data.color_type,
+            interlaced: self.ihdr_data.interlaced,
             bit_depth: BitDepth::Eight,
             raw_data: reduced,
             palette: self.palette.clone(),
@@ -419,9 +420,10 @@ impl PngData {
         changed
     }
 
-    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, bit_depth, raw_data, palette, transparency_pixel, aux_headers}: ReducedPng) {
+    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, bit_depth, raw_data, interlaced, palette, transparency_pixel, aux_headers}: ReducedPng) {
         self.ihdr_data.color_type = color_type;
         self.ihdr_data.bit_depth = bit_depth;
+        self.ihdr_data.interlaced = interlaced;
         self.raw_data = raw_data;
         if palette.is_some() {
             self.transparency_pixel = None;
@@ -652,19 +654,19 @@ impl PngData {
     /// The `interlace` parameter specifies the *new* interlacing mode
     /// Assumes that the data has already been de-filtered
     #[inline]
-    pub fn change_interlacing(&mut self, interlace: u8) -> bool {
+    #[must_use]
+    pub fn change_interlacing(&mut self, interlace: u8) -> Option<ReducedPng> {
         if interlace == self.ihdr_data.interlaced {
-            return false;
+            return None;
         }
 
-        if interlace == 1 {
+        Some(if interlace == 1 {
             // Convert progressive to interlaced data
-            interlace_image(self);
+            interlace_image(self)
         } else {
             // Convert interlaced to progressive data
-            deinterlace_image(self);
-        }
-        true
+            deinterlace_image(self)
+        })
     }
 }
 

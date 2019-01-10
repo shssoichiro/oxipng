@@ -766,8 +766,8 @@ fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) ->
     }
 
     if let Some(interlacing) = opts.interlace {
-        if png.change_interlacing(interlacing) {
-            png.ihdr_data.interlaced = interlacing;
+        if let Some(reduced) = png.change_interlacing(interlacing) {
+            png.apply_reduction(reduced);
             reduction_occurred = true;
         }
     }

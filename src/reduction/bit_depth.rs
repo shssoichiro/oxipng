@@ -82,6 +82,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<ReducedPng> {
 
     Some(ReducedPng {
         color_type: png.ihdr_data.color_type,
+        interlaced: png.ihdr_data.interlaced,
         raw_data: reduced.to_bytes(),
         bit_depth: BitDepth::from_u8(allowed_bits as u8),
         aux_headers: Default::default(),
