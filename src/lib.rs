@@ -740,10 +740,13 @@ fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) ->
         return reduction_occurred;
     }
 
-    if opts.bit_depth_reduction && png.reduce_bit_depth() {
-        reduction_occurred = true;
-        if opts.verbosity == Some(1) {
-            report_reduction(png);
+    if opts.bit_depth_reduction {
+        if let Some(reduced) = png.reduce_bit_depth() {
+            png.apply_reduction(reduced);
+            reduction_occurred = true;
+            if opts.verbosity == Some(1) {
+                report_reduction(png);
+            }
         }
     }
 

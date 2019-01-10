@@ -1,3 +1,4 @@
+use reduction::ReducedPng;
 use bit_vec::BitVec;
 use colors::{BitDepth, ColorType};
 use png::PngData;
@@ -24,7 +25,8 @@ const FOUR_BIT_PERMUTATIONS: [u8; 11] = [
     0b1111_1111,
 ];
 
-pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
+#[must_use]
+pub fn reduce_bit_depth_8_or_less(png: &PngData) -> Option<ReducedPng> {
     let mut reduced = BitVec::with_capacity(png.raw_data.len() * 8);
     let bit_depth: usize = png.ihdr_data.bit_depth.as_u8() as usize;
     let mut allowed_bits = 1;
@@ -37,7 +39,7 @@ pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
                     allowed_bits = bit_index.next_power_of_two();
                     if allowed_bits == bit_depth {
                         // Not reducable
-                        return false;
+                        return None;
                     }
                 }
             }
@@ -51,7 +53,7 @@ pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
                     } else if allowed_bits == 4 {
                         &FOUR_BIT_PERMUTATIONS
                     } else {
-                        return false;
+                        return None;
                     };
                     if permutations.iter().any(|perm| *perm == byte) {
                         break;
@@ -78,7 +80,12 @@ pub fn reduce_bit_depth_8_or_less(png: &mut PngData) -> bool {
         }
     }
 
-    png.raw_data = reduced.to_bytes();
-    png.ihdr_data.bit_depth = BitDepth::from_u8(allowed_bits as u8);
-    true
+    Some(ReducedPng {
+        color_type: png.ihdr_data.color_type,
+        raw_data: reduced.to_bytes(),
+        bit_depth: BitDepth::from_u8(allowed_bits as u8),
+        aux_headers: Default::default(),
+        palette: png.palette.clone(),
+        transparency_pixel: png.transparency_pixel.clone(),
+    })
 }

@@ -6,7 +6,8 @@ use rgb::{FromSlice, RGB8, RGBA8};
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
+#[must_use]
+pub fn reduce_rgba_to_grayscale_alpha(png: &PngData) -> Option<ReducedPng> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp = 4 * byte_depth;
@@ -31,11 +32,11 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
 
             if (i as u8 & bpp_mask) == bpp - 1 {
                 if low_bytes.iter().unique().count() > 1 {
-                    return false;
+                    return None;
                 }
                 if byte_depth == 2 {
                     if high_bytes.iter().unique().count() > 1 {
-                        return false;
+                        return None;
                     }
                     reduced.push(high_bytes[0]);
                     high_bytes.clear();
@@ -48,19 +49,23 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &mut PngData) -> bool {
         }
     }
 
-    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
-        assert!(sbit_header.len() >= 3);
-        sbit_header.remove(1);
-        sbit_header.remove(1);
-    }
-    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
-        assert_eq!(bkgd_header.len(), 6);
-        bkgd_header.truncate(2);
+    let mut aux_headers = HashMap::new();
+    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
+        aux_headers.insert(*b"sBIT", sbit_header.get(0).map(|&s| vec![s]));
     }
 
-    png.raw_data = reduced;
-    png.ihdr_data.color_type = ColorType::GrayscaleAlpha;
-    true
+    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
+        aux_headers.insert(*b"bKGD", bkgd_header.get(0..2).map(|b| b.to_owned()));
+    }
+
+    Some(ReducedPng {
+        raw_data: reduced,
+        bit_depth: png.ihdr_data.bit_depth,
+        color_type: ColorType::GrayscaleAlpha,
+        palette: None,
+        transparency_pixel: None,
+        aux_headers,
+    })
 }
 
 fn reduce_scanline_to_palette<T>(
@@ -88,7 +93,8 @@ where
     true
 }
 
-pub fn reduced_color_to_palette(png: &mut PngData) -> Option<ReducedPng> {
+#[must_use]
+pub fn reduced_color_to_palette(png: &PngData) -> Option<ReducedPng> {
     if png.ihdr_data.bit_depth != BitDepth::Eight {
         return None;
     }
@@ -171,6 +177,7 @@ pub fn reduced_color_to_palette(png: &mut PngData) -> Option<ReducedPng> {
 
     Some(ReducedPng {
         color_type: ColorType::Indexed,
+        bit_depth: png.ihdr_data.bit_depth,
         aux_headers,
         raw_data,
         transparency_pixel: None,
@@ -178,7 +185,8 @@ pub fn reduced_color_to_palette(png: &mut PngData) -> Option<ReducedPng> {
     })
 }
 
-pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
+#[must_use]
+pub fn reduce_rgb_to_grayscale(png: &PngData) -> Option<ReducedPng> {
     let mut reduced = Vec::with_capacity(png.raw_data.len());
     let byte_depth: u8 = png.ihdr_data.bit_depth.as_u8() >> 3;
     let bpp: usize = 3 * byte_depth as usize;
@@ -190,7 +198,7 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
             if i % bpp == bpp - 1 {
                 if bpp == 3 {
                     if cur_pixel.iter().unique().count() > 1 {
-                        return false;
+                        return None;
                     }
                     reduced.push(cur_pixel[0]);
                 } else {
@@ -202,7 +210,7 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
                         .unique()
                         .collect::<Vec<(u8, u8)>>();
                     if pixel_bytes.len() > 1 {
-                        return false;
+                        return None;
                     }
                     reduced.push(pixel_bytes[0].0);
                     reduced.push(pixel_bytes[0].1);
@@ -211,23 +219,31 @@ pub fn reduce_rgb_to_grayscale(png: &mut PngData) -> bool {
             }
         }
     }
-    if let Some(ref mut trns) = png.transparency_pixel {
-        assert_eq!(trns.len(), 6);
-        if trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
-            return false;
+
+    let transparency_pixel = if let Some(ref trns) = png.transparency_pixel {
+        if trns.len() != 6 || trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
+            None
+        } else {
+            Some(trns[0..2].to_owned())
         }
-        *trns = trns[0..2].to_owned();
+    } else {
+        png.transparency_pixel.clone()
+    };
+
+    let mut aux_headers = HashMap::new();
+    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
+        aux_headers.insert(*b"sBIT", sbit_header.get(0).map(|&byte| vec![byte]));
     }
-    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
-        assert_eq!(sbit_header.len(), 3);
-        sbit_header.truncate(1);
-    }
-    if let Some(bkgd_header) = png.aux_headers.get_mut(b"bKGD") {
-        assert_eq!(bkgd_header.len(), 6);
-        bkgd_header.truncate(2);
+    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
+        aux_headers.insert(*b"bKGD", bkgd_header.get(0..2).map(|b| b.to_owned()));
     }
 
-    png.raw_data = reduced;
-    png.ihdr_data.color_type = ColorType::Grayscale;
-    true
+    Some(ReducedPng {
+        raw_data: reduced,
+        color_type: ColorType::Grayscale,
+        bit_depth: png.ihdr_data.bit_depth,
+        palette: None,
+        transparency_pixel,
+        aux_headers,
+    })
 }

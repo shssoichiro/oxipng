@@ -12,6 +12,7 @@ pub mod color;
 pub struct ReducedPng {
     pub color_type: ColorType,
     pub raw_data: Vec<u8>,
+    pub bit_depth: BitDepth,
     /// replace if Some
     pub palette: Option<Vec<RGBA8>>,
     /// replace if Some
@@ -22,6 +23,7 @@ pub struct ReducedPng {
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
+#[must_use]
 pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
     if png.ihdr_data.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
@@ -84,6 +86,7 @@ pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
     do_palette_reduction(png, &palette_map)
 }
 
+#[must_use]
 fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Option<ReducedPng> {
     let byte_map = palette_map_to_byte_map(png, palette_map)?;
     let mut raw_data = Vec::with_capacity(png.raw_data.len());
@@ -105,6 +108,7 @@ fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Optio
 
     Some(ReducedPng {
         color_type: ColorType::Indexed,
+        bit_depth: png.ihdr_data.bit_depth,
         raw_data,
         transparency_pixel: None,
         palette: Some(reordered_palette(png.palette.as_ref()?, palette_map)),

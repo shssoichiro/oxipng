@@ -3,6 +3,7 @@ use png::PngData;
 use colors::ColorType;
 use std::collections::HashMap;
 
+#[must_use]
 pub fn reduced_alpha_channel(png: &PngData) -> Option<ReducedPng> {
     let target_color_type = match png.ihdr_data.color_type {
         ColorType::GrayscaleAlpha => ColorType::Grayscale,
@@ -45,6 +46,7 @@ pub fn reduced_alpha_channel(png: &PngData) -> Option<ReducedPng> {
 
     Some(ReducedPng {
         raw_data,
+        bit_depth: png.ihdr_data.bit_depth,
         color_type: target_color_type,
         aux_headers,
         transparency_pixel: None,

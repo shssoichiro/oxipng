@@ -328,14 +328,15 @@ impl PngData {
 
     /// Attempt to reduce the bit depth of the image
     /// Returns true if the bit depth was reduced, false otherwise
-    pub fn reduce_bit_depth(&mut self) -> bool {
+    #[must_use]
+    pub fn reduce_bit_depth(&self) -> Option<ReducedPng> {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed
                 || self.ihdr_data.color_type == ColorType::Grayscale
             {
                 return reduce_bit_depth_8_or_less(self);
             }
-            return false;
+            return None;
         }
 
         // Reduce from 16 to 8 bits per channel per pixel
@@ -355,16 +356,21 @@ impl PngData {
                     // Low byte
                     if high_byte != byte {
                         // Can't reduce, exit early
-                        return false;
+                        return None;
                     }
                     reduced.push(byte);
                 }
             }
         }
 
-        self.ihdr_data.bit_depth = BitDepth::Eight;
-        self.raw_data = reduced;
-        true
+        Some(ReducedPng {
+            color_type: self.ihdr_data.color_type,
+            bit_depth: BitDepth::Eight,
+            raw_data: reduced,
+            palette: self.palette.clone(),
+            transparency_pixel: self.transparency_pixel.clone(),
+            aux_headers: Default::default(),
+        })
     }
 
     /// Attempt to reduce the color type of the image
@@ -376,9 +382,7 @@ impl PngData {
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
         if self.ihdr_data.color_type == ColorType::RGBA {
-            if reduce_rgba_to_grayscale_alpha(self) {
-                changed = true;
-            } else if let Some(reduced) = reduced_alpha_channel(self) {
+            if let Some(reduced) = reduce_rgba_to_grayscale_alpha(self).or_else(|| reduced_alpha_channel(self)) {
                 self.apply_reduction(reduced);
                 changed = true;
             } else if let Some(reduced) = reduced_color_to_palette(self) {
@@ -397,10 +401,7 @@ impl PngData {
         }
 
         if self.ihdr_data.color_type == ColorType::RGB {
-            if reduce_rgb_to_grayscale(self) {
-                changed = true;
-                should_reduce_bit_depth = true;
-            } else if let Some(reduced) = reduced_color_to_palette(self) {
+            if let Some(reduced) = reduce_rgb_to_grayscale(self).or_else(|| reduced_color_to_palette(self)) {
                 self.apply_reduction(reduced);
                 changed = true;
                 should_reduce_bit_depth = true;
@@ -410,14 +411,17 @@ impl PngData {
         if should_reduce_bit_depth {
             // Some conversions will allow us to perform bit depth reduction that
             // wasn't possible before
-            reduce_bit_depth_8_or_less(self);
+            if let Some(reduced) = reduce_bit_depth_8_or_less(self) {
+                self.apply_reduction(reduced);
+            }
         }
 
         changed
     }
 
-    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, raw_data, palette, transparency_pixel, aux_headers}: ReducedPng) {
+    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, bit_depth, raw_data, palette, transparency_pixel, aux_headers}: ReducedPng) {
         self.ihdr_data.color_type = color_type;
+        self.ihdr_data.bit_depth = bit_depth;
         self.raw_data = raw_data;
         if palette.is_some() {
             self.transparency_pixel = None;
