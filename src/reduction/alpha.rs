@@ -1,7 +1,17 @@
+use reduction::ReducedPng;
 use png::PngData;
+use colors::ColorType;
+use std::collections::HashMap;
 
-pub fn reduce_alpha_channel(png: &mut PngData, channels: u8) -> Option<Vec<u8>> {
+#[must_use]
+pub fn reduced_alpha_channel(png: &PngData) -> Option<ReducedPng> {
+    let target_color_type = match png.ihdr_data.color_type {
+        ColorType::GrayscaleAlpha => ColorType::Grayscale,
+        ColorType::RGBA => ColorType::RGB,
+        _ => return None,
+    };
     let byte_depth = png.ihdr_data.bit_depth.as_u8() >> 3;
+    let channels = png.channels_per_pixel();
     let bpp = channels * byte_depth;
     let bpp_mask = bpp - 1;
     assert_eq!(0, bpp & bpp_mask);
@@ -14,27 +24,33 @@ pub fn reduce_alpha_channel(png: &mut PngData, channels: u8) -> Option<Vec<u8>> 
         }
     }
 
-    let mut reduced = Vec::with_capacity(png.raw_data.len());
+    let mut raw_data = Vec::with_capacity(png.raw_data.len());
     for line in png.scan_lines() {
-        reduced.push(line.filter);
+        raw_data.push(line.filter);
         for (i, &byte) in line.data.iter().enumerate() {
             if i as u8 & bpp_mask >= colored_bytes {
                 continue;
             } else {
-                reduced.push(byte);
+                raw_data.push(byte);
             }
         }
     }
 
+    let mut aux_headers = HashMap::new();
     // sBIT contains information about alpha channel's original depth,
     // and alpha has just been removed
-    if let Some(sbit_header) = png.aux_headers.get_mut(b"sBIT") {
+    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
         // Some programs save the sBIT header as RGB even if the image is RGBA.
-        // Only remove the alpha channel if it's actually there.
-        if sbit_header.len() == 4 {
-            sbit_header.pop();
-        }
+        aux_headers.insert(*b"sBIT", Some(sbit_header.iter().cloned().take(3).collect()));
     }
 
-    Some(reduced)
+    Some(ReducedPng {
+        raw_data,
+        bit_depth: png.ihdr_data.bit_depth,
+        interlaced: png.ihdr_data.interlaced,
+        color_type: target_color_type,
+        aux_headers,
+        transparency_pixel: None,
+        palette: None,
+    })
 }

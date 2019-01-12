@@ -14,7 +14,7 @@ fn interlacing_16_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(1);
+        safe_png.change_interlacing(1)
     });
 }
 
@@ -25,7 +25,7 @@ fn interlacing_8_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(1);
+        safe_png.change_interlacing(1)
     });
 }
 
@@ -38,7 +38,7 @@ fn interlacing_4_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(1);
+        safe_png.change_interlacing(1)
     });
 }
 
@@ -51,7 +51,7 @@ fn interlacing_2_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(1);
+        safe_png.change_interlacing(1)
     });
 }
 
@@ -64,7 +64,7 @@ fn interlacing_1_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(1);
+        safe_png.change_interlacing(1)
     });
 }
 
@@ -77,7 +77,7 @@ fn deinterlacing_16_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(0);
+        safe_png.change_interlacing(0)
     });
 }
 
@@ -90,7 +90,7 @@ fn deinterlacing_8_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(0);
+        safe_png.change_interlacing(0)
     });
 }
 
@@ -103,7 +103,7 @@ fn deinterlacing_4_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(0);
+        safe_png.change_interlacing(0)
     });
 }
 
@@ -116,7 +116,7 @@ fn deinterlacing_2_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(0);
+        safe_png.change_interlacing(0)
     });
 }
 
@@ -129,6 +129,6 @@ fn deinterlacing_1_bits(b: &mut Bencher) {
 
     b.iter(|| {
         let mut safe_png = png.clone();
-        safe_png.change_interlacing(0);
+        safe_png.change_interlacing(0)
     });
 }

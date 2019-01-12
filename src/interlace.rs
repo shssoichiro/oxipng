@@ -1,7 +1,9 @@
+use reduction::ReducedPng;
 use bit_vec::BitVec;
 use png::PngData;
 
-pub fn interlace_image(png: &mut PngData) {
+#[must_use]
+pub fn interlace_image(png: &PngData) -> ReducedPng {
     let mut passes: Vec<BitVec> = vec![BitVec::new(); 7];
     let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
     for (index, line) in png.scan_lines().enumerate() {
@@ -74,14 +76,24 @@ pub fn interlace_image(png: &mut PngData) {
             }
         }
     }
-    let mut output = Vec::new();
+
+    let mut output = Vec::with_capacity(png.raw_data.len());
     for pass in &passes {
         output.extend(pass.to_bytes());
     }
-    png.raw_data = output;
+
+    ReducedPng {
+        raw_data: output,
+        interlaced: 1,
+        color_type: png.ihdr_data.color_type,
+        bit_depth: png.ihdr_data.bit_depth,
+        aux_headers: Default::default(),
+        palette: None,
+        transparency_pixel: None,
+    }
 }
 
-pub fn deinterlace_image(png: &mut PngData) {
+pub fn deinterlace_image(png: &PngData) -> ReducedPng {
     let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
     let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr_data.width as usize;
     // Initialize each output line with a starting filter byte of 0
@@ -126,14 +138,22 @@ pub fn deinterlace_image(png: &mut PngData) {
             current_y = pass_constants.y_shift as usize;
         }
     }
-    let mut output = Vec::new();
+    let mut output = Vec::with_capacity(png.raw_data.len());
     for line in &mut lines {
         while line.len() % 8 != 0 {
             line.push(false);
         }
         output.extend(line.to_bytes());
     }
-    png.raw_data = output;
+    ReducedPng {
+        raw_data: output,
+        interlaced: 0,
+        color_type: png.ihdr_data.color_type,
+        bit_depth: png.ihdr_data.bit_depth,
+        aux_headers: Default::default(),
+        palette: None,
+        transparency_pixel: None,
+    }
 }
 
 #[derive(Clone, Copy)]

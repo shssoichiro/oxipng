@@ -4,6 +4,7 @@ use colors::{AlphaOptim, BitDepth, ColorType};
 use crc::crc32;
 use deflate;
 use error::PngError;
+use reduction::*;
 use filters::*;
 use headers::*;
 use interlace::{deinterlace_image, interlace_image};
@@ -12,9 +13,9 @@ use itertools::flatten;
 use rayon::prelude::*;
 use reduction::bit_depth::*;
 use reduction::color::*;
+use reduction::alpha::*;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
-use std::collections::hash_map::Entry::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -327,14 +328,15 @@ impl PngData {
 
     /// Attempt to reduce the bit depth of the image
     /// Returns true if the bit depth was reduced, false otherwise
-    pub fn reduce_bit_depth(&mut self) -> bool {
+    #[must_use]
+    pub fn reduce_bit_depth(&self) -> Option<ReducedPng> {
         if self.ihdr_data.bit_depth != BitDepth::Sixteen {
             if self.ihdr_data.color_type == ColorType::Indexed
                 || self.ihdr_data.color_type == ColorType::Grayscale
             {
                 return reduce_bit_depth_8_or_less(self);
             }
-            return false;
+            return None;
         }
 
         // Reduce from 16 to 8 bits per channel per pixel
@@ -354,131 +356,22 @@ impl PngData {
                     // Low byte
                     if high_byte != byte {
                         // Can't reduce, exit early
-                        return false;
+                        return None;
                     }
                     reduced.push(byte);
                 }
             }
         }
 
-        self.ihdr_data.bit_depth = BitDepth::Eight;
-        self.raw_data = reduced;
-        true
-    }
-
-    /// Attempt to reduce the number of colors in the palette
-    /// Returns true if the palette was reduced, false otherwise
-    pub fn reduce_palette(&mut self) -> bool {
-        if self.ihdr_data.color_type != ColorType::Indexed {
-            // Can't reduce if there is no palette
-            return false;
-        }
-        if self.ihdr_data.bit_depth == BitDepth::One {
-            // Gains from 1-bit images will be at most 1 byte
-            // Not worth the CPU time
-            return false;
-        }
-
-        let mut palette_map = [0u8; 256];
-        let mut used = [false; 256];
-        {
-            let palette = match self.palette {
-                Some(ref p) => p,
-                None => return false,
-            };
-
-            // Find palette entries that are never used
-            for line in self.scan_lines() {
-                match self.ihdr_data.bit_depth {
-                    BitDepth::Eight => for &byte in line.data {
-                        used[byte as usize] = true;
-                    },
-                    BitDepth::Four => for &byte in line.data {
-                        used[(byte & 0x0F) as usize] = true;
-                        used[(byte >> 4) as usize] = true;
-                    },
-                    BitDepth::Two => for &byte in line.data {
-                        used[(byte & 0x03) as usize] = true;
-                        used[((byte >> 2) & 0x03) as usize] = true;
-                        used[((byte >> 4) & 0x03) as usize] = true;
-                        used[(byte >> 6) as usize] = true;
-                    },
-                    _ => unreachable!(),
-                }
-            }
-
-            let mut next_index = 0;
-            let mut seen = HashMap::with_capacity(palette.len());
-            for (i, (used, palette_map)) in
-                used.iter().cloned().zip(palette_map.iter_mut()).enumerate()
-            {
-                if !used {
-                    continue;
-                }
-                // There are invalid files that use pixel indices beyond palette size
-                let color = palette
-                    .get(i)
-                    .cloned()
-                    .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
-                match seen.entry(color) {
-                    Vacant(new) => {
-                        *palette_map = next_index;
-                        new.insert(next_index);
-                        next_index += 1;
-                    }
-                    Occupied(remap_to) => {
-                        *palette_map = *remap_to.get();
-                    }
-                }
-            }
-            if (0..palette.len()).all(|i| palette_map[i] == i as u8) {
-                return false;
-            }
-        }
-
-        self.do_palette_reduction(&palette_map, &used);
-        true
-    }
-
-    fn do_palette_reduction(&mut self, palette_map: &[u8; 256], used: &[bool; 256]) {
-        let mut byte_map = *palette_map;
-
-        // low bit-depths can be pre-computed for every byte value
-        match self.ihdr_data.bit_depth {
-            BitDepth::Four => for byte in 0..=255 {
-                byte_map[byte as usize] =
-                    palette_map[(byte & 0x0F) as usize] | (palette_map[(byte >> 4) as usize] << 4);
-            },
-            BitDepth::Two => for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[(byte & 0x03) as usize]
-                    | (palette_map[((byte >> 2) & 0x03) as usize] << 2)
-                    | (palette_map[((byte >> 4) & 0x03) as usize] << 4)
-                    | (palette_map[(byte >> 6) as usize] << 6);
-            },
-            _ => {}
-        }
-
-        // Reassign data bytes to new indices
-        for line in self.scan_lines_mut() {
-            for byte in line.data {
-                *byte = byte_map[*byte as usize];
-            }
-        }
-
-        self.transparency_pixel = None;
-        if let Some(palette) = self.palette.take() {
-            let max_index = palette_map.iter().max().cloned().unwrap_or(0) as usize;
-            let mut new_palette = vec![RGBA8::new(0, 0, 0, 255); max_index + 1];
-            for (color, (map_to, used)) in palette
-                .into_iter()
-                .zip(palette_map.iter().cloned().zip(used.iter().cloned()))
-            {
-                if used {
-                    new_palette[map_to as usize] = color;
-                }
-            }
-            self.palette = Some(new_palette);
-        }
+        Some(ReducedPng {
+            color_type: self.ihdr_data.color_type,
+            interlaced: self.ihdr_data.interlaced,
+            bit_depth: BitDepth::Eight,
+            raw_data: reduced,
+            palette: self.palette.clone(),
+            transparency_pixel: self.transparency_pixel.clone(),
+            aux_headers: Default::default(),
+        })
     }
 
     /// Attempt to reduce the color type of the image
@@ -490,35 +383,63 @@ impl PngData {
         // Go down one step at a time
         // Maybe not the most efficient, but it's safe
         if self.ihdr_data.color_type == ColorType::RGBA {
-            if reduce_rgba_to_grayscale_alpha(self) || reduce_rgba_to_rgb(self) {
+            if let Some(reduced) = reduce_rgba_to_grayscale_alpha(self).or_else(|| reduced_alpha_channel(self)) {
+                self.apply_reduction(reduced);
                 changed = true;
-            } else if reduce_color_to_palette(self) {
+            } else if let Some(reduced) = reduced_color_to_palette(self) {
+                self.apply_reduction(reduced);
                 changed = true;
                 should_reduce_bit_depth = true;
             }
         }
 
-        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha
-            && reduce_grayscale_alpha_to_grayscale(self)
-        {
-            changed = true;
-            should_reduce_bit_depth = true;
+        if self.ihdr_data.color_type == ColorType::GrayscaleAlpha {
+            if let Some(reduced) = reduced_alpha_channel(self) {
+                self.apply_reduction(reduced);
+                changed = true;
+                should_reduce_bit_depth = true;
+            }
         }
 
-        if self.ihdr_data.color_type == ColorType::RGB
-            && (reduce_rgb_to_grayscale(self) || reduce_color_to_palette(self))
-        {
-            changed = true;
-            should_reduce_bit_depth = true;
+        if self.ihdr_data.color_type == ColorType::RGB {
+            if let Some(reduced) = reduce_rgb_to_grayscale(self).or_else(|| reduced_color_to_palette(self)) {
+                self.apply_reduction(reduced);
+                changed = true;
+                should_reduce_bit_depth = true;
+            }
         }
 
         if should_reduce_bit_depth {
             // Some conversions will allow us to perform bit depth reduction that
             // wasn't possible before
-            reduce_bit_depth_8_or_less(self);
+            if let Some(reduced) = reduce_bit_depth_8_or_less(self) {
+                self.apply_reduction(reduced);
+            }
         }
 
         changed
+    }
+
+    pub(crate) fn apply_reduction(&mut self, ReducedPng {color_type, bit_depth, raw_data, interlaced, palette, transparency_pixel, aux_headers}: ReducedPng) {
+        self.ihdr_data.color_type = color_type;
+        self.ihdr_data.bit_depth = bit_depth;
+        self.ihdr_data.interlaced = interlaced;
+        self.raw_data = raw_data;
+        if palette.is_some() {
+            self.transparency_pixel = None;
+            self.palette = palette;
+        }
+        if transparency_pixel.is_some() {
+            self.transparency_pixel = transparency_pixel;
+        }
+        self.idat_data.clear(); // this field is out of date and needs to be replaced
+
+        for (header, val) in aux_headers {
+            match val {
+                Some(val) => self.aux_headers.insert(header, val),
+                None => self.aux_headers.remove(&header),
+            };
+        }
     }
 
     pub fn try_alpha_reduction(&mut self, alphas: &HashSet<AlphaOptim>) -> bool {
@@ -733,19 +654,19 @@ impl PngData {
     /// The `interlace` parameter specifies the *new* interlacing mode
     /// Assumes that the data has already been de-filtered
     #[inline]
-    pub fn change_interlacing(&mut self, interlace: u8) -> bool {
+    #[must_use]
+    pub fn change_interlacing(&mut self, interlace: u8) -> Option<ReducedPng> {
         if interlace == self.ihdr_data.interlaced {
-            return false;
+            return None;
         }
 
-        if interlace == 1 {
+        Some(if interlace == 1 {
             // Convert progressive to interlaced data
-            interlace_image(self);
+            interlace_image(self)
         } else {
             // Convert interlaced to progressive data
-            deinterlace_image(self);
-        }
-        true
+            deinterlace_image(self)
+        })
     }
 }
 
