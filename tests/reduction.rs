@@ -36,9 +36,9 @@ fn test_it_converts(
     }
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, color_type_in);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
-    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -55,8 +55,8 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, color_type_out);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
+    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
 }
@@ -716,9 +716,9 @@ fn palette_should_be_reduced_with_dupes() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 43);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 43);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -735,9 +735,9 @@ fn palette_should_be_reduced_with_dupes() {
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 35);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 35);
 
     remove_file(output).ok();
 }
@@ -749,9 +749,9 @@ fn palette_should_be_reduced_with_unused() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 35);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 35);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -768,9 +768,9 @@ fn palette_should_be_reduced_with_unused() {
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 33);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 33);
 
     remove_file(output).ok();
 }
@@ -782,9 +782,9 @@ fn palette_should_be_reduced_with_both() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 43);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 43);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -801,9 +801,9 @@ fn palette_should_be_reduced_with_both() {
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
-    assert_eq!(png.palette.unwrap().len(), 33);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.palette.unwrap().len(), 33);
 
     remove_file(output).ok();
 }

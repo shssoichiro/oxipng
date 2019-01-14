@@ -17,11 +17,13 @@ use atomicmin::AtomicMin;
 use crc::crc32;
 use deflate::inflate;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
+use png::PngImage;
 use png::PngData;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::borrow::Cow;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
@@ -475,20 +477,20 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
     if opts.verbosity.is_some() {
         eprintln!(
             "    {}x{} pixels, PNG format",
-            png.ihdr_data.width, png.ihdr_data.height
+            png.raw.ihdr.width, png.raw.ihdr.height
         );
-        if let Some(ref palette) = png.palette {
+        if let Some(ref palette) = png.raw.palette {
             eprintln!(
                 "    {} bits/pixel, {} colors in palette",
-                png.ihdr_data.bit_depth,
+                png.raw.ihdr.bit_depth,
                 palette.len() / 3
             );
         } else {
             eprintln!(
                 "    {}x{} bits/pixel, {:?}",
-                png.channels_per_pixel(),
-                png.ihdr_data.bit_depth,
-                png.ihdr_data.color_type
+                png.raw.channels_per_pixel(),
+                png.raw.ihdr.bit_depth,
+                png.raw.ihdr.color_type
             );
         }
         eprintln!("    IDAT size = {} bytes", idat_original_size);
@@ -501,8 +503,8 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
 
     if opts.use_heuristics {
         // Heuristically determine which set of options to use
-        if png.ihdr_data.bit_depth.as_u8() >= 8
-            && png.ihdr_data.color_type != colors::ColorType::Indexed
+        if png.raw.ihdr.bit_depth.as_u8() >= 8
+            && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
             if filter.is_empty() {
                 filter.push(5);
@@ -520,7 +522,13 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         }
     }
 
-    let reduction_occurred = perform_reductions(png, opts, &deadline);
+    let reduction_occurred = if let Some(reduced) = perform_reductions(&png.raw, opts, &deadline) {
+        png.raw = reduced;
+        png.idat_data.clear(); // this field is out of date and needs to be replaced
+        true
+    } else {
+        false
+    };
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
@@ -566,11 +574,11 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         let filters: HashMap<u8, Vec<u8>> = filter_iter
             .map(|f| {
                 let png = png.clone();
-                (*f, png.filter_image(*f))
+                (*f, png.raw.filter_image(*f))
             }).collect();
 
         let original_len = original_png.idat_data.len();
-        let added_interlacing = opts.interlace == Some(1) && original_png.ihdr_data.interlaced == 0;
+        let added_interlacing = opts.interlace == Some(1) && original_png.raw.ihdr.interlaced == 0;
 
         let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
         #[cfg(feature = "parallel")]
@@ -723,66 +731,66 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
     Err(PngError::new("The resulting image is corrupted"))
 }
 
-/// Attempt all reduction operations requested by the given `Options` struct
-/// and apply them directly to the `PngData` passed in
-fn perform_reductions(png: &mut PngData, opts: &Options, deadline: &Deadline) -> bool {
-    let mut reduction_occurred = false;
+fn if_owned(cow: Cow<PngImage>) -> Option<PngImage> {
+    match cow {
+        Cow::Owned(png) => Some(png),
+        _ => None,
+    }
+}
+
+fn perform_reductions(png: &PngImage, opts: &Options, deadline: &Deadline) -> Option<PngImage> {
+    let mut reduced = Cow::Borrowed(png);
 
     if opts.palette_reduction {
-        if let Some(reduced) = reduced_palette(png) {
-            png.apply_reduction(reduced);
-            reduction_occurred = true;
+        if let Some(r) = reduced_palette(&reduced) {
+            reduced = Cow::Owned(r);
             if opts.verbosity == Some(1) {
-                report_reduction(png);
+                report_reduction(&reduced);
             }
         }
     }
 
     if deadline.passed() {
-        return reduction_occurred;
+        return if_owned(reduced);
     }
 
     if opts.bit_depth_reduction {
-        if let Some(reduced) = png.reduce_bit_depth() {
-            png.apply_reduction(reduced);
-            reduction_occurred = true;
+        if let Some(r) = reduce_bit_depth(&reduced) {
+            reduced = Cow::Owned(r);
             if opts.verbosity == Some(1) {
-                report_reduction(png);
+                report_reduction(&reduced);
             }
         }
     }
 
     if deadline.passed() {
-        return reduction_occurred;
+        return if_owned(reduced);
     }
 
-    if opts.color_type_reduction && png.reduce_color_type() {
-        reduction_occurred = true;
-        if opts.verbosity == Some(1) {
-            report_reduction(png);
+    if opts.color_type_reduction {
+        if let Some(r) = reduce_color_type(&reduced) {
+            reduced = Cow::Owned(r);
+            if opts.verbosity == Some(1) {
+                report_reduction(&reduced);
+            }
         }
     }
 
-    if reduction_occurred && opts.verbosity.is_some() {
-        report_reduction(png);
-    }
-
     if let Some(interlacing) = opts.interlace {
-        if let Some(reduced) = png.change_interlacing(interlacing) {
-            png.apply_reduction(reduced);
-            reduction_occurred = true;
+        if let Some(r) = reduced.change_interlacing(interlacing) {
+            reduced = Cow::Owned(r);
         }
     }
 
     if deadline.passed() {
-        return reduction_occurred;
+        return if_owned(reduced);
     }
 
-    if png.try_alpha_reduction(&opts.alphas) {
-        reduction_occurred = true;
+    if let Some(r) = try_alpha_reduction(&reduced, &opts.alphas) {
+        reduced = Cow::Owned(r);
     }
 
-    reduction_occurred
+    if_owned(reduced)
 }
 
 /// Keep track of processing timeout
@@ -819,19 +827,19 @@ impl Deadline {
 }
 
 /// Display the status of the image data after a reduction has taken place
-fn report_reduction(png: &PngData) {
+fn report_reduction(png: &PngImage) {
     if let Some(ref palette) = png.palette {
         eprintln!(
             "Reducing image to {} bits/pixel, {} colors in palette",
-            png.ihdr_data.bit_depth,
+            png.ihdr.bit_depth,
             palette.len() / 3
         );
     } else {
         eprintln!(
             "Reducing image to {}x{} bits/pixel, {}",
             png.channels_per_pixel(),
-            png.ihdr_data.bit_depth,
-            png.ihdr_data.color_type
+            png.ihdr.bit_depth,
+            png.ihdr.color_type
         );
     }
 }
@@ -842,25 +850,25 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            png.aux_headers.retain(|chunk, _| {
+            png.raw.aux_headers.retain(|chunk, _| {
                 std::str::from_utf8(chunk)
                     .ok()
                     .map_or(false, |name| hdrs.contains(name))
             });
         }
         Headers::Strip(ref hdrs) => for hdr in hdrs {
-            png.aux_headers.remove(hdr.as_bytes());
+            png.raw.aux_headers.remove(hdr.as_bytes());
         },
         Headers::Safe => {
             const PRESERVED_HEADERS: [[u8; 4]; 9] = [
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
                 *b"sPLT",
             ];
-            png.aux_headers
+            png.raw.aux_headers
                 .retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
         }
         Headers::All => {
-            png.aux_headers = HashMap::new();
+            png.raw.aux_headers = HashMap::new();
         }
     }
 
@@ -873,18 +881,18 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
     };
 
     if may_replace_iccp {
-        if png.aux_headers.get(b"sRGB").is_some() {
+        if png.raw.aux_headers.get(b"sRGB").is_some() {
             // Files aren't supposed to have both chunks, so we chose to honor sRGB
-            png.aux_headers.remove(b"iCCP");
-        } else if let Some(intent) = png
+            png.raw.aux_headers.remove(b"iCCP");
+        } else if let Some(intent) = png.raw
             .aux_headers
             .get(b"iCCP")
             .and_then(|iccp| srgb_rendering_intent(iccp))
         {
             // sRGB-like profile can be safely replaced with
             // an sRGB chunk with the same rendering intent
-            png.aux_headers.remove(b"iCCP");
-            png.aux_headers.insert(*b"sRGB", vec![intent]);
+            png.raw.aux_headers.remove(b"iCCP");
+            png.raw.aux_headers.insert(*b"sRGB", vec![intent]);
         }
     }
 }

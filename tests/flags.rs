@@ -32,8 +32,8 @@ fn test_it_converts(
 ) {
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, color_type_in);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
+    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -50,8 +50,8 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, color_type_out);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
+    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
 }
@@ -81,9 +81,9 @@ fn strip_headers_list() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -100,9 +100,9 @@ fn strip_headers_list() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(!png.aux_headers.contains_key(b"iCCP"));
+    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(!png.raw.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -115,9 +115,9 @@ fn strip_headers_safe() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -134,9 +134,9 @@ fn strip_headers_safe() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key(b"tEXt"));
-    assert!(!png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"sRGB"));
+    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(!png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"sRGB"));
 
     remove_file(output).ok();
 }
@@ -149,9 +149,9 @@ fn strip_headers_all() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -168,9 +168,9 @@ fn strip_headers_all() {
         }
     };
 
-    assert!(!png.aux_headers.contains_key(b"tEXt"));
-    assert!(!png.aux_headers.contains_key(b"iTXt"));
-    assert!(!png.aux_headers.contains_key(b"iCCP"));
+    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(!png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(!png.raw.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -183,9 +183,9 @@ fn strip_headers_none() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert!(png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -202,9 +202,9 @@ fn strip_headers_none() {
         }
     };
 
-    assert!(png.aux_headers.contains_key(b"tEXt"));
-    assert!(png.aux_headers.contains_key(b"iTXt"));
-    assert!(png.aux_headers.contains_key(b"iCCP"));
+    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
+    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
 
     remove_file(output).ok();
 }
@@ -217,7 +217,7 @@ fn interlacing_0_to_1() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -234,7 +234,7 @@ fn interlacing_0_to_1() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
 
     remove_file(output).ok();
 }
@@ -247,7 +247,7 @@ fn interlacing_1_to_0() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -264,7 +264,7 @@ fn interlacing_1_to_0() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
 
     remove_file(output).ok();
 }
@@ -277,9 +277,9 @@ fn interlacing_0_to_1_small_files() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -296,9 +296,9 @@ fn interlacing_0_to_1_small_files() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::One);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
 
     remove_file(output).ok();
 }
@@ -311,9 +311,9 @@ fn interlacing_1_to_0_small_files() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -330,9 +330,9 @@ fn interlacing_1_to_0_small_files() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, ColorType::Indexed);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::One);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
 
     remove_file(output).ok();
 }
@@ -348,7 +348,7 @@ fn interlaced_0_to_1_other_filter_mode() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -365,7 +365,7 @@ fn interlaced_0_to_1_other_filter_mode() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
 
     remove_file(output).ok();
 }
@@ -397,8 +397,8 @@ fn fix_errors() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::RGBA);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::RGBA);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -415,8 +415,8 @@ fn fix_errors() {
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, ColorType::Grayscale);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Grayscale);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
     remove_file(output).ok();

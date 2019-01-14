@@ -35,8 +35,8 @@ fn test_it_converts(
     let png = PngData::new(&input, opts.fix_errors).unwrap();
     opts.filter = HashSet::new();
     opts.filter.insert(filter);
-    assert_eq!(png.ihdr_data.color_type, color_type_in);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
+    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -53,8 +53,8 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, color_type_out);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
+    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
 }
