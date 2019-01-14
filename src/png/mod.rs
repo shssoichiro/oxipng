@@ -163,15 +163,6 @@ impl PngData {
         }
     }
 
-    pub(crate) fn reset_from_original(&mut self, original: &Self) {
-        self.idat_data = original.idat_data.clone();
-        self.ihdr_data = original.ihdr_data;
-        self.raw_data = original.raw_data.clone();
-        self.palette = original.palette.clone();
-        self.transparency_pixel = original.transparency_pixel.clone();
-        self.aux_headers = original.aux_headers.clone();
-    }
-
     /// Return the number of channels in the image, based on color type
     #[inline]
     pub fn channels_per_pixel(&self) -> u8 {

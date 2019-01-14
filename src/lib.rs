@@ -655,7 +655,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
                 );
             }
         } else if reduction_occurred {
-            png.reset_from_original(&original_png);
+            *png = original_png;
         }
     }
 
