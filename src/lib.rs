@@ -16,6 +16,7 @@ use reduction::*;
 use atomicmin::AtomicMin;
 use crc::crc32;
 use deflate::inflate;
+use evaluate::Evaluator;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use png::PngImage;
 use png::PngData;
@@ -23,12 +24,12 @@ use png::PngData;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
-use std::borrow::Cow;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
+use std::sync::Arc;
 
 pub use colors::AlphaOptim;
 pub use deflate::Deflaters;
@@ -39,6 +40,7 @@ mod atomicmin;
 mod colors;
 mod deflate;
 mod error;
+mod evaluate;
 mod filters;
 mod headers;
 mod interlace;
@@ -522,9 +524,16 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         }
     }
 
-    let reduction_occurred = if let Some(reduced) = perform_reductions(&png.raw, opts, &deadline) {
-        png.raw = reduced;
-        png.idat_data.clear(); // this field is out of date and needs to be replaced
+    // This will collect all versions of images and pick one that compresses best
+    let eval = Evaluator::new();
+    // Usually we want transformations that are smaller than the unmodified original,
+    // but if we're interlacing, we have to accept a possible file size increase.
+    if opts.interlace.is_none() {
+        eval.set_baseline(png.raw.clone());
+    }
+    perform_reductions(png.raw.clone(), opts, &deadline, &eval);
+    let reduction_occurred = if let Some(result) = eval.get_result() {
+        *png = result;
         true
     } else {
         false
@@ -731,66 +740,59 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
     Err(PngError::new("The resulting image is corrupted"))
 }
 
-fn if_owned(cow: Cow<PngImage>) -> Option<PngImage> {
-    match cow {
-        Cow::Owned(png) => Some(png),
-        _ => None,
-    }
-}
+fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadline, eval: &Evaluator) {
 
-fn perform_reductions(png: &PngImage, opts: &Options, deadline: &Deadline) -> Option<PngImage> {
-    let mut reduced = Cow::Borrowed(png);
-
-    if opts.palette_reduction {
-        if let Some(r) = reduced_palette(&reduced) {
-            reduced = Cow::Owned(r);
-            if opts.verbosity == Some(1) {
-                report_reduction(&reduced);
-            }
+    // must be done first to evaluate rest with the correct interlacing
+    if let Some(interlacing) = opts.interlace {
+        if let Some(reduced) = png.change_interlacing(interlacing) {
+            png = Arc::new(reduced);
+            eval.try_image(png.clone());
+        }
+        if deadline.passed() {
+            return;
         }
     }
 
-    if deadline.passed() {
-        return if_owned(reduced);
+    if opts.palette_reduction {
+        if let Some(reduced) = reduced_palette(&png) {
+            png = Arc::new(reduced);
+            eval.try_image(png.clone());
+            if opts.verbosity == Some(1) {
+                report_reduction(&png);
+            }
+        }
+        if deadline.passed() {
+            return;
+        }
     }
 
     if opts.bit_depth_reduction {
-        if let Some(r) = reduce_bit_depth(&reduced) {
-            reduced = Cow::Owned(r);
+        if let Some(reduced) = reduce_bit_depth(&png) {
+            png = Arc::new(reduced);
+            eval.try_image(png.clone());
             if opts.verbosity == Some(1) {
-                report_reduction(&reduced);
+                report_reduction(&png);
             }
         }
-    }
-
-    if deadline.passed() {
-        return if_owned(reduced);
+        if deadline.passed() {
+            return;
+        }
     }
 
     if opts.color_type_reduction {
-        if let Some(r) = reduce_color_type(&reduced) {
-            reduced = Cow::Owned(r);
+        if let Some(reduced) = reduce_color_type(&png) {
+            png = Arc::new(reduced);
+            eval.try_image(png.clone());
             if opts.verbosity == Some(1) {
-                report_reduction(&reduced);
+                report_reduction(&png);
             }
         }
-    }
-
-    if let Some(interlacing) = opts.interlace {
-        if let Some(r) = reduced.change_interlacing(interlacing) {
-            reduced = Cow::Owned(r);
+        if deadline.passed() {
+            return;
         }
     }
 
-    if deadline.passed() {
-        return if_owned(reduced);
-    }
-
-    if let Some(r) = try_alpha_reduction(&reduced, &opts.alphas) {
-        reduced = Cow::Owned(r);
-    }
-
-    if_owned(reduced)
+    try_alpha_reductions(png, &opts.alphas, eval);
 }
 
 /// Keep track of processing timeout
@@ -846,29 +848,30 @@ fn report_reduction(png: &PngImage) {
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
 fn perform_strip(png: &mut PngData, opts: &Options) {
+    let raw = Arc::make_mut(&mut png.raw);
     match opts.strip {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            png.raw.aux_headers.retain(|chunk, _| {
+            raw.aux_headers.retain(|chunk, _| {
                 std::str::from_utf8(chunk)
                     .ok()
                     .map_or(false, |name| hdrs.contains(name))
             });
         }
         Headers::Strip(ref hdrs) => for hdr in hdrs {
-            png.raw.aux_headers.remove(hdr.as_bytes());
+            raw.aux_headers.remove(hdr.as_bytes());
         },
         Headers::Safe => {
             const PRESERVED_HEADERS: [[u8; 4]; 9] = [
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
                 *b"sPLT",
             ];
-            png.raw.aux_headers
+            raw.aux_headers
                 .retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
         }
         Headers::All => {
-            png.raw.aux_headers = HashMap::new();
+            raw.aux_headers = HashMap::new();
         }
     }
 
@@ -881,18 +884,18 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
     };
 
     if may_replace_iccp {
-        if png.raw.aux_headers.get(b"sRGB").is_some() {
+        if raw.aux_headers.get(b"sRGB").is_some() {
             // Files aren't supposed to have both chunks, so we chose to honor sRGB
-            png.raw.aux_headers.remove(b"iCCP");
-        } else if let Some(intent) = png.raw
+            raw.aux_headers.remove(b"iCCP");
+        } else if let Some(intent) = raw
             .aux_headers
             .get(b"iCCP")
             .and_then(|iccp| srgb_rendering_intent(iccp))
         {
             // sRGB-like profile can be safely replaced with
             // an sRGB chunk with the same rendering intent
-            png.raw.aux_headers.remove(b"iCCP");
-            png.raw.aux_headers.insert(*b"sRGB", vec![intent]);
+            raw.aux_headers.remove(b"iCCP");
+            raw.aux_headers.insert(*b"sRGB", vec![intent]);
         }
     }
 }

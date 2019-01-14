@@ -1,56 +1,25 @@
-use png::STD_STRATEGY;
-use png::STD_WINDOW;
+use evaluate::Evaluator;
 use itertools::flatten;
 use png::scan_lines::ScanLine;
 use std::collections::HashSet;
-use png::STD_COMPRESSION;
-use png::STD_FILTERS;
+use std::sync::Arc;
 use colors::AlphaOptim;
 use headers::IhdrData;
 use png::PngImage;
 use colors::ColorType;
-use atomicmin::AtomicMin;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
-use deflate;
 
-pub fn try_alpha_reduction(png: &PngImage, alphas: &HashSet<AlphaOptim>) -> Option<PngImage> {
+pub fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, eval: &Evaluator) {
     assert!(!alphas.is_empty());
     let alphas = alphas.iter().collect::<Vec<_>>();
-    let best_size = AtomicMin::new(None);
     #[cfg(feature = "parallel")]
     let alphas_iter = alphas.par_iter().with_max_len(1);
     #[cfg(not(feature = "parallel"))]
     let alphas_iter = alphas.iter();
-    let best = alphas_iter
-        .filter_map(|&alpha| {
-            let image = match filtered_alpha_channel(png, *alpha) {
-                Some(image) => image,
-                None => return None,
-            };
-            #[cfg(feature = "parallel")]
-            let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
-            #[cfg(not(feature = "parallel"))]
-            let filters_iter = STD_FILTERS.iter();
-            filters_iter
-                .filter_map(|f| {
-                    deflate::deflate(
-                        &image.filter_image(*f),
-                        STD_COMPRESSION,
-                        STD_STRATEGY,
-                        STD_WINDOW,
-                        &best_size,
-                    ).ok()
-                    .as_ref()
-                    .map(|l| {
-                        best_size.set_min(l.len());
-                        l.len()
-                    })
-                }).min()
-                .map(|size| (size, image))
-        }).min_by_key(|&(size, _)| size);
-
-    best.map(|(_, image)| image)
+    alphas_iter
+        .filter_map(|&alpha| filtered_alpha_channel(&png, *alpha))
+        .for_each(|image| eval.try_image(Arc::new(image)));
 }
 
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {

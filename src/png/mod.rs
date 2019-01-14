@@ -13,11 +13,13 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
 use std::path::Path;
+use std::sync::Arc;
 
-pub(crate) const STD_COMPRESSION: u8 = 8;
+pub(crate) const STD_COMPRESSION: u8 = 6;
 /// Must use normal compression, as faster ones (Huffman/RLE-only) are not representative
 pub(crate) const STD_STRATEGY: u8 = 0;
-pub(crate) const STD_WINDOW: u8 = 15;
+/// OK to use a bit smalller window for evaluation
+pub(crate) const STD_WINDOW: u8 = 13;
 pub(crate) const STD_FILTERS: [u8; 2] = [0, 5];
 
 pub(crate) mod scan_lines;
@@ -42,7 +44,8 @@ pub struct PngImage {
 /// Contains all data relevant to a PNG image
 #[derive(Debug, Clone)]
 pub struct PngData {
-    pub raw: PngImage,
+    /// Uncompressed image data
+    pub raw: Arc<PngImage>,
     /// The filtered and compressed data of the IDAT chunk
     pub idat_data: Vec<u8>,
 }
@@ -122,19 +125,19 @@ impl PngData {
             aux_headers.remove(b"tRNS"),
         )?;
 
-        let mut png_data = Self {
-            idat_data: idat_headers,
-            raw: PngImage {
-                ihdr: ihdr_header,
-                data: raw_data,
+        let mut raw = PngImage {
+            ihdr: ihdr_header,
+            data: raw_data,
             palette,
             transparency_pixel,
             aux_headers,
-            }
         };
-        png_data.raw.data = png_data.raw.unfilter_image();
+        raw.data = raw.unfilter_image();
         // Return the PngData
-        Ok(png_data)
+        Ok(Self {
+            idat_data: idat_headers,
+            raw: Arc::new(raw),
+        })
     }
 
     /// Handle transparency header
@@ -161,7 +164,6 @@ impl PngData {
             Ok((None, trns_data))
         }
     }
-
 
     /// Format the `PngData` struct into a valid PNG bytestream
     pub fn output(&self) -> Vec<u8> {
