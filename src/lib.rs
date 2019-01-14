@@ -357,7 +357,9 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     let mut optimized_output = optimize_png(&mut png, &in_data, opts)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
-        eprintln!("File already optimized");
+        if opts.verbosity.is_some() {
+            eprintln!("File already optimized");
+        }
         match (output, input) {
             // if p is None, it also means same as the input path
             (&OutFile::Path(ref p), &InFile::Path(ref input_path))
