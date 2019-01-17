@@ -28,12 +28,12 @@ const FOUR_BIT_PERMUTATIONS: [u8; 11] = [
 /// Attempt to reduce the bit depth of the image
 /// Returns true if the bit depth was reduced, false otherwise
 #[must_use]
-pub fn reduce_bit_depth(png: &PngImage) -> Option<PngImage> {
+pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
         if png.ihdr.color_type == ColorType::Indexed
             || png.ihdr.color_type == ColorType::Grayscale
         {
-            return reduce_bit_depth_8_or_less(png);
+            return reduce_bit_depth_8_or_less(png, minimum_bits);
         }
         return None;
     }
@@ -75,18 +75,18 @@ pub fn reduce_bit_depth(png: &PngImage) -> Option<PngImage> {
 }
 
 #[must_use]
-pub fn reduce_bit_depth_8_or_less(png: &PngImage) -> Option<PngImage> {
+pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
+    assert!(minimum_bits >= 1 && minimum_bits < 8);
     let mut reduced = BitVec::with_capacity(png.data.len() * 8);
     let bit_depth: usize = png.ihdr.bit_depth.as_u8() as usize;
-    let mut minimum_bits = 1;
     if minimum_bits >= bit_depth {
         return None;
     }
     for line in png.scan_lines() {
         if png.ihdr.color_type == ColorType::Indexed {
             let line_max = line.data.iter().map(|&byte| match png.ihdr.bit_depth {
-                BitDepth::Two => (byte & 0x3).max((byte >> 2) & 0x3).max((byte >> 4) & 0x3).max(byte >> 6),
-                BitDepth::Four => (byte & 0xF).max(byte >> 4),
+                    BitDepth::Two => (byte & 0x3).max((byte >> 2) & 0x3).max((byte >> 4) & 0x3).max(byte >> 6),
+                    BitDepth::Four => (byte & 0xF).max(byte >> 4),
                 _ => byte,
             }).max().unwrap_or(0);
             let required_bits = match line_max {
@@ -94,7 +94,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage) -> Option<PngImage> {
                 x if x > 0x03 => 4,
                 x if x > 0x01 => 2,
                 _ => 1,
-            };
+                };
             if required_bits > minimum_bits {
                 minimum_bits = required_bits;
                 if minimum_bits >= bit_depth {

@@ -198,7 +198,7 @@ pub fn reduce_color_type(png: &PngImage) -> Option<PngImage> {
     if should_reduce_bit_depth {
         // Some conversions will allow us to perform bit depth reduction that
         // wasn't possible before
-        if let Some(r) = reduce_bit_depth_8_or_less(&reduced) {
+        if let Some(r) = reduce_bit_depth_8_or_less(&reduced, 1) {
             reduced = Cow::Owned(r);
         }
     }

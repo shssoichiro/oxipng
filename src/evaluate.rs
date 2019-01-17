@@ -58,9 +58,9 @@ impl Evaluator {
     /// Main loop of evaluation thread
     fn evaluate_images(from_channel: Receiver<(Arc<PngImage>, bool)>) -> Option<PngData> {
         let best_candidate_size = AtomicMin::new(None);
-        let best_result = Mutex::new(None);
+        let best_result: Mutex<Option<(PngData, _, _)>> = Mutex::new(None);
         // ends when sender is dropped
-        for (image, is_reduction) in from_channel.iter() {
+        for (nth, (image, is_reduction)) in from_channel.iter().enumerate() {
             #[cfg(feature = "parallel")]
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
             #[cfg(not(feature = "parallel"))]
@@ -75,13 +75,26 @@ impl Evaluator {
                     &best_candidate_size,
                 ) {
                     let mut res = best_result.lock().unwrap();
-                    if best_candidate_size.get().map_or(true, |len| len >= idat_data.len()) {
+                    if best_candidate_size.get().map_or(true, |best_len| {
+                        // a tie-breaker is required to make evaluation deterministic
+                        if let Some(res) = res.as_ref() {
+                            // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
+                            let old_img = &res.0.raw;
+                            let new = (idat_data.len(), image.data.len(), image.ihdr.bit_depth, f, nth);
+                            let old = (best_len, old_img.data.len(), old_img.ihdr.bit_depth, res.1, res.2);
+                            new < old
+                        } else if best_len > idat_data.len() {
+                            true
+                        } else {
+                            false
+                        }
+                    }) {
                         best_candidate_size.set_min(idat_data.len());
                         *res = if is_reduction {
                             Some((PngData {
                                 idat_data,
                                 raw: Arc::clone(&image),
-                            }, f))
+                            }, f, nth))
                         } else {
                             None
                         };
@@ -90,7 +103,7 @@ impl Evaluator {
             });
         }
         best_result.into_inner().expect("filters should be done")
-            .map(|(img, _)| img)
+            .map(|(img, _, _)| img)
     }
 }
 

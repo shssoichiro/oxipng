@@ -37,7 +37,7 @@ fn test_it_converts(
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type, color_type_in);
-    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in, "test file is broken");
     assert_eq!(png.raw.ihdr.interlaced, 0);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -699,14 +699,33 @@ fn grayscale_8_should_be_grayscale_8() {
 
 #[test]
 fn small_files() {
-    test_it_converts(
-        "tests/files/small_files.png",
-        None,
-        ColorType::Indexed,
-        BitDepth::Eight,
-        ColorType::Indexed,
-        BitDepth::One,
-    );
+    let input = PathBuf::from("tests/files/small_files.png");
+    let (output, opts) = get_opts(&input);
+
+    let png = PngData::new(&input, opts.fix_errors).unwrap();
+
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!("{}", x),
+    };
+    let output = output.path().unwrap();
+    assert!(output.exists());
+
+    let png = match PngData::new(&output, opts.fix_errors) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(&output).ok();
+            panic!("{}", x)
+        }
+    };
+
+    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    // depth varies depending on zlib implementation used
+
+    remove_file(output).ok();
 }
 
 #[test]

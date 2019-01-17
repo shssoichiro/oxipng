@@ -20,6 +20,7 @@ use evaluate::Evaluator;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use png::PngImage;
 use png::PngData;
+use colors::BitDepth;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
@@ -767,9 +768,17 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
     }
 
     if opts.bit_depth_reduction {
-        if let Some(reduced) = reduce_bit_depth(&png) {
+        if let Some(reduced) = reduce_bit_depth(&png, 1) {
+            let previous = png.clone();
+            let bits = reduced.ihdr.bit_depth;
             png = Arc::new(reduced);
             eval.try_image(png.clone());
+            if (bits == BitDepth::One || bits == BitDepth::Two) && previous.ihdr.bit_depth != BitDepth::Four {
+                // Also try 16-color mode for all lower bits images, since that may compress better
+                if let Some(reduced) = reduce_bit_depth(&previous, 4) {
+                    eval.try_image(Arc::new(reduced));
+                }
+            }
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
             }
