@@ -444,6 +444,10 @@ fn interlaced_palette_8_should_be_palette_8() {
 
 #[test]
 fn interlaced_palette_8_should_be_palette_4() {
+    // miniz doesn't estimate compression that well
+    if !oxipng::internal_tests::cfzlib::is_supported() {
+        return;
+    }
     test_it_converts(
         "tests/files/interlaced_palette_8_should_be_palette_4.png",
         ColorType::Indexed,
