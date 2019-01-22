@@ -190,12 +190,13 @@ impl PngData {
         // Palette
         if let Some(ref palette) = self.raw.palette {
             let mut palette_data = Vec::with_capacity(palette.len() * 3);
-            for px in palette {
+            let max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
+            for px in palette.iter().take(max_palette_size) {
                 palette_data.extend_from_slice(px.rgb().as_slice());
             }
             write_png_block(b"PLTE", &palette_data, &mut output);
             let num_transparent =
-                palette.iter().enumerate().fold(
+                palette.iter().take(max_palette_size).enumerate().fold(
                     0,
                     |prev, (index, px)| {
                         if px.a != 255 {

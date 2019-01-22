@@ -68,7 +68,7 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
             bit_depth: BitDepth::Eight,
             ..png.ihdr
         },
-        palette: png.palette.clone(),
+        palette: None,
         transparency_pixel: png.transparency_pixel.clone(),
         aux_headers: png.aux_headers.clone(),
     })

@@ -55,6 +55,11 @@ fn test_it_converts(
 
     assert_eq!(png.raw.ihdr.color_type, color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
+    if let Some(palette) = png.raw.palette.as_ref() {
+        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
+    } else {
+        assert!(png.raw.ihdr.color_type != ColorType::Indexed);
+    }
 
     remove_file(output).ok();
 }
