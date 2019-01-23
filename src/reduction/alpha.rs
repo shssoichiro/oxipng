@@ -19,7 +19,7 @@ pub fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, ev
     let alphas_iter = alphas.iter();
     alphas_iter
         .filter_map(|&alpha| filtered_alpha_channel(&png, *alpha))
-        .for_each(|image| eval.try_image(Arc::new(image)));
+        .for_each(|image| eval.try_image(Arc::new(image), 0.99));
 }
 
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {

@@ -19,7 +19,7 @@ use std::thread;
 /// Collect image versions and pick one that compresses best
 pub struct Evaluator {
     /// images are sent to the thread for evaluation
-    eval_send: Option<SyncSender<(Arc<PngImage>, bool)>>,
+    eval_send: Option<SyncSender<(Arc<PngImage>, f32, bool)>>,
     // the thread helps evaluate images asynchronously
     eval_thread: thread::JoinHandle<Option<PngData>>,
 }
@@ -43,24 +43,26 @@ impl Evaluator {
 
     /// Set baseline image. It will be used only to measure minimum compression level required
     pub fn set_baseline(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, false)
+        self.try_image_inner(image, 1.0, false)
     }
 
     /// Check if the image is smaller than others
-    pub fn try_image(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, true)
+    /// Bias is a value in 0..=1 range. Compressed size is multiplied by
+    /// this fraction when comparing to the best, so 0.95 allows 5% larger size.
+    pub fn try_image(&self, image: Arc<PngImage>, bias: f32) {
+        self.try_image_inner(image, bias, true)
     }
 
-    fn try_image_inner(&self, image: Arc<PngImage>, is_reduction: bool) {
-        self.eval_send.as_ref().expect("not finished yet").send((image, is_reduction)).expect("send")
+    fn try_image_inner(&self, image: Arc<PngImage>, bias: f32, is_reduction: bool) {
+        self.eval_send.as_ref().expect("not finished yet").send((image, bias, is_reduction)).expect("send")
     }
 
     /// Main loop of evaluation thread
-    fn evaluate_images(from_channel: Receiver<(Arc<PngImage>, bool)>) -> Option<PngData> {
+    fn evaluate_images(from_channel: Receiver<(Arc<PngImage>, f32, bool)>) -> Option<PngData> {
         let best_candidate_size = AtomicMin::new(None);
         let best_result: Mutex<Option<(PngData, _, _)>> = Mutex::new(None);
         // ends when sender is dropped
-        for (nth, (image, is_reduction)) in from_channel.iter().enumerate() {
+        for (nth, (image, bias, is_reduction)) in from_channel.iter().enumerate() {
             #[cfg(feature = "parallel")]
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
             #[cfg(not(feature = "parallel"))]
@@ -75,15 +77,16 @@ impl Evaluator {
                     &best_candidate_size,
                 ) {
                     let mut res = best_result.lock().unwrap();
-                    if best_candidate_size.get().map_or(true, |best_len| {
+                    if best_candidate_size.get().map_or(true, |old_best_len| {
+                        let new_len = (idat_data.len() as f64 * bias as f64) as usize;
                         // a tie-breaker is required to make evaluation deterministic
                         if let Some(res) = res.as_ref() {
                             // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
                             let old_img = &res.0.raw;
-                            let new = (idat_data.len(), image.data.len(), image.ihdr.bit_depth, f, nth);
-                            let old = (best_len, old_img.data.len(), old_img.ihdr.bit_depth, res.1, res.2);
+                            let new = (new_len, image.data.len(), image.ihdr.bit_depth, f, nth);
+                            let old = (old_best_len, old_img.data.len(), old_img.ihdr.bit_depth, res.1, res.2);
                             new < old
-                        } else if best_len > idat_data.len() {
+                        } else if new_len < old_best_len {
                             true
                         } else {
                             false

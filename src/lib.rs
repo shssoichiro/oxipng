@@ -747,7 +747,7 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
     if let Some(interlacing) = opts.interlace {
         if let Some(reduced) = png.change_interlacing(interlacing) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone());
+            eval.try_image(png.clone(), 0.);
         }
         if deadline.passed() {
             return;
@@ -757,7 +757,7 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
     if opts.palette_reduction {
         if let Some(reduced) = reduced_palette(&png) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone());
+            eval.try_image(png.clone(), 0.95);
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
             }
@@ -772,11 +772,11 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
             let previous = png.clone();
             let bits = reduced.ihdr.bit_depth;
             png = Arc::new(reduced);
-            eval.try_image(png.clone());
+            eval.try_image(png.clone(), 1.0);
             if (bits == BitDepth::One || bits == BitDepth::Two) && previous.ihdr.bit_depth != BitDepth::Four {
                 // Also try 16-color mode for all lower bits images, since that may compress better
                 if let Some(reduced) = reduce_bit_depth(&previous, 4) {
-                    eval.try_image(Arc::new(reduced));
+                    eval.try_image(Arc::new(reduced), 0.98);
                 }
             }
             if opts.verbosity == Some(1) {
@@ -791,7 +791,7 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
     if opts.color_type_reduction {
         if let Some(reduced) = reduce_color_type(&png) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone());
+            eval.try_image(png.clone(), 0.96);
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
             }
