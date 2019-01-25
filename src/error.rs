@@ -6,6 +6,7 @@ use std::fmt;
 #[derive(Debug, Clone)]
 pub enum PngError {
     DeflatedDataTooLong(usize),
+    TimedOut,
     NotPNG,
     APNGNotSupported,
     InvalidData,
@@ -28,6 +29,7 @@ impl fmt::Display for PngError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             PngError::DeflatedDataTooLong(_) => f.write_str("deflated data too long"),
+            PngError::TimedOut => f.write_str("timed out"),
             PngError::NotPNG => f.write_str("Invalid header detected; Not a PNG file"),
             PngError::InvalidData => f.write_str("Invalid data found; unable to read PNG file"),
             PngError::TruncatedData => {

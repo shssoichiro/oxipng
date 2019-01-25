@@ -3,6 +3,7 @@
 
 use atomicmin::AtomicMin;
 use deflate;
+use Deadline;
 use png::PngData;
 use png::PngImage;
 use png::STD_COMPRESSION;
@@ -16,7 +17,7 @@ use std::sync::Mutex;
 use std::thread;
 
 /// Collect image versions and pick one that compresses best
-pub struct Evaluator {
+pub(crate) struct Evaluator {
     /// images are sent to the thread for evaluation
     eval_send: Option<SyncSender<(Arc<PngImage>, f32, bool)>>,
     // the thread helps evaluate images asynchronously
@@ -24,12 +25,12 @@ pub struct Evaluator {
 }
 
 impl Evaluator {
-    pub fn new() -> Self {
+    pub fn new(deadline: Arc<Deadline>) -> Self {
         // queue size ensures we're not using too much memory for pending reductions
         let (tx, rx) = sync_channel(4);
         Self {
             eval_send: Some(tx),
-            eval_thread: thread::spawn(move || Self::evaluate_images(rx)),
+            eval_thread: thread::spawn(move || Self::evaluate_images(rx, deadline)),
         }
     }
 
@@ -57,7 +58,7 @@ impl Evaluator {
     }
 
     /// Main loop of evaluation thread
-    fn evaluate_images(from_channel: Receiver<(Arc<PngImage>, f32, bool)>) -> Option<PngData> {
+    fn evaluate_images(from_channel: Receiver<(Arc<PngImage>, f32, bool)>, deadline: Arc<Deadline>) -> Option<PngData> {
         let best_candidate_size = AtomicMin::new(None);
         let best_result: Mutex<Option<(PngData, _, _)>> = Mutex::new(None);
         // ends when sender is dropped
@@ -65,12 +66,16 @@ impl Evaluator {
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
 
             filters_iter.for_each(|&f| {
+                if deadline.passed() {
+                    return;
+                }
                 if let Ok(idat_data) = deflate::deflate(
                     &image.filter_image(f),
                     STD_COMPRESSION,
                     STD_STRATEGY,
                     STD_WINDOW,
                     &best_candidate_size,
+                    &deadline,
                 ) {
                     let mut res = best_result.lock().unwrap();
                     if best_candidate_size.get().map_or(true, |old_best_len| {
