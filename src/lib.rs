@@ -204,7 +204,7 @@ pub struct Options {
     pub use_heuristics: bool,
     /// Number of threads to use
     ///
-    /// Default: 1.5x CPU cores, rounded down
+    /// Default: number of CPU cores
     pub threads: usize,
 
     /// Maximum amount of time to spend on optimizations.
@@ -293,10 +293,6 @@ impl Default for Options {
         alphas.insert(colors::AlphaOptim::NoOp);
         alphas.insert(colors::AlphaOptim::Black);
 
-        // Default to 1 thread on single-core, otherwise use threads = 1.5x CPU cores
-        let num_cpus = num_cpus::get();
-        let thread_count = num_cpus + (num_cpus >> 1);
-
         Options {
             backup: false,
             pretend: false,
@@ -320,7 +316,7 @@ impl Default for Options {
             strip: Headers::None,
             deflate: Deflaters::Zlib,
             use_heuristics: false,
-            threads: thread_count,
+            threads: num_cpus::get(),
             timeout: None,
         }
     }
@@ -330,10 +326,8 @@ impl Default for Options {
 pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
-    let thread_count = opts.threads;
-    #[cfg(feature = "parallel")]
     let _ = rayon::ThreadPoolBuilder::new()
-        .num_threads(thread_count)
+        .num_threads(opts.threads)
         .build_global();
 
     // Read in the file and try to decode as PNG.
@@ -427,10 +421,8 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     // Initialize the thread pool with correct number of threads
     #[cfg(feature = "parallel")]
-    let thread_count = opts.threads;
-    #[cfg(feature = "parallel")]
     let _ = rayon::ThreadPoolBuilder::new()
-        .num_threads(thread_count)
+        .num_threads(opts.threads)
         .build_global();
 
     // Read in the file and try to decode as PNG.
