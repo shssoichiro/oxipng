@@ -9,7 +9,6 @@ use png::STD_COMPRESSION;
 use png::STD_FILTERS;
 use png::STD_STRATEGY;
 use png::STD_WINDOW;
-#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::sync::mpsc::*;
 use std::sync::Arc;
@@ -63,10 +62,7 @@ impl Evaluator {
         let best_result: Mutex<Option<(PngData, _, _)>> = Mutex::new(None);
         // ends when sender is dropped
         for (nth, (image, bias, is_reduction)) in from_channel.iter().enumerate() {
-            #[cfg(feature = "parallel")]
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
-            #[cfg(not(feature = "parallel"))]
-            let filters_iter = STD_FILTERS.iter();
 
             filters_iter.for_each(|&f| {
                 if let Ok(idat_data) = deflate::deflate(

@@ -9,6 +9,8 @@ extern crate miniz_oxide;
 extern crate num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
+#[cfg(not(feature = "parallel"))]
+mod rayon;
 extern crate rgb;
 extern crate zopfli;
 
@@ -21,7 +23,6 @@ use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use png::PngImage;
 use png::PngData;
 use colors::BitDepth;
-#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -569,10 +570,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
             }
         }
 
-        #[cfg(feature = "parallel")]
         let filter_iter = filter.par_iter().with_max_len(1);
-        #[cfg(not(feature = "parallel"))]
-        let filter_iter = filter.iter();
         let filters: HashMap<u8, Vec<u8>> = filter_iter
             .map(|f| {
                 let png = png.clone();
@@ -583,10 +581,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         let added_interlacing = opts.interlace == Some(1) && original_png.raw.ihdr.interlaced == 0;
 
         let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
-        #[cfg(feature = "parallel")]
         let results_iter = results.into_par_iter().with_max_len(1);
-        #[cfg(not(feature = "parallel"))]
-        let results_iter = results.into_iter();
         let best = results_iter.filter_map(|trial| {
             if deadline.passed() {
                 return None;
@@ -635,20 +630,8 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
                 None
             }
         });
-        #[cfg(feature = "parallel")]
-        let best: Option<TrialWithData> =
-            best.reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
-        #[cfg(not(feature = "parallel"))]
-        let best: Option<TrialWithData> = best.fold(None, |i, j| {
-            if let Some(i) = i {
-                if i.1.len() <= j.1.len() {
-                    Some(i)
-                } else {
-                    Some(j)
-                }
-            } else {
-                Some(j)
-            }
+        let best: Option<TrialWithData> = best.reduce_with(|i, j| {
+            if i.1.len() <= j.1.len() { i } else { j }
         });
 
         if let Some(better) = best {
@@ -704,15 +687,10 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
         }
     }
 
-    let (old_png, new_png) = {
-        let old_png = || image::load_from_memory_with_format(original_data, ImageFormat::PNG);
-        let new_png = || image::load_from_memory_with_format(&output, ImageFormat::PNG);
-        #[cfg(feature = "parallel")]
-        let res = rayon::join(old_png, new_png);
-        #[cfg(not(feature = "parallel"))]
-        let res = (old_png(), new_png());
-        res
-    };
+    let (old_png, new_png) = rayon::join(
+        || image::load_from_memory_with_format(original_data, ImageFormat::PNG),
+        || image::load_from_memory_with_format(&output, ImageFormat::PNG)
+    );
 
     if let Ok(new_png) = new_png {
         if let Ok(old_png) = old_png {

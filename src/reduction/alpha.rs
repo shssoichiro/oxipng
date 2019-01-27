@@ -7,16 +7,12 @@ use colors::AlphaOptim;
 use headers::IhdrData;
 use png::PngImage;
 use colors::ColorType;
-#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 pub fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, eval: &Evaluator) {
     assert!(!alphas.is_empty());
     let alphas = alphas.iter().collect::<Vec<_>>();
-    #[cfg(feature = "parallel")]
     let alphas_iter = alphas.par_iter().with_max_len(1);
-    #[cfg(not(feature = "parallel"))]
-    let alphas_iter = alphas.iter();
     alphas_iter
         .filter_map(|&alpha| filtered_alpha_channel(&png, *alpha))
         .for_each(|image| eval.try_image(Arc::new(image), 0.99));
