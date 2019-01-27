@@ -1,38 +1,38 @@
-use reduction::ReducedPng;
+use headers::IhdrData;
 use bit_vec::BitVec;
-use png::PngData;
+use png::PngImage;
 
 #[must_use]
-pub fn interlace_image(png: &PngData) -> ReducedPng {
+pub fn interlace_image(png: &PngImage) -> PngImage {
     let mut passes: Vec<BitVec> = vec![BitVec::new(); 7];
-    let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
+    let bits_per_pixel = png.ihdr.bit_depth.as_u8() * png.channels_per_pixel();
     for (index, line) in png.scan_lines().enumerate() {
         match index % 8 {
             // Add filter bytes to passes that will be in the output image
             0 => {
                 passes[0].extend(BitVec::from_elem(8, false));
-                if png.ihdr_data.width >= 5 {
+                if png.ihdr.width >= 5 {
                     passes[1].extend(BitVec::from_elem(8, false));
                 }
-                if png.ihdr_data.width >= 3 {
+                if png.ihdr.width >= 3 {
                     passes[3].extend(BitVec::from_elem(8, false));
                 }
-                if png.ihdr_data.width >= 2 {
+                if png.ihdr.width >= 2 {
                     passes[5].extend(BitVec::from_elem(8, false));
                 }
             }
             4 => {
                 passes[2].extend(BitVec::from_elem(8, false));
-                if png.ihdr_data.width >= 3 {
+                if png.ihdr.width >= 3 {
                     passes[3].extend(BitVec::from_elem(8, false));
                 }
-                if png.ihdr_data.width >= 2 {
+                if png.ihdr.width >= 2 {
                     passes[5].extend(BitVec::from_elem(8, false));
                 }
             }
             2 | 6 => {
                 passes[4].extend(BitVec::from_elem(8, false));
-                if png.ihdr_data.width >= 2 {
+                if png.ihdr.width >= 2 {
                     passes[5].extend(BitVec::from_elem(8, false));
                 }
             }
@@ -43,7 +43,7 @@ pub fn interlace_image(png: &PngData) -> ReducedPng {
         let bit_vec = BitVec::from_bytes(&line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
-            if i >= (png.ihdr_data.width * u32::from(bits_per_pixel)) as usize {
+            if i >= (png.ihdr.width * u32::from(bits_per_pixel)) as usize {
                 break;
             }
             // Copy pixels into interlaced passes
@@ -77,35 +77,36 @@ pub fn interlace_image(png: &PngData) -> ReducedPng {
         }
     }
 
-    let mut output = Vec::with_capacity(png.raw_data.len());
+    let mut output = Vec::with_capacity(png.data.len());
     for pass in &passes {
         output.extend(pass.to_bytes());
     }
 
-    ReducedPng {
-        raw_data: output,
-        interlaced: 1,
-        color_type: png.ihdr_data.color_type,
-        bit_depth: png.ihdr_data.bit_depth,
-        aux_headers: Default::default(),
-        palette: None,
-        transparency_pixel: None,
+    PngImage {
+        data: output,
+        ihdr: IhdrData {
+            interlaced: 1,
+            ..png.ihdr
+        },
+        aux_headers: png.aux_headers.clone(),
+        palette: png.palette.clone(),
+        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 
-pub fn deinterlace_image(png: &PngData) -> ReducedPng {
-    let bits_per_pixel = png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel();
-    let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr_data.width as usize;
+pub fn deinterlace_image(png: &PngImage) -> PngImage {
+    let bits_per_pixel = png.ihdr.bit_depth.as_u8() * png.channels_per_pixel();
+    let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr.width as usize;
     // Initialize each output line with a starting filter byte of 0
     // as well as some blank data
     let mut lines: Vec<BitVec> =
-        vec![BitVec::from_elem(bits_per_line, false); png.ihdr_data.height as usize];
+        vec![BitVec::from_elem(bits_per_line, false); png.ihdr.height as usize];
     let mut current_pass = 1;
     let mut pass_constants = interlaced_constants(current_pass);
     let mut current_y: usize = pass_constants.y_shift as usize;
     for line in png.scan_lines() {
         let bit_vec = BitVec::from_bytes(&line.data);
-        let bits_in_line = ((png.ihdr_data.width - u32::from(pass_constants.x_shift)
+        let bits_in_line = ((png.ihdr.width - u32::from(pass_constants.x_shift)
             + u32::from(pass_constants.x_step)
             - 1)
             / u32::from(pass_constants.x_step)) as usize
@@ -123,36 +124,37 @@ pub fn deinterlace_image(png: &PngData) -> ReducedPng {
         }
         // Calculate the next line and move to next pass if necessary
         current_y += pass_constants.y_step as usize;
-        if current_y >= png.ihdr_data.height as usize {
+        if current_y >= png.ihdr.height as usize {
             if current_pass == 7 {
                 break;
             }
             current_pass += 1;
-            if current_pass == 2 && png.ihdr_data.width <= 4 {
+            if current_pass == 2 && png.ihdr.width <= 4 {
                 current_pass += 1;
             }
-            if current_pass == 3 && png.ihdr_data.height <= 4 {
+            if current_pass == 3 && png.ihdr.height <= 4 {
                 current_pass += 1;
             }
             pass_constants = interlaced_constants(current_pass);
             current_y = pass_constants.y_shift as usize;
         }
     }
-    let mut output = Vec::with_capacity(png.raw_data.len());
+    let mut output = Vec::with_capacity(png.data.len());
     for line in &mut lines {
         while line.len() % 8 != 0 {
             line.push(false);
         }
         output.extend(line.to_bytes());
     }
-    ReducedPng {
-        raw_data: output,
-        interlaced: 0,
-        color_type: png.ihdr_data.color_type,
-        bit_depth: png.ihdr_data.bit_depth,
-        aux_headers: Default::default(),
-        palette: None,
-        transparency_pixel: None,
+    PngImage {
+        data: output,
+        ihdr: IhdrData {
+            interlaced: 0,
+            ..png.ihdr
+        },
+        aux_headers: png.aux_headers.clone(),
+        palette: png.palette.clone(),
+        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 

@@ -1,36 +1,30 @@
+use headers::IhdrData;
 use std::collections::HashMap;
 use colors::{BitDepth, ColorType};
 use std::collections::hash_map::Entry::*;
-use png::PngData;
+use png::PngImage;
 use rgb::RGBA8;
+use std::borrow::Cow;
 
 pub mod alpha;
+use alpha::*;
 pub mod bit_depth;
+use bit_depth::*;
 pub mod color;
+use color::*;
 
-/// Fields to replace in PngData to apply the reduction
-pub struct ReducedPng {
-    pub color_type: ColorType,
-    pub raw_data: Vec<u8>,
-    pub bit_depth: BitDepth,
-    /// replace if Some
-    pub palette: Option<Vec<RGBA8>>,
-    /// replace if Some
-    pub transparency_pixel: Option<Vec<u8>>,
-    /// replace if Some, delete if None
-    pub aux_headers: HashMap<[u8; 4], Option<Vec<u8>>>,
-    pub interlaced: u8,
-}
+pub use bit_depth::reduce_bit_depth;
+pub use alpha::try_alpha_reductions;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
 #[must_use]
-pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
-    if png.ihdr_data.color_type != ColorType::Indexed {
+pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
+    if png.ihdr.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
         return None;
     }
-    if png.ihdr_data.bit_depth == BitDepth::One {
+    if png.ihdr.bit_depth == BitDepth::One {
         // Gains from 1-bit images will be at most 1 byte
         // Not worth the CPU time
         return None;
@@ -43,7 +37,7 @@ pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
 
         // Find palette entries that are never used
         for line in png.scan_lines() {
-            match png.ihdr_data.bit_depth {
+            match png.ihdr.bit_depth {
                 BitDepth::Eight => for &byte in line.data {
                     used[byte as usize] = true;
                 },
@@ -88,9 +82,9 @@ pub fn reduced_palette(png: &PngData) -> Option<ReducedPng> {
 }
 
 #[must_use]
-fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Option<ReducedPng> {
+fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<PngImage> {
     let byte_map = palette_map_to_byte_map(png, palette_map)?;
-    let mut raw_data = Vec::with_capacity(png.raw_data.len());
+    let mut raw_data = Vec::with_capacity(png.data.len());
 
     // Reassign data bytes to new indices
     for line in png.scan_lines() {
@@ -100,25 +94,26 @@ fn do_palette_reduction(png: &PngData, palette_map: &[Option<u8>; 256]) -> Optio
         }
     }
 
-    let mut aux_headers = HashMap::new();
+    let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
         if let Some(Some(map_to)) = bkgd_header.get(0).and_then(|&idx| palette_map.get(idx as usize)) {
-            aux_headers.insert(*b"bKGD", Some(vec![*map_to]));
+            aux_headers.insert(*b"bKGD", vec![*map_to]);
         }
     }
 
-    Some(ReducedPng {
-        color_type: ColorType::Indexed,
-        bit_depth: png.ihdr_data.bit_depth,
-        interlaced: png.ihdr_data.interlaced,
-        raw_data,
+    Some(PngImage {
+        ihdr: IhdrData {
+            color_type: ColorType::Indexed,
+            ..png.ihdr
+        },
+        data: raw_data,
         transparency_pixel: None,
         palette: Some(reordered_palette(png.palette.as_ref()?, palette_map)),
         aux_headers,
     })
 }
 
-fn palette_map_to_byte_map(png: &PngData, palette_map: &[Option<u8>; 256]) -> Option<[u8; 256]> {
+fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<[u8; 256]> {
     let len = png.palette.as_ref().map(|p| p.len()).unwrap_or(0);
     if (0..len).all(|i| palette_map[i].map_or(true, |to| to == i as u8)) {
         // No reduction necessary
@@ -128,7 +123,7 @@ fn palette_map_to_byte_map(png: &PngData, palette_map: &[Option<u8>; 256]) -> Op
     let mut byte_map = [0u8; 256];
 
     // low bit-depths can be pre-computed for every byte value
-    match png.ihdr_data.bit_depth {
+    match png.ihdr.bit_depth {
         BitDepth::Eight => {
             for byte in 0..=255 {
                 byte_map[byte as usize] = palette_map[byte as usize].unwrap_or(0)
@@ -166,4 +161,50 @@ fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<
         }
     }
     new_palette
+}
+
+
+/// Attempt to reduce the color type of the image
+/// Returns true if the color type was reduced, false otherwise
+pub fn reduce_color_type(png: &PngImage) -> Option<PngImage> {
+    let mut should_reduce_bit_depth = false;
+    let mut reduced = Cow::Borrowed(png);
+
+    // Go down one step at a time
+    // Maybe not the most efficient, but it's safe
+    if reduced.ihdr.color_type == ColorType::RGBA {
+        if let Some(r) = reduce_rgba_to_grayscale_alpha(&reduced).or_else(|| reduced_alpha_channel(&reduced)) {
+            reduced = Cow::Owned(r);
+        } else if let Some(r) = reduced_color_to_palette(&reduced) {
+            reduced = Cow::Owned(r);
+            should_reduce_bit_depth = true;
+        }
+    }
+
+    if reduced.ihdr.color_type == ColorType::GrayscaleAlpha {
+        if let Some(r) = reduced_alpha_channel(&reduced) {
+            reduced = Cow::Owned(r);
+            should_reduce_bit_depth = true;
+        }
+    }
+
+    if reduced.ihdr.color_type == ColorType::RGB {
+        if let Some(r) = reduce_rgb_to_grayscale(&reduced).or_else(|| reduced_color_to_palette(&reduced)) {
+            reduced = Cow::Owned(r);
+            should_reduce_bit_depth = true;
+        }
+    }
+
+    if should_reduce_bit_depth {
+        // Some conversions will allow us to perform bit depth reduction that
+        // wasn't possible before
+        if let Some(r) = reduce_bit_depth_8_or_less(&reduced, 1) {
+            reduced = Cow::Owned(r);
+        }
+    }
+
+    match reduced {
+        Cow::Owned(r) => Some(r),
+        _ => None,
+    }
 }

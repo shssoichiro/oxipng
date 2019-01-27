@@ -13,7 +13,7 @@ fn zopfli_16_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        zopfli_deflate(png.raw_data.as_ref()).ok();
+        zopfli_deflate(png.raw.data.as_ref()).ok();
     });
 }
 
@@ -23,7 +23,7 @@ fn zopfli_8_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        zopfli_deflate(png.raw_data.as_ref()).ok();
+        zopfli_deflate(png.raw.data.as_ref()).ok();
     });
 }
 
@@ -35,7 +35,7 @@ fn zopfli_4_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        zopfli_deflate(png.raw_data.as_ref()).ok();
+        zopfli_deflate(png.raw.data.as_ref()).ok();
     });
 }
 
@@ -47,7 +47,7 @@ fn zopfli_2_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        zopfli_deflate(png.raw_data.as_ref()).ok();
+        zopfli_deflate(png.raw.data.as_ref()).ok();
     });
 }
 
@@ -59,6 +59,6 @@ fn zopfli_1_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        zopfli_deflate(png.raw_data.as_ref()).ok();
+        zopfli_deflate(png.raw.data.as_ref()).ok();
     });
 }

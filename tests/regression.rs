@@ -33,8 +33,8 @@ fn test_it_converts(
     let (output, opts) = custom.unwrap_or_else(|| get_opts(&input));
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.color_type, color_type_in);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_in);
+    assert_eq!(png.raw.ihdr.color_type, color_type_in, "test file is broken");
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in, "test file is broken");
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -51,8 +51,13 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.ihdr_data.color_type, color_type_out);
-    assert_eq!(png.ihdr_data.bit_depth, bit_depth_out);
+    assert_eq!(png.raw.ihdr.color_type, color_type_out, "optimized to wrong color type");
+    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out, "optimized to wrong bit depth");
+    if let Some(palette) = png.raw.palette.as_ref() {
+        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
+    } else {
+        assert!(png.raw.ihdr.color_type != ColorType::Indexed);
+    }
 
     remove_file(output).ok();
 }
@@ -77,9 +82,9 @@ fn issue_42() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.ihdr_data.interlaced, 0);
-    assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.interlaced, 0);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -96,9 +101,9 @@ fn issue_42() {
         }
     };
 
-    assert_eq!(png.ihdr_data.interlaced, 1);
-    assert_eq!(png.ihdr_data.color_type, ColorType::GrayscaleAlpha);
-    assert_eq!(png.ihdr_data.bit_depth, BitDepth::Eight);
+    assert_eq!(png.raw.ihdr.interlaced, 1);
+    assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     remove_file(output).ok();
 }
@@ -570,5 +575,17 @@ fn issue_153() {
         BitDepth::Eight,
         ColorType::Indexed,
         BitDepth::Eight,
+    );
+}
+
+#[test]
+fn issue_159() {
+    test_it_converts(
+        "tests/files/issue-159.png",
+        None,
+        ColorType::Indexed,
+        BitDepth::One,
+        ColorType::Indexed,
+        BitDepth::One,
     );
 }
