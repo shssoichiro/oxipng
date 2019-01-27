@@ -1,4 +1,4 @@
-use super::PngData;
+use png::PngImage;
 
 #[derive(Debug, Clone)]
 /// An iterator over the scan lines of a PNG image
@@ -9,10 +9,10 @@ pub struct ScanLines<'a> {
 }
 
 impl<'a> ScanLines<'a> {
-    pub fn new(png: &'a PngData) -> Self {
+    pub fn new(png: &'a PngImage) -> Self {
         Self {
             iter: ScanLineRanges::new(png),
-            raw_data: &png.raw_data,
+            raw_data: &png.data,
         }
     }
 }
@@ -39,10 +39,10 @@ pub struct ScanLinesMut<'a> {
 }
 
 impl<'a> ScanLinesMut<'a> {
-    pub fn new(png: &'a mut PngData) -> Self {
+    pub fn new(png: &'a mut PngImage) -> Self {
         Self {
             iter: ScanLineRanges::new(png),
-            raw_data: Some(&mut png.raw_data),
+            raw_data: Some(&mut png.data),
         }
     }
 }
@@ -73,13 +73,13 @@ struct ScanLineRanges {
 }
 
 impl ScanLineRanges {
-    pub fn new(png: &PngData) -> Self {
+    pub fn new(png: &PngImage) -> Self {
         Self {
-            bits_per_pixel: png.ihdr_data.bit_depth.as_u8() * png.channels_per_pixel(),
-            width: png.ihdr_data.width,
-            height: png.ihdr_data.height,
-            left: png.raw_data.len(),
-            pass: if png.ihdr_data.interlaced == 1 {
+            bits_per_pixel: png.ihdr.bit_depth.as_u8() * png.channels_per_pixel(),
+            width: png.ihdr.width,
+            height: png.ihdr.height,
+            left: png.data.len(),
+            pass: if png.ihdr.interlaced == 1 {
                 Some((1, 0))
             } else {
                 None
@@ -153,6 +153,7 @@ impl Iterator for ScanLineRanges {
         let bits_per_line = pixels_per_line * u32::from(self.bits_per_pixel);
         let bytes_per_line = ((bits_per_line + 7) / 8) as usize;
         let len = bytes_per_line + 1;
+        assert!(self.left >= len);
         self.left -= len;
         Some((len, current_pass))
     }

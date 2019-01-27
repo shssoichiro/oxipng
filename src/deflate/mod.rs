@@ -9,7 +9,14 @@ use PngResult;
 pub mod miniz_stream;
 
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
-mod cfzlib;
+pub mod cfzlib;
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+pub mod cfzlib {
+    pub fn is_supported() -> bool {
+        return false;
+    }
+}
 
 /// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
