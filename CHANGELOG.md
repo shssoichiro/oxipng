@@ -4,6 +4,7 @@
  - Update `itertools` crate to 0.8.0
  - Update `zopfli` crate to 0.4.0
  - Use Rust edition 2018
+ - Bump minimum required Rust version to 1.31.0
 
 ### Version 2.1.8
  - Fix non-standard sBIT headers in other code locations ([#153](https://github.com/shssoichiro/oxipng/issues/153))
