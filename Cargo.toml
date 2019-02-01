@@ -63,14 +63,6 @@ binary = [
 ]
 default = ["binary", "parallel"]
 parallel = ["rayon"]
-dev = [
-    "nightly-binary",
-]
-nightly = []
-nightly-binary = [
-    "binary",
-    "nightly",
-]
 
 [lib]
 name = "oxipng"
