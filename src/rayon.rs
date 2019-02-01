@@ -51,3 +51,7 @@ impl<I: Iterator> ParallelIterator for I {
 pub fn join<A, B>(a: impl FnOnce() -> A, b: impl FnOnce() -> B) -> (A, B) {
     (a(), b())
 }
+
+pub fn spawn(a: impl FnOnce() -> A) -> A {
+    a()
+}
