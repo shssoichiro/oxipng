@@ -1,4 +1,4 @@
-use png::PngImage;
+use crate::png::PngImage;
 
 #[derive(Debug, Clone)]
 /// An iterator over the scan lines of a PNG image

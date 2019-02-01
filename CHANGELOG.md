@@ -1,3 +1,10 @@
+### Version 2.2.0
+ - Various internal improvements ([#154](https://github.com/shssoichiro/oxipng/pull/154)) ([#158](https://github.com/shssoichiro/oxipng/pull/158)) ([#160](https://github.com/shssoichiro/oxipng/pull/160)) ([#161](https://github.com/shssoichiro/oxipng/pull/161)) ([#162](https://github.com/shssoichiro/oxipng/pull/162)) ([#163](https://github.com/shssoichiro/oxipng/pull/163))
+ - Update `image` crate to 0.21.0
+ - Update `itertools` crate to 0.8.0
+ - Update `zopfli` crate to 0.4.0
+ - Use Rust edition 2018
+
 ### Version 2.1.8
  - Fix non-standard sBIT headers in other code locations ([#153](https://github.com/shssoichiro/oxipng/issues/153))
 

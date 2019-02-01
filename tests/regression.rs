@@ -1,4 +1,4 @@
-extern crate oxipng;
+use oxipng;
 
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
@@ -33,7 +33,10 @@ fn test_it_converts(
     let (output, opts) = custom.unwrap_or_else(|| get_opts(&input));
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_in, "test file is broken");
+    assert_eq!(
+        png.raw.ihdr.color_type, color_type_in,
+        "test file is broken"
+    );
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in, "test file is broken");
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -51,8 +54,14 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_out, "optimized to wrong color type");
-    assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out, "optimized to wrong bit depth");
+    assert_eq!(
+        png.raw.ihdr.color_type, color_type_out,
+        "optimized to wrong color type"
+    );
+    assert_eq!(
+        png.raw.ihdr.bit_depth, bit_depth_out,
+        "optimized to wrong bit depth"
+    );
     if let Some(palette) = png.raw.palette.as_ref() {
         assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
     } else {

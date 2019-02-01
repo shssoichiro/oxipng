@@ -1,22 +1,28 @@
 //! Check if a reduction makes file smaller, and keep best reductions.
 //! Works asynchronously when possible
 
-use atomicmin::AtomicMin;
+use crate::atomicmin::AtomicMin;
+use crate::deflate;
+use crate::png::PngData;
+use crate::png::PngImage;
+use crate::png::STD_COMPRESSION;
+use crate::png::STD_FILTERS;
+use crate::png::STD_STRATEGY;
+use crate::png::STD_WINDOW;
+#[cfg(not(feature = "parallel"))]
+use crate::rayon;
+#[cfg(not(feature = "parallel"))]
+use crate::rayon::prelude::*;
+use crate::Deadline;
+#[cfg(feature = "parallel")]
+use rayon;
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
-use deflate;
-use Deadline;
-use png::PngData;
-use png::PngImage;
-use png::STD_COMPRESSION;
-use png::STD_FILTERS;
-use png::STD_STRATEGY;
-use png::STD_WINDOW;
-use rayon::prelude::*;
 use std::sync::mpsc::*;
 use std::sync::Arc;
 use std::thread;
-use rayon;
 
 struct Candidate {
     image: PngData,
@@ -100,16 +106,20 @@ impl Evaluator {
                 ) {
                     best_candidate_size.set_min(idat_data.len());
                     // the rest is shipped to the evavluation/collection thread
-                    eval_send.as_ref().expect("not finished yet").send(Candidate {
-                        image: PngData {
-                            idat_data,
-                            raw: Arc::clone(&image),
-                        },
-                        bias,
-                        filter,
-                        is_reduction,
-                        nth,
-                    }).expect("send");
+                    eval_send
+                        .as_ref()
+                        .expect("not finished yet")
+                        .send(Candidate {
+                            image: PngData {
+                                idat_data,
+                                raw: Arc::clone(&image),
+                            },
+                            bias,
+                            filter,
+                            is_reduction,
+                            nth,
+                        })
+                        .expect("send");
                 }
             });
         });
@@ -124,11 +134,33 @@ impl Evaluator {
             let is_best = if let Some(ref old) = best_result {
                 // ordering is important - later file gets to use bias over earlier, but not the other way
                 // (this way bias=0 replaces, but doesn't forbid later optimizations)
-                let new_len = (new.image.idat_data.len() as f64 * if new.nth > old.nth {new.bias as f64} else {1.0}) as usize;
-                let old_len = (old.image.idat_data.len() as f64 * if new.nth < old.nth {old.bias as f64} else {1.0}) as usize;
+                let new_len = (new.image.idat_data.len() as f64
+                    * if new.nth > old.nth {
+                        f64::from(new.bias)
+                    } else {
+                        1.0
+                    }) as usize;
+                let old_len = (old.image.idat_data.len() as f64
+                    * if new.nth < old.nth {
+                        f64::from(old.bias)
+                    } else {
+                        1.0
+                    }) as usize;
                 // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
-                let new = (new_len, new.image.raw.data.len(), new.image.raw.ihdr.bit_depth, new.filter, new.nth);
-                let old = (old_len, old.image.raw.data.len(), old.image.raw.ihdr.bit_depth, old.filter, old.nth);
+                let new = (
+                    new_len,
+                    new.image.raw.data.len(),
+                    new.image.raw.ihdr.bit_depth,
+                    new.filter,
+                    new.nth,
+                );
+                let old = (
+                    old_len,
+                    old.image.raw.data.len(),
+                    old.image.raw.ihdr.bit_depth,
+                    old.filter,
+                    old.nth,
+                );
                 // <= instead of < is important, because best_candidate_size has been set already,
                 // so the current result may be comparing its size with itself
                 new <= old
@@ -136,14 +168,9 @@ impl Evaluator {
                 true
             };
             if is_best {
-                best_result = if new.is_reduction {
-                    Some(new)
-                } else {
-                    None
-                };
+                best_result = if new.is_reduction { Some(new) } else { None };
             }
         }
         best_result.map(|res| res.image)
     }
 }
-

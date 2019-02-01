@@ -1,7 +1,7 @@
-use headers::IhdrData;
-use colors::{BitDepth, ColorType};
+use crate::colors::{BitDepth, ColorType};
+use crate::headers::IhdrData;
+use crate::png::PngImage;
 use itertools::Itertools;
-use png::PngImage;
 use rgb::{FromSlice, RGB8, RGBA8};
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -145,7 +145,8 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
             } else {
                 None
             }
-        }).max();
+        })
+        .max();
     let trns_size = num_transparent.map(|n| n + 8).unwrap_or(0);
 
     let headers_size = palette.len() * 3 + 8 + trns_size;
@@ -212,9 +213,9 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
                 } else {
                     let pixel_bytes = cur_pixel
                         .iter()
-                        .step(2)
+                        .step_by(2)
                         .cloned()
-                        .zip(cur_pixel.iter().skip(1).step(2).cloned())
+                        .zip(cur_pixel.iter().skip(1).step_by(2).cloned())
                         .unique()
                         .collect::<Vec<(u8, u8)>>();
                     if pixel_bytes.len() > 1 {
@@ -254,7 +255,7 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
         data: reduced,
         ihdr: IhdrData {
             color_type: ColorType::Grayscale,
-            .. png.ihdr
+            ..png.ihdr
         },
         aux_headers,
         palette: None,

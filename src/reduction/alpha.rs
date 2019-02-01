@@ -1,15 +1,21 @@
-use evaluate::Evaluator;
-use itertools::flatten;
-use png::scan_lines::ScanLine;
+use crate::colors::AlphaOptim;
+use crate::colors::ColorType;
+use crate::evaluate::Evaluator;
+use crate::headers::IhdrData;
+use crate::png::scan_lines::ScanLine;
+use crate::png::PngImage;
+#[cfg(not(feature = "parallel"))]
+use crate::rayon::prelude::*;
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 use std::collections::HashSet;
 use std::sync::Arc;
-use colors::AlphaOptim;
-use headers::IhdrData;
-use png::PngImage;
-use colors::ColorType;
-use rayon::prelude::*;
 
-pub(crate) fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, eval: &Evaluator) {
+pub(crate) fn try_alpha_reductions(
+    png: Arc<PngImage>,
+    alphas: &HashSet<AlphaOptim>,
+    eval: &Evaluator,
+) {
     assert!(!alphas.is_empty());
     let alphas = alphas.iter().collect::<Vec<_>>();
     let alphas_iter = alphas.par_iter().with_max_len(1);
@@ -88,7 +94,7 @@ fn reduced_alpha_to_white(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
 
 fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     let mut lines = Vec::new();
-    let mut scan_lines = png.scan_lines().collect::<Vec<ScanLine>>();
+    let mut scan_lines = png.scan_lines().collect::<Vec<ScanLine<'_>>>();
     scan_lines.reverse();
     let mut last_line = Vec::new();
     let mut current_line = Vec::with_capacity(last_line.len());
@@ -111,7 +117,7 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         lines.push(current_line.clone());
         current_line.clear();
     }
-    flatten(lines.into_iter().rev()).collect()
+    lines.into_iter().rev().flatten().collect()
 }
 
 fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
@@ -154,7 +160,7 @@ fn reduced_alpha_to_left(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
             last_pixel = pixel.to_owned();
         }
         reduced.push(line.filter);
-        reduced.extend(flatten(line_bytes.chunks(bpp).rev()));
+        reduced.extend(line_bytes.chunks(bpp).rev().flatten());
     }
     reduced
 }

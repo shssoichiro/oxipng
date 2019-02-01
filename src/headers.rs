@@ -1,10 +1,10 @@
+use crate::colors::{BitDepth, ColorType};
+use crate::error::PngError;
+use crate::PngResult;
 use byteorder::{BigEndian, ReadBytesExt};
-use colors::{BitDepth, ColorType};
 use crc::crc32;
-use error::PngError;
 use std::collections::HashSet;
 use std::io::Cursor;
-use PngResult;
 
 #[derive(Debug, Clone, Copy)]
 /// Headers from the IHDR chunk of the image

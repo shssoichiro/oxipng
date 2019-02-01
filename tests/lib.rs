@@ -1,4 +1,4 @@
-extern crate oxipng;
+use oxipng;
 
 use oxipng::Headers;
 use oxipng::OutFile;

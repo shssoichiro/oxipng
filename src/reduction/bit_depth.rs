@@ -1,7 +1,7 @@
-use headers::IhdrData;
+use crate::colors::{BitDepth, ColorType};
+use crate::headers::IhdrData;
+use crate::png::PngImage;
 use bit_vec::BitVec;
-use colors::{BitDepth, ColorType};
-use png::PngImage;
 
 const ONE_BIT_PERMUTATIONS: [u8; 2] = [0b0000_0000, 0b1111_1111];
 const TWO_BIT_PERMUTATIONS: [u8; 5] = [
@@ -30,8 +30,7 @@ const FOUR_BIT_PERMUTATIONS: [u8; 11] = [
 #[must_use]
 pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
-        if png.ihdr.color_type == ColorType::Indexed
-            || png.ihdr.color_type == ColorType::Grayscale
+        if png.ihdr.color_type == ColorType::Indexed || png.ihdr.color_type == ColorType::Grayscale
         {
             return reduce_bit_depth_8_or_less(png, minimum_bits);
         }
@@ -40,8 +39,8 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
 
     // Reduce from 16 to 8 bits per channel per pixel
     let mut reduced = Vec::with_capacity(
-        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel())
-            + png.ihdr.height) as usize,
+        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel()) + png.ihdr.height)
+            as usize,
     );
     let mut high_byte = 0;
 
@@ -84,17 +83,25 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     }
     for line in png.scan_lines() {
         if png.ihdr.color_type == ColorType::Indexed {
-            let line_max = line.data.iter().map(|&byte| match png.ihdr.bit_depth {
-                    BitDepth::Two => (byte & 0x3).max((byte >> 2) & 0x3).max((byte >> 4) & 0x3).max(byte >> 6),
+            let line_max = line
+                .data
+                .iter()
+                .map(|&byte| match png.ihdr.bit_depth {
+                    BitDepth::Two => (byte & 0x3)
+                        .max((byte >> 2) & 0x3)
+                        .max((byte >> 4) & 0x3)
+                        .max(byte >> 6),
                     BitDepth::Four => (byte & 0xF).max(byte >> 4),
-                _ => byte,
-            }).max().unwrap_or(0);
+                    _ => byte,
+                })
+                .max()
+                .unwrap_or(0);
             let required_bits = match line_max {
                 x if x > 0x0F => 8,
                 x if x > 0x03 => 4,
                 x if x > 0x01 => 2,
                 _ => 1,
-                };
+            };
             if required_bits > minimum_bits {
                 minimum_bits = required_bits;
                 if minimum_bits >= bit_depth {

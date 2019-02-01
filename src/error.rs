@@ -26,7 +26,7 @@ impl Error for PngError {
 
 impl fmt::Display for PngError {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             PngError::DeflatedDataTooLong(_) => f.write_str("deflated data too long"),
             PngError::TimedOut => f.write_str("timed out"),

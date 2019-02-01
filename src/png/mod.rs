@@ -1,11 +1,11 @@
+use crate::colors::ColorType;
+use crate::deflate;
+use crate::error::PngError;
+use crate::filters::*;
+use crate::headers::*;
+use crate::interlace::{deinterlace_image, interlace_image};
 use byteorder::{BigEndian, WriteBytesExt};
-use colors::ColorType;
 use crc::crc32;
-use deflate;
-use error::PngError;
-use filters::*;
-use headers::*;
-use interlace::{deinterlace_image, interlace_image};
 use rgb::ComponentSlice;
 use rgb::RGBA8;
 use std::collections::HashMap;
@@ -180,7 +180,8 @@ impl PngData {
         let _ = ihdr_data.write_u8(self.raw.ihdr.interlaced);
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
-        for (key, header) in self.raw
+        for (key, header) in self
+            .raw
             .aux_headers
             .iter()
             .filter(|&(key, _)| !(key == b"bKGD" || key == b"hIST" || key == b"tRNS"))
@@ -196,16 +197,20 @@ impl PngData {
             }
             write_png_block(b"PLTE", &palette_data, &mut output);
             let num_transparent =
-                palette.iter().take(max_palette_size).enumerate().fold(
-                    0,
-                    |prev, (index, px)| {
-                        if px.a != 255 {
-                            index + 1
-                        } else {
-                            prev
-                        }
-                    },
-                );
+                palette
+                    .iter()
+                    .take(max_palette_size)
+                    .enumerate()
+                    .fold(
+                        0,
+                        |prev, (index, px)| {
+                            if px.a != 255 {
+                                index + 1
+                            } else {
+                                prev
+                            }
+                        },
+                    );
             if num_transparent > 0 {
                 let trns_data: Vec<_> = palette[0..num_transparent].iter().map(|px| px.a).collect();
                 write_png_block(b"tRNS", &trns_data, &mut output);
@@ -215,7 +220,8 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self.raw
+        for (key, header) in self
+            .raw
             .aux_headers
             .iter()
             .filter(|&(key, _)| key == b"bKGD" || key == b"hIST" || key == b"tRNS")
@@ -232,7 +238,6 @@ impl PngData {
 }
 
 impl PngImage {
-
     /// Convert the image to the specified interlacing type
     /// Returns true if the interlacing was changed, false otherwise
     /// The `interlace` parameter specifies the *new* interlacing mode
@@ -261,13 +266,13 @@ impl PngImage {
 
     /// Return an iterator over the scanlines of the image
     #[inline]
-    pub fn scan_lines(&self) -> ScanLines {
+    pub fn scan_lines(&self) -> ScanLines<'_> {
         ScanLines::new(self)
     }
 
     /// Return an iterator over the scanlines of the image
     #[inline]
-    pub fn scan_lines_mut(&mut self) -> ScanLinesMut {
+    pub fn scan_lines_mut(&mut self) -> ScanLinesMut<'_> {
         ScanLinesMut::new(self)
     }
 
@@ -331,7 +336,8 @@ impl PngImage {
                                 let signed = x as i8;
                                 acc + i16::from(signed).abs() as u64
                             })
-                        }).unwrap();
+                        })
+                        .unwrap();
                     filtered.push(*best_filter);
                     filtered.extend_from_slice(best_line);
                 }

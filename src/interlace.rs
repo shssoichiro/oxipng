@@ -1,6 +1,6 @@
-use headers::IhdrData;
+use crate::headers::IhdrData;
+use crate::png::PngImage;
 use bit_vec::BitVec;
-use png::PngImage;
 
 #[must_use]
 pub fn interlace_image(png: &PngImage) -> PngImage {

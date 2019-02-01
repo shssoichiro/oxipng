@@ -6,6 +6,7 @@ categories = [
 ]
 description = "A lossless PNG compression optimizer"
 documentation = "https://docs.rs/oxipng"
+edition = "2018"
 exclude = [
     "tests/*",
     "bench/*",
@@ -30,9 +31,9 @@ required-features = ["binary"]
 bit-vec = "^0.5.0"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
-itertools = "^0.7.7"
+itertools = "^0.8.0"
 num_cpus = "^1.0.0"
-zopfli = "^0.3.4"
+zopfli = "^0.4.0"
 miniz_oxide = "0.2.0"
 rgb = "0.8.11"
 
@@ -54,7 +55,7 @@ cloudflare-zlib = "^0.2.2"
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
-version = "^0.20.0"
+version = "^0.21.0"
 
 [features]
 binary = [

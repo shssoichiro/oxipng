@@ -1,7 +1,7 @@
-use atomicmin::AtomicMin;
-use error::PngError;
+use crate::atomicmin::AtomicMin;
+use crate::error::PngError;
+use crate::PngResult;
 use miniz_oxide::deflate::core::*;
-use PngResult;
 
 pub fn compress_to_vec_oxipng(
     input: &[u8],

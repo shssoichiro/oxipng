@@ -1,28 +1,18 @@
-extern crate bit_vec;
-extern crate byteorder;
-#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
-extern crate cloudflare_zlib;
-extern crate crc;
-extern crate image;
-extern crate itertools;
-extern crate miniz_oxide;
-extern crate num_cpus;
+use num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
 #[cfg(not(feature = "parallel"))]
 mod rayon;
-extern crate rgb;
-extern crate zopfli;
 
-use reduction::*;
-use atomicmin::AtomicMin;
+use crate::atomicmin::AtomicMin;
+use crate::colors::BitDepth;
+use crate::deflate::inflate;
+use crate::evaluate::Evaluator;
+use crate::png::PngData;
+use crate::png::PngImage;
+use crate::reduction::*;
 use crc::crc32;
-use deflate::inflate;
-use evaluate::Evaluator;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
-use png::PngImage;
-use png::PngData;
-use colors::BitDepth;
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -30,13 +20,13 @@ use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
-pub use colors::AlphaOptim;
-pub use deflate::Deflaters;
-pub use error::PngError;
-pub use headers::Headers;
+pub use crate::colors::AlphaOptim;
+pub use crate::deflate::Deflaters;
+pub use crate::error::PngError;
+pub use crate::headers::Headers;
 
 mod atomicmin;
 mod colors;
@@ -52,11 +42,11 @@ mod reduction;
 /// Private to oxipng; don't use outside tests and benches
 #[doc(hidden)]
 pub mod internal_tests {
-    pub use atomicmin::*;
-    pub use colors::*;
-    pub use deflate::*;
-    pub use headers::*;
-    pub use png::*;
+    pub use crate::atomicmin::*;
+    pub use crate::colors::*;
+    pub use crate::deflate::*;
+    pub use crate::headers::*;
+    pub use crate::png::*;
 }
 
 #[derive(Clone, Debug)]
@@ -92,7 +82,7 @@ impl InFile {
 }
 
 impl fmt::Display for InFile {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             InFile::Path(ref p) => write!(f, "{}", p.display()),
             InFile::StdIn => f.write_str("stdin"),
@@ -465,7 +455,12 @@ struct TrialOptions {
 }
 
 /// Perform optimization on the input PNG object using the options provided
-fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadline: Arc<Deadline>) -> PngResult<Vec<u8>> {
+fn optimize_png(
+    png: &mut PngData,
+    original_data: &[u8],
+    opts: &Options,
+    deadline: Arc<Deadline>,
+) -> PngResult<Vec<u8>> {
     type TrialWithData = (TrialOptions, Vec<u8>);
 
     let original_png = png.clone();
@@ -582,7 +577,8 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadlin
             .map(|f| {
                 let png = png.clone();
                 (*f, png.raw.filter_image(*f))
-            }).collect();
+            })
+            .collect();
 
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.raw.ihdr.interlaced == 0;
@@ -639,9 +635,8 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadlin
                 None
             }
         });
-        let best: Option<TrialWithData> = best.reduce_with(|i, j| {
-            if i.1.len() <= j.1.len() { i } else { j }
-        });
+        let best: Option<TrialWithData> =
+            best.reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
 
         if let Some(better) = best {
             png.idat_data = better.1;
@@ -698,7 +693,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadlin
 
     let (old_png, new_png) = rayon::join(
         || image::load_from_memory_with_format(original_data, ImageFormat::PNG),
-        || image::load_from_memory_with_format(&output, ImageFormat::PNG)
+        || image::load_from_memory_with_format(&output, ImageFormat::PNG),
     );
 
     if let Ok(new_png) = new_png {
@@ -720,8 +715,12 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadlin
     Err(PngError::new("The resulting image is corrupted"))
 }
 
-fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadline, eval: &Evaluator) {
-
+fn perform_reductions(
+    mut png: Arc<PngImage>,
+    opts: &Options,
+    deadline: &Deadline,
+    eval: &Evaluator,
+) {
     // must be done first to evaluate rest with the correct interlacing
     if let Some(interlacing) = opts.interlace {
         if let Some(reduced) = png.change_interlacing(interlacing) {
@@ -752,7 +751,9 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
             let bits = reduced.ihdr.bit_depth;
             png = Arc::new(reduced);
             eval.try_image(png.clone(), 1.0);
-            if (bits == BitDepth::One || bits == BitDepth::Two) && previous.ihdr.bit_depth != BitDepth::Four {
+            if (bits == BitDepth::One || bits == BitDepth::Two)
+                && previous.ihdr.bit_depth != BitDepth::Four
+            {
                 // Also try 16-color mode for all lower bits images, since that may compress better
                 if let Some(reduced) = reduce_bit_depth(&previous, 4) {
                     eval.try_image(Arc::new(reduced), 0.98);
@@ -848,9 +849,11 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
                     .map_or(false, |name| hdrs.contains(name))
             });
         }
-        Headers::Strip(ref hdrs) => for hdr in hdrs {
-            raw.aux_headers.remove(hdr.as_bytes());
-        },
+        Headers::Strip(ref hdrs) => {
+            for hdr in hdrs {
+                raw.aux_headers.remove(hdr.as_bytes());
+            }
+        }
         Headers::Safe => {
             const PRESERVED_HEADERS: [[u8; 4]; 9] = [
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",

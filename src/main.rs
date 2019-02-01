@@ -1,10 +1,6 @@
 #![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
 #![deny(missing_debug_implementations, missing_copy_implementations)]
 
-extern crate clap;
-extern crate oxipng;
-extern crate wild;
-
 use clap::{App, AppSettings, Arg, ArgMatches};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;

@@ -17,7 +17,7 @@ pub enum ColorType {
 
 impl fmt::Display for ColorType {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",
@@ -73,7 +73,7 @@ pub enum BitDepth {
 
 impl fmt::Display for BitDepth {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",
@@ -127,7 +127,7 @@ pub enum AlphaOptim {
 }
 
 impl fmt::Display for AlphaOptim {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",

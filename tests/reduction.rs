@@ -1,4 +1,4 @@
-extern crate oxipng;
+use oxipng;
 
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
