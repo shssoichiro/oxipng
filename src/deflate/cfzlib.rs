@@ -1,3 +1,4 @@
+use Deadline;
 use atomicmin::AtomicMin;
 pub use cloudflare_zlib::is_supported;
 use cloudflare_zlib::*;
@@ -13,24 +14,27 @@ impl From<ZError> for PngError {
     }
 }
 
-pub fn cfzlib_deflate(
+pub(crate) fn cfzlib_deflate(
     data: &[u8],
     level: u8,
     strategy: u8,
     window_bits: u8,
     max_size: &AtomicMin,
+    deadline: &Deadline,
 ) -> PngResult<Vec<u8>> {
     let mut stream = Deflate::new(level.into(), strategy.into(), window_bits.into())?;
     stream.reserve(max_size.get().unwrap_or(data.len() / 2));
     let max_size = max_size.as_atomic_usize();
     // max size is generally checked after each split,
-    // so splitting the buffer into pieces gices more checks
+    // so splitting the buffer into pieces gives more checks
     // = better chance of hitting it sooner.
-    let (first, rest) = data.split_at(data.len() / 2);
-    stream.compress_with_limit(first, max_size)?;
-    let (rest1, rest2) = rest.split_at(rest.len() / 2);
-    stream.compress_with_limit(rest1, max_size)?;
-    stream.compress_with_limit(rest2, max_size)?;
+    let chunk_size = (data.len()/4).max(1<<15).min(1<<18); // 32-256KB
+    for chunk in data.chunks(chunk_size) {
+        stream.compress_with_limit(chunk, max_size)?;
+        if deadline.passed() {
+            return Err(PngError::TimedOut);
+        }
+    }
     Ok(stream.finish()?)
 }
 
@@ -42,6 +46,7 @@ fn compress_test() {
         Z_DEFAULT_STRATEGY as u8,
         15,
         &AtomicMin::new(None),
+        &Deadline::new(None, false),
     ).unwrap();
     let res = ::deflate::inflate(&vec).unwrap();
     assert_eq!(&res, b"azxcvbnm");

@@ -9,7 +9,7 @@ use png::PngImage;
 use colors::ColorType;
 use rayon::prelude::*;
 
-pub fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, eval: &Evaluator) {
+pub(crate) fn try_alpha_reductions(png: Arc<PngImage>, alphas: &HashSet<AlphaOptim>, eval: &Evaluator) {
     assert!(!alphas.is_empty());
     let alphas = alphas.iter().collect::<Vec<_>>();
     let alphas_iter = alphas.par_iter().with_max_len(1);

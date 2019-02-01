@@ -341,6 +341,8 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
         eprintln!("Processing: {}", input);
     }
 
+    let deadline = Arc::new(Deadline::new(opts.timeout, opts.verbosity.is_some()));
+
     let in_data = match *input {
         InFile::Path(ref input_path) => PngData::read_file(input_path)?,
         InFile::StdIn => {
@@ -354,7 +356,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let mut optimized_output = optimize_png(&mut png, &in_data, opts)?;
+    let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         if opts.verbosity.is_some() {
@@ -437,11 +439,14 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     if opts.verbosity.is_some() {
         eprintln!("Processing from memory");
     }
+
+    let deadline = Arc::new(Deadline::new(opts.timeout, opts.verbosity.is_some()));
+
     let original_size = data.len() as usize;
     let mut png = PngData::from_slice(data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let optimized_output = optimize_png(&mut png, data, opts)?;
+    let optimized_output = optimize_png(&mut png, data, opts, deadline)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
         eprintln!("Image already optimized");
@@ -460,10 +465,8 @@ struct TrialOptions {
 }
 
 /// Perform optimization on the input PNG object using the options provided
-fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
+fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options, deadline: Arc<Deadline>) -> PngResult<Vec<u8>> {
     type TrialWithData = (TrialOptions, Vec<u8>);
-
-    let deadline = Deadline::new(opts);
 
     let original_png = png.clone();
 
@@ -519,7 +522,7 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
     }
 
     // This will collect all versions of images and pick one that compresses best
-    let eval = Evaluator::new();
+    let eval = Evaluator::new(deadline.clone());
     // Usually we want transformations that are smaller than the unmodified original,
     // but if we're interlacing, we have to accept a possible file size increase.
     if opts.interlace.is_none() {
@@ -535,15 +538,12 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
-        let combinations = if opts.deflate == Deflaters::Zlib {
+        let combinations = if opts.deflate == Deflaters::Zlib && !deadline.passed() {
             filter.len() * compression.len() * strategies.len()
         } else {
             filter.len()
         };
         let mut results: Vec<TrialOptions> = Vec::with_capacity(combinations);
-        if opts.verbosity.is_some() {
-            eprintln!("Trying: {} combinations", combinations);
-        }
 
         for f in &filter {
             if opts.deflate == Deflaters::Zlib {
@@ -554,6 +554,9 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
                             compression: *zc,
                             strategy: *zs,
                         });
+                    }
+                    if deadline.passed() {
+                        break;
                     }
                 }
             } else {
@@ -568,6 +571,10 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
             if deadline.passed() {
                 break;
             }
+        }
+
+        if opts.verbosity.is_some() {
+            eprintln!("Trying: {} combinations", results.len());
         }
 
         let filter_iter = filter.par_iter().with_max_len(1);
@@ -594,10 +601,12 @@ fn optimize_png(png: &mut PngData, original_data: &[u8], opts: &Options) -> PngR
                     trial.strategy,
                     opts.window,
                     &best_size,
+                    &deadline,
                 )
             } else {
                 deflate::zopfli_deflate(filtered)
             };
+
             let new_idat = match new_idat {
                 Ok(n) => n,
                 Err(PngError::DeflatedDataTooLong(max)) if opts.verbosity == Some(1) => {
@@ -775,18 +784,18 @@ fn perform_reductions(mut png: Arc<PngImage>, opts: &Options, deadline: &Deadlin
 }
 
 /// Keep track of processing timeout
-struct Deadline {
+pub(crate) struct Deadline {
     start: Instant,
     timeout: Option<Duration>,
     print_message: AtomicBool,
 }
 
 impl Deadline {
-    pub fn new(opts: &Options) -> Self {
+    pub fn new(timeout: Option<Duration>, verbose: bool) -> Self {
         Self {
             start: Instant::now(),
-            timeout: opts.timeout,
-            print_message: AtomicBool::new(opts.verbosity.is_some()),
+            timeout,
+            print_message: AtomicBool::new(verbose),
         }
     }
 
@@ -795,10 +804,11 @@ impl Deadline {
     /// If the verbose option is on, it also prints a timeout message once.
     pub fn passed(&self) -> bool {
         if let Some(timeout) = self.timeout {
-            if self.start.elapsed() > timeout {
+            let elapsed = self.start.elapsed();
+            if elapsed > timeout {
                 if self.print_message.load(Ordering::Relaxed) {
                     self.print_message.store(false, Ordering::Relaxed);
-                    eprintln!("Timed out after {} second(s)", timeout.as_secs());
+                    eprintln!("Timed out after {} second(s)", elapsed.as_secs());
                 }
                 return true;
             }

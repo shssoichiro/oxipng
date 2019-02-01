@@ -1,3 +1,4 @@
+use Deadline;
 use atomicmin::AtomicMin;
 use error::PngError;
 use miniz_oxide;
@@ -25,11 +26,11 @@ pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
+pub(crate) fn deflate(data: &[u8], zc: u8, zs: u8, zw: u8, max_size: &AtomicMin, deadline: &Deadline) -> PngResult<Vec<u8>> {
     #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     {
         if cfzlib::is_supported() {
-            return cfzlib::cfzlib_deflate(data, zc, zs, zw, max_size);
+            return cfzlib::cfzlib_deflate(data, zc, zs, zw, max_size, deadline);
         }
     }
 

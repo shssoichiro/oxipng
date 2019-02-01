@@ -13,8 +13,8 @@ use bit_depth::*;
 pub mod color;
 use color::*;
 
-pub use bit_depth::reduce_bit_depth;
-pub use alpha::try_alpha_reductions;
+pub(crate) use bit_depth::reduce_bit_depth;
+pub(crate) use alpha::try_alpha_reductions;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
