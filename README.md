@@ -97,7 +97,7 @@ Oxipng is open-source software, distributed under the MIT license.
 Tested oxipng 2.2.0 (compiled on rustc 1.32.0 (9fda7c223 2019-01-16)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
-
+```
 Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
   Time (mean ± σ):     117.2 ms ±   5.6 ms    [User: 269.2 ms, System: 17.2 ms]
   Range (min … max):   106.6 ms … 126.0 ms    25 runs
@@ -120,3 +120,4 @@ Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.
 Summary
   './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
     6.54 ± 0.29 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+```
