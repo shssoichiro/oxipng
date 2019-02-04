@@ -11,6 +11,7 @@ echo "Tested $OXIPNG_VERSION (compiled on $RUST_VERSION) against $OPTIPNG_VERSIO
 echo -e '\n\n```\n' >> README.md
 
 hyperfine --warmup 5 './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md
+echo -e '\n\n' >> README.md
 hyperfine --warmup 5 './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png' | ./node_modules/.bin/strip-ansi >> README.md
 
 echo -e '\n```\n' >> README.md
