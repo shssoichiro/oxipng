@@ -97,7 +97,7 @@ Oxipng is open-source software, distributed under the MIT license.
 Tested oxipng 2.2.0 (compiled on rustc 1.32.0 (9fda7c223 2019-01-16)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
-
+```
 Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
   Time (mean ± σ):     117.2 ms ±   5.6 ms    [User: 269.2 ms, System: 17.2 ms]
   Range (min … max):   106.6 ms … 126.0 ms    25 runs
@@ -109,6 +109,8 @@ Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 Summary
   './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
     2.39 ± 0.12 times faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+
+
 Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
   Time (mean ± σ):     144.7 ms ±   6.3 ms    [User: 497.5 ms, System: 25.5 ms]
   Range (min … max):   134.7 ms … 159.4 ms    19 runs
@@ -120,3 +122,4 @@ Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.
 Summary
   './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
     6.54 ± 0.29 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+```
