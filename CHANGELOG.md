@@ -1,3 +1,6 @@
+### Version 2.2.1
+ - Fix compression of very large files ([#167](https://github.com/shssoichiro/oxipng/pull/167)) ([#168](https://github.com/shssoichiro/oxipng/pull/168))
+
 ### Version 2.2.0
  - Various internal improvements ([#154](https://github.com/shssoichiro/oxipng/pull/154)) ([#158](https://github.com/shssoichiro/oxipng/pull/158)) ([#160](https://github.com/shssoichiro/oxipng/pull/160)) ([#161](https://github.com/shssoichiro/oxipng/pull/161)) ([#162](https://github.com/shssoichiro/oxipng/pull/162)) ([#163](https://github.com/shssoichiro/oxipng/pull/163))
  - Update `image` crate to 0.21.0
