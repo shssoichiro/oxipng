@@ -55,7 +55,11 @@ cloudflare-zlib = "^0.2.2"
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
-version = "^0.21.0"
+#FIXME: Use upstream version when 0.22 is released
+#Contains bugfix for issues 167 and 168
+#version = "^0.21.0"
+git = "https://github.com/PistonDevelopers/image"
+rev = "41dfbae"
 
 [features]
 binary = [
