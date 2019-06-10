@@ -8,7 +8,7 @@ use byteorder::{BigEndian, WriteBytesExt};
 use crc::crc32;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
@@ -179,10 +179,16 @@ impl PngData {
         let _ = ihdr_data.write_u8(0); // Filter method -- 5-way adaptive filtering
         let _ = ihdr_data.write_u8(self.raw.ihdr.interlaced);
         write_png_block(b"IHDR", &ihdr_data, &mut output);
-        // Ancillary headers
+        // Ancillary headers (put into BTreeMap for a deterministic order)
+        let mut aux_headers_sorted = BTreeMap::new();
         for (key, header) in self
             .raw
             .aux_headers
+            .iter()
+        {
+            aux_headers_sorted.insert(*key, header);
+        }
+        for (key, header) in aux_headers_sorted
             .iter()
             .filter(|&(key, _)| !(key == b"bKGD" || key == b"hIST" || key == b"tRNS"))
         {
@@ -220,9 +226,7 @@ impl PngData {
             write_png_block(b"tRNS", transparency_pixel, &mut output);
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self
-            .raw
-            .aux_headers
+        for (key, header) in aux_headers_sorted
             .iter()
             .filter(|&(key, _)| key == b"bKGD" || key == b"hIST" || key == b"tRNS")
         {
