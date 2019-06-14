@@ -97,6 +97,8 @@ impl Iterator for ScanLineRanges {
         let (pixels_per_line, current_pass) = if let Some(ref mut pass) = self.pass {
             // Scanlines for interlaced PNG files
             // Handle edge cases for images smaller than 5 pixels in either direction
+            // No extra case needed for skipping pass 7 as this is already handled by the
+            // self.left == 0 check above
             if self.width < 5 && pass.0 == 2 {
                 pass.0 = 3;
                 pass.1 = 4;
@@ -106,13 +108,25 @@ impl Iterator for ScanLineRanges {
                 pass.0 = 4;
                 pass.1 = 0;
             }
-            let (pixels_factor, y_steps) = match pass {
-                (1, _) | (2, _) => (8, 8),
-                (3, _) => (4, 8),
-                (4, _) => (4, 4),
-                (5, _) => (2, 4),
-                (6, _) => (2, 2),
-                (7, _) => (1, 2),
+            if self.width < 3 && pass.0 == 4 {
+                pass.0 = 5;
+                pass.1 = 2;
+            }
+            if self.height < 3 && pass.0 == 5 {
+                pass.0 = 6;
+                pass.1 = 0;
+            }
+            if self.width == 1 && pass.0 == 6 {
+                pass.0 = 7;
+                pass.1 = 1;
+            }
+            let (pixels_factor, y_steps) = match pass.0 {
+                1 | 2 => (8, 8),
+                3 => (4, 8),
+                4 => (4, 4),
+                5 => (2, 4),
+                6 => (2, 2),
+                7 => (1, 2),
                 _ => unreachable!(),
             };
             let mut pixels_per_line = self.width / pixels_factor as u32;
