@@ -8,7 +8,7 @@ use byteorder::{BigEndian, WriteBytesExt};
 use crc::crc32;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::iter::Iterator;
@@ -38,7 +38,7 @@ pub struct PngImage {
     /// The pixel value that should be rendered as transparent
     pub transparency_pixel: Option<Vec<u8>>,
     /// All non-critical headers from the PNG are stored here
-    pub aux_headers: HashMap<[u8; 4], Vec<u8>>,
+    pub aux_headers: BTreeMap<[u8; 4], Vec<u8>>,
 }
 
 /// Contains all data relevant to a PNG image
@@ -97,7 +97,7 @@ impl PngData {
         }
         byte_offset += 8;
         // Read the data headers
-        let mut aux_headers: HashMap<[u8; 4], Vec<u8>> = HashMap::new();
+        let mut aux_headers: BTreeMap<[u8; 4], Vec<u8>> = BTreeMap::new();
         let mut idat_headers: Vec<u8> = Vec::new();
         while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
             match &header.name {

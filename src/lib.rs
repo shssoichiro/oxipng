@@ -14,7 +14,7 @@ use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use rayon::prelude::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
@@ -843,11 +843,15 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            raw.aux_headers.retain(|chunk, _| {
-                std::str::from_utf8(chunk)
+            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
+            for hdr in &keys {
+                let preserve = std::str::from_utf8(hdr)
                     .ok()
-                    .map_or(false, |name| hdrs.contains(name))
-            });
+                    .map_or(false, |name| hdrs.contains(name));
+                if !preserve {
+                    raw.aux_headers.remove(hdr);
+                }
+            }
         }
         Headers::Strip(ref hdrs) => {
             for hdr in hdrs {
@@ -859,11 +863,14 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
                 *b"sPLT",
             ];
-            raw.aux_headers
-                .retain(|hdr, _| PRESERVED_HEADERS.contains(hdr));
+            for hdr in &PRESERVED_HEADERS {
+                if !PRESERVED_HEADERS.contains(hdr) {
+                    raw.aux_headers.remove(hdr);
+                }
+            }
         }
         Headers::All => {
-            raw.aux_headers = HashMap::new();
+            raw.aux_headers = BTreeMap::new();
         }
     }
 
