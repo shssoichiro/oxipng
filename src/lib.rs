@@ -477,7 +477,7 @@ fn optimize_png(
             eprintln!(
                 "    {} bits/pixel, {} colors in palette",
                 png.raw.ihdr.bit_depth,
-                palette.len() / 3
+                palette.len()
             );
         } else {
             eprintln!(
@@ -824,7 +824,7 @@ fn report_reduction(png: &PngImage) {
         eprintln!(
             "Reducing image to {} bits/pixel, {} colors in palette",
             png.ihdr.bit_depth,
-            palette.len() / 3
+            palette.len()
         );
     } else {
         eprintln!(
