@@ -74,3 +74,5 @@ name = "oxipng"
 path = "src/lib.rs"
 [profile.dev]
 opt-level = 2
+[profile.release]
+lto = true
