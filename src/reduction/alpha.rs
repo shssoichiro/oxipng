@@ -93,11 +93,11 @@ fn reduced_alpha_to_white(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
 }
 
 fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
-    let mut lines = Vec::new();
     let mut scan_lines = png.scan_lines().collect::<Vec<ScanLine<'_>>>();
     scan_lines.reverse();
+    let mut lines = Vec::with_capacity(scan_lines.len());
     let mut last_line = Vec::new();
-    let mut current_line = Vec::with_capacity(last_line.len());
+    let mut current_line = Vec::with_capacity(scan_lines[0].data.len());
     for line in scan_lines {
         if line.data.len() != last_line.len() {
             last_line = vec![0; line.data.len()];
