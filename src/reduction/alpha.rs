@@ -97,7 +97,7 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     scan_lines.reverse();
     let mut lines = Vec::with_capacity(scan_lines.len());
     let mut last_line = Vec::new();
-    let mut current_line = Vec::with_capacity(scan_lines[0].data.len());
+    let mut current_line = Vec::with_capacity(scan_lines[0].data.len() + 1); // filter size + pixels
     for line in scan_lines {
         if line.data.len() != last_line.len() {
             last_line = vec![0; line.data.len()];
