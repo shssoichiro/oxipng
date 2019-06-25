@@ -863,7 +863,8 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
                 *b"sPLT",
             ];
-            for hdr in &PRESERVED_HEADERS {
+            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
+            for hdr in &keys {
                 if !PRESERVED_HEADERS.contains(hdr) {
                     raw.aux_headers.remove(hdr);
                 }
