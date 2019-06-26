@@ -610,3 +610,15 @@ fn issue_167() {
         BitDepth::Eight,
     );
 }
+
+#[test]
+fn issue_175() {
+    test_it_converts(
+        "tests/files/issue-175.png",
+        None,
+        ColorType::Grayscale,
+        BitDepth::One,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
