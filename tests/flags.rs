@@ -332,7 +332,7 @@ fn interlacing_1_to_0_small_files() {
 
     assert_eq!(png.raw.ihdr.interlaced, 0);
     assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
-    // the depth can't be asserted reliably, because on such small file different zlib implementaitons pick diferent depth as the best
+    // the depth can't be asserted reliably, because on such small file different zlib implementations pick different depth as the best
 
     remove_file(output).ok();
 }
