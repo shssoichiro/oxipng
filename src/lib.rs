@@ -446,7 +446,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 /// Defines options to be used for a single compression trial
 struct TrialOptions {
     pub filter: u8,
@@ -636,7 +636,7 @@ fn optimize_png(
             }
         });
         let best: Option<TrialWithData> =
-            best.reduce_with(|i, j| if i.1.len() <= j.1.len() { i } else { j });
+            best.reduce_with(|i, j| if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) { i } else { j });
 
         if let Some(better) = best {
             png.idat_data = better.1;
