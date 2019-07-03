@@ -1,3 +1,14 @@
+### Version 2.2.2
+ - Fix grayscale bit-depth reduction ([#171](https://github.com/shssoichiro/oxipng/pull/171))
+ - Fix typos and incorrect log message ([#172](https://github.com/shssoichiro/oxipng/pull/172))
+ - Make metadata order deterministic ([#174](https://github.com/shssoichiro/oxipng/pull/174))
+ - Fix 32-bit builds ([#176](https://github.com/shssoichiro/oxipng/pull/176))
+ - Enable LTO in release builds ([#177](https://github.com/shssoichiro/oxipng/pull/177))
+ - Use deterministic compression strategy ([#179](https://github.com/shssoichiro/oxipng/pull/179))
+ - Fix decoding interlaced images with height or width <= 2 ([#175](https://github.com/shssoichiro/oxipng/pull/175))
+ - Preallocate memory in reduced_alpha_to_up ([#180](https://github.com/shssoichiro/oxipng/pull/180))
+ - Update `bit-vec` crate to 0.6
+
 ### Version 2.2.1
  - Fix compression of very large files ([#167](https://github.com/shssoichiro/oxipng/pull/167)) ([#168](https://github.com/shssoichiro/oxipng/pull/168))
 
