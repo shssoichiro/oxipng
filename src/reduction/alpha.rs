@@ -16,7 +16,10 @@ pub(crate) fn try_alpha_reductions(
     alphas: &HashSet<AlphaOptim>,
     eval: &Evaluator,
 ) {
-    assert!(!alphas.is_empty());
+    if alphas.is_empty() {
+        return;
+    }
+
     let alphas = alphas.iter().collect::<Vec<_>>();
     let alphas_iter = alphas.par_iter().with_max_len(1);
     alphas_iter
