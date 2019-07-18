@@ -61,9 +61,24 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
             }
         }
 
+        let mut used_enumerated : Vec<(usize, &bool)>= used.iter().enumerate().collect();
+        used_enumerated.sort_by(|a, b| {
+            //Sort by ascending alpha and descending luma.
+            let color_val = |palette : &Vec<rgb::RGBA<u8>>, i| {
+                let color = palette.get(i).cloned()
+                    .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
+                let mut result = (color.a as i32) << 18;
+                result -= (color.r as i32) * 299;
+                result -= (color.g as i32) * 587;
+                result -= (color.b as i32) * 114;
+                result
+            };
+            color_val(palette, a.0).cmp(&color_val(palette, b.0))
+        });
+
         let mut next_index = 0u16;
         let mut seen = HashMap::with_capacity(palette.len());
-        for (i, (used, palette_map)) in used.iter().cloned().zip(palette_map.iter_mut()).enumerate()
+        for (i, used) in used_enumerated.iter().cloned()
         {
             if !used {
                 continue;
@@ -75,12 +90,12 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
                 .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
             match seen.entry(color) {
                 Vacant(new) => {
-                    *palette_map = Some(next_index as u8);
+                    palette_map[i] = Some(next_index as u8);
                     new.insert(next_index as u8);
                     next_index += 1;
                 }
                 Occupied(remap_to) => {
-                    *palette_map = Some(*remap_to.get());
+                    palette_map[i] = Some(*remap_to.get())
                 }
             }
         }
