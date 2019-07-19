@@ -238,7 +238,8 @@ impl Options {
         self
     }
 
-    fn apply_preset_2(self) -> Self {
+    fn apply_preset_2(mut self) -> Self {
+        self.use_heuristics = true;
         self
     }
 
@@ -532,6 +533,57 @@ fn optimize_png(
     };
 
     if opts.idat_recoding || reduction_occurred {
+        let filter_iter = filter.par_iter().with_max_len(1);
+        let mut filters: HashMap<u8, Vec<u8>> = filter_iter
+            .map(|f| {
+                let png = png.clone();
+                (*f, png.raw.filter_image(*f))
+            })
+            .collect();
+        if opts.use_heuristics && filter.len() > 1 {
+            let best_size_heuristics = AtomicMin::new(None);
+            let mut heuristic_results: Vec<TrialOptions> = Vec::with_capacity(filter.len());
+            for f in &filter {
+                heuristic_results.push(TrialOptions {
+                    filter: *f,
+                    compression: 1,
+                    strategy: if *f == 0 {0} else {1},
+                });
+            }
+            let filter_heuristics_iter = heuristic_results.into_par_iter().with_max_len(1);
+            let best_filter = filter_heuristics_iter.filter_map(|trial| {
+                if deadline.passed() {
+                    return None;
+                }
+                let filtered = &filters[&trial.filter];
+                let new_idat = deflate::deflate(
+                        filtered,
+                        trial.compression,
+                        trial.strategy,
+                        opts.window,
+                        &best_size_heuristics,
+                        &deadline,
+                        );
+
+                let new_size = match new_idat {
+                    Ok(n) => n.len(),
+                    _ => return None,
+                };
+
+                // update best size across all threads
+                best_size_heuristics.set_min(new_size);
+
+                Some((trial.filter, new_size))
+            });
+            let best_filter = best_filter.reduce_with(|i, j| if i.1 <= j.1 {i} else {j});
+
+            if let Some(result) = best_filter {
+                filter.clear();
+                filter.push(result.0);
+                filters.retain(|&f, _| f == result.0);
+            }
+        }
+
         // Go through selected permutations and determine the best
         let combinations = if opts.deflate == Deflaters::Zlib && !deadline.passed() {
             filter.len() * compression.len() * strategies.len()
@@ -571,14 +623,6 @@ fn optimize_png(
         if opts.verbosity.is_some() {
             eprintln!("Trying: {} combinations", results.len());
         }
-
-        let filter_iter = filter.par_iter().with_max_len(1);
-        let filters: HashMap<u8, Vec<u8>> = filter_iter
-            .map(|f| {
-                let png = png.clone();
-                (*f, png.raw.filter_image(*f))
-            })
-            .collect();
 
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.raw.ihdr.interlaced == 0;
