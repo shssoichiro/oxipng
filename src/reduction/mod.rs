@@ -226,6 +226,14 @@ pub fn reduce_color_type(png: &PngImage) -> Option<PngImage> {
         }
     }
 
+    //Make sure that palette gets sorted. Ideally, this should be done within reduced_color_to_palette.
+    if should_reduce_bit_depth && reduced.ihdr.color_type == ColorType::Indexed {
+        if let Some(r) = reduced_palette(&reduced) {
+            reduced = Cow::Owned(r);
+            should_reduce_bit_depth = true;
+        }
+    }
+
     if should_reduce_bit_depth {
         // Some conversions will allow us to perform bit depth reduction that
         // wasn't possible before
