@@ -635,3 +635,19 @@ fn issue_175() {
         BitDepth::One,
     );
 }
+
+#[test]
+fn issue_182() {
+    let input = "tests/files/issue-175.png";
+    let (output, mut opts) = get_opts(Path::new(input));
+    opts.interlace = Some(0);
+
+    test_it_converts(
+        input,
+        Some((output, opts)),
+        ColorType::Grayscale,
+        BitDepth::One,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
