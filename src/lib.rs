@@ -285,9 +285,7 @@ impl Default for Options {
         for i in 0..4 {
             strategies.insert(i);
         }
-        let mut alphas = HashSet::new();
-        alphas.insert(colors::AlphaOptim::NoOp);
-        alphas.insert(colors::AlphaOptim::Black);
+        let alphas = HashSet::new();
 
         Options {
             backup: false,
