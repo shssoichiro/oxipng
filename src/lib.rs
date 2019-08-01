@@ -250,6 +250,8 @@ impl Options {
     }
 
     fn apply_preset_4(mut self) -> Self {
+        self.alphas.insert(AlphaOptim::NoOp);
+        self.alphas.insert(AlphaOptim::Black);
         self.alphas.insert(AlphaOptim::White);
         self.alphas.insert(AlphaOptim::Up);
         self.alphas.insert(AlphaOptim::Down);
