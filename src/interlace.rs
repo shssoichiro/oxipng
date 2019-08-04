@@ -135,6 +135,19 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
             if current_pass == 3 && png.ihdr.height <= 4 {
                 current_pass += 1;
             }
+            if current_pass == 4 && png.ihdr.width <= 2 {
+                current_pass += 1;
+            }
+            if current_pass == 5 && png.ihdr.height <= 2 {
+                current_pass += 1;
+            }
+            if current_pass == 6 && png.ihdr.width == 1 {
+                current_pass += 1;
+            }
+            if current_pass == 7 && png.ihdr.height == 1 {
+                break;
+            }
+
             pass_constants = interlaced_constants(current_pass);
             current_y = pass_constants.y_shift as usize;
         }
