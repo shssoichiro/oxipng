@@ -34,7 +34,7 @@ crc = "^1.2.0"
 itertools = "^0.8.0"
 num_cpus = "^1.0.0"
 zopfli = "^0.4.0"
-miniz_oxide = "0.2.0"
+miniz_oxide = "0.3"
 rgb = "0.8.11"
 
 [dependencies.rayon]
@@ -55,7 +55,7 @@ cloudflare-zlib = "^0.2.2"
 [dependencies.image]
 default-features = false
 features = ["png_codec"]
-version = "^0.21.2"
+version = "0.22"
 
 [features]
 binary = [
