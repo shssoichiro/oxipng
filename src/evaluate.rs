@@ -41,7 +41,7 @@ pub(crate) struct Evaluator {
     nth: AtomicUsize,
     best_candidate_size: Arc<AtomicMin>,
     /// images are sent to the thread for evaluation
-    eval_send: Option<SyncSender<Candidate>>,
+    eval_send: SyncSender<Candidate>,
     // the thread helps evaluate images asynchronously
     eval_thread: thread::JoinHandle<Option<PngData>>,
 }
@@ -53,15 +53,15 @@ impl Evaluator {
             deadline,
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
-            eval_send: Some(tx),
+            eval_send: tx,
             eval_thread: thread::spawn(move || Self::evaluate_images(rx)),
         }
     }
 
     /// Wait for all evaluations to finish and return smallest reduction
     /// Or `None` if all reductions were worse than baseline.
-    pub fn get_result(mut self) -> Option<PngData> {
-        let _ = self.eval_send.take(); // disconnect the sender, breaking the loop in the thread
+    pub fn get_result(self) -> Option<PngData> {
+        drop(self.eval_send); // disconnect the sender, breaking the loop in the thread
         self.eval_thread.join().expect("eval thread")
     }
 
@@ -107,8 +107,6 @@ impl Evaluator {
                     best_candidate_size.set_min(idat_data.len());
                     // the rest is shipped to the evavluation/collection thread
                     eval_send
-                        .as_ref()
-                        .expect("not finished yet")
                         .send(Candidate {
                             image: PngData {
                                 idat_data,
