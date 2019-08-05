@@ -86,7 +86,8 @@ impl Evaluator {
         // but results will be collected via the message queue
         let eval_send = self.eval_send.clone();
         rayon::spawn(move || {
-            let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
+            let FILTERS: [u8; 1] = [0];
+            let filters_iter = FILTERS.par_iter().with_max_len(1);
 
             // Updating of best result inside the parallel loop would require locks,
             // which are dangerous to do in side Rayon's loop.
@@ -98,7 +99,7 @@ impl Evaluator {
                 }
                 if let Ok(idat_data) = deflate::deflate(
                     &image.filter_image(filter),
-                    STD_COMPRESSION,
+                    1,
                     STD_STRATEGY,
                     STD_WINDOW,
                     &best_candidate_size,
