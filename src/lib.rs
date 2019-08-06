@@ -540,6 +540,8 @@ fn optimize_png(
                 (*f, png.raw.filter_image(*f))
             })
             .collect();
+
+        //Use heuristics to choose the best filter strategy.
         if opts.use_heuristics && filter.len() > 1 {
             let best_size_heuristics = AtomicMin::new(None);
             let mut heuristic_results: Vec<TrialOptions> = Vec::with_capacity(filter.len());
@@ -575,12 +577,52 @@ fn optimize_png(
 
                 Some((trial.filter, new_size))
             });
-            let best_filter = best_filter.reduce_with(|i, j| if i.1 <= j.1 {i} else {j});
+            let best_filter = best_filter.reduce_with(|i, j| if i.1 < j.1 || (i.1 == j.1 && i.0 < j.0) {i} else {j});
 
             if let Some(result) = best_filter {
                 filter.clear();
                 filter.push(result.0);
                 filters.retain(|&f, _| f == result.0);
+            }
+        }
+
+        //Use heuristics to choose whether to try strategy 0 or 1 at full compression. Compression
+        //level 5 gives a good approximation.
+        if opts.use_heuristics && strategies.len() == 4 {
+            let best_size_heuristics = AtomicMin::new(None);
+            let heuristic_results = vec![0, 1];
+            let strategy_heuristics_iter = heuristic_results.into_par_iter().with_max_len(1);
+            let best_strategy = strategy_heuristics_iter.filter_map(|strategy| {
+                if deadline.passed() {
+                    return None;
+                }
+                let filtered = &filters[filter.iter().last().unwrap()];
+                let new_idat = deflate::deflate(
+                        filtered,
+                        5,
+                        strategy,
+                        opts.window,
+                        &best_size_heuristics,
+                        &deadline,
+                        );
+
+                let new_size = match new_idat {
+                    Ok(n) => n.len(),
+                    _ => return None,
+                };
+
+                // update best size across all threads
+                best_size_heuristics.set_min(new_size);
+
+                Some((strategy, new_size))
+            });
+            let best_strategy = best_strategy.reduce_with(|i, j| if i.1 < j.1 || (i.1 == j.1 && i.0 < j.0) {i} else {j});
+
+            if let Some(result) = best_strategy {
+                strategies.clear();
+                strategies.insert(result.0);
+                strategies.insert(2);
+                strategies.insert(3);
             }
         }
 
