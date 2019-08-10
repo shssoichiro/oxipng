@@ -1,12 +1,12 @@
-pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8> {
-    let mut filtered = Vec::with_capacity(data.len());
+pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
+    buf.reserve(data.len());
     match filter {
         0 => {
-            filtered.extend_from_slice(data);
+            buf.extend_from_slice(data);
         }
         1 => {
-            filtered.extend_from_slice(&data[0..bpp]);
-            filtered.extend(
+            buf.extend_from_slice(&data[0..bpp]);
+            buf.extend(
                 data.iter()
                     .skip(bpp)
                     .zip(data.iter())
@@ -15,9 +15,9 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         }
         2 => {
             if last_line.is_empty() {
-                filtered.extend_from_slice(data);
+                buf.extend_from_slice(data);
             } else {
-                filtered.extend(
+                buf.extend(
                     data.iter()
                         .zip(last_line.iter())
                         .map(|(cur, last)| cur.wrapping_sub(*last)),
@@ -27,12 +27,12 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         3 => {
             for (i, byte) in data.iter().enumerate() {
                 if last_line.is_empty() {
-                    filtered.push(match i.checked_sub(bpp) {
+                    buf.push(match i.checked_sub(bpp) {
                         Some(x) => byte.wrapping_sub(data[x] >> 1),
                         None => *byte,
                     });
                 } else {
-                    filtered.push(match i.checked_sub(bpp) {
+                    buf.push(match i.checked_sub(bpp) {
                         Some(x) => byte.wrapping_sub(
                             ((u16::from(data[x]) + u16::from(last_line[i])) >> 1) as u8,
                         ),
@@ -44,12 +44,12 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         4 => {
             for (i, byte) in data.iter().enumerate() {
                 if last_line.is_empty() {
-                    filtered.push(match i.checked_sub(bpp) {
+                    buf.push(match i.checked_sub(bpp) {
                         Some(x) => byte.wrapping_sub(data[x]),
                         None => *byte,
                     });
                 } else {
-                    filtered.push(match i.checked_sub(bpp) {
+                    buf.push(match i.checked_sub(bpp) {
                         Some(x) => {
                             byte.wrapping_sub(paeth_predictor(data[x], last_line[i], last_line[x]))
                         }
@@ -60,7 +60,6 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec
         }
         _ => unreachable!(),
     }
-    filtered
 }
 
 pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8]) -> Vec<u8> {
