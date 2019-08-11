@@ -282,17 +282,19 @@ impl PngImage {
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = 1;
+        let mut unfiltered_buf = Vec::new();
         for line in self.scan_lines() {
             if let Some(pass) = line.pass {
                 if pass != last_pass {
-                    last_line = Vec::new();
+                    last_line.clear();
                     last_pass = pass;
                 }
             }
-            let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
+            unfilter_line(line.filter, bpp, &line.data, &last_line, &mut unfiltered_buf);
             unfiltered.push(0);
-            unfiltered.extend_from_slice(&unfiltered_line);
-            last_line = unfiltered_line;
+            unfiltered.extend_from_slice(&unfiltered_buf);
+            std::mem::swap(&mut last_line, &mut unfiltered_buf);
+            unfiltered_buf.clear();
         }
         unfiltered
     }
