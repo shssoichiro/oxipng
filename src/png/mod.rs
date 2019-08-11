@@ -307,7 +307,6 @@ impl PngImage {
     /// 4: Paeth
     /// 5: All (heuristically pick the best filter for each line)
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
-        //dbg!(self.data.len());
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: &[u8] = &[];
