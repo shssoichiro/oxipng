@@ -11,12 +11,9 @@ use crate::png::STD_STRATEGY;
 use crate::png::STD_WINDOW;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
-#[cfg(not(feature = "parallel"))]
-use crate::rayon::prelude::*;
 use crate::Deadline;
 #[cfg(feature = "parallel")]
 use rayon;
-#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
