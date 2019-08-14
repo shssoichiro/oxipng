@@ -32,6 +32,60 @@ struct Candidate {
     nth: usize,
 }
 
+#[derive(Default)]
+struct Comparator {
+    best_result: Option<Candidate>,
+}
+
+impl Comparator {
+    fn evaluate(&mut self, new: Candidate) {
+        // a tie-breaker is required to make evaluation deterministic
+        let is_best = if let Some(ref old) = self.best_result {
+            // ordering is important - later file gets to use bias over earlier, but not the other way
+            // (this way bias=0 replaces, but doesn't forbid later optimizations)
+            let new_len = (new.image.idat_data.len() as f64
+                * if new.nth > old.nth {
+                    f64::from(new.bias)
+                } else {
+                    1.0
+                }) as usize;
+            let old_len = (old.image.idat_data.len() as f64
+                * if new.nth < old.nth {
+                    f64::from(old.bias)
+                } else {
+                    1.0
+                }) as usize;
+            // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
+            let new = (
+                new_len,
+                new.image.raw.data.len(),
+                new.image.raw.ihdr.bit_depth,
+                new.filter,
+                new.nth,
+            );
+            let old = (
+                old_len,
+                old.image.raw.data.len(),
+                old.image.raw.ihdr.bit_depth,
+                old.filter,
+                old.nth,
+            );
+            // <= instead of < is important, because best_candidate_size has been set already,
+            // so the current result may be comparing its size with itself
+            new <= old
+        } else {
+            true
+        };
+        if is_best {
+            self.best_result = if new.is_reduction { Some(new) } else { None };
+        }
+    }
+
+    fn get_result(self) -> Option<PngData> {
+        self.best_result.map(|res| res.image)
+    }
+}
+
 /// Collect image versions and pick one that compresses best
 pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
@@ -51,7 +105,13 @@ impl Evaluator {
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
             eval_send: tx,
-            eval_thread: thread::spawn(move || Self::evaluate_images(rx)),
+            eval_thread: thread::spawn(move || {
+                let mut comparator = Comparator::default();
+                for candidate in rx {
+                    comparator.evaluate(candidate);
+                }
+                comparator.get_result()
+            }),
         }
     }
 
@@ -118,54 +178,5 @@ impl Evaluator {
                 }
             });
         });
-    }
-
-    /// Main loop of evaluation thread
-    fn evaluate_images(from_channel: Receiver<Candidate>) -> Option<PngData> {
-        let mut best_result: Option<Candidate> = None;
-        // ends when the last sender is dropped
-        for new in from_channel.iter() {
-            // a tie-breaker is required to make evaluation deterministic
-            let is_best = if let Some(ref old) = best_result {
-                // ordering is important - later file gets to use bias over earlier, but not the other way
-                // (this way bias=0 replaces, but doesn't forbid later optimizations)
-                let new_len = (new.image.idat_data.len() as f64
-                    * if new.nth > old.nth {
-                        f64::from(new.bias)
-                    } else {
-                        1.0
-                    }) as usize;
-                let old_len = (old.image.idat_data.len() as f64
-                    * if new.nth < old.nth {
-                        f64::from(old.bias)
-                    } else {
-                        1.0
-                    }) as usize;
-                // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
-                let new = (
-                    new_len,
-                    new.image.raw.data.len(),
-                    new.image.raw.ihdr.bit_depth,
-                    new.filter,
-                    new.nth,
-                );
-                let old = (
-                    old_len,
-                    old.image.raw.data.len(),
-                    old.image.raw.ihdr.bit_depth,
-                    old.filter,
-                    old.nth,
-                );
-                // <= instead of < is important, because best_candidate_size has been set already,
-                // so the current result may be comparing its size with itself
-                new <= old
-            } else {
-                true
-            };
-            if is_best {
-                best_result = if new.is_reduction { Some(new) } else { None };
-            }
-        }
-        best_result.map(|res| res.image)
     }
 }
