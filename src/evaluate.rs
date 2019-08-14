@@ -17,6 +17,7 @@ use rayon;
 use rayon::prelude::*;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
+#[cfg(feature = "parallel")]
 use std::sync::mpsc::*;
 use std::sync::Arc;
 use std::thread;
@@ -92,19 +93,27 @@ pub(crate) struct Evaluator {
     nth: AtomicUsize,
     best_candidate_size: Arc<AtomicMin>,
     /// images are sent to the thread for evaluation
+    #[cfg(feature = "parallel")]
     eval_send: SyncSender<Candidate>,
     // the thread helps evaluate images asynchronously
+    #[cfg(feature = "parallel")]
     eval_thread: thread::JoinHandle<Option<PngData>>,
+    // in non-parallel mode, images are evaluated synchronously
+    #[cfg(not(feature = "parallel"))]
+    eval_comparator: std::cell::RefCell<Comparator>,
 }
 
 impl Evaluator {
     pub fn new(deadline: Arc<Deadline>) -> Self {
+        #[cfg(feature = "parallel")]
         let (tx, rx) = sync_channel(4);
         Self {
             deadline,
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
+            #[cfg(feature = "parallel")]
             eval_send: tx,
+            #[cfg(feature = "parallel")]
             eval_thread: thread::spawn(move || {
                 let mut comparator = Comparator::default();
                 for candidate in rx {
@@ -112,14 +121,22 @@ impl Evaluator {
                 }
                 comparator.get_result()
             }),
+            #[cfg(not(feature = "parallel"))]
+            eval_comparator: Default::default(),
         }
     }
 
     /// Wait for all evaluations to finish and return smallest reduction
     /// Or `None` if all reductions were worse than baseline.
+    #[cfg(feature = "parallel")]
     pub fn get_result(self) -> Option<PngData> {
         drop(self.eval_send); // disconnect the sender, breaking the loop in the thread
         self.eval_thread.join().expect("eval thread")
+    }
+
+    #[cfg(not(feature = "parallel"))]
+    pub fn get_result(self) -> Option<PngData> {
+        self.eval_comparator.into_inner().get_result()
     }
 
     /// Set baseline image. It will be used only to measure minimum compression level required
@@ -141,6 +158,7 @@ impl Evaluator {
         let best_candidate_size = self.best_candidate_size.clone();
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
+        #[cfg(feature = "parallel")]
         let eval_send = self.eval_send.clone();
         rayon::spawn(move || {
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
@@ -163,18 +181,26 @@ impl Evaluator {
                 ) {
                     best_candidate_size.set_min(idat_data.len());
                     // the rest is shipped to the evavluation/collection thread
-                    eval_send
-                        .send(Candidate {
-                            image: PngData {
-                                idat_data,
-                                raw: Arc::clone(&image),
-                            },
-                            bias,
-                            filter,
-                            is_reduction,
-                            nth,
-                        })
-                        .expect("send");
+                    let new = Candidate {
+                        image: PngData {
+                            idat_data,
+                            raw: Arc::clone(&image),
+                        },
+                        bias,
+                        filter,
+                        is_reduction,
+                        nth,
+                    };
+
+                    #[cfg(feature = "parallel")]
+                    {
+                        eval_send.send(new).expect("send");
+                    }
+
+                    #[cfg(not(feature = "parallel"))]
+                    {
+                        self.eval_comparator.borrow_mut().evaluate(new);
+                    }
                 }
             });
         });
