@@ -282,17 +282,19 @@ impl PngImage {
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = 1;
+        let mut unfiltered_buf = Vec::new();
         for line in self.scan_lines() {
             if let Some(pass) = line.pass {
                 if pass != last_pass {
-                    last_line = Vec::new();
+                    last_line.clear();
                     last_pass = pass;
                 }
             }
-            let unfiltered_line = unfilter_line(line.filter, bpp, &line.data, &last_line);
+            unfilter_line(line.filter, bpp, &line.data, &last_line, &mut unfiltered_buf);
             unfiltered.push(0);
-            unfiltered.extend_from_slice(&unfiltered_line);
-            last_line = unfiltered_line;
+            unfiltered.extend_from_slice(&unfiltered_buf);
+            std::mem::swap(&mut last_line, &mut unfiltered_buf);
+            unfiltered_buf.clear();
         }
         unfiltered
     }
@@ -309,7 +311,9 @@ impl PngImage {
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: &[u8] = &[];
         let mut last_pass: Option<u8> = None;
+        let mut f_buf = Vec::new();
         for line in self.scan_lines() {
+            f_buf.clear();
             match filter {
                 0 | 1 | 2 | 3 | 4 => {
                     let filter = if last_pass == line.pass || filter <= 1 {
@@ -318,28 +322,34 @@ impl PngImage {
                         0
                     };
                     filtered.push(filter);
-                    filtered.extend_from_slice(&filter_line(filter, bpp, &line.data, last_line));
+                    filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
+                    filtered.extend_from_slice(&f_buf);
                 }
                 5 => {
                     // Heuristically guess best filter per line
                     // Uses MSAD algorithm mentioned in libpng reference docs
                     // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut trials: Vec<(u8, Vec<u8>)> = Vec::with_capacity(5);
+                    let mut best_filter = 0;
+                    let mut best_line = Vec::new();
+                    let mut best_size = std::u64::MAX;
+                    
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        trials.push((filter, filter_line(filter, bpp, &line.data, last_line)));
+                        filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
+                        let size = f_buf.iter().fold(0u64, |acc, &x| {
+                            let signed = x as i8;
+                            acc + i16::from(signed).abs() as u64
+                        });
+                        if size < best_size {
+                            best_size = size;
+                            best_filter = filter;
+                            std::mem::swap(&mut best_line, &mut f_buf);
+                        }
+                        f_buf.clear() //discard buffer, and start again
+
                     }
-                    let (best_filter, best_line) = trials
-                        .iter()
-                        .min_by_key(|(_, line)| {
-                            line.iter().fold(0u64, |acc, &x| {
-                                let signed = x as i8;
-                                acc + i16::from(signed).abs() as u64
-                            })
-                        })
-                        .unwrap();
-                    filtered.push(*best_filter);
-                    filtered.extend_from_slice(best_line);
+                    filtered.push(best_filter);
+                    filtered.extend_from_slice(&best_line);
                 }
                 _ => unreachable!(),
             }
