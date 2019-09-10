@@ -64,16 +64,16 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
         let mut used_enumerated : Vec<(usize, &bool)>= used.iter().enumerate().collect();
         used_enumerated.sort_by(|a, b| {
             //Sort by ascending alpha and descending luma.
-            let color_val = |palette : &Vec<rgb::RGBA<u8>>, i| {
-                let color = palette.get(i).cloned()
+            let color_val = |i| {
+                let color = palette.get(i).copied()
                     .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
-                let mut result = (color.a as i32) << 18;
-                result -= (color.r as i32) * 299;
-                result -= (color.g as i32) * 587;
-                result -= (color.b as i32) * 114;
-                result
+                ((color.a as i32) << 18)
+                // These are coefficients for standard sRGB to luma conversion
+                - (color.r as i32) * 299
+                - (color.g as i32) * 587
+                - (color.b as i32) * 114
             };
-            color_val(palette, a.0).cmp(&color_val(palette, b.0))
+            color_val(a.0).cmp(&color_val(b.0))
         });
 
         let mut next_index = 0u16;
