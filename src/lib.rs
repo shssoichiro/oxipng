@@ -282,7 +282,7 @@ impl Default for Options {
         }
         // We always need NoOp to be present
         let mut alphas = HashSet::new();
-        self.alphas.insert(AlphaOptim::NoOp);
+        alphas.insert(AlphaOptim::NoOp);
 
         Options {
             backup: false,
