@@ -363,7 +363,6 @@ fn parse_opts_into_struct(
     };
 
     if matches.is_present("alpha") {
-        opts.alphas.insert(AlphaOptim::NoOp);
         opts.alphas.insert(AlphaOptim::Black);
         opts.alphas.insert(AlphaOptim::White);
         opts.alphas.insert(AlphaOptim::Up);
