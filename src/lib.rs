@@ -250,11 +250,6 @@ impl Options {
     }
 
     fn apply_preset_4(mut self) -> Self {
-        self.alphas.insert(AlphaOptim::White);
-        self.alphas.insert(AlphaOptim::Up);
-        self.alphas.insert(AlphaOptim::Down);
-        self.alphas.insert(AlphaOptim::Left);
-        self.alphas.insert(AlphaOptim::Right);
         self.apply_preset_3()
     }
 
@@ -285,9 +280,9 @@ impl Default for Options {
         for i in 0..4 {
             strategies.insert(i);
         }
+        // We always need NoOp to be present
         let mut alphas = HashSet::new();
-        alphas.insert(colors::AlphaOptim::NoOp);
-        alphas.insert(colors::AlphaOptim::Black);
+        alphas.insert(AlphaOptim::NoOp);
 
         Options {
             backup: false,
