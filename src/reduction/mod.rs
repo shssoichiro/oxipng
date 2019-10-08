@@ -61,11 +61,13 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
             }
         }
 
-        let mut used_enumerated : Vec<(usize, &bool)>= used.iter().enumerate().collect();
+        let mut used_enumerated: Vec<(usize, &bool)> = used.iter().enumerate().collect();
         used_enumerated.sort_by(|a, b| {
             //Sort by ascending alpha and descending luma.
             let color_val = |i| {
-                let color = palette.get(i).copied()
+                let color = palette
+                    .get(i)
+                    .copied()
                     .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
                 ((color.a as i32) << 18)
                 // These are coefficients for standard sRGB to luma conversion
@@ -78,8 +80,7 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
 
         let mut next_index = 0u16;
         let mut seen = HashMap::with_capacity(palette.len());
-        for (i, used) in used_enumerated.iter().cloned()
-        {
+        for (i, used) in used_enumerated.iter().cloned() {
             if !used {
                 continue;
             }
@@ -94,9 +95,7 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
                     new.insert(next_index as u8);
                     next_index += 1;
                 }
-                Occupied(remap_to) => {
-                    palette_map[i] = Some(*remap_to.get())
-                }
+                Occupied(remap_to) => palette_map[i] = Some(*remap_to.get()),
             }
         }
     }

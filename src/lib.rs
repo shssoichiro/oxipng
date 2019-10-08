@@ -249,7 +249,7 @@ impl Options {
         self
     }
 
-    fn apply_preset_4(mut self) -> Self {
+    fn apply_preset_4(self) -> Self {
         self.apply_preset_3()
     }
 
@@ -630,8 +630,13 @@ fn optimize_png(
                 None
             }
         });
-        let best: Option<TrialWithData> =
-            best.reduce_with(|i, j| if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) { i } else { j });
+        let best: Option<TrialWithData> = best.reduce_with(|i, j| {
+            if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
+                i
+            } else {
+                j
+            }
+        });
 
         if let Some(better) = best {
             png.idat_data = better.1;
@@ -797,7 +802,7 @@ impl Deadline {
                 start: Instant::now(),
                 timeout,
                 print_message: AtomicBool::new(verbose),
-            })
+            }),
         }
     }
 

@@ -4,12 +4,7 @@ use crate::png::PngImage;
 use bit_vec::BitVec;
 
 const ONE_BIT_PERMUTATIONS: [u8; 2] = [0b0000_0000, 0b1111_1111];
-const TWO_BIT_PERMUTATIONS: [u8; 4] = [
-    0b0000_0000,
-    0b0101_0101,
-    0b1010_1010,
-    0b1111_1111,
-];
+const TWO_BIT_PERMUTATIONS: [u8; 4] = [0b0000_0000, 0b0101_0101, 0b1010_1010, 0b1111_1111];
 const FOUR_BIT_PERMUTATIONS: [u8; 16] = [
     0b0000_0000,
     0b0001_0001,

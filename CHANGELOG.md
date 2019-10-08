@@ -1,3 +1,11 @@
+### Version 2.3.0
+ - Allow disabling all alpha optimizations ([#181](https://github.com/shssoichiro/oxipng/pull/181))
+ - Fix interlacing issues on tiny images ([#182](https://github.com/shssoichiro/oxipng/pull/182))
+ - Reduce memory usage in filtering ([#191](https://github.com/shssoichiro/oxipng/pull/191))
+ - Implement palette sorting to improve compression ([#193](https://github.com/shssoichiro/oxipng/pull/193))
+ - Disable alpha optimizations by default ([#187](https://github.com/shssoichiro/oxipng/pull/187))
+ - Add support for WASM ([#194](https://github.com/shssoichiro/oxipng/pull/194))
+
 ### Version 2.2.2
  - Fix grayscale bit-depth reduction ([#171](https://github.com/shssoichiro/oxipng/pull/171))
  - Fix typos and incorrect log message ([#172](https://github.com/shssoichiro/oxipng/pull/172))
