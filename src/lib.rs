@@ -1,3 +1,17 @@
+#![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
+#![deny(missing_debug_implementations, missing_copy_implementations)]
+#![warn(clippy::expl_impl_clone_on_copy)]
+#![warn(clippy::float_cmp_const)]
+#![warn(clippy::linkedlist)]
+#![warn(clippy::map_flatten)]
+#![warn(clippy::match_same_arms)]
+#![warn(clippy::mem_forget)]
+#![warn(clippy::mut_mut)]
+#![warn(clippy::mutex_integer)]
+#![warn(clippy::needless_continue)]
+#![warn(clippy::path_buf_push_overwrite)]
+#![warn(clippy::range_plus_one)]
+
 use num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
@@ -427,7 +441,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
 
     let deadline = Arc::new(Deadline::new(opts.timeout, opts.verbosity.is_some()));
 
-    let original_size = data.len() as usize;
+    let original_size = data.len();
     let mut png = PngData::from_slice(data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
@@ -882,11 +896,10 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
     }
 
     let may_replace_iccp = match opts.strip {
-        Headers::None => false,
         Headers::Keep(ref hdrs) => hdrs.contains("sRGB"),
         Headers::Strip(ref hdrs) => !hdrs.iter().any(|v| v == "sRGB"),
         Headers::Safe => true,
-        Headers::All => false,
+        Headers::None | Headers::All => false,
     };
 
     if may_replace_iccp {

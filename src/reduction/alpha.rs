@@ -215,9 +215,9 @@ pub fn reduced_alpha_channel(png: &PngImage) -> Option<PngImage> {
         for (i, &byte) in line.data.iter().enumerate() {
             if i as u8 & bpp_mask >= colored_bytes {
                 continue;
-            } else {
-                raw_data.push(byte);
             }
+
+            raw_data.push(byte);
         }
     }
 

@@ -1,6 +1,7 @@
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 
+#[derive(Debug)]
 pub struct AtomicMin {
     val: AtomicUsize,
 }

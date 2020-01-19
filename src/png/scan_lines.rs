@@ -129,7 +129,7 @@ impl Iterator for ScanLineRanges {
                 7 => (1, 2),
                 _ => unreachable!(),
             };
-            let mut pixels_per_line = self.width / pixels_factor as u32;
+            let mut pixels_per_line = self.width / pixels_factor;
             // Determine whether to add pixels if there is a final, incomplete 8x8 block
             let gap = self.width % pixels_factor;
             match pass.0 {
