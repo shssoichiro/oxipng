@@ -1,3 +1,6 @@
+### Version 2.3.1 (unreleased)
+- Update `image` crate to 0.23
+
 ### Version 2.3.0
  - Allow disabling all alpha optimizations ([#181](https://github.com/shssoichiro/oxipng/pull/181))
  - Fix interlacing issues on tiny images ([#182](https://github.com/shssoichiro/oxipng/pull/182))

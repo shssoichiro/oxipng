@@ -706,8 +706,8 @@ fn optimize_png(
     }
 
     let (old_png, new_png) = rayon::join(
-        || image::load_from_memory_with_format(original_data, ImageFormat::PNG),
-        || image::load_from_memory_with_format(&output, ImageFormat::PNG),
+        || image::load_from_memory_with_format(original_data, ImageFormat::Png),
+        || image::load_from_memory_with_format(&output, ImageFormat::Png),
     );
 
     if let Ok(new_png) = new_png {
