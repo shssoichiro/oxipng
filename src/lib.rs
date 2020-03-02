@@ -11,6 +11,7 @@
 #![warn(clippy::needless_continue)]
 #![warn(clippy::path_buf_push_overwrite)]
 #![warn(clippy::range_plus_one)]
+#![allow(clippy::cognitive_complexity)]
 
 use num_cpus;
 #[cfg(feature = "parallel")]
