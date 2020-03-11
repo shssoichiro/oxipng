@@ -1,8 +1,6 @@
-use oxipng;
-
+use indexmap::IndexSet;
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
-use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -11,7 +9,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
     options.verbosity = None;
     options.force = true;
-    let mut filter = HashSet::new();
+    let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
@@ -309,7 +307,7 @@ fn issue_113_white() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-white-out.png").to_owned(),
@@ -329,7 +327,7 @@ fn issue_113_black() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-black-out.png").to_owned(),
@@ -349,7 +347,7 @@ fn issue_113_right() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Right);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-right-out.png").to_owned(),
@@ -369,7 +367,7 @@ fn issue_113_left() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Left);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-left-out.png").to_owned(),
@@ -389,7 +387,7 @@ fn issue_113_up() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Up);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-up-out.png").to_owned(),
@@ -409,7 +407,7 @@ fn issue_113_down() {
     let input = "tests/files/issue-113.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(1);
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Down);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-down-out.png").to_owned(),
@@ -441,7 +439,7 @@ fn issue_129() {
 fn issue_133_black() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-black-out.png").to_owned(),
@@ -460,7 +458,7 @@ fn issue_133_black() {
 fn issue_133_white() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::White);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-white-out.png").to_owned(),
@@ -479,7 +477,7 @@ fn issue_133_white() {
 fn issue_133_up() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Up);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-up-out.png").to_owned(),
@@ -498,7 +496,7 @@ fn issue_133_up() {
 fn issue_133_down() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Down);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-down-out.png").to_owned(),
@@ -517,7 +515,7 @@ fn issue_133_down() {
 fn issue_133_right() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Right);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-right-out.png").to_owned(),
@@ -536,7 +534,7 @@ fn issue_133_right() {
 fn issue_133_left() {
     let input = "tests/files/issue-133.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.alphas = HashSet::new();
+    opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Left);
     let output = OutFile::Path(Some(
         Path::new(input).with_extension("-left-out.png").to_owned(),

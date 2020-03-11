@@ -1,3 +1,4 @@
+use indexmap::IndexSet;
 use crate::colors::AlphaOptim;
 use crate::colors::ColorType;
 use crate::evaluate::Evaluator;
@@ -8,22 +9,21 @@ use crate::png::PngImage;
 use crate::rayon::prelude::*;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
-use std::collections::HashSet;
 use std::sync::Arc;
 
 pub(crate) fn try_alpha_reductions(
     png: Arc<PngImage>,
-    alphas: &HashSet<AlphaOptim>,
+    alphas: &IndexSet<AlphaOptim>,
     eval: &Evaluator,
 ) {
     if alphas.is_empty() {
         return;
     }
 
-    let alphas = alphas.iter().collect::<Vec<_>>();
-    let alphas_iter = alphas.par_iter().with_max_len(1);
-    alphas_iter
-        .filter_map(|&alpha| filtered_alpha_channel(&png, *alpha))
+    alphas
+        .par_iter()
+        .with_max_len(1)
+        .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
         .for_each(|image| eval.try_image(Arc::new(image), 0.99));
 }
 

@@ -1,9 +1,9 @@
+use indexmap::IndexSet;
 use crate::colors::{BitDepth, ColorType};
 use crate::error::PngError;
 use crate::PngResult;
 use byteorder::{BigEndian, ReadBytesExt};
 use crc::crc32;
-use std::collections::HashSet;
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Copy)]
@@ -35,7 +35,7 @@ pub enum Headers {
     /// Headers that won't affect rendering (all but cHRM, gAMA, iCCP, sBIT, sRGB, bKGD, hIST, pHYs, sPLT)
     Safe,
     /// Remove all non-critical chunks except these
-    Keep(HashSet<String>),
+    Keep(IndexSet<String>),
     /// All non-critical headers
     All,
 }
