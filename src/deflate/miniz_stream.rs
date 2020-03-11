@@ -3,12 +3,13 @@ use crate::error::PngError;
 use crate::PngResult;
 use miniz_oxide::deflate::core::*;
 
-pub fn compress_to_vec_oxipng(
+pub(crate) fn compress_to_vec_oxipng(
     input: &[u8],
     level: u8,
     window_bits: i32,
     strategy: i32,
     max_size: &AtomicMin,
+    deadline: &crate::Deadline,
 ) -> PngResult<Vec<u8>> {
     // The comp flags function sets the zlib flag if the window_bits parameter is > 0.
     let flags = create_comp_flags_from_zip_params(level.into(), window_bits, strategy);
@@ -44,6 +45,9 @@ pub fn compress_to_vec_oxipng(
                     if output.len() > max {
                         return Err(PngError::DeflatedDataTooLong(output.len()));
                     }
+                }
+                if deadline.passed() {
+                    return Err(PngError::TimedOut);
                 }
                 // We need more space, so extend the vector.
                 if output.len().saturating_sub(out_pos) < 30 {
