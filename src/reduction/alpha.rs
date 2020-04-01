@@ -24,7 +24,7 @@ pub(crate) fn try_alpha_reductions(
         .par_iter()
         .with_max_len(1)
         .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
-        .for_each(|image| eval.try_image(Arc::new(image), 0.99));
+        .for_each(|image| eval.try_image(Arc::new(image)));
 }
 
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {

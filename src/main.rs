@@ -193,6 +193,10 @@ fn main() {
             .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
             .short("Z")
             .long("zopfli"))
+        .arg(Arg::with_name("libdeflater")
+            .help("Use an alternative Libdeflater algorithm, overrides zlib-specific options")
+            .short("D")
+            .long("libdeflater"))
         .arg(Arg::with_name("timeout")
             .help("Maximum amount of time, in seconds, to spend on optimizations")
             .takes_value(true)
@@ -479,6 +483,10 @@ fn parse_opts_into_struct(
 
     if matches.is_present("zopfli") {
         opts.deflate = Deflaters::Zopfli;
+    }
+
+    if matches.is_present("libdeflater") {
+        opts.deflate = Deflaters::Libdeflater;
     }
 
     if let Some(x) = matches.value_of("threads") {

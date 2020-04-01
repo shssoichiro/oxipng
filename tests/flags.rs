@@ -436,3 +436,21 @@ fn zopfli_mode() {
         BitDepth::Eight,
     );
 }
+
+
+#[test]
+fn libdeflater_mode() {
+    let input = PathBuf::from("tests/files/zopfli_mode.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.deflate = Deflaters::Libdeflater;
+
+    test_it_converts(
+        input,
+        &output,
+        &opts,
+        ColorType::RGB,
+        BitDepth::Eight,
+        ColorType::RGB,
+        BitDepth::Eight,
+    );
+}
