@@ -14,13 +14,13 @@
 #![allow(clippy::cognitive_complexity)]
 
 use clap::{App, AppSettings, Arg, ArgMatches};
+use indexmap::IndexSet;
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::Options;
 use oxipng::PngResult;
 use oxipng::{InFile, OutFile};
-use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
 use std::process::exit;
@@ -500,9 +500,9 @@ fn parse_numeric_range_opts(
     input: &str,
     min_value: u8,
     max_value: u8,
-) -> Result<HashSet<u8>, String> {
+) -> Result<IndexSet<u8>, String> {
     const ERROR_MESSAGE: &str = "Not a valid input";
-    let mut items = HashSet::new();
+    let mut items = IndexSet::new();
 
     // one value
     if let Ok(one_value) = input.parse::<u8>() {

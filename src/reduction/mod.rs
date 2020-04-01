@@ -1,10 +1,9 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
+use indexmap::map::{IndexMap, Entry::*};
 use rgb::RGBA8;
 use std::borrow::Cow;
-use std::collections::hash_map::Entry::*;
-use std::collections::HashMap;
 
 pub mod alpha;
 use crate::alpha::*;
@@ -79,7 +78,7 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
         });
 
         let mut next_index = 0u16;
-        let mut seen = HashMap::with_capacity(palette.len());
+        let mut seen = IndexMap::with_capacity(palette.len());
         for (i, used) in used_enumerated.iter().cloned() {
             if !used {
                 continue;

@@ -28,8 +28,8 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
+use indexmap::{IndexSet, IndexMap};
 use rayon::prelude::*;
-use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
@@ -154,7 +154,7 @@ pub struct Options {
     /// Which filters to try on the file (0-5)
     ///
     /// Default: `0,5`
-    pub filter: HashSet<u8>,
+    pub filter: IndexSet<u8>,
     /// Whether to change the interlacing type of the file.
     ///
     /// `None` will not change the current interlacing type.
@@ -166,11 +166,11 @@ pub struct Options {
     /// Which zlib compression levels to try on the file (1-9)
     ///
     /// Default: `9`
-    pub compression: HashSet<u8>,
+    pub compression: IndexSet<u8>,
     /// Which zlib compression strategies to try on the file (0-3)
     ///
     /// Default: `0-3`
-    pub strategies: HashSet<u8>,
+    pub strategies: IndexSet<u8>,
     /// Window size to use when compressing the file, as `2^window` bytes.
     ///
     /// Doesn't affect compression but may affect speed and memory usage.
@@ -179,7 +179,7 @@ pub struct Options {
     /// Default: `15`
     pub window: u8,
     /// Alpha filtering strategies to use
-    pub alphas: HashSet<colors::AlphaOptim>,
+    pub alphas: IndexSet<colors::AlphaOptim>,
     /// Whether to attempt bit depth reduction
     ///
     /// Default: `true`
@@ -286,17 +286,17 @@ impl Options {
 impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface
-        let mut filter = HashSet::new();
+        let mut filter = IndexSet::new();
         filter.insert(0);
         filter.insert(5);
-        let mut compression = HashSet::new();
+        let mut compression = IndexSet::new();
         compression.insert(9);
-        let mut strategies = HashSet::new();
+        let mut strategies = IndexSet::new();
         for i in 0..4 {
             strategies.insert(i);
         }
         // We always need NoOp to be present
-        let mut alphas = HashSet::new();
+        let mut alphas = IndexSet::new();
         alphas.insert(AlphaOptim::NoOp);
 
         Options {
@@ -502,7 +502,7 @@ fn optimize_png(
         eprintln!("    File size = {} bytes", file_original_size);
     }
 
-    let mut filter = opts.filter.iter().cloned().collect::<Vec<u8>>();
+    let mut filter = opts.filter.clone();
     let compression = &opts.compression;
     let mut strategies = opts.strategies.clone();
 
@@ -512,14 +512,14 @@ fn optimize_png(
             && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
             if filter.is_empty() {
-                filter.push(5);
+                filter.insert(5);
             }
             if strategies.is_empty() {
                 strategies.insert(1);
             }
         } else {
             if filter.is_empty() {
-                filter.push(0);
+                filter.insert(0);
             }
             if strategies.is_empty() {
                 strategies.insert(0);
@@ -583,8 +583,10 @@ fn optimize_png(
             eprintln!("Trying: {} combinations", results.len());
         }
 
-        let filter_iter = filter.par_iter().with_max_len(1);
-        let filters: HashMap<u8, Vec<u8>> = filter_iter
+        let filters: IndexMap<u8, Vec<u8>> =
+            filter
+            .par_iter()
+            .with_max_len(1)
             .map(|f| {
                 let png = png.clone();
                 (*f, png.raw.filter_image(*f))
@@ -865,15 +867,10 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
-            for hdr in &keys {
-                let preserve = std::str::from_utf8(hdr)
-                    .ok()
-                    .map_or(false, |name| hdrs.contains(name));
-                if !preserve {
-                    raw.aux_headers.remove(hdr);
-                }
-            }
+            raw.aux_headers.retain(|hdr, _| {
+                std::str::from_utf8(hdr)
+                    .map_or(false, |name| hdrs.contains(name))
+            })
         }
         Headers::Strip(ref hdrs) => {
             for hdr in hdrs {
@@ -893,7 +890,7 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
             }
         }
         Headers::All => {
-            raw.aux_headers = BTreeMap::new();
+            raw.aux_headers = IndexMap::new();
         }
     }
 

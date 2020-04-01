@@ -1,9 +1,9 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
+use indexmap::IndexMap;
 use itertools::Itertools;
 use rgb::{FromSlice, RGB8, RGBA8};
-use std::collections::HashMap;
 use std::hash::Hash;
 
 #[must_use]
@@ -76,7 +76,7 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngImage) -> Option<PngImage> {
 
 fn reduce_scanline_to_palette<T>(
     iter: impl IntoIterator<Item = T>,
-    palette: &mut HashMap<T, u8>,
+    palette: &mut IndexMap<T, u8>,
     reduced: &mut Vec<u8>,
 ) -> bool
 where
@@ -105,7 +105,7 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
         return None;
     }
     let mut raw_data = Vec::with_capacity(png.data.len());
-    let mut palette = HashMap::with_capacity(257);
+    let mut palette = IndexMap::with_capacity(257);
     let transparency_pixel = png
         .transparency_pixel
         .as_ref()

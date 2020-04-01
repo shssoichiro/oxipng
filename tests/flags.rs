@@ -1,8 +1,6 @@
-extern crate oxipng;
-
+use indexmap::IndexSet;
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
-use std::collections::HashSet;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -11,7 +9,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
     options.verbosity = None;
     options.force = true;
-    let mut filter = HashSet::new();
+    let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
@@ -342,7 +340,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let input = PathBuf::from("tests/files/interlaced_0_to_1_other_filter_mode.png");
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
-    let mut filter = HashSet::new();
+    let mut filter = IndexSet::new();
     filter.insert(4);
     opts.filter = filter;
 
