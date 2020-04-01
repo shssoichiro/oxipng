@@ -353,6 +353,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             data
         }
     };
+
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
@@ -565,7 +566,7 @@ fn optimize_png(
                     }
                 }
             } else {
-                // Zopfli compression has no additional options
+                // Zopfli and Libdeflater compression have no additional options.
                 results.push(TrialOptions {
                     filter: *f,
                     compression: 0,
@@ -600,17 +601,17 @@ fn optimize_png(
                 return None;
             }
             let filtered = &filters[&trial.filter];
-            let new_idat = if opts.deflate == Deflaters::Zlib {
-                deflate::deflate(
+            let new_idat = match opts.deflate {
+                Deflaters::Zlib => deflate::deflate(
                     filtered,
                     trial.compression,
                     trial.strategy,
                     opts.window,
                     &best_size,
                     &deadline,
-                )
-            } else {
-                deflate::zopfli_deflate(filtered)
+                ),
+                Deflaters::Zopfli => deflate::zopfli_deflate(filtered),
+                Deflaters::Libdeflater => deflate::libdeflater_deflate(filtered, &best_size),
             };
 
             let new_idat = match new_idat {

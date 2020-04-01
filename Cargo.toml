@@ -36,6 +36,7 @@ num_cpus = "^1.0.0"
 zopfli = "^0.4.0"
 miniz_oxide = "0.3"
 rgb = "0.8.11"
+libdeflater = "0.2.0"
 
 [dependencies.rayon]
 optional = true
