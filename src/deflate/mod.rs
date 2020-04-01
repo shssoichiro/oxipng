@@ -44,7 +44,7 @@ pub(crate) fn deflate(
         }
     }
 
-    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size)
+    miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size, deadline)
 }
 
 pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
