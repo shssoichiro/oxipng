@@ -14,13 +14,13 @@
 #![allow(clippy::cognitive_complexity)]
 
 use clap::{App, AppSettings, Arg, ArgMatches};
+use indexmap::IndexSet;
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::Options;
 use oxipng::PngResult;
 use oxipng::{InFile, OutFile};
-use std::collections::HashSet;
 use std::fs::DirBuilder;
 use std::path::PathBuf;
 use std::process::exit;
@@ -193,6 +193,10 @@ fn main() {
             .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
             .short("Z")
             .long("zopfli"))
+        .arg(Arg::with_name("libdeflater")
+            .help("Use an alternative Libdeflater algorithm, overrides zlib-specific options")
+            .short("D")
+            .long("libdeflater"))
         .arg(Arg::with_name("timeout")
             .help("Maximum amount of time, in seconds, to spend on optimizations")
             .takes_value(true)
@@ -481,6 +485,10 @@ fn parse_opts_into_struct(
         opts.deflate = Deflaters::Zopfli;
     }
 
+    if matches.is_present("libdeflater") {
+        opts.deflate = Deflaters::Libdeflater;
+    }
+
     if let Some(x) = matches.value_of("threads") {
         opts.threads = x.parse::<usize>().unwrap();
     }
@@ -492,9 +500,9 @@ fn parse_numeric_range_opts(
     input: &str,
     min_value: u8,
     max_value: u8,
-) -> Result<HashSet<u8>, String> {
+) -> Result<IndexSet<u8>, String> {
     const ERROR_MESSAGE: &str = "Not a valid input";
-    let mut items = HashSet::new();
+    let mut items = IndexSet::new();
 
     // one value
     if let Ok(one_value) = input.parse::<u8>() {

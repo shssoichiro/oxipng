@@ -9,6 +9,9 @@ use zopfli;
 #[doc(hidden)]
 pub mod miniz_stream;
 
+mod deflater;
+pub use deflater::deflate as libdeflater_deflate;
+
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 pub mod cfzlib;
 
@@ -62,4 +65,6 @@ pub enum Deflaters {
     Zlib,
     /// Use the better but slower Zopfli implementation
     Zopfli,
+    /// Use libdeflater.
+    Libdeflater,
 }

@@ -28,8 +28,8 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
+use indexmap::{IndexSet, IndexMap};
 use rayon::prelude::*;
-use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::fs::{copy, File};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
@@ -154,7 +154,7 @@ pub struct Options {
     /// Which filters to try on the file (0-5)
     ///
     /// Default: `0,5`
-    pub filter: HashSet<u8>,
+    pub filter: IndexSet<u8>,
     /// Whether to change the interlacing type of the file.
     ///
     /// `None` will not change the current interlacing type.
@@ -166,11 +166,11 @@ pub struct Options {
     /// Which zlib compression levels to try on the file (1-9)
     ///
     /// Default: `9`
-    pub compression: HashSet<u8>,
+    pub compression: IndexSet<u8>,
     /// Which zlib compression strategies to try on the file (0-3)
     ///
     /// Default: `0-3`
-    pub strategies: HashSet<u8>,
+    pub strategies: IndexSet<u8>,
     /// Window size to use when compressing the file, as `2^window` bytes.
     ///
     /// Doesn't affect compression but may affect speed and memory usage.
@@ -179,7 +179,7 @@ pub struct Options {
     /// Default: `15`
     pub window: u8,
     /// Alpha filtering strategies to use
-    pub alphas: HashSet<colors::AlphaOptim>,
+    pub alphas: IndexSet<colors::AlphaOptim>,
     /// Whether to attempt bit depth reduction
     ///
     /// Default: `true`
@@ -286,17 +286,17 @@ impl Options {
 impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface
-        let mut filter = HashSet::new();
+        let mut filter = IndexSet::new();
         filter.insert(0);
         filter.insert(5);
-        let mut compression = HashSet::new();
+        let mut compression = IndexSet::new();
         compression.insert(9);
-        let mut strategies = HashSet::new();
+        let mut strategies = IndexSet::new();
         for i in 0..4 {
             strategies.insert(i);
         }
         // We always need NoOp to be present
-        let mut alphas = HashSet::new();
+        let mut alphas = IndexSet::new();
         alphas.insert(AlphaOptim::NoOp);
 
         Options {
@@ -353,6 +353,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             data
         }
     };
+
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
@@ -501,7 +502,7 @@ fn optimize_png(
         eprintln!("    File size = {} bytes", file_original_size);
     }
 
-    let mut filter = opts.filter.iter().cloned().collect::<Vec<u8>>();
+    let mut filter = opts.filter.clone();
     let compression = &opts.compression;
     let mut strategies = opts.strategies.clone();
 
@@ -511,14 +512,14 @@ fn optimize_png(
             && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
             if filter.is_empty() {
-                filter.push(5);
+                filter.insert(5);
             }
             if strategies.is_empty() {
                 strategies.insert(1);
             }
         } else {
             if filter.is_empty() {
-                filter.push(0);
+                filter.insert(0);
             }
             if strategies.is_empty() {
                 strategies.insert(0);
@@ -565,7 +566,7 @@ fn optimize_png(
                     }
                 }
             } else {
-                // Zopfli compression has no additional options
+                // Zopfli and Libdeflater compression have no additional options.
                 results.push(TrialOptions {
                     filter: *f,
                     compression: 0,
@@ -582,8 +583,10 @@ fn optimize_png(
             eprintln!("Trying: {} combinations", results.len());
         }
 
-        let filter_iter = filter.par_iter().with_max_len(1);
-        let filters: HashMap<u8, Vec<u8>> = filter_iter
+        let filters: IndexMap<u8, Vec<u8>> =
+            filter
+            .par_iter()
+            .with_max_len(1)
             .map(|f| {
                 let png = png.clone();
                 (*f, png.raw.filter_image(*f))
@@ -600,17 +603,17 @@ fn optimize_png(
                 return None;
             }
             let filtered = &filters[&trial.filter];
-            let new_idat = if opts.deflate == Deflaters::Zlib {
-                deflate::deflate(
+            let new_idat = match opts.deflate {
+                Deflaters::Zlib => deflate::deflate(
                     filtered,
                     trial.compression,
                     trial.strategy,
                     opts.window,
                     &best_size,
                     &deadline,
-                )
-            } else {
-                deflate::zopfli_deflate(filtered)
+                ),
+                Deflaters::Zopfli => deflate::zopfli_deflate(filtered),
+                Deflaters::Libdeflater => deflate::libdeflater_deflate(filtered, &best_size),
             };
 
             let new_idat = match new_idat {
@@ -740,7 +743,7 @@ fn perform_reductions(
     if let Some(interlacing) = opts.interlace {
         if let Some(reduced) = png.change_interlacing(interlacing) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone(), 0.);
+            eval.try_image(png.clone());
         }
         if deadline.passed() {
             return;
@@ -750,7 +753,7 @@ fn perform_reductions(
     if opts.palette_reduction {
         if let Some(reduced) = reduced_palette(&png) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone(), 0.95);
+            eval.try_image(png.clone());
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
             }
@@ -765,13 +768,13 @@ fn perform_reductions(
             let previous = png.clone();
             let bits = reduced.ihdr.bit_depth;
             png = Arc::new(reduced);
-            eval.try_image(png.clone(), 1.0);
+            eval.try_image(png.clone());
             if (bits == BitDepth::One || bits == BitDepth::Two)
                 && previous.ihdr.bit_depth != BitDepth::Four
             {
                 // Also try 16-color mode for all lower bits images, since that may compress better
                 if let Some(reduced) = reduce_bit_depth(&previous, 4) {
-                    eval.try_image(Arc::new(reduced), 0.98);
+                    eval.try_image(Arc::new(reduced));
                 }
             }
             if opts.verbosity == Some(1) {
@@ -786,7 +789,7 @@ fn perform_reductions(
     if opts.color_type_reduction {
         if let Some(reduced) = reduce_color_type(&png) {
             png = Arc::new(reduced);
-            eval.try_image(png.clone(), 0.96);
+            eval.try_image(png.clone());
             if opts.verbosity == Some(1) {
                 report_reduction(&png);
             }
@@ -864,15 +867,10 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
         // Strip headers
         Headers::None => (),
         Headers::Keep(ref hdrs) => {
-            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
-            for hdr in &keys {
-                let preserve = std::str::from_utf8(hdr)
-                    .ok()
-                    .map_or(false, |name| hdrs.contains(name));
-                if !preserve {
-                    raw.aux_headers.remove(hdr);
-                }
-            }
+            raw.aux_headers.retain(|hdr, _| {
+                std::str::from_utf8(hdr)
+                    .map_or(false, |name| hdrs.contains(name))
+            })
         }
         Headers::Strip(ref hdrs) => {
             for hdr in hdrs {
@@ -892,7 +890,7 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
             }
         }
         Headers::All => {
-            raw.aux_headers = BTreeMap::new();
+            raw.aux_headers = IndexMap::new();
         }
     }
 

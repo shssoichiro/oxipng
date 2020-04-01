@@ -24,8 +24,6 @@ use std::thread;
 
 struct Candidate {
     image: PngData,
-    // compressed size multiplier. Fudge factor to prefer more promising formats.
-    bias: f32,
     // if false, that's baseline file to throw away
     is_reduction: bool,
     filter: u8,
@@ -42,30 +40,16 @@ impl Comparator {
     fn evaluate(&mut self, new: Candidate) {
         // a tie-breaker is required to make evaluation deterministic
         let is_best = if let Some(ref old) = self.best_result {
-            // ordering is important - later file gets to use bias over earlier, but not the other way
-            // (this way bias=0 replaces, but doesn't forbid later optimizations)
-            let new_len = (new.image.idat_data.len() as f64
-                * if new.nth > old.nth {
-                    f64::from(new.bias)
-                } else {
-                    1.0
-                }) as usize;
-            let old_len = (old.image.idat_data.len() as f64
-                * if new.nth < old.nth {
-                    f64::from(old.bias)
-                } else {
-                    1.0
-                }) as usize;
             // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
             let new = (
-                new_len,
+                new.image.idat_data.len(),
                 new.image.raw.data.len(),
                 new.image.raw.ihdr.bit_depth,
                 new.filter,
                 new.nth,
             );
             let old = (
-                old_len,
+                old.image.idat_data.len(),
                 old.image.raw.data.len(),
                 old.image.raw.ihdr.bit_depth,
                 old.filter,
@@ -141,17 +125,15 @@ impl Evaluator {
 
     /// Set baseline image. It will be used only to measure minimum compression level required
     pub fn set_baseline(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, 1.0, false)
+        self.try_image_inner(image, false)
     }
 
     /// Check if the image is smaller than others
-    /// Bias is a value in 0..=1 range. Compressed size is multiplied by
-    /// this fraction when comparing to the best, so 0.95 allows 5% larger size.
-    pub fn try_image(&self, image: Arc<PngImage>, bias: f32) {
-        self.try_image_inner(image, bias, true)
+    pub fn try_image(&self, image: Arc<PngImage>) {
+        self.try_image_inner(image, true)
     }
 
-    fn try_image_inner(&self, image: Arc<PngImage>, bias: f32, is_reduction: bool) {
+    fn try_image_inner(&self, image: Arc<PngImage>, is_reduction: bool) {
         let nth = self.nth.fetch_add(1, SeqCst);
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
@@ -186,7 +168,6 @@ impl Evaluator {
                             idat_data,
                             raw: Arc::clone(&image),
                         },
-                        bias,
                         filter,
                         is_reduction,
                         nth,
