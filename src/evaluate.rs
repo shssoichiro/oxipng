@@ -29,43 +29,15 @@ struct Candidate {
     nth: usize,
 }
 
-#[derive(Default)]
-struct Comparator {
-    best_result: Option<Candidate>,
-}
-
-impl Comparator {
-    fn evaluate(&mut self, new: Candidate) {
-        // a tie-breaker is required to make evaluation deterministic
-        let is_best = if let Some(ref old) = self.best_result {
-            // choose smallest compressed, or if compresses the same, smallest uncompressed, or cheaper filter
-            let new = (
-                new.image.idat_data.len(),
-                new.image.raw.data.len(),
-                new.image.raw.ihdr.bit_depth,
-                new.filter,
-                new.nth,
-            );
-            let old = (
-                old.image.idat_data.len(),
-                old.image.raw.data.len(),
-                old.image.raw.ihdr.bit_depth,
-                old.filter,
-                old.nth,
-            );
-            // <= instead of < is important, because best_candidate_size has been set already,
-            // so the current result may be comparing its size with itself
-            new <= old
-        } else {
-            true
-        };
-        if is_best {
-            self.best_result = Some(new);
-        }
-    }
-
-    fn get_result(self) -> Option<PngData> {
-        self.best_result.map(|res| res.image)
+impl Candidate {
+    fn cmp_key(&self) -> impl Ord {
+        (
+            self.image.idat_data.len(),
+            self.image.raw.data.len(),
+            self.image.raw.ihdr.bit_depth,
+            self.filter,
+            self.nth,
+        )
     }
 }
 
@@ -79,10 +51,10 @@ pub(crate) struct Evaluator {
     eval_send: SyncSender<Candidate>,
     // the thread helps evaluate images asynchronously
     #[cfg(feature = "parallel")]
-    eval_thread: thread::JoinHandle<Option<PngData>>,
+    eval_thread: thread::JoinHandle<Option<Candidate>>,
     // in non-parallel mode, images are evaluated synchronously
     #[cfg(not(feature = "parallel"))]
-    eval_comparator: std::cell::RefCell<Comparator>,
+    eval_best_candidate: Option<Candidate>,
 }
 
 impl Evaluator {
@@ -96,29 +68,27 @@ impl Evaluator {
             #[cfg(feature = "parallel")]
             eval_send: tx,
             #[cfg(feature = "parallel")]
-            eval_thread: thread::spawn(move || {
-                let mut comparator = Comparator::default();
-                for candidate in rx {
-                    comparator.evaluate(candidate);
-                }
-                comparator.get_result()
-            }),
+            eval_thread: thread::spawn(move || rx.into_iter().min_by_key(Candidate::cmp_key)),
             #[cfg(not(feature = "parallel"))]
-            eval_comparator: Default::default(),
+            eval_best_candidate: None,
         }
     }
 
     /// Wait for all evaluations to finish and return smallest reduction
     /// Or `None` if all reductions were worse than baseline.
     #[cfg(feature = "parallel")]
-    pub fn get_result(self) -> Option<PngData> {
+    fn get_best_candidate(self) -> Option<Candidate> {
         drop(self.eval_send); // disconnect the sender, breaking the loop in the thread
         self.eval_thread.join().expect("eval thread")
     }
 
     #[cfg(not(feature = "parallel"))]
+    fn get_best_candidate(self) -> Option<Candidate> {
+        self.eval_best_candidate
+    }
+
     pub fn get_result(self) -> Option<PngData> {
-        self.eval_comparator.into_inner().get_result()
+        self.get_best_candidate().map(|candidate| candidate.image)
     }
 
     /// Set baseline image. It will be used only to measure minimum compression level required
@@ -181,7 +151,10 @@ impl Evaluator {
 
                     #[cfg(not(feature = "parallel"))]
                     {
-                        self.eval_comparator.borrow_mut().evaluate(new);
+                        match self.eval_best_candidate {
+                            Some(prev) if prev.cmp_key() < new.cmp_key() => {}
+                            _ => self.eval_best_candidate = Some(new),
+                        }
                     }
                 }
             });
