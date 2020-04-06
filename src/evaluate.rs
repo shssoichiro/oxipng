@@ -24,8 +24,6 @@ use std::thread;
 
 struct Candidate {
     image: PngData,
-    // if false, that's baseline file to throw away
-    is_reduction: bool,
     filter: u8,
     // first wins tie-breaker
     nth: usize,
@@ -62,7 +60,7 @@ impl Comparator {
             true
         };
         if is_best {
-            self.best_result = if new.is_reduction { Some(new) } else { None };
+            self.best_result = Some(new);
         }
     }
 
@@ -162,6 +160,10 @@ impl Evaluator {
                     &deadline,
                 ) {
                     best_candidate_size.set_min(idat_data.len());
+                    // ignore baseline images after this point
+                    if !is_reduction {
+                        return;
+                    }
                     // the rest is shipped to the evavluation/collection thread
                     let new = Candidate {
                         image: PngData {
@@ -169,7 +171,6 @@ impl Evaluator {
                             raw: Arc::clone(&image),
                         },
                         filter,
-                        is_reduction,
                         nth,
                     };
 
