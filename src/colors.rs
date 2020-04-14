@@ -56,7 +56,7 @@ impl ColorType {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 /// The number of bits to be used per channel per pixel
 pub enum BitDepth {
     /// One bit per channel per pixel
