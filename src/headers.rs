@@ -1,9 +1,9 @@
-use indexmap::IndexSet;
 use crate::colors::{BitDepth, ColorType};
 use crate::error::PngError;
 use crate::PngResult;
 use byteorder::{BigEndian, ReadBytesExt};
 use crc::crc32;
+use indexmap::IndexSet;
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Copy)]

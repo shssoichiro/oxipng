@@ -437,7 +437,6 @@ fn zopfli_mode() {
     );
 }
 
-
 #[test]
 fn libdeflater_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
