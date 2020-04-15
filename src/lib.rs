@@ -28,7 +28,6 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
-use indexmap::{IndexMap, IndexSet};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File};
@@ -42,6 +41,7 @@ pub use crate::colors::AlphaOptim;
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::headers::Headers;
+pub use indexmap::{IndexMap, IndexSet};
 
 mod atomicmin;
 mod colors;
