@@ -403,10 +403,6 @@ fn parse_opts_into_struct(
         opts.fix_errors = true;
     }
 
-    if matches.is_present("clobber") {
-        opts.clobber = false;
-    }
-
     if matches.is_present("pretend") {
         opts.pretend = true;
     }
