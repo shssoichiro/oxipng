@@ -12,10 +12,7 @@ fn reductions_16_to_8_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -25,10 +22,7 @@ fn reductions_8_to_4_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -38,10 +32,7 @@ fn reductions_8_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -51,10 +42,7 @@ fn reductions_8_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -64,10 +52,7 @@ fn reductions_4_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -77,10 +62,7 @@ fn reductions_4_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -90,10 +72,7 @@ fn reductions_2_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_bit_depth()
-    });
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
 }
 
 #[bench]
@@ -101,10 +80,7 @@ fn reductions_rgba_to_rgb_16(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_16_should_be_rgb_16.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -112,10 +88,7 @@ fn reductions_rgba_to_rgb_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_should_be_rgb_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -125,10 +98,7 @@ fn reductions_rgba_to_grayscale_alpha_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -138,10 +108,7 @@ fn reductions_rgba_to_grayscale_alpha_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -151,10 +118,7 @@ fn reductions_rgba_to_grayscale_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -164,10 +128,7 @@ fn reductions_rgba_to_grayscale_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -177,10 +138,7 @@ fn reductions_rgb_to_grayscale_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -188,10 +146,7 @@ fn reductions_rgb_to_grayscale_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -199,10 +154,7 @@ fn reductions_rgba_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -210,10 +162,7 @@ fn reductions_rgb_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_color_type()
-    });
+    b.iter(|| reduce_color_type(&png.raw));
 }
 
 #[bench]
@@ -223,10 +172,7 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette()
-    });
+    b.iter(|| reduced_palette(&png.raw));
 }
 
 #[bench]
@@ -236,10 +182,7 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette()
-    });
+    b.iter(|| reduced_palette(&png.raw));
 }
 
 #[bench]
@@ -249,10 +192,7 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.reduce_palette()
-    });
+    b.iter(|| reduced_palette(&png.raw));
 }
 
 #[bench]
@@ -260,7 +200,7 @@ fn reductions_alpha_black(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_black.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::Black));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Black));
 }
 
 #[bench]
@@ -268,7 +208,7 @@ fn reductions_alpha_white(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_white.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::White));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::White));
 }
 
 #[bench]
@@ -276,7 +216,7 @@ fn reductions_alpha_left(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_left.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::Left));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Left));
 }
 
 #[bench]
@@ -284,7 +224,7 @@ fn reductions_alpha_right(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_right.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::Right));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Right));
 }
 
 #[bench]
@@ -292,7 +232,7 @@ fn reductions_alpha_up(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_up.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::Up));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Up));
 }
 
 #[bench]
@@ -300,5 +240,5 @@ fn reductions_alpha_down(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_down.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| png.reduced_alpha_channel(AlphaOptim::Down));
+    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Down));
 }

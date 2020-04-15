@@ -29,7 +29,8 @@ pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
 }
 
 /// Compress a data stream using the DEFLATE algorithm
-pub(crate) fn deflate(
+#[doc(hidden)]
+pub fn deflate(
     data: &[u8],
     zc: u8,
     zs: u8,
