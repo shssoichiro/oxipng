@@ -12,10 +12,7 @@ fn interlacing_16_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(1)
-    });
+    b.iter(|| png.raw.change_interlacing(1));
 }
 
 #[bench]
@@ -23,10 +20,7 @@ fn interlacing_8_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_rgb_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(1)
-    });
+    b.iter(|| png.raw.change_interlacing(1));
 }
 
 #[bench]
@@ -36,10 +30,7 @@ fn interlacing_4_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(1)
-    });
+    b.iter(|| png.raw.change_interlacing(1));
 }
 
 #[bench]
@@ -49,10 +40,7 @@ fn interlacing_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(1)
-    });
+    b.iter(|| png.raw.change_interlacing(1));
 }
 
 #[bench]
@@ -62,10 +50,7 @@ fn interlacing_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(1)
-    });
+    b.iter(|| png.raw.change_interlacing(1));
 }
 
 #[bench]
@@ -75,10 +60,7 @@ fn deinterlacing_16_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(0)
-    });
+    b.iter(|| png.raw.change_interlacing(0));
 }
 
 #[bench]
@@ -88,10 +70,7 @@ fn deinterlacing_8_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(0)
-    });
+    b.iter(|| png.raw.change_interlacing(0));
 }
 
 #[bench]
@@ -101,10 +80,7 @@ fn deinterlacing_4_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(0)
-    });
+    b.iter(|| png.raw.change_interlacing(0));
 }
 
 #[bench]
@@ -114,10 +90,7 @@ fn deinterlacing_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(0)
-    });
+    b.iter(|| png.raw.change_interlacing(0));
 }
 
 #[bench]
@@ -127,8 +100,5 @@ fn deinterlacing_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| {
-        let mut safe_png = png.clone();
-        safe_png.change_interlacing(0)
-    });
+    b.iter(|| png.raw.change_interlacing(0));
 }

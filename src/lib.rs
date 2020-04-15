@@ -62,6 +62,7 @@ pub mod internal_tests {
     pub use crate::deflate::*;
     pub use crate::headers::*;
     pub use crate::png::*;
+    pub use crate::reduction::*;
 }
 
 #[derive(Clone, Debug)]
@@ -801,6 +802,7 @@ fn perform_reductions(
     try_alpha_reductions(png, &opts.alphas, eval);
 }
 
+#[derive(Debug)]
 struct DeadlineImp {
     start: Instant,
     timeout: Duration,
@@ -808,7 +810,9 @@ struct DeadlineImp {
 }
 
 /// Keep track of processing timeout
-pub(crate) struct Deadline {
+#[doc(hidden)]
+#[derive(Debug)]
+pub struct Deadline {
     imp: Option<DeadlineImp>,
 }
 
