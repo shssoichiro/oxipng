@@ -325,31 +325,11 @@ fn parse_opts_into_struct(
         opts.filter = parse_numeric_range_opts(x, 0, 5).unwrap();
     }
 
-    if let Some(x) = matches.value_of("compression") {
-        opts.compression = parse_numeric_range_opts(x, 1, 9).unwrap();
-    }
-
-    if let Some(x) = matches.value_of("strategies") {
-        opts.strategies = parse_numeric_range_opts(x, 0, 3).unwrap();
-    }
-
     if let Some(x) = matches.value_of("timeout") {
         let num = x
             .parse()
             .map_err(|_| "Timeout must be a number".to_owned())?;
         opts.timeout = Some(Duration::from_secs(num));
-    }
-
-    match matches.value_of("window") {
-        Some("256") => opts.window = 8,
-        Some("512") => opts.window = 9,
-        Some("1k") => opts.window = 10,
-        Some("2k") => opts.window = 11,
-        Some("4k") => opts.window = 12,
-        Some("8k") => opts.window = 13,
-        Some("16k") => opts.window = 14,
-        // 32k is default
-        _ => (),
     }
 
     let out_dir = if let Some(x) = matches.value_of("output_dir") {
@@ -482,7 +462,44 @@ fn parse_opts_into_struct(
     }
 
     if matches.is_present("libdeflater") {
+        if matches.is_present("zopfli") {
+            return Err("zopfli and libdeflater can't be used simultaneously".to_owned());
+        }
         opts.deflate = Deflaters::Libdeflater;
+    }
+
+    if let Deflaters::Zlib {
+        compression,
+        strategies,
+        window,
+    } = &mut opts.deflate
+    {
+        if let Some(x) = matches.value_of("compression") {
+            *compression = parse_numeric_range_opts(x, 1, 9).unwrap();
+        }
+
+        if let Some(x) = matches.value_of("strategies") {
+            *strategies = parse_numeric_range_opts(x, 0, 3).unwrap();
+        }
+
+        match matches.value_of("window") {
+            Some("256") => *window = 8,
+            Some("512") => *window = 9,
+            Some("1k") => *window = 10,
+            Some("2k") => *window = 11,
+            Some("4k") => *window = 12,
+            Some("8k") => *window = 13,
+            Some("16k") => *window = 14,
+            // 32k is default
+            _ => (),
+        }
+    } else if matches.is_present("compression")
+        || matches.is_present("strategies")
+        || matches.is_present("window")
+    {
+        return Err(
+            "compression, strategies and window options are compatible only with zlib".to_owned(),
+        );
     }
 
     if let Some(x) = matches.value_of("threads") {

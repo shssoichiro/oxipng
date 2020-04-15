@@ -2,6 +2,7 @@ use crate::atomicmin::AtomicMin;
 use crate::error::PngError;
 use crate::Deadline;
 use crate::PngResult;
+use indexmap::IndexSet;
 use miniz_oxide;
 use std::cmp::max;
 use zopfli;
@@ -59,11 +60,27 @@ pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
     Ok(output)
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 /// DEFLATE algorithms supported by oxipng
 pub enum Deflaters {
     /// Use the Zlib/Miniz DEFLATE implementation
-    Zlib,
+    Zlib {
+        /// Which zlib compression levels to try on the file (1-9)
+        ///
+        /// Default: `9`
+        compression: IndexSet<u8>,
+        /// Which zlib compression strategies to try on the file (0-3)
+        ///
+        /// Default: `0-3`
+        strategies: IndexSet<u8>,
+        /// Window size to use when compressing the file, as `2^window` bytes.
+        ///
+        /// Doesn't affect compression but may affect speed and memory usage.
+        /// 8-15 are valid values.
+        ///
+        /// Default: `15`
+        window: u8,
+    },
     /// Use the better but slower Zopfli implementation
     Zopfli,
     /// Use libdeflater.
