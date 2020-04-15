@@ -1,5 +1,5 @@
-use crate::{PngError, PngResult};
 use crate::atomicmin::AtomicMin;
+use crate::{PngError, PngResult};
 use libdeflater::{CompressionError, CompressionLvl, Compressor};
 
 pub fn deflate(data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {

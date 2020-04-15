@@ -1,0 +1,67 @@
+name: deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-binaries:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable-x86_64-pc-windows-gnu
+        override: true
+    - name: Build oxipng
+      run: |
+        cargo build --release
+    - name: Create zip
+      run: |
+        $OXIPNG_PATH="$Env:GITHUB_WORKSPACE\target\release"
+        7z a oxipng.zip "Cargo.lock" "$OXIPNG_PATH\oxipng.exe" "C:\usr\local"
+    - name: Upload binaries
+      uses: actions/upload-artifact@v1
+      with:
+        name: oxipng-binaries
+        path: oxipng.zip
+
+  deploy:
+    needs: create-binaries
+    env:
+      FILENAME: oxipng-windows-sdk
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Download the zip
+      uses: actions/download-artifact@v1
+      with:
+        name: oxipng-binaries
+    - name: Unzip oxipng Windows binaries
+      run: |
+        unzip oxipng-binaries/oxipng.zip -d oxipng-binaries
+        mv oxipng-binaries/Cargo.lock .
+    - name: Handle binaries
+      run: |
+        mv oxipng-binaries/local oxipng-binaries/$FILENAME
+        strip oxipng-binaries/oxipng.exe
+    - name: Package release binaries
+      id: data
+      run: |
+        VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+        echo "::set-output name=version::$VERSION"
+        cd oxipng-binaries
+        zip -r oxipng-$VERSION-windows.zip $FILENAME
+    - name: Create a release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: v${{ steps.data.outputs.version }}
+        files: |
+          Cargo.lock
+          oxipng-binaries/oxipng-${{ steps.data.outputs.version }}-windows.zip
+          oxipng-binaries/oxipng.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

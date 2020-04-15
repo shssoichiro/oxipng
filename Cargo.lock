@@ -319,7 +319,6 @@ dependencies = [
  "num_cpus 1.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rgb 0.8.16 (registry+https://github.com/rust-lang/crates.io-index)",
- "vec_map 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "wild 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "zopfli 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

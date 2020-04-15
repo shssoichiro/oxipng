@@ -1,0 +1,121 @@
+name: oxipng
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-test-unix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        conf:
+          - minimum-stable
+          - latest-stable
+          - latest-beta
+          - latest-nightly
+        include:
+          - conf: minimum-stable
+            toolchain: 1.41.0
+          - conf: latest-stable
+            toolchain: stable
+          - conf: latest-beta
+            toolchain: beta
+          - conf: latest-nightly
+            toolchain: nightly
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install ${{ matrix.toolchain }}
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.toolchain }}
+        override: true
+        components: clippy, rustfmt
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry/cache
+        key: ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-
+    - name: Run rustfmt
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: -- --check
+    - name: Run clippy
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- -D warnings
+    - name: Run tests
+      run: cargo test
+    - name: Build benchmarks
+      if: matrix.toolchain == 'nightly'
+      run: cargo bench --no-run
+    - name: Build docs
+      run: cargo doc --no-deps
+    - name: Check no default features
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --no-default-features -- -D warnings
+
+  build-test-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        conf:
+          - minimum-stable
+          - latest-stable
+        include:
+          - conf: minimum-stable
+            toolchain: 1.41.0
+          - conf: latest-stable
+            toolchain: stable
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install ${{ matrix.toolchain }}
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.toolchain }}
+        override: true
+        components: clippy, rustfmt
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry/cache
+        key: ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-
+    - name: Run rustfmt
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: -- --check
+    - name: Run clippy
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- -D warnings
+    - name: Run tests
+      run: cargo test
+    - name: Build docs
+      run: cargo doc --no-deps
+    - name: Check no default features
+      if: matrix.toolchain == 'stable'
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --no-default-features -- -D warnings

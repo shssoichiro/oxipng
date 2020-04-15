@@ -28,7 +28,7 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
-use indexmap::{IndexSet, IndexMap};
+use indexmap::{IndexMap, IndexSet};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File};
@@ -583,8 +583,7 @@ fn optimize_png(
             eprintln!("Trying: {} combinations", results.len());
         }
 
-        let filters: IndexMap<u8, Vec<u8>> =
-            filter
+        let filters: IndexMap<u8, Vec<u8>> = filter
             .par_iter()
             .with_max_len(1)
             .map(|f| {
@@ -866,12 +865,9 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
     match opts.strip {
         // Strip headers
         Headers::None => (),
-        Headers::Keep(ref hdrs) => {
-            raw.aux_headers.retain(|hdr, _| {
-                std::str::from_utf8(hdr)
-                    .map_or(false, |name| hdrs.contains(name))
-            })
-        }
+        Headers::Keep(ref hdrs) => raw
+            .aux_headers
+            .retain(|hdr, _| std::str::from_utf8(hdr).map_or(false, |name| hdrs.contains(name))),
         Headers::Strip(ref hdrs) => {
             for hdr in hdrs {
                 raw.aux_headers.remove(hdr.as_bytes());

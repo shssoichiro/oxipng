@@ -1,4 +1,3 @@
-use indexmap::IndexSet;
 use crate::colors::AlphaOptim;
 use crate::colors::ColorType;
 use crate::evaluate::Evaluator;
@@ -7,6 +6,7 @@ use crate::png::scan_lines::ScanLine;
 use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon::prelude::*;
+use indexmap::IndexSet;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::sync::Arc;

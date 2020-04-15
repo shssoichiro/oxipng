@@ -1,7 +1,7 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use indexmap::map::{IndexMap, Entry::*};
+use indexmap::map::{Entry::*, IndexMap};
 use rgb::RGBA8;
 use std::borrow::Cow;
 
