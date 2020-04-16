@@ -12,14 +12,15 @@ use crate::png::STD_WINDOW;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
 use crate::Deadline;
-#[cfg(feature = "parallel")]
-use rayon;
 use rayon::prelude::*;
+#[cfg(not(feature = "parallel"))]
+use std::cell::RefCell;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 #[cfg(feature = "parallel")]
 use std::sync::mpsc::*;
 use std::sync::Arc;
+#[cfg(feature = "parallel")]
 use std::thread;
 
 struct Candidate {
@@ -54,7 +55,7 @@ pub(crate) struct Evaluator {
     eval_thread: thread::JoinHandle<Option<Candidate>>,
     // in non-parallel mode, images are evaluated synchronously
     #[cfg(not(feature = "parallel"))]
-    eval_best_candidate: Option<Candidate>,
+    eval_best_candidate: RefCell<Option<Candidate>>,
 }
 
 impl Evaluator {
@@ -70,7 +71,7 @@ impl Evaluator {
             #[cfg(feature = "parallel")]
             eval_thread: thread::spawn(move || rx.into_iter().min_by_key(Candidate::cmp_key)),
             #[cfg(not(feature = "parallel"))]
-            eval_best_candidate: None,
+            eval_best_candidate: RefCell::new(None),
         }
     }
 
@@ -84,7 +85,7 @@ impl Evaluator {
 
     #[cfg(not(feature = "parallel"))]
     fn get_best_candidate(self) -> Option<Candidate> {
-        self.eval_best_candidate
+        self.eval_best_candidate.into_inner()
     }
 
     pub fn get_result(self) -> Option<PngData> {
@@ -151,9 +152,9 @@ impl Evaluator {
 
                     #[cfg(not(feature = "parallel"))]
                     {
-                        match self.eval_best_candidate {
+                        match &mut *self.eval_best_candidate.borrow_mut() {
                             Some(prev) if prev.cmp_key() < new.cmp_key() => {}
-                            _ => self.eval_best_candidate = Some(new),
+                            best => *best = Some(new),
                         }
                     }
                 }
