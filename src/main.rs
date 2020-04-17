@@ -15,6 +15,7 @@
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use indexmap::IndexSet;
+use log::{error, info};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
@@ -236,7 +237,7 @@ fn main() {
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
         Err(x) => {
-            eprintln!("{}", x);
+            error!("{}", x);
             exit(1)
         }
     };
@@ -259,7 +260,7 @@ fn main() {
         .collect();
 
     if let Err(e) = res {
-        eprintln!("{}", e);
+        error!("{}", e);
         exit(1);
     }
 }
@@ -284,7 +285,7 @@ fn collect_files(
                     .collect();
                 in_out_pairs.extend(collect_files(files, out_dir, out_file, recursive, false));
             } else {
-                eprintln!("{} is a directory, skipping", input.display());
+                info!("{} is a directory, skipping", input.display());
             }
             continue;
         };
@@ -391,13 +392,13 @@ fn parse_opts_into_struct(
         opts.preserve_attrs = true;
     }
 
-    if matches.is_present("quiet") {
-        opts.verbosity = None;
-    }
-
-    if matches.is_present("verbose") {
-        opts.verbosity = Some(1);
-    }
+    stderrlog::new()
+        .module(module_path!())
+        .quiet(matches.is_present("quiet"))
+        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
+        .show_level(false)
+        .init()
+        .unwrap();
 
     if matches.is_present("no-bit-reduction") {
         opts.bit_depth_reduction = false;
