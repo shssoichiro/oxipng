@@ -133,7 +133,13 @@ fn verbose_mode() {
     logs.sort();
     for (i, log) in logs.into_iter().enumerate() {
         let expected_prefix = format!("    zc = 9  zs = {}  f = 0 ", i);
-        assert!(log.starts_with(&expected_prefix), "logs[{}] = {:?} doesn't start with {:?}", i, log, expected_prefix);
+        assert!(
+            log.starts_with(&expected_prefix),
+            "logs[{}] = {:?} doesn't start with {:?}",
+            i,
+            log,
+            expected_prefix
+        );
     }
 }
 
