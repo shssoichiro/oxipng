@@ -28,7 +28,7 @@ jobs:
           - conf: latest-nightly
             toolchain: nightly
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Install ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
       with:
@@ -82,7 +82,7 @@ jobs:
           - conf: latest-stable
             toolchain: stable
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Install ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
       with:
