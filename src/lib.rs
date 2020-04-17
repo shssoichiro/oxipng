@@ -131,14 +131,6 @@ pub struct Options {
     /// Used only in CLI interface
     #[doc(hidden)]
     pub recursive: bool,
-    /// Overwrite existing output files.
-    ///
-    /// Default: `true`
-    pub clobber: bool,
-    /// Create new output files if they don't exist.
-    ///
-    /// Default: `true`
-    pub create: bool,
     /// Write to output even if there was no improvement in compression.
     ///
     /// Default: `false`
@@ -300,8 +292,6 @@ impl Default for Options {
             pretend: false,
             recursive: false,
             fix_errors: false,
-            clobber: true,
-            create: true,
             force: false,
             preserve_attrs: false,
             verbosity: Some(0),
