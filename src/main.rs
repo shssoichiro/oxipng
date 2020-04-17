@@ -486,7 +486,12 @@ fn parse_opts_into_struct(
     }
 
     if let Some(x) = matches.value_of("threads") {
-        opts.threads = x.parse::<usize>().unwrap();
+        let threads = x.parse::<usize>().unwrap();
+
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(threads)
+            .build_global()
+            .map_err(|err| err.to_string())?;
     }
 
     Ok((out_file, out_dir, opts))

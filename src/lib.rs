@@ -13,7 +13,6 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
-use num_cpus;
 #[cfg(feature = "parallel")]
 extern crate rayon;
 #[cfg(not(feature = "parallel"))]
@@ -206,10 +205,6 @@ pub struct Options {
     ///
     /// Default: `false`
     pub use_heuristics: bool,
-    /// Number of threads to use
-    ///
-    /// Default: number of CPU cores
-    pub threads: usize,
 
     /// Maximum amount of time to spend on optimizations.
     /// Further potential optimizations are skipped if the timeout is exceeded.
@@ -313,7 +308,6 @@ impl Default for Options {
             strip: Headers::None,
             deflate: Deflaters::Zlib,
             use_heuristics: false,
-            threads: num_cpus::get(),
             timeout: None,
         }
     }
@@ -321,12 +315,6 @@ impl Default for Options {
 
 /// Perform optimization on the input file using the options provided
 pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
-    // Initialize the thread pool with correct number of threads
-    #[cfg(feature = "parallel")]
-    let _ = rayon::ThreadPoolBuilder::new()
-        .num_threads(opts.threads)
-        .build_global();
-
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
         eprintln!("Processing: {}", input);
@@ -421,12 +409,6 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
 /// Perform optimization on the input file using the options provided, where the file is already
 /// loaded in-memory
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
-    // Initialize the thread pool with correct number of threads
-    #[cfg(feature = "parallel")]
-    let _ = rayon::ThreadPoolBuilder::new()
-        .num_threads(opts.threads)
-        .build_global();
-
     // Read in the file and try to decode as PNG.
     if opts.verbosity.is_some() {
         eprintln!("Processing from memory");
