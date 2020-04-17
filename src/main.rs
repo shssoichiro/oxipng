@@ -15,7 +15,7 @@
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use indexmap::IndexSet;
-use log::{error, info};
+use log::{error, warn};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
@@ -285,7 +285,7 @@ fn collect_files(
                     .collect();
                 in_out_pairs.extend(collect_files(files, out_dir, out_file, recursive, false));
             } else {
-                info!("{} is a directory, skipping", input.display());
+                warn!("{} is a directory, skipping", input.display());
             }
             continue;
         };
