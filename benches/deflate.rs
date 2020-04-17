@@ -16,14 +16,7 @@ fn deflate_16_bits_strategy_0(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            0,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 0, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -34,14 +27,7 @@ fn deflate_8_bits_strategy_0(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            0,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 0, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -54,14 +40,7 @@ fn deflate_4_bits_strategy_0(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            0,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 0, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -74,14 +53,7 @@ fn deflate_2_bits_strategy_0(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            0,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 0, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -94,14 +66,7 @@ fn deflate_1_bits_strategy_0(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            0,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 0, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -112,14 +77,7 @@ fn deflate_16_bits_strategy_1(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            1,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 1, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -130,14 +88,7 @@ fn deflate_8_bits_strategy_1(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            1,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 1, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -150,14 +101,7 @@ fn deflate_4_bits_strategy_1(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            1,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 1, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -170,14 +114,7 @@ fn deflate_2_bits_strategy_1(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            1,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 1, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -190,14 +127,7 @@ fn deflate_1_bits_strategy_1(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            1,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 1, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -208,14 +138,7 @@ fn deflate_16_bits_strategy_2(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            2,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 2, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -226,14 +149,7 @@ fn deflate_8_bits_strategy_2(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            2,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 2, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -246,14 +162,7 @@ fn deflate_4_bits_strategy_2(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            2,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 2, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -266,14 +175,7 @@ fn deflate_2_bits_strategy_2(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            2,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 2, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -286,14 +188,7 @@ fn deflate_1_bits_strategy_2(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            2,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 2, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -304,14 +199,7 @@ fn deflate_16_bits_strategy_3(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            3,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 3, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -322,14 +210,7 @@ fn deflate_8_bits_strategy_3(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            3,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 3, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -342,14 +223,7 @@ fn deflate_4_bits_strategy_3(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            3,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 3, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -362,14 +236,7 @@ fn deflate_2_bits_strategy_3(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            3,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 3, 15, &min, &Deadline::new(None))
     });
 }
 
@@ -382,14 +249,7 @@ fn deflate_1_bits_strategy_3(b: &mut Bencher) {
 
     b.iter(|| {
         let min = AtomicMin::new(None);
-        deflate(
-            png.raw.data.as_ref(),
-            9,
-            3,
-            15,
-            &min,
-            &Deadline::new(None, false),
-        )
+        deflate(png.raw.data.as_ref(), 9, 3, 15, &min, &Deadline::new(None))
     });
 }
 

@@ -7,7 +7,6 @@ use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.verbosity = None;
     options.force = true;
     let mut filter = IndexSet::new();
     filter.insert(0);
@@ -56,19 +55,86 @@ fn test_it_converts(
 
 #[test]
 fn verbose_mode() {
-    let input = PathBuf::from("tests/files/verbose_mode.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.verbosity = Some(1);
+    use log::{set_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record};
+    use std::cell::RefCell;
+    use std::sync::mpsc::{sync_channel, SyncSender};
 
-    test_it_converts(
-        input,
-        &output,
-        &opts,
-        ColorType::RGB,
-        BitDepth::Eight,
-        ColorType::RGB,
-        BitDepth::Eight,
-    );
+    // Rust runs tests in parallel by default.
+    // We want to make sure that we verify only logs from our test.
+    //
+    // For that, we store an Option in a thread-local variable and
+    // initialise it with Some(sender) only on threads spawned within
+    // our test.
+    thread_local! {
+        static VERBOSE_LOGS: RefCell<Option<SyncSender<String>>> = RefCell::new(None);
+    }
+
+    struct LogTester;
+
+    impl Log for LogTester {
+        fn enabled(&self, metadata: &Metadata) -> bool {
+            metadata.level() <= Level::Debug
+        }
+
+        fn log(&self, record: &Record) {
+            if record.level() == Level::Debug {
+                VERBOSE_LOGS.with(|logs| {
+                    // If current thread has a storage for logs, add our line.
+                    // Otherwise our handler is invoked from an unrelated test.
+                    if let Some(logs) = logs.borrow().as_ref() {
+                        logs.send(record.args().to_string()).unwrap();
+                    }
+                });
+            }
+        }
+
+        fn flush(&self) {}
+    }
+
+    set_logger(&LogTester).unwrap();
+    set_max_level(LevelFilter::Debug);
+
+    let input = PathBuf::from("tests/files/verbose_mode.png");
+    let (output, opts) = get_opts(&input);
+
+    let (sender, receiver) = sync_channel(4);
+
+    let thread_init = move || {
+        // Initialise logs storage for all threads within our test.
+        VERBOSE_LOGS.with(|logs| *logs.borrow_mut() = Some(sender.clone()));
+    };
+    let thread_exec = move || {
+        test_it_converts(
+            input,
+            &output,
+            &opts,
+            ColorType::RGB,
+            BitDepth::Eight,
+            ColorType::RGB,
+            BitDepth::Eight,
+        );
+    };
+
+    #[cfg(feature = "rayon")]
+    rayon::ThreadPoolBuilder::new()
+        .start_handler(move |_| thread_init())
+        .build()
+        .unwrap()
+        .install(move || rayon::spawn(thread_exec));
+
+    #[cfg(not(feature = "rayon"))]
+    std::thread::spawn(move || {
+        thread_init();
+        thread_exec();
+    });
+
+    let mut logs: Vec<_> = receiver.into_iter().collect();
+    assert_eq!(logs.len(), 4);
+    logs.sort();
+    for (i, log) in logs.into_iter().enumerate() {
+        let expected_prefix = format!("    zc = 9  zs = {}  f = 0 ", i);
+        assert!(log.starts_with(&expected_prefix), "logs[{}] = {:?} doesn't start with {:?}", i, log, expected_prefix);
+    }
 }
 
 #[test]
