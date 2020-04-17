@@ -147,7 +147,8 @@ fn main() {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for compression".to_owned()),
                 }
-            }))
+            })
+        .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::with_name("strategies")
             .help("zlib compression strategies (0-3) - Default: 0-3")
             .long("zs")
@@ -157,7 +158,8 @@ fn main() {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for strategies".to_owned()),
                 }
-            }))
+            })
+            .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::with_name("window")
             .help("zlib window size - Default: 32k")
             .long("zw")
@@ -170,7 +172,8 @@ fn main() {
             .possible_value("4k")
             .possible_value("8k")
             .possible_value("16k")
-            .possible_value("32k"))
+            .possible_value("32k")
+            .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::with_name("no-bit-reduction")
             .help("No bit depth reduction")
             .long("nb"))
@@ -192,11 +195,13 @@ fn main() {
         .arg(Arg::with_name("zopfli")
             .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
             .short("Z")
-            .long("zopfli"))
+            .long("zopfli")
+            .conflicts_with("libdeflater"))
         .arg(Arg::with_name("libdeflater")
             .help("Use an alternative Libdeflater algorithm, overrides zlib-specific options")
             .short("D")
-            .long("libdeflater"))
+            .long("libdeflater")
+            .conflicts_with("zopfli"))
         .arg(Arg::with_name("timeout")
             .help("Maximum amount of time, in seconds, to spend on optimizations")
             .takes_value(true)
@@ -459,16 +464,9 @@ fn parse_opts_into_struct(
 
     if matches.is_present("zopfli") {
         opts.deflate = Deflaters::Zopfli;
-    }
-
-    if matches.is_present("libdeflater") {
-        if matches.is_present("zopfli") {
-            return Err("zopfli and libdeflater can't be used simultaneously".to_owned());
-        }
+    } else if matches.is_present("libdeflater") {
         opts.deflate = Deflaters::Libdeflater;
-    }
-
-    if let Deflaters::Zlib {
+    } else if let Deflaters::Zlib {
         compression,
         strategies,
         window,
@@ -493,13 +491,6 @@ fn parse_opts_into_struct(
             // 32k is default
             _ => (),
         }
-    } else if matches.is_present("compression")
-        || matches.is_present("strategies")
-        || matches.is_present("window")
-    {
-        return Err(
-            "compression, strategies and window options are compatible only with zlib".to_owned(),
-        );
     }
 
     if let Some(x) = matches.value_of("threads") {
