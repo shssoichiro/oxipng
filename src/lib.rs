@@ -405,7 +405,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     let optimized_output = optimize_png(&mut png, data, opts, deadline)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
-        warn!("Image already optimized");
+        info!("Image already optimized");
         Ok(data.to_vec())
     } else {
         Ok(optimized_output)
