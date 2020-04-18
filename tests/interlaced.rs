@@ -7,7 +7,6 @@ use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options::default();
-    options.verbosity = None;
     options.force = true;
     let mut filter = IndexSet::new();
     filter.insert(0);

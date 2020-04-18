@@ -27,6 +27,7 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use crc::crc32;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
+use log::{debug, error, info, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File};
@@ -139,10 +140,6 @@ pub struct Options {
     ///
     /// Default: `false`
     pub preserve_attrs: bool,
-    /// How verbose the console logging should be (`None` for quiet, `Some(0)` for normal, `Some(1)` for verbose)
-    ///
-    /// Default: `Some(0)`
-    pub verbosity: Option<u8>,
     /// Which filters to try on the file (0-5)
     ///
     /// Default: `0,5`
@@ -289,7 +286,6 @@ impl Default for Options {
             fix_errors: false,
             force: false,
             preserve_attrs: false,
-            verbosity: Some(0),
             filter,
             interlace: None,
             alphas,
@@ -312,11 +308,9 @@ impl Default for Options {
 /// Perform optimization on the input file using the options provided
 pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
     // Read in the file and try to decode as PNG.
-    if opts.verbosity.is_some() {
-        eprintln!("Processing: {}", input);
-    }
+    info!("Processing: {}", input);
 
-    let deadline = Arc::new(Deadline::new(opts.timeout, opts.verbosity.is_some()));
+    let deadline = Arc::new(Deadline::new(opts.timeout));
 
     let in_data = match *input {
         InFile::Path(ref input_path) => PngData::read_file(input_path)?,
@@ -335,9 +329,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
-        if opts.verbosity.is_some() {
-            eprintln!("File already optimized");
-        }
+        info!("File already optimized");
         match (output, input) {
             // if p is None, it also means same as the input path
             (&OutFile::Path(ref p), &InFile::Path(ref input_path))
@@ -352,9 +344,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     }
 
     if opts.pretend {
-        if opts.verbosity.is_some() {
-            eprintln!("Running in pretend mode, no output");
-        }
+        info!("Running in pretend mode, no output");
         return Ok(());
     }
 
@@ -382,7 +372,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             })?;
             if opts.preserve_attrs {
                 if let Some(input_path) = input.path() {
-                    copy_permissions(input_path, &out_file, opts.verbosity);
+                    copy_permissions(input_path, &out_file);
                 }
             }
 
@@ -394,9 +384,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                     e
                 ))
             })?;
-            if opts.verbosity.is_some() {
-                eprintln!("Output: {}", output_path.display());
-            }
+            info!("Output: {}", output_path.display());
         }
     }
     Ok(())
@@ -406,11 +394,9 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
 /// loaded in-memory
 pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     // Read in the file and try to decode as PNG.
-    if opts.verbosity.is_some() {
-        eprintln!("Processing from memory");
-    }
+    info!("Processing from memory");
 
-    let deadline = Arc::new(Deadline::new(opts.timeout, opts.verbosity.is_some()));
+    let deadline = Arc::new(Deadline::new(opts.timeout));
 
     let original_size = data.len();
     let mut png = PngData::from_slice(data, opts.fix_errors)?;
@@ -419,7 +405,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     let optimized_output = optimize_png(&mut png, data, opts, deadline)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
-        eprintln!("Image already optimized");
+        info!("Image already optimized");
         Ok(data.to_vec())
     } else {
         Ok(optimized_output)
@@ -448,28 +434,26 @@ fn optimize_png(
     // Print png info
     let file_original_size = original_data.len();
     let idat_original_size = png.idat_data.len();
-    if opts.verbosity.is_some() {
-        eprintln!(
-            "    {}x{} pixels, PNG format",
-            png.raw.ihdr.width, png.raw.ihdr.height
+    info!(
+        "    {}x{} pixels, PNG format",
+        png.raw.ihdr.width, png.raw.ihdr.height
+    );
+    if let Some(ref palette) = png.raw.palette {
+        info!(
+            "    {} bits/pixel, {} colors in palette",
+            png.raw.ihdr.bit_depth,
+            palette.len()
         );
-        if let Some(ref palette) = png.raw.palette {
-            eprintln!(
-                "    {} bits/pixel, {} colors in palette",
-                png.raw.ihdr.bit_depth,
-                palette.len()
-            );
-        } else {
-            eprintln!(
-                "    {}x{} bits/pixel, {:?}",
-                png.raw.channels_per_pixel(),
-                png.raw.ihdr.bit_depth,
-                png.raw.ihdr.color_type
-            );
-        }
-        eprintln!("    IDAT size = {} bytes", idat_original_size);
-        eprintln!("    File size = {} bytes", file_original_size);
+    } else {
+        info!(
+            "    {}x{} bits/pixel, {:?}",
+            png.raw.channels_per_pixel(),
+            png.raw.ihdr.bit_depth,
+            png.raw.ihdr.color_type
+        );
     }
+    info!("    IDAT size = {} bytes", idat_original_size);
+    info!("    File size = {} bytes", file_original_size);
 
     let mut filter = opts.filter.clone();
     let mut strategies = match &opts.deflate {
@@ -548,9 +532,7 @@ fn optimize_png(
             }
         }
 
-        if opts.verbosity.is_some() {
-            eprintln!("Trying: {} combinations", results.len());
-        }
+        info!("Trying: {} combinations", results.len());
 
         let filters: IndexMap<u8, Vec<u8>> = filter
             .par_iter()
@@ -586,8 +568,8 @@ fn optimize_png(
 
             let new_idat = match new_idat {
                 Ok(n) => n,
-                Err(PngError::DeflatedDataTooLong(max)) if opts.verbosity == Some(1) => {
-                    eprintln!(
+                Err(PngError::DeflatedDataTooLong(max)) => {
+                    debug!(
                         "    zc = {}  zs = {}  f = {}       >{} bytes",
                         trial.compression, trial.strategy, trial.filter, max,
                     );
@@ -600,15 +582,13 @@ fn optimize_png(
             let new_size = new_idat.len();
             best_size.set_min(new_size);
 
-            if opts.verbosity == Some(1) {
-                eprintln!(
-                    "    zc = {}  zs = {}  f = {}        {} bytes",
-                    trial.compression,
-                    trial.strategy,
-                    trial.filter,
-                    new_idat.len()
-                );
-            }
+            debug!(
+                "    zc = {}  zs = {}  f = {}        {} bytes",
+                trial.compression,
+                trial.strategy,
+                trial.filter,
+                new_idat.len()
+            );
 
             if new_size < original_len || added_interlacing || opts.force {
                 Some((trial, new_idat))
@@ -624,19 +604,16 @@ fn optimize_png(
             }
         });
 
-        if let Some(better) = best {
-            png.idat_data = better.1;
-            if opts.verbosity.is_some() {
-                let opts = better.0;
-                eprintln!("Found better combination:");
-                eprintln!(
-                    "    zc = {}  zs = {}  f = {}        {} bytes",
-                    opts.compression,
-                    opts.strategy,
-                    opts.filter,
-                    png.idat_data.len()
-                );
-            }
+        if let Some((opts, idat_data)) = best {
+            png.idat_data = idat_data;
+            info!("Found better combination:");
+            info!(
+                "    zc = {}  zs = {}  f = {}        {} bytes",
+                opts.compression,
+                opts.strategy,
+                opts.filter,
+                png.idat_data.len()
+            );
         } else if reduction_occurred {
             *png = original_png;
         }
@@ -646,35 +623,33 @@ fn optimize_png(
 
     let output = png.output();
 
-    if opts.verbosity.is_some() {
-        if idat_original_size >= png.idat_data.len() {
-            eprintln!(
-                "    IDAT size = {} bytes ({} bytes decrease)",
-                png.idat_data.len(),
-                idat_original_size - png.idat_data.len()
-            );
-        } else {
-            eprintln!(
-                "    IDAT size = {} bytes ({} bytes increase)",
-                png.idat_data.len(),
-                png.idat_data.len() - idat_original_size
-            );
-        }
-        if file_original_size >= output.len() {
-            eprintln!(
-                "    file size = {} bytes ({} bytes = {:.2}% decrease)",
-                output.len(),
-                file_original_size - output.len(),
-                (file_original_size - output.len()) as f64 / file_original_size as f64 * 100f64
-            );
-        } else {
-            eprintln!(
-                "    file size = {} bytes ({} bytes = {:.2}% increase)",
-                output.len(),
-                output.len() - file_original_size,
-                (output.len() - file_original_size) as f64 / file_original_size as f64 * 100f64
-            );
-        }
+    if idat_original_size >= png.idat_data.len() {
+        info!(
+            "    IDAT size = {} bytes ({} bytes decrease)",
+            png.idat_data.len(),
+            idat_original_size - png.idat_data.len()
+        );
+    } else {
+        info!(
+            "    IDAT size = {} bytes ({} bytes increase)",
+            png.idat_data.len(),
+            png.idat_data.len() - idat_original_size
+        );
+    }
+    if file_original_size >= output.len() {
+        info!(
+            "    file size = {} bytes ({} bytes = {:.2}% decrease)",
+            output.len(),
+            file_original_size - output.len(),
+            (file_original_size - output.len()) as f64 / file_original_size as f64 * 100f64
+        );
+    } else {
+        info!(
+            "    file size = {} bytes ({} bytes = {:.2}% increase)",
+            output.len(),
+            output.len() - file_original_size,
+            (output.len() - file_original_size) as f64 / file_original_size as f64 * 100f64
+        );
     }
 
     let (old_png, new_png) = rayon::join(
@@ -695,7 +670,7 @@ fn optimize_png(
         }
     }
 
-    eprintln!(
+    error!(
         "The resulting image is corrupted and will not be outputted.\nThis is a bug! Please report it at https://github.com/shssoichiro/oxipng/issues"
     );
     Err(PngError::new("The resulting image is corrupted"))
@@ -722,9 +697,7 @@ fn perform_reductions(
         if let Some(reduced) = reduced_palette(&png) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
+            report_reduction(&png);
         }
         if deadline.passed() {
             return;
@@ -745,9 +718,7 @@ fn perform_reductions(
                     eval.try_image(Arc::new(reduced));
                 }
             }
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
+            report_reduction(&png);
         }
         if deadline.passed() {
             return;
@@ -758,9 +729,7 @@ fn perform_reductions(
         if let Some(reduced) = reduce_color_type(&png) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
-            if opts.verbosity == Some(1) {
-                report_reduction(&png);
-            }
+            report_reduction(&png);
         }
         if deadline.passed() {
             return;
@@ -785,12 +754,12 @@ pub struct Deadline {
 }
 
 impl Deadline {
-    pub fn new(timeout: Option<Duration>, verbose: bool) -> Self {
+    pub fn new(timeout: Option<Duration>) -> Self {
         Self {
             imp: timeout.map(|timeout| DeadlineImp {
                 start: Instant::now(),
                 timeout,
-                print_message: AtomicBool::new(verbose),
+                print_message: AtomicBool::new(true),
             }),
         }
     }
@@ -802,9 +771,11 @@ impl Deadline {
         if let Some(imp) = &self.imp {
             let elapsed = imp.start.elapsed();
             if elapsed > imp.timeout {
-                if imp.print_message.load(Ordering::Relaxed) {
-                    imp.print_message.store(false, Ordering::Relaxed);
-                    eprintln!("Timed out after {} second(s)", elapsed.as_secs());
+                if imp
+                    .print_message
+                    .compare_and_swap(true, false, Ordering::SeqCst)
+                {
+                    warn!("Timed out after {} second(s)", elapsed.as_secs());
                 }
                 return true;
             }
@@ -816,13 +787,13 @@ impl Deadline {
 /// Display the status of the image data after a reduction has taken place
 fn report_reduction(png: &PngImage) {
     if let Some(ref palette) = png.palette {
-        eprintln!(
+        info!(
             "Reducing image to {} bits/pixel, {} colors in palette",
             png.ihdr.bit_depth,
             palette.len()
         );
     } else {
-        eprintln!(
+        info!(
             "Reducing image to {}x{} bits/pixel, {}",
             png.channels_per_pixel(),
             png.ihdr.bit_depth,
@@ -947,7 +918,7 @@ fn perform_backup(input_path: &Path) -> PngResult<()> {
 }
 
 #[cfg(not(unix))]
-fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
+fn copy_permissions(input_path: &Path, out_file: &File) {
     if let Ok(f) = File::open(input_path) {
         if let Ok(metadata) = f.metadata() {
             if let Ok(out_meta) = out_file.metadata() {
@@ -957,13 +928,11 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
             }
         }
     };
-    if verbosity.is_some() {
-        eprintln!("Failed to set permissions on output file");
-    }
+    warn!("Failed to set permissions on output file");
 }
 
 #[cfg(unix)]
-fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
+fn copy_permissions(input_path: &Path, out_file: &File) {
     use std::os::unix::fs::PermissionsExt;
 
     if let Ok(f) = File::open(input_path) {
@@ -975,9 +944,7 @@ fn copy_permissions(input_path: &Path, out_file: &File, verbosity: Option<u8>) {
             }
         }
     };
-    if verbosity.is_some() {
-        eprintln!("Failed to set permissions on output file");
-    }
+    warn!("Failed to set permissions on output file");
 }
 
 /// Compares images pixel by pixel for equivalent content

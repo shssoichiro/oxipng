@@ -46,7 +46,7 @@ fn compress_test() {
         Z_DEFAULT_STRATEGY as u8,
         15,
         &AtomicMin::new(None),
-        &Deadline::new(None, false),
+        &Deadline::new(None),
     )
     .unwrap();
     let res = crate::deflate::inflate(&vec).unwrap();

@@ -13,8 +13,7 @@ fn optimize_from_memory() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
     assert!(result.is_ok());
@@ -26,8 +25,7 @@ fn optimize_from_memory_corrupted() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
     assert!(result.is_err());
@@ -39,8 +37,7 @@ fn optimize_from_memory_apng() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
     assert!(result.is_err());
@@ -48,8 +45,7 @@ fn optimize_from_memory_apng() {
 
 #[test]
 fn optimize() {
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize(
         &"tests/files/fully_optimized.png".into(),
@@ -61,8 +57,7 @@ fn optimize() {
 
 #[test]
 fn optimize_corrupted() {
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize(
         &"tests/files/corrupted_header.png".into(),
@@ -74,8 +69,7 @@ fn optimize_corrupted() {
 
 #[test]
 fn optimize_apng() {
-    let mut opts: oxipng::Options = Default::default();
-    opts.verbosity = Some(1);
+    let opts: oxipng::Options = Default::default();
 
     let result = oxipng::optimize(
         &"tests/files/apng_file.png".into(),
