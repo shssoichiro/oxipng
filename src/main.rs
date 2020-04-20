@@ -321,15 +321,12 @@ fn parse_opts_into_struct(
         .init()
         .unwrap();
 
-    let mut opts = if let Some(x) = matches.value_of("optimization") {
-        if let Ok(opt) = x.parse::<u8>() {
-            Options::from_preset(opt)
-        } else {
-            unreachable!()
-        }
-    } else {
-        Options::default()
+    let level = match matches.value_of("optimization") {
+        Some(x) => x.parse::<u8>().unwrap(),
+        None => 2,
     };
+
+    let mut opts = Options::from_preset(level);
 
     if let Some(x) = matches.value_of("interlace") {
         opts.interlace = x.parse::<u8>().ok();
@@ -491,6 +488,17 @@ fn parse_opts_into_struct(
             Some("16k") => *window = 14,
             // 32k is default
             _ => (),
+        }
+    }
+
+    if level > 3 {
+        match opts.deflate {
+            Deflaters::Zlib { .. } => {}
+            _ => {
+                warn!(
+                    "Level 4 and above are equivalent to level 3 for compressors other than zlib"
+                );
+            }
         }
     }
 
