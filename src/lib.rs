@@ -201,7 +201,10 @@ impl Options {
             1 => opts.apply_preset_1(),
             2 => opts.apply_preset_2(),
             3 => opts.apply_preset_3(),
-            4 => opts.apply_preset_4(),
+            4 => {
+                warn!("Level 4 is deprecated and is identical to level 3");
+                opts.apply_preset_4()
+            }
             5 => opts.apply_preset_5(),
             _ => opts.apply_preset_6(),
         }
