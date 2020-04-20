@@ -231,9 +231,9 @@ fn main() {
     -o 1  =>  --zc 9                       (1 trial, determined heuristically)
     -o 2  =>  --zc 9 --zs 0-3 -f 0,5       (8 trials)
     -o 3  =>  --zc 9 --zs 0-3 -f 0-5       (24 trials)
-    -o 4  =>  --zc 9 --zs 0-3 -f 0-5 -a    (24 trials + 6 alpha trials)
-    -o 5  =>  --zc 3-9 --zs 0-3 -f 0-5 -a  (96 trials + 6 alpha trials)
-    -o 6  =>  --zc 1-9 --zs 0-3 -f 0-5 -a  (180 trials + 6 alpha trials)
+    -o 4  =>                               (deprecated; same as `-o 3`)
+    -o 5  =>  --zc 3-9 --zs 0-3 -f 0-5     (96 trials)
+    -o 6  =>  --zc 1-9 --zs 0-3 -f 0-5     (180 trials)
 
     Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
     regardless of the order you write the arguments.")
