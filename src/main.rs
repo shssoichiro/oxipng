@@ -313,6 +313,14 @@ fn collect_files(
 fn parse_opts_into_struct(
     matches: &ArgMatches,
 ) -> Result<(OutFile, Option<PathBuf>, Options), String> {
+    stderrlog::new()
+        .module(module_path!())
+        .quiet(matches.is_present("quiet"))
+        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
+        .show_level(false)
+        .init()
+        .unwrap();
+
     let mut opts = if let Some(x) = matches.value_of("optimization") {
         if let Ok(opt) = x.parse::<u8>() {
             Options::from_preset(opt)
@@ -396,14 +404,6 @@ fn parse_opts_into_struct(
     if matches.is_present("preserve") {
         opts.preserve_attrs = true;
     }
-
-    stderrlog::new()
-        .module(module_path!())
-        .quiet(matches.is_present("quiet"))
-        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
-        .show_level(false)
-        .init()
-        .unwrap();
 
     if matches.is_present("no-bit-reduction") {
         opts.bit_depth_reduction = false;
