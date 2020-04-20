@@ -255,7 +255,7 @@ fn main() {
             .collect(),
         &out_dir,
         &out_file,
-        opts.recursive,
+        matches.is_present("recursive"),
         true,
     );
 
@@ -379,10 +379,6 @@ fn parse_opts_into_struct(
 
     if matches.is_present("force") {
         opts.force = true;
-    }
-
-    if matches.is_present("recursive") {
-        opts.recursive = true;
     }
 
     if matches.is_present("fix") {

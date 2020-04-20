@@ -129,9 +129,6 @@ pub struct Options {
     ///
     /// Default: `false`
     pub pretend: bool,
-    /// Used only in CLI interface
-    #[doc(hidden)]
-    pub recursive: bool,
     /// Write to output even if there was no improvement in compression.
     ///
     /// Default: `false`
@@ -282,7 +279,6 @@ impl Default for Options {
         Options {
             backup: false,
             pretend: false,
-            recursive: false,
             fix_errors: false,
             force: false,
             preserve_attrs: false,
