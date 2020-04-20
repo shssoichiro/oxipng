@@ -52,7 +52,8 @@ fn main() {
             .possible_value("3")
             .possible_value("4")
             .possible_value("5")
-            .possible_value("6"))
+            .possible_value("6")
+            .possible_value("max"))
         .arg(Arg::with_name("backup")
             .help("Back up modified files")
             .short("b")
@@ -227,13 +228,14 @@ fn main() {
                 }
             }))
         .after_help("Optimization levels:
-    -o 0  =>  --zc 3 --nz                  (0 or 1 trials)
-    -o 1  =>  --zc 9                       (1 trial, determined heuristically)
-    -o 2  =>  --zc 9 --zs 0-3 -f 0,5       (8 trials)
-    -o 3  =>  --zc 9 --zs 0-3 -f 0-5       (24 trials)
-    -o 4  =>                               (deprecated; same as `-o 3`)
-    -o 5  =>  --zc 3-9 --zs 0-3 -f 0-5     (96 trials)
-    -o 6  =>  --zc 1-9 --zs 0-3 -f 0-5     (180 trials)
+    -o 0   =>  --zc 3 --nz                  (0 or 1 trials)
+    -o 1   =>  --zc 9                       (1 trial, determined heuristically)
+    -o 2   =>  --zc 9 --zs 0-3 -f 0,5       (8 trials)
+    -o 3   =>  --zc 9 --zs 0-3 -f 0-5       (24 trials)
+    -o 4   =>                               (deprecated; same as `-o 3`)
+    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (96 trials)
+    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (180 trials)
+    -o max =>                               (alias for the max compression, currently same as -o 6)
 
     Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
     regardless of the order you write the arguments.")
@@ -321,12 +323,14 @@ fn parse_opts_into_struct(
         .init()
         .unwrap();
 
-    let level = match matches.value_of("optimization") {
-        Some(x) => x.parse::<u8>().unwrap(),
-        None => 2,
+    let (explicit_level, mut opts) = match matches.value_of("optimization") {
+        None => (None, Options::default()),
+        Some("max") => (None, Options::max_compression()),
+        Some(level) => {
+            let level = level.parse::<u8>().unwrap();
+            (Some(level), Options::from_preset(level))
+        }
     };
-
-    let mut opts = Options::from_preset(level);
 
     if let Some(x) = matches.value_of("interlace") {
         opts.interlace = x.parse::<u8>().ok();
@@ -491,7 +495,7 @@ fn parse_opts_into_struct(
         }
     }
 
-    if level > 3 {
+    if explicit_level > Some(3) {
         match opts.deflate {
             Deflaters::Zlib { .. } => {}
             _ => {

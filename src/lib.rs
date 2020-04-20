@@ -206,8 +206,16 @@ impl Options {
                 opts.apply_preset_4()
             }
             5 => opts.apply_preset_5(),
-            _ => opts.apply_preset_6(),
+            6 => opts.apply_preset_6(),
+            _ => {
+                warn!("Level 7 and above don't exist yet and are identical to level 6");
+                opts.apply_preset_6()
+            }
         }
+    }
+
+    pub fn max_compression() -> Options {
+        Options::from_preset(6)
     }
 
     // The following methods make assumptions that they are operating
