@@ -198,10 +198,21 @@ impl Options {
             1 => opts.apply_preset_1(),
             2 => opts.apply_preset_2(),
             3 => opts.apply_preset_3(),
-            4 => opts.apply_preset_4(),
+            4 => {
+                warn!("Level 4 is deprecated and is identical to level 3");
+                opts.apply_preset_4()
+            }
             5 => opts.apply_preset_5(),
-            _ => opts.apply_preset_6(),
+            6 => opts.apply_preset_6(),
+            _ => {
+                warn!("Level 7 and above don't exist yet and are identical to level 6");
+                opts.apply_preset_6()
+            }
         }
+    }
+
+    pub fn max_compression() -> Options {
+        Options::from_preset(6)
     }
 
     // The following methods make assumptions that they are operating

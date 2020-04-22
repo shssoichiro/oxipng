@@ -52,7 +52,8 @@ fn main() {
             .possible_value("3")
             .possible_value("4")
             .possible_value("5")
-            .possible_value("6"))
+            .possible_value("6")
+            .possible_value("max"))
         .arg(Arg::with_name("backup")
             .help("Back up modified files")
             .short("b")
@@ -227,13 +228,14 @@ fn main() {
                 }
             }))
         .after_help("Optimization levels:
-    -o 0  =>  --zc 3 --nz                  (0 or 1 trials)
-    -o 1  =>  --zc 9                       (1 trial, determined heuristically)
-    -o 2  =>  --zc 9 --zs 0-3 -f 0,5       (8 trials)
-    -o 3  =>  --zc 9 --zs 0-3 -f 0-5       (24 trials)
-    -o 4  =>  --zc 9 --zs 0-3 -f 0-5 -a    (24 trials + 6 alpha trials)
-    -o 5  =>  --zc 3-9 --zs 0-3 -f 0-5 -a  (96 trials + 6 alpha trials)
-    -o 6  =>  --zc 1-9 --zs 0-3 -f 0-5 -a  (180 trials + 6 alpha trials)
+    -o 0   =>  --zc 3 --nz                  (0 or 1 trials)
+    -o 1   =>  --zc 9                       (1 trial, determined heuristically)
+    -o 2   =>  --zc 9 --zs 0-3 -f 0,5       (8 trials with zlib or 2 trials with other compressors)
+    -o 3   =>  --zc 9 --zs 0-3 -f 0-5       (24 trials with zlib or 6 trials with other compressors)
+    -o 4   =>                               (deprecated; same as `-o 3`)
+    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (168 trials with zlib; same as `-o 3` for other compressors)
+    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (216 trials with zlib; same as `-o 3` for other compressors)
+    -o max =>                               (stable alias for the max compression)
 
     Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
     regardless of the order you write the arguments.")
@@ -313,14 +315,21 @@ fn collect_files(
 fn parse_opts_into_struct(
     matches: &ArgMatches,
 ) -> Result<(OutFile, Option<PathBuf>, Options), String> {
-    let mut opts = if let Some(x) = matches.value_of("optimization") {
-        if let Ok(opt) = x.parse::<u8>() {
-            Options::from_preset(opt)
-        } else {
-            unreachable!()
+    stderrlog::new()
+        .module(module_path!())
+        .quiet(matches.is_present("quiet"))
+        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
+        .show_level(false)
+        .init()
+        .unwrap();
+
+    let (explicit_level, mut opts) = match matches.value_of("optimization") {
+        None => (None, Options::default()),
+        Some("max") => (None, Options::max_compression()),
+        Some(level) => {
+            let level = level.parse::<u8>().unwrap();
+            (Some(level), Options::from_preset(level))
         }
-    } else {
-        Options::default()
     };
 
     if let Some(x) = matches.value_of("interlace") {
@@ -392,14 +401,6 @@ fn parse_opts_into_struct(
     if matches.is_present("preserve") {
         opts.preserve_attrs = true;
     }
-
-    stderrlog::new()
-        .module(module_path!())
-        .quiet(matches.is_present("quiet"))
-        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
-        .show_level(false)
-        .init()
-        .unwrap();
 
     if matches.is_present("no-bit-reduction") {
         opts.bit_depth_reduction = false;
@@ -487,6 +488,17 @@ fn parse_opts_into_struct(
             Some("16k") => *window = 14,
             // 32k is default
             _ => (),
+        }
+    }
+
+    if explicit_level > Some(3) {
+        match opts.deflate {
+            Deflaters::Zlib { .. } => {}
+            _ => {
+                warn!(
+                    "Level 4 and above are equivalent to level 3 for compressors other than zlib"
+                );
+            }
         }
     }
 
