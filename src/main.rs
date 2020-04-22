@@ -233,8 +233,8 @@ fn main() {
     -o 2   =>  --zc 9 --zs 0-3 -f 0,5       (8 trials with zlib or 2 trials with other compressors)
     -o 3   =>  --zc 9 --zs 0-3 -f 0-5       (24 trials with zlib or 6 trials with other compressors)
     -o 4   =>                               (deprecated; same as `-o 3`)
-    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (96 trials with zlib; same as `-o 3` for other compressors)
-    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (180 trials with zlib; same as -o 3` for other compressors)
+    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (168 trials with zlib; same as `-o 3` for other compressors)
+    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (216 trials with zlib; same as `-o 3` for other compressors)
     -o max =>                               (stable alias for the max compression)
 
     Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
