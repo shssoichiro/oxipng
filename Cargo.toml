@@ -40,6 +40,7 @@ indexmap = "1.6.0"
 libdeflater = { version = "0.5.0", optional = true }
 log = "0.4.11"
 stderrlog = { version = "0.5.0", optional = true }
+crossbeam-channel = "0.4.4"
 
 [dependencies.rayon]
 optional = true

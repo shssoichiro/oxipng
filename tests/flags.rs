@@ -55,9 +55,9 @@ fn test_it_converts(
 
 #[test]
 fn verbose_mode() {
+    use crossbeam_channel::{unbounded, Sender};
     use log::{set_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record};
     use std::cell::RefCell;
-    use std::sync::mpsc::{sync_channel, SyncSender};
 
     // Rust runs tests in parallel by default.
     // We want to make sure that we verify only logs from our test.
@@ -66,7 +66,7 @@ fn verbose_mode() {
     // initialise it with Some(sender) only on threads spawned within
     // our test.
     thread_local! {
-        static VERBOSE_LOGS: RefCell<Option<SyncSender<String>>> = RefCell::new(None);
+        static VERBOSE_LOGS: RefCell<Option<Sender<String>>> = RefCell::new(None);
     }
 
     struct LogTester;
@@ -97,7 +97,7 @@ fn verbose_mode() {
     let input = PathBuf::from("tests/files/verbose_mode.png");
     let (output, opts) = get_opts(&input);
 
-    let (sender, receiver) = sync_channel(4);
+    let (sender, receiver) = unbounded();
 
     let thread_init = move || {
         // Initialise logs storage for all threads within our test.
