@@ -3,9 +3,7 @@ use crate::error::PngError;
 use crate::Deadline;
 use crate::PngResult;
 use indexmap::IndexSet;
-use miniz_oxide;
 use std::cmp::max;
-use zopfli;
 
 #[doc(hidden)]
 pub mod miniz_stream;

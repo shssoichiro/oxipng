@@ -1,5 +1,21 @@
-### Version 2.3.1 (unreleased)
+### Version 3.0.0
+- [Breaking] Bump minimum Rust version to 1.41.0
+- [Breaking] Use IndexMap/IndexSet to provide more consistent performance ([#202](https://github.com/shssoichiro/oxipng/pull/202))
+  - This changes some public-facing types.
+    `IndexMap` and `IndexSet` are reexported
+    at the crate root to aid migration.
+- [Breaking] Remove fields from the `Options` struct which were never used ([#211](https://github.com/shssoichiro/oxipng/pull/211/files#diff-b4aea3e418ccdb71239b96952d9cddb6L217), [#212](https://github.com/shssoichiro/oxipng/pull/212/files#diff-b4aea3e418ccdb71239b96952d9cddb6L134))
+- [Breaking] Refactor zlib-specific options in the `Options` struct ([#210](https://github.com/shssoichiro/oxipng/pull/210/files))
+- [Feature] Add libdeflater as an option ([#203](https://github.com/shssoichiro/oxipng/pull/203))
+- [Feature] Use standard `log` library ([#218](https://github.com/shssoichiro/oxipng/pull/218))
+- [Feature] Add `-o max` setting which will always reference the highest compression preset ([#224](https://github.com/shssoichiro/oxipng/pull/224))
+- [Deprecated] `-o 4` was found to be equivalent to `-o 3` and is deprecated.
+  It will likely be removed in a future release.
+  For now it remains equivalent to `-o 3`. ([#224](https://github.com/shssoichiro/oxipng/pull/224))
+- [Bugfix] Ensure output is deterministic ([#199](https://github.com/shssoichiro/oxipng/pull/199))
 - Update `image` crate to 0.23
+- Update `itertools` crate to 0.9
+- Various performance and internal improvements
 
 ### Version 2.3.0
  - Allow disabling all alpha optimizations ([#181](https://github.com/shssoichiro/oxipng/pull/181))
