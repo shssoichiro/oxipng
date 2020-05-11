@@ -63,7 +63,7 @@ jobs:
         with:
           name: ${{ steps.tagName.outputs.tag }}
           files: |
-            oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
-            oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc.zip
+            oxipng/oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
+            oxipng/oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
