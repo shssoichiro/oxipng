@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  deploy-windows:
+  create-binaries-windows:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -32,16 +32,38 @@ jobs:
     - name: Build oxipng
       run: |
         cargo build --release --target ${{ matrix.target }}
-        strip target/release/oxipng.exe
     - name: Create zip
       run: |
-        $OXIPNG_PATH="$Env:GITHUB_WORKSPACE\target\release"
+        $OXIPNG_PATH="$Env:GITHUB_WORKSPACE\target\${{ matrix.target }}\release"
+        strip "$OXIPNG_PATH\oxipng.exe"
         7z a oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}.zip "$OXIPNG_PATH\oxipng.exe"
-    - name: Create a release
-      uses: softprops/action-gh-release@v1
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v1
       with:
-        name: ${{ steps.tagName.outputs.tag }}
-        files: |
-          oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}
+        path: oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}.zip
+
+  deploy:
+    needs: create-binaries-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: olegtarasov/get-tag@v2
+        id: tagName
+      - name: Download x86_64 Windows
+        uses: actions/download-artifact@v1
+        with:
+          name: oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc
+      - name: Download i686 Windows
+        uses: actions/download-artifact@v1
+        with:
+          name: oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc
+      - name: Create a release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.tagName.outputs.tag }}
+          files: |
+            oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
+            oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
