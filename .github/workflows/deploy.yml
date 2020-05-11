@@ -10,6 +10,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: olegtarasov/get-tag@v2
+      id: tagName
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
@@ -22,15 +24,13 @@ jobs:
         strip target/release/oxipng.exe
     - name: Create zip
       run: |
-        VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-        echo "::set-output name=version::$VERSION"
         $OXIPNG_PATH="$Env:GITHUB_WORKSPACE\target\release"
-        7z a oxipng-v${{ steps.data.outputs.version }}-x86_64-pc-windows-msvc.zip "$OXIPNG_PATH\oxipng.exe"
+        7z a oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip "$OXIPNG_PATH\oxipng.exe"
     - name: Create a release
       uses: softprops/action-gh-release@v1
       with:
-        name: v${{ steps.data.outputs.version }}
+        name: ${{ steps.tagName.outputs.tag }}
         files: |
-          oxipng-v${{ steps.data.outputs.version }}-x86_64-pc-windows-msvc.zip
+          oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
