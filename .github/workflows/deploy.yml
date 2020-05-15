@@ -66,10 +66,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get the version
+      - name: Get version and release description
         id: tagName
         run: |
           VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > CHANGELOG.txt
           echo "::set-output name=tag::$VERSION"
 
       - name: Download x86_64 Windows artifact
@@ -86,6 +87,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ steps.tagName.outputs.tag }}
+          body_path: CHANGELOG.txt
           files: |
             oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
             oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc.zip
