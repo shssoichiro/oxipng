@@ -86,7 +86,7 @@ jobs:
       - name: Create a release
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ steps.tagName.outputs.tag }}
+          name: v${{ steps.tagName.outputs.tag }}
           body_path: CHANGELOG.txt
           files: |
             oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
