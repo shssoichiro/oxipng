@@ -12,14 +12,17 @@ interface or as a library in other Rust programs.
 
 ## Installing
 
-Oxipng can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
+Oxipng for Windows can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
 
-Oxipng can also be installed from Cargo, via the following command:
+For MacOS or Linux, it is recommended to install from your distro's package repository, if possible.
+
+Alternatively, oxipng can be installed from Cargo, via the following command:
 ```
 cargo install oxipng
 ```
 
-Alternatively, oxipng can be built from source using the latest stable or nightly Rust:
+Oxipng can be built from source using the latest stable or nightly Rust.
+This is primarily useful for developing on oxipng.
 ```
 git clone https://github.com/shssoichiro/oxipng.git
 cd oxipng
