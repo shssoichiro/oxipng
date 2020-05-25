@@ -15,6 +15,7 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
+build = "build.rs"
 version = "3.0.0"
 
 [badges]
@@ -59,6 +60,9 @@ version = "0.23"
 
 [target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies]
 cloudflare-zlib = "^0.2.2"
+
+[build-dependencies]
+rustc_version = "0.2"
 
 [features]
 binary = [
