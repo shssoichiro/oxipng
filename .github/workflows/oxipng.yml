@@ -9,24 +9,29 @@ on:
       - master
 
 jobs:
-  build-test-unix:
-    runs-on: ubuntu-latest
+  test:
     strategy:
       matrix:
-        conf:
-          - minimum-stable
-          - latest-stable
-          - latest-beta
-          - latest-nightly
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-pc-windows-msvc
+        toolchain:
+          # Minimum stable
+          - "1.41.0"
+          - stable
+          - beta
+          - nightly
         include:
-          - conf: minimum-stable
-            toolchain: 1.41.0
-          - conf: latest-stable
-            toolchain: stable
-          - conf: latest-beta
-            toolchain: beta
-          - conf: latest-nightly
-            toolchain: nightly
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+        exclude:
+          - target: x86_64-pc-windows-msvc
+            rust: beta
+          - target: x86_64-pc-windows-msvc
+            rust: nightly
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
     - name: Install ${{ matrix.toolchain }}
@@ -40,9 +45,9 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.cargo/registry/cache
-        key: ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-
+          ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-
     - name: Run rustfmt
       if: matrix.toolchain == 'stable'
       uses: actions-rs/cargo@v1
@@ -60,57 +65,6 @@ jobs:
     - name: Build benchmarks
       if: matrix.toolchain == 'nightly'
       run: cargo bench --no-run
-    - name: Build docs
-      run: cargo doc --no-deps
-    - name: Check no default features
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: --no-default-features -- -D warnings
-
-  build-test-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        conf:
-          - minimum-stable
-          - latest-stable
-        include:
-          - conf: minimum-stable
-            toolchain: 1.41.0
-          - conf: latest-stable
-            toolchain: stable
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install ${{ matrix.toolchain }}
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.toolchain }}
-        override: true
-        components: clippy, rustfmt
-    - name: Cache cargo registry
-      uses: actions/cache@v1
-      with:
-        path: ~/.cargo/registry/cache
-        key: ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.conf }}-cargo-registry-
-    - name: Run rustfmt
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: -- --check
-    - name: Run clippy
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings
-    - name: Run tests
-      run: cargo test
     - name: Build docs
       run: cargo doc --no-deps
     - name: Check no default features
