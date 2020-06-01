@@ -34,17 +34,17 @@ jobs:
           os: macOS-latest
         exclude:
         - target: x86_64-pc-windows-msvc
-          rust: beta
+          toolchain: beta
         - target: x86_64-pc-windows-msvc
-          rust: nightly
+          toolchain: nightly
         - target: x86_64-apple-darwin
-          rust: beta
+          toolchain: beta
         - target: x86_64-apple-darwin
-          rust: nightly
+          toolchain: nightly
         - target: x86_64-unknown-linux-musl
-          rust: beta
+          toolchain: beta
         - target: x86_64-unknown-linux-musl
-          rust: nightly
+          toolchain: nightly
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
