@@ -7,20 +7,22 @@ on:
 
 jobs:
 
-  create-binaries-windows:
+  create-binaries:
 
     strategy:
       matrix:
-        conf:
-          - x86_64-pc-windows-msvc
-          - i686-pc-windows-msvc
+        os: [ubuntu-latest, macOS-latest, windows-latest]
         include:
-          - conf: x86_64-pc-windows-msvc
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - os: macOS-latest
+            target: x86_64-apple-darwin
+          - os: windows-latest
             target: x86_64-pc-windows-msvc
-          - conf: i686-pc-windows-msvc
+          - os: windows-latest
             target: i686-pc-windows-msvc
 
-    runs-on: windows-latest
+    runs-on: '${{ matrix.os }}'
 
     steps:
     - uses: actions/checkout@v2
@@ -33,9 +35,17 @@ jobs:
         target: ${{ matrix.target }}
         override: true
 
+    - name: Install musl
+      run: sudo apt-get install musl-tools
+      if: contains(matrix.target, 'linux-musl')
+
     - name: Build oxipng
       run: |
         cargo build --release --target ${{ matrix.target }}
+
+    - name: Strip binary
+      run: strip 'target/${{ matrix.target }}/release/oxipng'
+      if: "!contains(matrix.target, 'windows')"
 
     - name: Get the version
       shell: bash
@@ -44,22 +54,35 @@ jobs:
         VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
         echo "::set-output name=tag::$VERSION"
 
-    - name: Create zip
+    - name: Build package
+      id: package
+      shell: bash
       run: |
-        $OXIPNG_PATH="$Env:GITHUB_WORKSPACE\target\${{ matrix.target }}\release"
-        strip "$OXIPNG_PATH\oxipng.exe"
-        7z a oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}.zip `
-             "$OXIPNG_PATH\oxipng.exe"
+        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}"
+        if [[ '${{ matrix.target }}' == *windows* ]]; then
+          ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
+          mv LICENSE LICENSE.txt
+          7z a "${ARCHIVE_FILE}" "./target/${{ matrix.target }}/release/oxipng.exe" ./CHANGELOG.md ./LICENSE.txt ./README.md
+          echo ::set-output "name=file::${ARCHIVE_FILE}"
+          echo ::set-output "name=name::${ARCHIVE_NAME}.zip"
+        else
+          ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
+          mkdir "/tmp/${ARCHIVE_NAME}"
+          cp README.md CHANGELOG.md LICENSE "target/${{ matrix.target }}/release/oxipng" "/tmp/${ARCHIVE_NAME}"
+          tar -czf "${PWD}/${ARCHIVE_FILE}" -C /tmp/ "${ARCHIVE_NAME}"
+          echo ::set-output "name=file::${ARCHIVE_FILE}"
+          echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
+        fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}
-        path: oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}.zip
+        name: ${{ steps.package.outputs.name }}
+        path: ${{ steps.package.outputs.file }}
 
   deploy:
 
-    needs: create-binaries-windows
+    needs: create-binaries
 
     runs-on: ubuntu-latest
 
@@ -73,15 +96,10 @@ jobs:
           tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > CHANGELOG.txt
           echo "::set-output name=tag::$VERSION"
 
-      - name: Download x86_64 Windows artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc
-
-      - name: Download i686 Windows artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc
+          path: ./binaries
 
       - name: Create a release
         uses: softprops/action-gh-release@v1
@@ -89,7 +107,7 @@ jobs:
           name: v${{ steps.tagName.outputs.tag }}
           body_path: CHANGELOG.txt
           files: |
-            oxipng-${{ steps.tagName.outputs.tag }}-x86_64-pc-windows-msvc.zip
-            oxipng-${{ steps.tagName.outputs.tag }}-i686-pc-windows-msvc.zip
+            ./binaries/**/*.zip
+            ./binaries/**/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
