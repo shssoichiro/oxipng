@@ -37,7 +37,7 @@ zopfli = "^0.4.0"
 miniz_oxide = "0.3"
 rgb = "0.8.18"
 indexmap = { version = "1.4.0", features = ["rayon"] }
-libdeflater = "0.3.0"
+libdeflater = "0.5.0"
 log = "0.4.8"
 stderrlog = { version = "0.4.3", optional = true }
 
