@@ -66,9 +66,9 @@ other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.t
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
-[Options struct](https://docs.rs/oxipng/0.13.0/oxipng/struct.Options.html) and
+[Options struct](https://docs.rs/oxipng/3.0.0/oxipng/struct.Options.html) and
 passing it, along with an input filename, into the
-[optimize function](https://docs.rs/oxipng/0.13.0/oxipng/fn.optimize.html).
+[optimize function](https://docs.rs/oxipng/3.0.0/oxipng/fn.optimize.html).
 
 ## History
 
