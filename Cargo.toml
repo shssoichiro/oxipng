@@ -38,7 +38,7 @@ miniz_oxide = "0.4"
 rgb = "0.8.20"
 indexmap = { version = "1.4.0", features = ["rayon"] }
 libdeflater = "0.5.0"
-log = "0.4.8"
+log = "0.4.11"
 stderrlog = { version = "0.4.3", optional = true }
 
 [dependencies.rayon]
