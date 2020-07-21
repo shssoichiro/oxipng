@@ -1,9 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
-// TODO: Use `#[non_exhaustive]` once stabilized
-// https://github.com/rust-lang/rust/issues/44109
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum PngError {
     DeflatedDataTooLong(usize),
     TimedOut,
@@ -13,8 +12,6 @@ pub enum PngError {
     TruncatedData,
     ChunkMissing(&'static str),
     Other(Box<str>),
-    #[doc(hidden)]
-    _Nonexhaustive,
 }
 
 impl Error for PngError {
@@ -38,7 +35,6 @@ impl fmt::Display for PngError {
             PngError::APNGNotSupported => f.write_str("APNG files are not (yet) supported"),
             PngError::ChunkMissing(s) => write!(f, "Chunk {} missing or empty", s),
             PngError::Other(ref s) => f.write_str(s),
-            PngError::_Nonexhaustive => unreachable!(),
         }
     }
 }
