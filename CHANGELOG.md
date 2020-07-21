@@ -1,3 +1,8 @@
+### Version 3.0.1
+- [Bugfix] Re-add `--force` flag to CLI
+  - This was accidentally removed somehow
+- Many non-breaking dependency version bumps
+
 ### Version 3.0.0
 - [Breaking] Bump minimum Rust version to 1.41.0
 - [Breaking] Use IndexMap/IndexSet to provide more consistent performance ([#202](https://github.com/shssoichiro/oxipng/pull/202))

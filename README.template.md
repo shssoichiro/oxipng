@@ -12,14 +12,17 @@ interface or as a library in other Rust programs.
 
 ## Installing
 
-Oxipng can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
+Oxipng for Windows can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
 
-Oxipng can also be installed from Cargo, via the following command:
+For MacOS or Linux, it is recommended to install from your distro's package repository, if possible.
+
+Alternatively, oxipng can be installed from Cargo, via the following command:
 ```
 cargo install oxipng
 ```
 
-Alternatively, oxipng can be built from source using the latest stable or nightly Rust:
+Oxipng can be built from source using the latest stable or nightly Rust.
+This is primarily useful for developing on oxipng.
 ```
 git clone https://github.com/shssoichiro/oxipng.git
 cd oxipng
@@ -27,8 +30,7 @@ cargo build --release
 cp target/release/oxipng /usr/local/bin
 ```
 
-The current minimum supported Rust version is **1.41.0**. Oxipng may compile on earlier versions of Rust,
-but there is no guarantee.
+The current minimum supported Rust version is **1.41.0**.
 
 Oxipng follows Semantic Versioning.
 
@@ -66,9 +68,9 @@ other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.t
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
-[Options struct](https://docs.rs/oxipng/3.0.0/oxipng/struct.Options.html) and
+[Options struct](https://docs.rs/oxipng/3.0.1/oxipng/struct.Options.html) and
 passing it, along with an input filename, into the
-[optimize function](https://docs.rs/oxipng/3.0.0/oxipng/fn.optimize.html).
+[optimize function](https://docs.rs/oxipng/3.0.1/oxipng/fn.optimize.html).
 
 ## History
 

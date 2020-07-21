@@ -68,9 +68,9 @@ other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.t
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
-[Options struct](https://docs.rs/oxipng/0.13.0/oxipng/struct.Options.html) and
+[Options struct](https://docs.rs/oxipng/3.0.1/oxipng/struct.Options.html) and
 passing it, along with an input filename, into the
-[optimize function](https://docs.rs/oxipng/0.13.0/oxipng/fn.optimize.html).
+[optimize function](https://docs.rs/oxipng/3.0.1/oxipng/fn.optimize.html).
 
 ## History
 
@@ -97,36 +97,36 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested oxipng 3.0.0 (compiled on rustc 1.43.0 (4fb7144ed 2020-04-20)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
+Tested oxipng 3.0.1 (compiled on rustc 1.45.0 (5c1f21c3b 2020-07-13)) against OptiPNG version 0.7.7 on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with 8 logical cores
 
 
 ```
 
 Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):      99.5 ms ±   5.2 ms    [User: 265.5 ms, System: 15.3 ms]
-  Range (min … max):    89.0 ms … 111.0 ms    30 runs
+  Time (mean ± σ):     101.6 ms ±   5.9 ms    [User: 261.6 ms, System: 16.5 ms]
+  Range (min … max):    94.7 ms … 113.3 ms    28 runs
  
 Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     303.8 ms ±   2.9 ms    [User: 301.7 ms, System: 2.0 ms]
-  Range (min … max):   301.0 ms … 311.0 ms    10 runs
+  Time (mean ± σ):     294.0 ms ±   3.5 ms    [User: 293.5 ms, System: 0.6 ms]
+  Range (min … max):   290.4 ms … 300.5 ms    10 runs
  
 Summary
   './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    3.05 ± 0.16 times faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+    2.89 ± 0.17 times faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
 
 
 
 Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     130.3 ms ±   6.9 ms    [User: 512.9 ms, System: 21.0 ms]
-  Range (min … max):   118.8 ms … 140.0 ms    21 runs
+  Time (mean ± σ):     131.6 ms ±   6.1 ms    [User: 509.8 ms, System: 17.1 ms]
+  Range (min … max):   123.5 ms … 143.6 ms    23 runs
  
 Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):      1.016 s ±  0.011 s    [User: 1.013 s, System: 0.002 s]
-  Range (min … max):    1.001 s …  1.034 s    10 runs
+  Time (mean ± σ):     995.7 ms ±   8.0 ms    [User: 993.6 ms, System: 1.7 ms]
+  Range (min … max):   987.5 ms … 1012.8 ms    10 runs
  
 Summary
   './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    7.80 ± 0.42 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
+    7.57 ± 0.35 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
 
 ```
 
