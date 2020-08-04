@@ -58,8 +58,9 @@ default-features = false
 features = ["png"]
 version = "0.23"
 
-[target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies]
-cloudflare-zlib = "^0.2.2"
+[target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies.cloudflare-zlib]
+features = ["arm-always"]
+version = "^0.2.2"
 
 [build-dependencies]
 rustc_version = "0.2"
