@@ -20,7 +20,6 @@ use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::Options;
-use oxipng::PngResult;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
 use std::path::PathBuf;
@@ -264,13 +263,26 @@ fn main() {
         true,
     );
 
-    let res: PngResult<()> = files
-        .into_iter()
-        .map(|(input, output)| oxipng::optimize(&input, &output, &opts))
-        .collect();
+    let mut success = false;
+    for (input, output) in files {
+        match oxipng::optimize(&input, &output, &opts) {
+            // For optimizing single files, this will return the correct exit code always.
+            // For recursive optimization, the correct choice is a bit subjective.
+            // We're choosing to return a 0 exit code if ANY file in the set
+            // runs correctly.
+            // The reason for this is that recursion may pick up files that are not
+            // PNG files, and return an error for them.
+            // We don't really want to return an error code for those files.
+            Ok(_) => {
+                success = true;
+            }
+            Err(e) => {
+                error!("{}", e);
+            }
+        };
+    }
 
-    if let Err(e) = res {
-        error!("{}", e);
+    if !success {
         exit(1);
     }
 }
@@ -288,12 +300,16 @@ fn collect_files(
         let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
         if !using_stdin && input.is_dir() {
             if recursive {
-                let files = input
-                    .read_dir()
-                    .unwrap()
-                    .map(|x| x.unwrap().path())
-                    .collect();
-                in_out_pairs.extend(collect_files(files, out_dir, out_file, recursive, false));
+                match input.read_dir() {
+                    Ok(dir) => {
+                        let files = dir.filter_map(|x| x.ok().map(|x| x.path())).collect();
+                        in_out_pairs
+                            .extend(collect_files(files, out_dir, out_file, recursive, false));
+                    }
+                    Err(_) => {
+                        return Vec::new();
+                    }
+                }
             } else {
                 warn!("{} is a directory, skipping", input.display());
             }
