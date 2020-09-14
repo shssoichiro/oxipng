@@ -39,7 +39,7 @@ rgb = "0.8.25"
 indexmap = { version = "1.6.0", features = ["rayon"] }
 libdeflater = "0.5.0"
 log = "0.4.11"
-stderrlog = { version = "0.4.3", optional = true }
+stderrlog = { version = "0.5.0", optional = true }
 
 [dependencies.rayon]
 optional = true
