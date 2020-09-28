@@ -3,12 +3,13 @@ use crate::error::PngError;
 use crate::Deadline;
 use crate::PngResult;
 use indexmap::IndexSet;
-use std::cmp::max;
 
 #[doc(hidden)]
 pub mod miniz_stream;
 
+#[cfg(feature = "libdeflater")]
 mod deflater;
+#[cfg(feature = "libdeflater")]
 pub use deflater::deflate as libdeflater_deflate;
 
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
@@ -47,7 +48,10 @@ pub fn deflate(
     miniz_stream::compress_to_vec_oxipng(data, zc, zw.into(), zs.into(), max_size, deadline)
 }
 
+#[cfg(feature = "zopfli")]
 pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
+    use std::cmp::max;
+
     let mut output = Vec::with_capacity(max(1024, data.len() / 20));
     let options = zopfli::Options::default();
     match zopfli::compress(&options, &zopfli::Format::Zlib, data, &mut output) {
@@ -79,8 +83,10 @@ pub enum Deflaters {
         /// Default: `15`
         window: u8,
     },
+    #[cfg(feature = "zopfli")]
     /// Use the better but slower Zopfli implementation
     Zopfli,
+    #[cfg(feature = "libdeflater")]
     /// Use libdeflater.
     Libdeflater,
 }
