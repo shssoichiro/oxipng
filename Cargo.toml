@@ -43,7 +43,7 @@ stderrlog = { version = "0.5.0", optional = true }
 
 [dependencies.rayon]
 optional = true
-version = "^1.4.0"
+version = "^1.4.1"
 
 [dependencies.clap]
 optional = true
