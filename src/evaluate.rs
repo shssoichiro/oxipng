@@ -13,7 +13,7 @@ use crate::png::STD_WINDOW;
 use crate::rayon;
 use crate::Deadline;
 #[cfg(feature = "parallel")]
-use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use rayon::prelude::*;
 #[cfg(not(feature = "parallel"))]
 use std::cell::RefCell;
@@ -45,44 +45,24 @@ pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
     nth: AtomicUsize,
     best_candidate_size: Arc<AtomicMin>,
-    /// images are sent to the thread for evaluation
+    /// images are sent to the caller thread for evaluation
     #[cfg(feature = "parallel")]
-    eval_send: Sender<Candidate>,
-    // the thread helps evaluate images asynchronously
-    #[cfg(feature = "parallel")]
-    eval_thread: Receiver<Option<Candidate>>,
+    eval_channel: (Sender<Candidate>, Receiver<Candidate>),
     // in non-parallel mode, images are evaluated synchronously
     #[cfg(not(feature = "parallel"))]
     eval_best_candidate: RefCell<Option<Candidate>>,
 }
 
-// Like `std::thread::spawn`, but uses Rayon to create a thread.
-//
-// This allows this function to work on targets like WebAssembly,
-// where `std::thread::spawn` doesn't work but Rayon can thanks to its
-// support for custom spawn handlers.
-//
-// Unlike `std::thread::spawn`, `rayon::spawn` doesn't support closure results
-// (it doesn't return a `JoinHandle<T>`), so we simulate it with a crossbeam
-// channel instead (where `Receiver` acts as a `JoinHandle`).
-fn thread_spawn<T: Send + 'static>(f: impl FnOnce() -> T + Send + 'static) -> Receiver<T> {
-    let (tx, rx) = bounded(0);
-    rayon::spawn(move || tx.send(f()).unwrap());
-    rx
-}
-
 impl Evaluator {
     pub fn new(deadline: Arc<Deadline>) -> Self {
         #[cfg(feature = "parallel")]
-        let (tx, rx) = unbounded();
+        let eval_channel = unbounded();
         Self {
             deadline,
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
             #[cfg(feature = "parallel")]
-            eval_send: tx,
-            #[cfg(feature = "parallel")]
-            eval_thread: thread_spawn(move || rx.into_iter().min_by_key(Candidate::cmp_key)),
+            eval_channel,
             #[cfg(not(feature = "parallel"))]
             eval_best_candidate: RefCell::new(None),
         }
@@ -92,8 +72,9 @@ impl Evaluator {
     /// Or `None` if all reductions were worse than baseline.
     #[cfg(feature = "parallel")]
     fn get_best_candidate(self) -> Option<Candidate> {
-        drop(self.eval_send); // disconnect the sender, breaking the loop in the thread
-        self.eval_thread.recv().expect("eval thread")
+        let (eval_send, eval_recv) = self.eval_channel;
+        drop(eval_send); // disconnect the sender, breaking the loop in the thread
+        eval_recv.into_iter().min_by_key(Candidate::cmp_key)
     }
 
     #[cfg(not(feature = "parallel"))]
@@ -123,7 +104,7 @@ impl Evaluator {
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
         #[cfg(feature = "parallel")]
-        let eval_send = self.eval_send.clone();
+        let eval_send = self.eval_channel.0.clone();
         rayon::spawn(move || {
             let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
 
