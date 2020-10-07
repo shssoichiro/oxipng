@@ -118,6 +118,7 @@ fn verbose_mode() {
     #[cfg(feature = "rayon")]
     rayon::ThreadPoolBuilder::new()
         .start_handler(move |_| thread_init())
+        .num_threads(rayon::current_num_threads() + 1)
         .build()
         .unwrap()
         .install(move || rayon::spawn(thread_exec));
