@@ -1,5 +1,5 @@
 use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::{Relaxed, SeqCst};
+use std::sync::atomic::Ordering::SeqCst;
 
 #[derive(Debug)]
 pub struct AtomicMin {
@@ -28,18 +28,6 @@ impl AtomicMin {
     }
 
     pub fn set_min(&self, new_val: usize) {
-        let mut current_val = self.val.load(Relaxed);
-        loop {
-            if new_val < current_val {
-                if let Err(v) = self
-                    .val
-                    .compare_exchange(current_val, new_val, SeqCst, Relaxed)
-                {
-                    current_val = v;
-                    continue;
-                }
-            }
-            break;
-        }
+        self.val.fetch_min(new_val, SeqCst);
     }
 }
