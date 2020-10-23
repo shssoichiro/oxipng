@@ -12,10 +12,10 @@ mod deflater;
 #[cfg(feature = "libdeflater")]
 pub use deflater::deflate as libdeflater_deflate;
 
-#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+#[cfg(feature = "cloudflare-zlib")]
 pub mod cfzlib;
 
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(feature = "cloudflare-zlib"))]
 pub mod cfzlib {
     pub fn is_supported() -> bool {
         return false;
@@ -38,7 +38,7 @@ pub fn deflate(
     max_size: &AtomicMin,
     deadline: &Deadline,
 ) -> PngResult<Vec<u8>> {
-    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+    #[cfg(feature = "cloudflare-zlib")]
     {
         if cfzlib::is_supported() {
             return cfzlib::cfzlib_deflate(data, zc, zs, zw, max_size, deadline);
