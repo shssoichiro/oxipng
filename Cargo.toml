@@ -63,7 +63,7 @@ features = ["arm-always"]
 version = "^0.2.2"
 
 [build-dependencies]
-rustc_version = "0.2"
+rustc_version = "0.3"
 
 [features]
 binary = [
