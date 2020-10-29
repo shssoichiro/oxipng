@@ -423,6 +423,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pest"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10f4872ae94d7b90ae48754df22fd42ad52ce740b8f370b03da4835417403e53"
+dependencies = [
+ "ucd-trie",
+]
+
+[[package]]
 name = "png"
 version = "0.16.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -470,9 +479,9 @@ dependencies = [
 
 [[package]]
 name = "rustc_version"
-version = "0.2.3"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "138e3e0acb6c9fb258b19b67cb8abd63c00679d2851805ea151465464fe9030a"
+checksum = "65c94201b44764d6d1f7e37c15a8289ed55e546c1762c7f1d57f616966e0c181"
 dependencies = [
  "semver",
 ]
@@ -485,18 +494,21 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "semver"
-version = "0.9.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d7eb9ef2c18661902cc47e535f9bc51b78acd254da71d375c2f6720d9a40403"
+checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
 dependencies = [
  "semver-parser",
 ]
 
 [[package]]
 name = "semver-parser"
-version = "0.7.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
+checksum = "42ef146c2ad5e5f4b037cd6ce2ebb775401729b19a82040c1beac9d36c7d1428"
+dependencies = [
+ "pest",
+]
 
 [[package]]
 name = "stderrlog"
@@ -560,6 +572,12 @@ name = "typed-arena"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9b2228007eba4120145f785df0f6c92ea538f5a3635a612ecf4e334c8c1446d"
+
+[[package]]
+name = "ucd-trie"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
 
 [[package]]
 name = "unicode-width"
