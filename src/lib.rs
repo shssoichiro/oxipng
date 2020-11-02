@@ -12,6 +12,11 @@
 #![warn(clippy::path_buf_push_overwrite)]
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
+#![cfg_attr(
+    not(any(feature = "libdeflater", feature = "zopfli")),
+    allow(irrefutable_let_patterns),
+    allow(unreachable_patterns)
+)]
 
 #[cfg(feature = "parallel")]
 extern crate rayon;
@@ -569,7 +574,9 @@ fn optimize_png(
                     &best_size,
                     &deadline,
                 ),
+                #[cfg(feature = "zopfli")]
                 Deflaters::Zopfli => deflate::zopfli_deflate(filtered),
+                #[cfg(feature = "libdeflater")]
                 Deflaters::Libdeflater => deflate::libdeflater_deflate(filtered, &best_size),
             };
 
