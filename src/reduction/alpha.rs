@@ -64,9 +64,7 @@ fn reduced_alpha_to_black(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         reduced.push(line.filter);
         for pixel in line.data.chunks(bpp) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                for _ in 0..bpp {
-                    reduced.push(0);
-                }
+                reduced.resize(reduced.len() + bpp, 0);
             } else {
                 reduced.extend_from_slice(pixel);
             }
@@ -81,12 +79,8 @@ fn reduced_alpha_to_white(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         reduced.push(line.filter);
         for pixel in line.data.chunks(bpp) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                for _ in 0..(bpp - bpc) {
-                    reduced.push(255);
-                }
-                for _ in 0..bpc {
-                    reduced.push(0);
-                }
+                reduced.resize(reduced.len() + bpp - bpc, 255);
+                reduced.resize(reduced.len() + bpc, 0);
             } else {
                 reduced.extend_from_slice(pixel);
             }
@@ -109,9 +103,7 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
                 current_line.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                for _ in 0..bpc {
-                    current_line.push(0);
-                }
+                current_line.resize(current_line.len() + bpc, 0);
             } else {
                 current_line.extend_from_slice(pixel);
             }
@@ -134,9 +126,7 @@ fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
                 reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                for _ in 0..bpc {
-                    reduced.push(0);
-                }
+                reduced.resize(reduced.len() + bpc, 0);
             } else {
                 reduced.extend_from_slice(pixel);
             }
@@ -154,9 +144,7 @@ fn reduced_alpha_to_left(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         for pixel in line.data.chunks(bpp).rev() {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
                 line_bytes.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                for _ in 0..bpc {
-                    line_bytes.push(0);
-                }
+                line_bytes.resize(line_bytes.len() + bpc, 0);
             } else {
                 line_bytes.extend_from_slice(pixel);
             }
@@ -176,9 +164,7 @@ fn reduced_alpha_to_right(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
         for pixel in line.data.chunks(bpp) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
                 reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                for _ in 0..bpc {
-                    reduced.push(0);
-                }
+                reduced.resize(reduced.len() + bpc, 0);
             } else {
                 reduced.extend_from_slice(pixel);
             }

@@ -10,7 +10,7 @@ use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{BufReader, Read};
 use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
@@ -62,25 +62,24 @@ impl PngData {
     }
 
     pub fn read_file(filepath: &Path) -> Result<Vec<u8>, PngError> {
-        let mut file = match File::open(filepath) {
+        let file = match File::open(filepath) {
             Ok(f) => f,
             Err(_) => return Err(PngError::new("Failed to open file for reading")),
         };
+        let file_len = file.metadata().map(|m| m.len() as usize).unwrap_or(0);
+        let mut reader = BufReader::new(file);
         // Check file for PNG header
         let mut header = [0; 8];
-        if file.read_exact(&mut header).is_err() {
+        if reader.read_exact(&mut header).is_err() {
             return Err(PngError::new("Not a PNG file: too small"));
         }
         if !file_header_is_valid(&header) {
             return Err(PngError::new("Invalid PNG header detected"));
         }
-        if file.seek(SeekFrom::Start(0)).is_err() {
-            return Err(PngError::new("Failed to read from file"));
-        }
         // Read raw png data into memory
-        let mut byte_data: Vec<u8> =
-            Vec::with_capacity(file.metadata().map(|m| m.len() as usize).unwrap_or(0));
-        match file.read_to_end(&mut byte_data) {
+        let mut byte_data: Vec<u8> = Vec::with_capacity(file_len);
+        byte_data.extend_from_slice(&header);
+        match reader.read_to_end(&mut byte_data) {
             Ok(_) => (),
             Err(_) => return Err(PngError::new("Failed to read from file")),
         }
