@@ -7,22 +7,68 @@ on:
 
 jobs:
 
-  create-binaries:
+  create-windows-binaries:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        conf: [x86_64, i686]
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install stable
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        target: ${{ matrix.conf }}-pc-windows-msvc
+        override: true
+
+    - name: Build oxipng
+      run: |
+        cargo build --release --target ${{ matrix.conf }}-pc-windows-msvc
+
+    - name: Get the version
+      shell: bash
+      id: tagName
+      run: |
+        VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+        echo "::set-output name=tag::$VERSION"
+
+    - name: Build package
+      id: package
+      shell: bash
+      run: |
+        ARCHIVE_TARGET="${{ matrix.conf }}-pc-windows-msvc"
+        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
+        ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
+        mv LICENSE LICENSE.txt
+        7z a ${ARCHIVE_FILE} \
+             ./target/${{ matrix.conf }}-pc-windows-msvc/release/oxipng.exe \
+             ./CHANGELOG.md ./LICENSE.txt ./README.md
+        echo "::set-output name=file::${ARCHIVE_FILE}"
+        echo "::set-output name=name::${ARCHIVE_NAME}.zip"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.package.outputs.name }}
+        path: ${{ steps.package.outputs.file }}
+
+  create-unix-binaries:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-          - os: macOS-latest
+          - os: macos-latest
             target: x86_64-apple-darwin
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: windows-latest
-            target: i686-pc-windows-msvc
 
-    runs-on: '${{ matrix.os }}'
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -36,19 +82,19 @@ jobs:
         override: true
 
     - name: Install musl
-      run: sudo apt-get install musl-tools
       if: contains(matrix.target, 'linux-musl')
+      run: |
+        sudo apt-get install musl-tools
 
     - name: Build oxipng
       run: |
         cargo build --release --target ${{ matrix.target }}
 
     - name: Strip binary
-      run: strip 'target/${{ matrix.target }}/release/oxipng'
-      if: "!contains(matrix.target, 'windows')"
+      run: |
+        strip target/${{ matrix.target }}/release/oxipng
 
     - name: Get the version
-      shell: bash
       id: tagName
       run: |
         VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
@@ -56,23 +102,17 @@ jobs:
 
     - name: Build package
       id: package
-      shell: bash
       run: |
-        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-${{ matrix.target }}"
-        if [[ '${{ matrix.target }}' == *windows* ]]; then
-          ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
-          mv LICENSE LICENSE.txt
-          7z a "${ARCHIVE_FILE}" "./target/${{ matrix.target }}/release/oxipng.exe" ./CHANGELOG.md ./LICENSE.txt ./README.md
-          echo ::set-output "name=file::${ARCHIVE_FILE}"
-          echo ::set-output "name=name::${ARCHIVE_NAME}.zip"
-        else
-          ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
-          mkdir "/tmp/${ARCHIVE_NAME}"
-          cp README.md CHANGELOG.md LICENSE "target/${{ matrix.target }}/release/oxipng" "/tmp/${ARCHIVE_NAME}"
-          tar -czf "${PWD}/${ARCHIVE_FILE}" -C /tmp/ "${ARCHIVE_NAME}"
-          echo ::set-output "name=file::${ARCHIVE_FILE}"
-          echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
-        fi
+        ARCHIVE_TARGET=${{ matrix.target }}
+        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
+        ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
+        mkdir "/tmp/${ARCHIVE_NAME}"
+        cp README.md CHANGELOG.md LICENSE \
+           target/${{ matrix.target }}/release/oxipng \
+           /tmp/${ARCHIVE_NAME}
+        tar -czf ${PWD}/${ARCHIVE_FILE} -C /tmp/ ${ARCHIVE_NAME}
+        echo ::set-output "name=file::${ARCHIVE_FILE}"
+        echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
@@ -80,9 +120,10 @@ jobs:
         name: ${{ steps.package.outputs.name }}
         path: ${{ steps.package.outputs.file }}
 
+
   deploy:
 
-    needs: create-binaries
+    needs: [create-windows-binaries, create-unix-binaries]
 
     runs-on: ubuntu-latest
 

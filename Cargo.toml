@@ -33,17 +33,17 @@ bit-vec = "^0.6.2"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
 itertools = "^0.9.0"
-zopfli = "^0.4.0"
+zopfli = { version = "^0.4.0", optional = true }
 miniz_oxide = "0.4"
 rgb = "0.8.25"
 indexmap = "1.6.0"
-libdeflater = "0.5.0"
+libdeflater = { version = "0.5.0", optional = true }
 log = "0.4.11"
 stderrlog = { version = "0.5.0", optional = true }
 
 [dependencies.rayon]
 optional = true
-version = "^1.4.0"
+version = "^1.5.0"
 
 [dependencies.clap]
 optional = true
@@ -63,7 +63,7 @@ features = ["arm-always"]
 version = "^0.2.2"
 
 [build-dependencies]
-rustc_version = "0.2"
+rustc_version = "0.3"
 
 [features]
 binary = [
@@ -71,7 +71,7 @@ binary = [
     "wild",
     "stderrlog",
 ]
-default = ["binary", "parallel"]
+default = ["binary", "parallel", "libdeflater", "zopfli"]
 parallel = ["rayon", "indexmap/rayon"]
 
 [lib]
