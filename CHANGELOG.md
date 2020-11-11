@@ -1,3 +1,11 @@
+### Version 4.0.0
+- [Breaking] Bump minimum Rust version to 1.45.0
+- [Feature] Make `libdeflater` and `zopfli` optional for API users
+- [Bugfix] Fix cloudflare-zlib on aarch64 CPUs
+- [Bugfix] Don't exit on finding a non-PNG file when crawling recursively
+- [Bugfix] Make `rayon` truly optional
+- Various internal improvements
+
 ### Version 3.0.1
 - [Bugfix] Re-add `--force` flag to CLI
   - This was accidentally removed somehow

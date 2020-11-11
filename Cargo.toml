@@ -16,7 +16,7 @@ license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
 build = "build.rs"
-version = "3.0.1"
+version = "4.0.0"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
@@ -40,7 +40,7 @@ indexmap = "1.6.0"
 libdeflater = { version = "0.5.0", optional = true }
 log = "0.4.11"
 stderrlog = { version = "0.5.0", optional = true }
-crossbeam-channel = "0.4.4"
+crossbeam-channel = "0.5.0"
 
 [dependencies.rayon]
 optional = true
