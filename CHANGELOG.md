@@ -1,3 +1,7 @@
+### Version 4.0.1
+- Includes an update to libdeflater that improves support for targets
+  without a C stdlib, like wasm32.
+
 ### Version 4.0.0
 - [Breaking] Bump minimum Rust version to 1.45.0
 - [Feature] Make `libdeflater` and `zopfli` optional for API users
