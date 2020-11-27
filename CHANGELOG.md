@@ -1,3 +1,7 @@
+### Version 4.0.2
+- Includes another update to libdeflater that improves support for targets
+  without a C stdlib, like wasm32.
+
 ### Version 4.0.1
 - Includes an update to libdeflater that improves support for targets
   without a C stdlib, like wasm32.
