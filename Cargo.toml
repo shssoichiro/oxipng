@@ -29,7 +29,7 @@ path = "src/main.rs"
 required-features = ["binary"]
 
 [dependencies]
-bit-vec = "^0.6.2"
+bit-vec = "^0.6.3"
 byteorder = "^1.0.0"
 crc = "^1.2.0"
 itertools = "^0.9.0"
