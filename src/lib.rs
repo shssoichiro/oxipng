@@ -35,7 +35,7 @@ use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use log::{debug, error, info, warn};
 use rayon::prelude::*;
 use std::fmt;
-use std::fs::{copy, File};
+use std::fs::{copy, File, Metadata};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -324,9 +324,30 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
 
     let deadline = Arc::new(Deadline::new(opts.timeout));
 
+    // grab metadata before even opening input file to preserve atime
+    let opt_metadata_preserved;
     let in_data = match *input {
-        InFile::Path(ref input_path) => PngData::read_file(input_path)?,
+        InFile::Path(ref input_path) => {
+            if opts.preserve_attrs {
+                opt_metadata_preserved = input_path
+                    .metadata()
+                    .map_err(|err| {
+                        // TODO: Fail if input and output file are the same and metadata cannot be preserved?
+                        warn!(
+                            "Unable to read metadata from input file {:?}: {}",
+                            input_path, err
+                        );
+                        err
+                    })
+                    .ok();
+                debug!("preserving metadata: {:?}", opt_metadata_preserved);
+            } else {
+                opt_metadata_preserved = None;
+            }
+            PngData::read_file(input_path)?
+        }
         InFile::StdIn => {
+            opt_metadata_preserved = None;
             let mut data = Vec::new();
             stdin()
                 .read_to_end(&mut data)
@@ -382,20 +403,27 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                     err
                 ))
             })?;
-            if opts.preserve_attrs {
-                if let Some(input_path) = input.path() {
-                    copy_permissions(input_path, &out_file);
-                }
+            if let Some(metadata_input) = &opt_metadata_preserved {
+                copy_permissions(&metadata_input, &out_file);
             }
 
             let mut buffer = BufWriter::new(out_file);
-            buffer.write_all(&optimized_output).map_err(|e| {
-                PngError::new(&format!(
-                    "Unable to write to {}: {}",
-                    output_path.display(),
-                    e
-                ))
-            })?;
+            buffer
+                .write_all(&optimized_output)
+                // flush BufWriter so IO errors don't get swallowed silently on close() by drop!
+                .and_then(|()| buffer.flush())
+                .map_err(|e| {
+                    PngError::new(&format!(
+                        "Unable to write to {}: {}",
+                        output_path.display(),
+                        e
+                    ))
+                })?;
+            // force drop and thereby closing of file handle before modifying any timestamp
+            std::mem::drop(buffer);
+            if let Some(metadata_input) = &opt_metadata_preserved {
+                copy_times(&metadata_input, &output_path);
+            }
             info!("Output: {}", output_path.display());
         }
     }
@@ -932,33 +960,45 @@ fn perform_backup(input_path: &Path) -> PngResult<()> {
 }
 
 #[cfg(not(unix))]
-fn copy_permissions(input_path: &Path, out_file: &File) {
-    if let Ok(f) = File::open(input_path) {
-        if let Ok(metadata) = f.metadata() {
-            if let Ok(out_meta) = out_file.metadata() {
-                let readonly = metadata.permissions().readonly();
-                out_meta.permissions().set_readonly(readonly);
-                return;
-            }
-        }
-    };
+fn copy_permissions(metadata_input: &Metadata, out_file: &File) {
+    if let Ok(out_meta) = out_file.metadata() {
+        let readonly = metadata_input.permissions().readonly();
+        out_meta.permissions().set_readonly(readonly);
+        return;
+    }
     warn!("Failed to set permissions on output file");
 }
 
 #[cfg(unix)]
-fn copy_permissions(input_path: &Path, out_file: &File) {
+fn copy_permissions(metadata_input: &Metadata, out_file: &File) {
     use std::os::unix::fs::PermissionsExt;
 
-    if let Ok(f) = File::open(input_path) {
-        if let Ok(metadata) = f.metadata() {
-            if let Ok(out_meta) = out_file.metadata() {
-                let permissions = metadata.permissions().mode();
-                out_meta.permissions().set_mode(permissions);
-                return;
+    let permissions = metadata_input.permissions().mode();
+    if let Ok(out_meta) = out_file.metadata() {
+        out_meta.permissions().set_mode(permissions);
+        if let Ok(out_meta_reread) = out_file.metadata() {
+            if out_meta_reread.permissions().mode() != permissions {
+                warn!("Failed to set input file permissions on output file");
             }
+        } else {
+            warn!("Failed to read newly-set permissions on output file");
         }
-    };
+        return;
+    }
     warn!("Failed to set permissions on output file");
+}
+
+fn copy_times(input_path_meta: &Metadata, out_path: &Path) {
+    let atime = filetime::FileTime::from_last_access_time(input_path_meta);
+    let mtime = filetime::FileTime::from_last_modification_time(input_path_meta);
+    debug!(
+        "attempting to set file times: atime: {:?}, mtime: {:?}",
+        atime, mtime
+    );
+    if let Err(err) = filetime::set_file_times(out_path, atime, mtime) {
+        warn!("Failed to set input file access/modification time on output file");
+        debug!("Error: {:?}", err);
+    }
 }
 
 /// Compares images pixel by pixel for equivalent content

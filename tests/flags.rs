@@ -1,7 +1,9 @@
 use indexmap::IndexSet;
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
+use std::cell::RefCell;
 use std::fs::remove_file;
+use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -18,7 +20,8 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     )
 }
 
-fn test_it_converts(
+/// Add callback to allow checks before the output file is deleted again
+fn test_it_converts_callbacks<CBPRE, CBPOST>(
     input: PathBuf,
     output: &OutFile,
     opts: &oxipng::Options,
@@ -26,11 +29,18 @@ fn test_it_converts(
     bit_depth_in: BitDepth,
     color_type_out: ColorType,
     bit_depth_out: BitDepth,
-) {
+    mut callback_pre: CBPRE,
+    mut callback_post: CBPOST,
+) where
+    CBPOST: FnMut(&Path) -> (),
+    CBPRE: FnMut(&Path) -> (),
+{
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type, color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
+
+    callback_pre(&input);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -38,6 +48,8 @@ fn test_it_converts(
     };
     let output = output.path().unwrap();
     assert!(output.exists());
+
+    callback_post(&output);
 
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
@@ -51,6 +63,29 @@ fn test_it_converts(
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
+}
+
+/// Shim for new callback functionality
+fn test_it_converts(
+    input: PathBuf,
+    output: &OutFile,
+    opts: &oxipng::Options,
+    color_type_in: ColorType,
+    bit_depth_in: BitDepth,
+    color_type_out: ColorType,
+    bit_depth_out: BitDepth,
+) {
+    test_it_converts_callbacks(
+        input,
+        output,
+        opts,
+        color_type_in,
+        bit_depth_in,
+        color_type_out,
+        bit_depth_out,
+        |_| {},
+        |_| {},
+    )
 }
 
 #[test]
@@ -444,10 +479,45 @@ fn interlaced_0_to_1_other_filter_mode() {
 #[test]
 fn preserve_attrs() {
     let input = PathBuf::from("tests/files/preserve_attrs.png");
+
+    let atime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
+    let mtime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
+
     let (output, mut opts) = get_opts(&input);
     opts.preserve_attrs = true;
 
-    test_it_converts(
+    let callback_pre = |path_in: &Path| {
+        let meta_input = path_in
+            .metadata()
+            .expect("unable to get file metadata for output file");
+
+        atime_canon.replace(filetime::FileTime::from_last_access_time(&meta_input));
+        mtime_canon.replace(filetime::FileTime::from_last_modification_time(&meta_input));
+    };
+
+    let callback_post = |path_out: &Path| {
+        let meta_output = path_out
+            .metadata()
+            .expect("unable to get file metadata for output file");
+
+        let cellref_atime_canon = atime_canon.borrow();
+        let cellref_mtime_canon = mtime_canon.borrow();
+        let ref_atime_canon: &filetime::FileTime = cellref_atime_canon.deref();
+        let ref_mtime_canon: &filetime::FileTime = cellref_mtime_canon.deref();
+
+        assert_eq!(
+            ref_atime_canon,
+            &filetime::FileTime::from_last_access_time(&meta_output),
+            "expected access time to be identical to that of input",
+        );
+        assert_eq!(
+            ref_mtime_canon,
+            &filetime::FileTime::from_last_modification_time(&meta_output),
+            "expected modification time to be identical to that of input",
+        );
+    };
+
+    test_it_converts_callbacks(
         input,
         &output,
         &opts,
@@ -455,9 +525,9 @@ fn preserve_attrs() {
         BitDepth::Eight,
         ColorType::RGB,
         BitDepth::Eight,
+        callback_pre,
+        callback_post,
     );
-
-    // TODO: Actually check permissions
 }
 
 #[test]
