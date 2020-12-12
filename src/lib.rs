@@ -988,6 +988,10 @@ fn copy_permissions(metadata_input: &Metadata, out_file: &File) {
     warn!("Failed to set permissions on output file");
 }
 
+#[cfg(not(feature = "filetime"))]
+fn copy_times(_: &Metadata, _: &Path) {}
+
+#[cfg(feature = "filetime")]
 fn copy_times(input_path_meta: &Metadata, out_path: &Path) {
     let atime = filetime::FileTime::from_last_access_time(input_path_meta);
     let mtime = filetime::FileTime::from_last_modification_time(input_path_meta);

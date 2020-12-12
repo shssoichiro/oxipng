@@ -1,8 +1,10 @@
 use indexmap::IndexSet;
 use oxipng::internal_tests::*;
 use oxipng::{InFile, OutFile};
+#[cfg(feature = "filetime")]
 use std::cell::RefCell;
 use std::fs::remove_file;
+#[cfg(feature = "filetime")]
 use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
@@ -480,12 +482,15 @@ fn interlaced_0_to_1_other_filter_mode() {
 fn preserve_attrs() {
     let input = PathBuf::from("tests/files/preserve_attrs.png");
 
+    #[cfg(feature = "filetime")]
     let atime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
+    #[cfg(feature = "filetime")]
     let mtime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
 
     let (output, mut opts) = get_opts(&input);
     opts.preserve_attrs = true;
 
+    #[cfg(feature = "filetime")]
     let callback_pre = |path_in: &Path| {
         let meta_input = path_in
             .metadata()
@@ -494,7 +499,10 @@ fn preserve_attrs() {
         atime_canon.replace(filetime::FileTime::from_last_access_time(&meta_input));
         mtime_canon.replace(filetime::FileTime::from_last_modification_time(&meta_input));
     };
+    #[cfg(not(feature = "filetime"))]
+    let callback_pre = |_: &Path| {};
 
+    #[cfg(feature = "filetime")]
     let callback_post = |path_out: &Path| {
         let meta_output = path_out
             .metadata()
@@ -516,6 +524,8 @@ fn preserve_attrs() {
             "expected modification time to be identical to that of input",
         );
     };
+    #[cfg(not(feature = "filetime"))]
+    let callback_post = |_: &Path| {};
 
     test_it_converts_callbacks(
         input,
@@ -528,6 +538,8 @@ fn preserve_attrs() {
         callback_pre,
         callback_post,
     );
+
+    // TODO: Actually check permissions
 }
 
 #[test]
