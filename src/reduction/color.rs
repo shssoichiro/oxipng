@@ -12,7 +12,9 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngImage) -> Option<PngImage> {
     let byte_depth = png.ihdr.bit_depth.as_u8() >> 3;
     let bpp = 4 * byte_depth;
     let bpp_mask = bpp - 1;
-    assert_eq!(0, bpp & bpp_mask);
+    if 0 != bpp & bpp_mask {
+        return None;
+    }
     let colored_bytes = bpp - byte_depth;
     for line in png.scan_lines() {
         reduced.push(line.filter);
@@ -157,7 +159,10 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
-        assert_eq!(bkgd_header.len(), 6);
+        if bkgd_header.len() != 6 {
+            // malformed chunk?
+            return None;
+        }
         // In bKGD 16-bit values are used even for 8-bit images
         let bg = RGBA8::new(bkgd_header[1], bkgd_header[3], bkgd_header[5], 255);
         let entry = if let Some(&entry) = palette.get(&bg) {

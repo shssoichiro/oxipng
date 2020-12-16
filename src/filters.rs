@@ -63,7 +63,7 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
 }
 
 pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
-    assert_eq!(buf.len(), 0);
+    buf.clear();
     buf.reserve(data.len());
     match filter {
         0 => {
