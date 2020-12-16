@@ -185,7 +185,9 @@ pub fn reduced_alpha_channel(png: &PngImage) -> Option<PngImage> {
     let channels = png.channels_per_pixel();
     let bpp = channels * byte_depth;
     let bpp_mask = bpp - 1;
-    assert_eq!(0, bpp & bpp_mask);
+    if 0 != bpp & bpp_mask {
+        return None;
+    }
     let colored_bytes = bpp - byte_depth;
     for line in png.scan_lines() {
         for (i, &byte) in line.data.iter().enumerate() {
