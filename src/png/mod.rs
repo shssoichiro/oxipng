@@ -100,7 +100,7 @@ impl PngData {
         let mut idat_headers: Vec<u8> = Vec::new();
         while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
             match &header.name {
-                b"IDAT" => idat_headers.extend(header.data),
+                b"IDAT" => idat_headers.extend_from_slice(header.data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
                 _ => {
                     aux_headers.insert(header.name, header.data.to_owned());
