@@ -118,6 +118,11 @@ impl PngData {
         let ihdr_header = parse_ihdr_header(&ihdr)?;
         let raw_data = deflate::inflate(idat_headers.as_ref())?;
 
+        // Reject files with incorrect width/height or truncated data
+        if raw_data.len() != ihdr_header.raw_data_size() {
+            return Err(PngError::TruncatedData);
+        }
+
         let (palette, transparency_pixel) = Self::palette_to_rgba(
             ihdr_header.color_type,
             aux_headers.remove(b"PLTE"),

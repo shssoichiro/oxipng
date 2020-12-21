@@ -5,7 +5,7 @@ use bit_vec::BitVec;
 #[must_use]
 pub fn interlace_image(png: &PngImage) -> PngImage {
     let mut passes: Vec<BitVec> = vec![BitVec::new(); 7];
-    let bits_per_pixel = png.ihdr.bit_depth.as_u8() * png.channels_per_pixel();
+    let bits_per_pixel = png.ihdr.bpp();
     for (index, line) in png.scan_lines().enumerate() {
         match index % 8 {
             // Add filter bytes to passes that will be in the output image
@@ -95,7 +95,7 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
 }
 
 pub fn deinterlace_image(png: &PngImage) -> PngImage {
-    let bits_per_pixel = png.ihdr.bit_depth.as_u8() * png.channels_per_pixel();
+    let bits_per_pixel = png.ihdr.bpp();
     let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr.width as usize;
     // Initialize each output line with a starting filter byte of 0
     // as well as some blank data
