@@ -25,6 +25,42 @@ pub struct IhdrData {
     pub interlaced: u8,
 }
 
+impl IhdrData {
+    /// Bits per pixel
+    pub fn bpp(&self) -> u8 {
+        self.bit_depth.as_u8() * self.color_type.channels_per_pixel()
+    }
+
+    /// Byte length of IDAT that is correct for this IHDR
+    pub fn raw_data_size(&self) -> usize {
+        let w = self.width as usize;
+        let h = self.height as usize;
+        let bpp = self.bpp();
+
+        fn bitmap_size(bpp: u8, w: usize, h: usize) -> usize {
+            (((w / 8) * bpp as usize) + ((w & 7) * bpp as usize + 7) / 8) * h
+        }
+
+        if self.interlaced == 0 {
+            bitmap_size(bpp, w, h) + h
+        } else {
+            let mut size = bitmap_size(bpp, (w + 7) >> 3, (h + 7) >> 3) + ((h + 7) >> 3);
+            if w > 4 {
+                size += bitmap_size(bpp, (w + 3) >> 3, (h + 7) >> 3) + ((h + 7) >> 3);
+            }
+            size += bitmap_size(bpp, (w + 3) >> 2, (h + 3) >> 3) + ((h + 3) >> 3);
+            if w > 2 {
+                size += bitmap_size(bpp, (w + 1) >> 2, (h + 3) >> 2) + ((h + 3) >> 2);
+            }
+            size += bitmap_size(bpp, (w + 1) >> 1, (h + 1) >> 2) + ((h + 1) >> 2);
+            if w > 1 {
+                size += bitmap_size(bpp, w >> 1, (h + 1) >> 1) + ((h + 1) >> 1);
+            }
+            size + bitmap_size(bpp, w, h >> 1) + (h >> 1)
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 /// Options to use for performing operations on headers (such as stripping)
 pub enum Headers {
