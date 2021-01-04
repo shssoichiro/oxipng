@@ -11,7 +11,10 @@ jobs:
 
     strategy:
       matrix:
-        conf: [x86_64, i686]
+        conf: [x86_64]
+# Temporarily disable i686 binaries, they are failing on linking libdeflate
+# and I don't have a Windows machine set up to experiment with fixing it.
+#        conf: [x86_64, i686]
 
     runs-on: windows-latest
 
