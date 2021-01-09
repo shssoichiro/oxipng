@@ -18,7 +18,7 @@ pub mod cfzlib;
 #[cfg(not(feature = "cloudflare-zlib"))]
 pub mod cfzlib {
     pub fn is_supported() -> bool {
-        return false;
+        false
     }
 }
 
