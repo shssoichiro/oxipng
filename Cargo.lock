@@ -479,9 +479,9 @@ dependencies = [
 
 [[package]]
 name = "rustc_version"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65c94201b44764d6d1f7e37c15a8289ed55e546c1762c7f1d57f616966e0c181"
+checksum = "397d411cfc34097bdb176984180f7d9980eb161aaf1368ceea96c9834d8f8b85"
 dependencies = [
  "semver",
 ]
