@@ -111,6 +111,7 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
     let transparency_pixel = png
         .transparency_pixel
         .as_ref()
+        .filter(|t| png.ihdr.color_type == ColorType::RGB && t.len() >= 6)
         .map(|t| RGB8::new(t[1], t[3], t[5]));
     for line in png.scan_lines() {
         raw_data.push(line.filter);
