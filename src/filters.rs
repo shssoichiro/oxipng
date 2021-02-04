@@ -72,11 +72,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf:
         }
         1 => {
             for (i, &cur) in data.iter().enumerate() {
-                buf.push(match i.checked_sub(bpp) {
-                    Some(x) => {
-                        let b = buf[x];
-                        cur.wrapping_add(b)
-                    }
+                let prev_byte = i.checked_sub(bpp).and_then(|x| buf.get(x).copied());
+                buf.push(match prev_byte {
+                    Some(b) => cur.wrapping_add(b),
                     None => cur,
                 });
             }
@@ -90,23 +88,20 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf:
         }
         3 => {
             for (i, (&cur, &last)) in data.iter().zip(last_line).enumerate() {
-                buf.push(match i.checked_sub(bpp) {
-                    Some(x) => {
-                        let b = buf[x];
-                        cur.wrapping_add(((u16::from(b) + u16::from(last)) >> 1) as u8)
-                    }
+                let prev_byte = i.checked_sub(bpp).and_then(|x| buf.get(x).copied());
+                buf.push(match prev_byte {
+                    Some(b) => cur.wrapping_add(((u16::from(b) + u16::from(last)) >> 1) as u8),
                     None => cur.wrapping_add(last >> 1),
                 });
             }
         }
         4 => {
-            for (i, (&cur, &last)) in data.iter().zip(last_line).enumerate() {
-                buf.push(match i.checked_sub(bpp) {
-                    Some(x) => {
-                        let b = buf[x];
-                        cur.wrapping_add(paeth_predictor(b, last, last_line[x]))
+            for (i, (&cur, &up)) in data.iter().zip(last_line).enumerate() {
+                buf.push(match i.checked_sub(bpp).map(|x| (buf.get(x).copied(), last_line.get(x).copied())) {
+                    Some((Some(left), Some(left_up))) => {
+                        cur.wrapping_add(paeth_predictor(left, up, left_up))
                     }
-                    None => cur.wrapping_add(last),
+                    _ => cur.wrapping_add(up),
                 });
             }
         }
