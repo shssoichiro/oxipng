@@ -65,6 +65,7 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
 pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
     buf.clear();
     buf.reserve(data.len());
+    assert_eq!(data.len(), last_line.len());
     match filter {
         0 => {
             buf.extend_from_slice(data);
@@ -81,55 +82,31 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf:
             }
         }
         2 => {
-            if last_line.is_empty() {
-                buf.extend_from_slice(data);
-            } else {
-                buf.extend(
-                    data.iter()
-                        .zip(last_line.iter())
-                        .map(|(cur, last)| cur.wrapping_add(*last)),
-                );
-            };
+            buf.extend(
+                data.iter()
+                    .zip(last_line.iter())
+                    .map(|(cur, last)| cur.wrapping_add(*last)),
+            );
         }
         3 => {
             for (i, byte) in data.iter().enumerate() {
-                buf.push(if last_line.is_empty() {
-                    match i.checked_sub(bpp) {
-                        Some(x) => {
-                            let b = buf[x];
-                            byte.wrapping_add(b >> 1)
-                        }
-                        None => *byte,
+                buf.push(match i.checked_sub(bpp) {
+                    Some(x) => {
+                        let b = buf[x];
+                        byte.wrapping_add(((u16::from(b) + u16::from(last_line[i])) >> 1) as u8)
                     }
-                } else {
-                    match i.checked_sub(bpp) {
-                        Some(x) => {
-                            let b = buf[x];
-                            byte.wrapping_add(((u16::from(b) + u16::from(last_line[i])) >> 1) as u8)
-                        }
-                        None => byte.wrapping_add(last_line[i] >> 1),
-                    }
+                    None => byte.wrapping_add(last_line[i] >> 1),
                 });
             }
         }
         4 => {
             for (i, byte) in data.iter().enumerate() {
-                buf.push(if last_line.is_empty() {
-                    match i.checked_sub(bpp) {
-                        Some(x) => {
-                            let b = buf[x];
-                            byte.wrapping_add(b)
-                        }
-                        None => *byte,
+                buf.push(match i.checked_sub(bpp) {
+                    Some(x) => {
+                        let b = buf[x];
+                        byte.wrapping_add(paeth_predictor(b, last_line[i], last_line[x]))
                     }
-                } else {
-                    match i.checked_sub(bpp) {
-                        Some(x) => {
-                            let b = buf[x];
-                            byte.wrapping_add(paeth_predictor(b, last_line[i], last_line[x]))
-                        }
-                        None => byte.wrapping_add(last_line[i]),
-                    }
+                    None => byte.wrapping_add(last_line[i]),
                 });
             }
         }
