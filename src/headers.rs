@@ -140,6 +140,8 @@ pub fn parse_next_header<'a>(
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
+    // This eliminates bounds checks for the rest of the function
+    let interlaced = byte_data.get(12).copied().ok_or(PngError::TruncatedData)?;
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {
@@ -162,6 +164,6 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
         height: rdr.read_u32::<BigEndian>().unwrap(),
         compression: byte_data[10],
         filter: byte_data[11],
-        interlaced: byte_data[12],
+        interlaced,
     })
 }
