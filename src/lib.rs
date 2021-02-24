@@ -785,10 +785,12 @@ impl Deadline {
         if let Some(imp) = &self.imp {
             let elapsed = imp.start.elapsed();
             if elapsed > imp.timeout {
-                if imp
-                    .print_message
-                    .compare_and_swap(true, false, Ordering::SeqCst)
-                {
+                if imp.print_message.compare_exchange(
+                    true,
+                    false,
+                    Ordering::SeqCst,
+                    Ordering::SeqCst,
+                ) {
                     warn!("Timed out after {} second(s)", elapsed.as_secs());
                 }
                 return true;
