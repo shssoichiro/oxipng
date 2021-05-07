@@ -10,11 +10,7 @@ pub trait ParallelIterator: Iterator + Sized {
     where
         OP: Fn(Self::Item, Self::Item) -> Self::Item + Sync,
     {
-        if let Some(a) = self.next() {
-            Some(self.fold(a, op))
-        } else {
-            None
-        }
+        self.next().map(|a| self.fold(a, op))
     }
 }
 

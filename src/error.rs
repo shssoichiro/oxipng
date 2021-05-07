@@ -14,15 +14,11 @@ pub enum PngError {
     Other(Box<str>),
 }
 
-impl Error for PngError {
-    // deprecated
-    fn description(&self) -> &str {
-        ""
-    }
-}
+impl Error for PngError {}
 
 impl fmt::Display for PngError {
     #[inline]
+    #[cold]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             PngError::DeflatedDataTooLong(_) => f.write_str("deflated data too long"),
@@ -40,7 +36,7 @@ impl fmt::Display for PngError {
 }
 
 impl PngError {
-    #[inline]
+    #[cold]
     pub fn new(description: &str) -> PngError {
         PngError::Other(description.into())
     }

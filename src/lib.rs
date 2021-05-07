@@ -12,6 +12,7 @@
 #![warn(clippy::path_buf_push_overwrite)]
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
+#![allow(clippy::upper_case_acronyms)]
 #![cfg_attr(
     not(any(feature = "libdeflater", feature = "zopfli")),
     allow(irrefutable_let_patterns),
@@ -97,7 +98,7 @@ impl InFile {
     pub fn path(&self) -> Option<&Path> {
         match *self {
             InFile::Path(ref p) => Some(p.as_path()),
-            _ => None,
+            InFile::StdIn => None,
         }
     }
 }
@@ -589,7 +590,7 @@ fn optimize_png(
                     );
                     return None;
                 }
-                _ => return None,
+                Err(_) => return None,
             };
 
             // update best size across all threads
@@ -655,14 +656,14 @@ fn optimize_png(
             "    file size = {} bytes ({} bytes = {:.2}% decrease)",
             output.len(),
             file_original_size - output.len(),
-            (file_original_size - output.len()) as f64 / file_original_size as f64 * 100f64
+            (file_original_size - output.len()) as f64 / file_original_size as f64 * 100_f64
         );
     } else {
         info!(
             "    file size = {} bytes ({} bytes = {:.2}% increase)",
             output.len(),
             output.len() - file_original_size,
-            (output.len() - file_original_size) as f64 / file_original_size as f64 * 100f64
+            (output.len() - file_original_size) as f64 / file_original_size as f64 * 100_f64
         );
     }
 

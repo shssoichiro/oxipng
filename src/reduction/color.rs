@@ -150,7 +150,7 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
             }
         })
         .max();
-    let trns_size = num_transparent.map(|n| n + 8).unwrap_or(0);
+    let trns_size = num_transparent.map_or(0, |n| n + 8);
 
     let headers_size = palette.len() * 3 + 8 + trns_size;
     if raw_data.len() + headers_size > png.data.len() {
