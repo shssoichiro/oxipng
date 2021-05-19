@@ -294,6 +294,7 @@ impl PngImage {
                     last_pass = pass;
                 }
             }
+            last_line.resize(line.data.len(), 0);
             unfilter_line(
                 line.filter,
                 bpp,
