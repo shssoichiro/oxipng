@@ -1,7 +1,7 @@
 use crate::png::PngImage;
 
-#[derive(Debug, Clone)]
 /// An iterator over the scan lines of a PNG image
+#[derive(Debug, Clone)]
 pub struct ScanLines<'a> {
     iter: ScanLineRanges,
     /// A reference to the PNG image being iterated upon

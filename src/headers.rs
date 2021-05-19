@@ -27,11 +27,14 @@ pub struct IhdrData {
 
 impl IhdrData {
     /// Bits per pixel
+    #[must_use]
+    #[inline]
     pub fn bpp(&self) -> u8 {
         self.bit_depth.as_u8() * self.color_type.channels_per_pixel()
     }
 
     /// Byte length of IDAT that is correct for this IHDR
+    #[must_use]
     pub fn raw_data_size(&self) -> usize {
         let w = self.width as usize;
         let h = self.height as usize;
@@ -134,7 +137,7 @@ pub fn parse_next_header<'a>(
         )));
     }
 
-    let mut name = [0u8; 4];
+    let mut name = [0_u8; 4];
     name.copy_from_slice(chunk_name);
     Ok(Some(RawHeader { name, data }))
 }
@@ -160,8 +163,12 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
             16 => BitDepth::Sixteen,
             _ => return Err(PngError::new("Unexpected bit depth in header")),
         },
-        width: rdr.read_u32::<BigEndian>().unwrap(),
-        height: rdr.read_u32::<BigEndian>().unwrap(),
+        width: rdr
+            .read_u32::<BigEndian>()
+            .map_err(|_| PngError::TruncatedData)?,
+        height: rdr
+            .read_u32::<BigEndian>()
+            .map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],
         filter: byte_data[11],
         interlaced,

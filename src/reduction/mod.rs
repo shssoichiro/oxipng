@@ -6,9 +6,9 @@ use rgb::RGBA8;
 use std::borrow::Cow;
 
 pub mod alpha;
-use crate::alpha::*;
+use crate::alpha::reduced_alpha_channel;
 pub mod bit_depth;
-use crate::bit_depth::*;
+use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
 use crate::color::*;
 
@@ -17,7 +17,6 @@ pub(crate) use crate::bit_depth::reduce_bit_depth;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
-#[must_use]
 pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
@@ -70,14 +69,14 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
                     .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
                 ((color.a as i32) << 18)
                 // These are coefficients for standard sRGB to luma conversion
-                - (color.r as i32) * 299
-                - (color.g as i32) * 587
-                - (color.b as i32) * 114
+                - i32::from(color.r) * 299
+                - i32::from(color.g) * 587
+                - i32::from(color.b) * 114
             };
             color_val(a.0).cmp(&color_val(b.0))
         });
 
-        let mut next_index = 0u16;
+        let mut next_index = 0_u16;
         let mut seen = IndexMap::with_capacity(palette.len());
         for (i, used) in used_enumerated.iter().cloned() {
             if !used {
@@ -138,33 +137,33 @@ fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Opti
 }
 
 fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<[u8; 256]> {
-    let len = png.palette.as_ref().map(|p| p.len()).unwrap_or(0);
+    let len = png.palette.as_ref().map_or(0, |p| p.len());
     if (0..len).all(|i| palette_map[i].map_or(true, |to| to == i as u8)) {
         // No reduction necessary
         return None;
     }
 
-    let mut byte_map = [0u8; 256];
+    let mut byte_map = [0_u8; 256];
 
     // low bit-depths can be pre-computed for every byte value
     match png.ihdr.bit_depth {
         BitDepth::Eight => {
-            for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[byte as usize].unwrap_or(0)
+            for byte in 0..=255usize {
+                byte_map[byte] = palette_map[byte].unwrap_or(0)
             }
         }
         BitDepth::Four => {
-            for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[(byte & 0x0F) as usize].unwrap_or(0)
-                    | (palette_map[(byte >> 4) as usize].unwrap_or(0) << 4);
+            for byte in 0..=255usize {
+                byte_map[byte] = palette_map[(byte & 0x0F)].unwrap_or(0)
+                    | (palette_map[(byte >> 4)].unwrap_or(0) << 4);
             }
         }
         BitDepth::Two => {
-            for byte in 0..=255 {
-                byte_map[byte as usize] = palette_map[(byte & 0x03) as usize].unwrap_or(0)
-                    | (palette_map[((byte >> 2) & 0x03) as usize].unwrap_or(0) << 2)
-                    | (palette_map[((byte >> 4) & 0x03) as usize].unwrap_or(0) << 4)
-                    | (palette_map[(byte >> 6) as usize].unwrap_or(0) << 6);
+            for byte in 0..=255usize {
+                byte_map[byte] = palette_map[(byte & 0x03)].unwrap_or(0)
+                    | (palette_map[((byte >> 2) & 0x03)].unwrap_or(0) << 2)
+                    | (palette_map[((byte >> 4) & 0x03)].unwrap_or(0) << 4)
+                    | (palette_map[(byte >> 6)].unwrap_or(0) << 6);
             }
         }
         _ => {}
@@ -174,12 +173,7 @@ fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> O
 }
 
 fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<RGBA8> {
-    let max_index = palette_map
-        .iter()
-        .cloned()
-        .filter_map(|x| x)
-        .max()
-        .unwrap_or(0) as usize;
+    let max_index = palette_map.iter().cloned().flatten().max().unwrap_or(0) as usize;
     let mut new_palette = vec![RGBA8::new(0, 0, 0, 255); max_index + 1];
     for (&color, &map_to) in palette.iter().zip(palette_map.iter()) {
         if let Some(map_to) = map_to {

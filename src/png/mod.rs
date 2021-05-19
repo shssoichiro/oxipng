@@ -208,10 +208,10 @@ impl PngData {
                     .fold(
                         0,
                         |prev, (index, px)| {
-                            if px.a != 255 {
-                                index + 1
-                            } else {
+                            if px.a == 255 {
                                 prev
+                            } else {
+                                index + 1
                             }
                         },
                     );
@@ -346,7 +346,7 @@ impl PngImage {
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
                         filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
-                        let size = f_buf.iter().fold(0u64, |acc, &x| {
+                        let size = f_buf.iter().fold(0_u64, |acc, &x| {
                             let signed = x as i8;
                             acc + i16::from(signed).abs() as u64
                         });

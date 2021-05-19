@@ -123,9 +123,8 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
                     };
                     if permutations.iter().any(|perm| *perm == byte) {
                         break;
-                    } else {
-                        minimum_bits <<= 1;
                     }
+                    minimum_bits <<= 1;
                 }
             }
         }
