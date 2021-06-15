@@ -285,14 +285,12 @@ impl PngImage {
         let mut unfiltered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
-        let mut last_pass = 1;
+        let mut last_pass = None;
         let mut unfiltered_buf = Vec::new();
         for line in self.scan_lines() {
-            if let Some(pass) = line.pass {
-                if pass != last_pass {
-                    last_line.clear();
-                    last_pass = pass;
-                }
+            if last_pass != line.pass {
+                last_line.clear();
+                last_pass = line.pass;
             }
             last_line.resize(line.data.len(), 0);
             unfilter_line(
@@ -325,6 +323,9 @@ impl PngImage {
         let mut f_buf = Vec::new();
         for line in self.scan_lines() {
             f_buf.clear();
+            if last_pass != line.pass {
+                last_line = &[];
+            }
             match filter {
                 0 | 1 | 2 | 3 | 4 => {
                     let filter = if last_pass == line.pass || filter <= 1 {
