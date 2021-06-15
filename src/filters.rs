@@ -1,4 +1,6 @@
 pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
+    assert!(data.len() >= bpp);
+    assert!(last_line.is_empty() || data.len() == last_line.len());
     buf.reserve(data.len());
     match filter {
         0 => {
@@ -17,6 +19,7 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
             if last_line.is_empty() {
                 buf.extend_from_slice(data);
             } else {
+                assert_eq!(data.len(), last_line.len());
                 buf.extend(
                     data.iter()
                         .zip(last_line.iter())
@@ -65,6 +68,7 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
 pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
     buf.clear();
     buf.reserve(data.len());
+    assert!(data.len() >= bpp);
     assert_eq!(data.len(), last_line.len());
     match filter {
         0 => {
