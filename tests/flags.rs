@@ -494,6 +494,7 @@ fn fix_errors() {
 }
 
 #[test]
+#[cfg(feature = "zopfli")]
 fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
@@ -511,6 +512,7 @@ fn zopfli_mode() {
 }
 
 #[test]
+#[cfg(feature = "libdeflater")]
 fn libdeflater_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
