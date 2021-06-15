@@ -75,7 +75,6 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
 #[must_use]
 pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
     assert!((1..8).contains(&minimum_bits));
-    let mut reduced = BitVec::with_capacity(png.data.len() * 8);
     let bit_depth: usize = png.ihdr.bit_depth.as_u8() as usize;
     if minimum_bits >= bit_depth {
         return None;
@@ -130,6 +129,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         }
     }
 
+    let mut reduced = BitVec::with_capacity(png.data.len() * 8);
     for line in png.scan_lines() {
         reduced.extend(BitVec::from_bytes(&[line.filter]));
         let bit_vec = BitVec::from_bytes(&line.data);
