@@ -78,7 +78,12 @@ parallel = ["rayon", "indexmap/rayon"]
 [lib]
 name = "oxipng"
 path = "src/lib.rs"
+
 [profile.dev]
 opt-level = 2
+
 [profile.release]
 lto = "thin"
+
+[profile.dev.package.bit-vec]
+opt-level = 3
