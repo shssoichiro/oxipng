@@ -1,3 +1,5 @@
+use crate::error::PngError;
+
 pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
     assert!(data.len() >= bpp);
     assert!(last_line.is_empty() || data.len() == last_line.len());
@@ -65,7 +67,7 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
     }
 }
 
-pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
+pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) -> Result<(), PngError> {
     buf.clear();
     buf.reserve(data.len());
     assert!(data.len() >= bpp);
@@ -114,8 +116,9 @@ pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf:
                 );
             }
         }
-        _ => unreachable!(),
+        _ => return Err(PngError::InvalidData),
     }
+    Ok(())
 }
 
 fn paeth_predictor(a: u8, b: u8, c: u8) -> u8 {
