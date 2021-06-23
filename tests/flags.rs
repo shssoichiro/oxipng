@@ -6,14 +6,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options::default();
-    options.force = true;
+    let mut options = oxipng::Options {
+        force: true,
+        ..Default::default()
+    };
     let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
     (
-        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        OutFile::Path(Some(input.with_extension("out.png"))),
         options,
     )
 }
@@ -32,7 +34,7 @@ fn test_it_converts(
     assert_eq!(png.raw.ihdr.color_type, color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
@@ -163,7 +165,7 @@ fn strip_headers_list() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -197,7 +199,7 @@ fn strip_headers_safe() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -231,7 +233,7 @@ fn strip_headers_all() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -265,7 +267,7 @@ fn strip_headers_none() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -297,7 +299,7 @@ fn interlacing_0_to_1() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -327,7 +329,7 @@ fn interlacing_1_to_0() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -359,7 +361,7 @@ fn interlacing_0_to_1_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -393,7 +395,7 @@ fn interlacing_1_to_0_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -428,7 +430,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -478,7 +480,7 @@ fn fix_errors() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, false) {
+    let png = match PngData::new(output, false) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();

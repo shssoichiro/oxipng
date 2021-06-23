@@ -6,14 +6,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options::default();
-    options.force = true;
+    let mut options = oxipng::Options {
+        force: true,
+        ..Default::default()
+    };
     let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
     (
-        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        OutFile::Path(Some(input.with_extension("out.png"))),
         options,
     )
 }

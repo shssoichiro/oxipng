@@ -1,5 +1,3 @@
-use oxipng;
-
 use oxipng::Headers;
 use oxipng::OutFile;
 use std::default::Default;
