@@ -108,7 +108,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
                 }
             }
         } else {
-            let bit_vec = BitVec::from_bytes(&line.data);
+            let bit_vec = BitVec::from_bytes(line.data);
             for byte in bit_vec.to_bytes() {
                 while minimum_bits < bit_depth {
                     let permutations: &[u8] = if minimum_bits == 1 {
@@ -132,7 +132,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     let mut reduced = BitVec::with_capacity(png.data.len() * 8);
     for line in png.scan_lines() {
         reduced.extend(BitVec::from_bytes(&[line.filter]));
-        let bit_vec = BitVec::from_bytes(&line.data);
+        let bit_vec = BitVec::from_bytes(line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
             let bit_index = bit_depth - (i % bit_depth);
             if bit_index <= minimum_bits {

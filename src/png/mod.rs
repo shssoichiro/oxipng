@@ -293,13 +293,7 @@ impl PngImage {
                 last_pass = line.pass;
             }
             last_line.resize(line.data.len(), 0);
-            unfilter_line(
-                line.filter,
-                bpp,
-                &line.data,
-                &last_line,
-                &mut unfiltered_buf,
-            );
+            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf);
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
@@ -334,7 +328,7 @@ impl PngImage {
                         0
                     };
                     filtered.push(filter);
-                    filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
+                    filter_line(filter, bpp, line.data, last_line, &mut f_buf);
                     filtered.extend_from_slice(&f_buf);
                 }
                 5 => {
@@ -347,7 +341,7 @@ impl PngImage {
 
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
+                        filter_line(filter, bpp, line.data, last_line, &mut f_buf);
                         let size = f_buf.iter().fold(0_u64, |acc, &x| {
                             let signed = x as i8;
                             acc + i16::from(signed).abs() as u64

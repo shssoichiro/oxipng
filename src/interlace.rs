@@ -40,7 +40,7 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
                 passes[6].extend(BitVec::from_elem(8, false));
             }
         }
-        let bit_vec = BitVec::from_bytes(&line.data);
+        let bit_vec = BitVec::from_bytes(line.data);
         for (i, bit) in bit_vec.iter().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= (png.ihdr.width * u32::from(bits_per_pixel)) as usize {
@@ -105,7 +105,7 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
     let mut pass_constants = interlaced_constants(current_pass);
     let mut current_y: usize = pass_constants.y_shift as usize;
     for line in png.scan_lines() {
-        let bit_vec = BitVec::from_bytes(&line.data);
+        let bit_vec = BitVec::from_bytes(line.data);
         let bits_in_line = ((png.ihdr.width - u32::from(pass_constants.x_shift)
             + u32::from(pass_constants.x_step)
             - 1)

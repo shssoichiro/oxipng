@@ -6,14 +6,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options::default();
-    options.force = true;
+    let mut options = oxipng::Options {
+        force: true,
+        ..Default::default()
+    };
     let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
     (
-        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        OutFile::Path(Some(input.with_extension("out.png"))),
         options,
     )
 }
@@ -99,7 +101,7 @@ fn issue_42() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -287,12 +289,10 @@ fn issue_92_filter_5() {
     let input = "tests/files/issue-92.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.filter = [5].iter().cloned().collect();
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-f5-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-f5-out.png")));
 
     test_it_converts(
-        &input,
+        input,
         Some((output, opts)),
         ColorType::Grayscale,
         BitDepth::Eight,
@@ -308,9 +308,7 @@ fn issue_113_white() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-white-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-white-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -328,9 +326,7 @@ fn issue_113_black() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-black-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-black-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -348,9 +344,7 @@ fn issue_113_right() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Right);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-right-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-right-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -368,9 +362,7 @@ fn issue_113_left() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Left);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-left-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-left-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -388,9 +380,7 @@ fn issue_113_up() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Up);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-up-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-up-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -408,9 +398,7 @@ fn issue_113_down() {
     opts.interlace = Some(1);
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Down);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-down-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-down-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -440,9 +428,7 @@ fn issue_133_black() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Black);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-black-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-black-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -459,9 +445,7 @@ fn issue_133_white() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::White);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-white-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-white-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -478,9 +462,7 @@ fn issue_133_up() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Up);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-up-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-up-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -497,9 +479,7 @@ fn issue_133_down() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Down);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-down-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-down-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -516,9 +496,7 @@ fn issue_133_right() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Right);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-right-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-right-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
@@ -535,9 +513,7 @@ fn issue_133_left() {
     let (_, mut opts) = get_opts(Path::new(input));
     opts.alphas = IndexSet::new();
     opts.alphas.insert(AlphaOptim::Left);
-    let output = OutFile::Path(Some(
-        Path::new(input).with_extension("-left-out.png").to_owned(),
-    ));
+    let output = OutFile::Path(Some(Path::new(input).with_extension("-left-out.png")));
     test_it_converts(
         input,
         Some((output, opts)),
