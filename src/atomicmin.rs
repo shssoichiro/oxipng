@@ -9,13 +9,13 @@ pub struct AtomicMin {
 impl AtomicMin {
     pub fn new(init: Option<usize>) -> Self {
         Self {
-            val: AtomicUsize::new(init.unwrap_or(usize::max_value())),
+            val: AtomicUsize::new(init.unwrap_or(usize::MAX)),
         }
     }
 
     pub fn get(&self) -> Option<usize> {
         let val = self.val.load(SeqCst);
-        if val == usize::max_value() {
+        if val == usize::MAX {
             None
         } else {
             Some(val)
