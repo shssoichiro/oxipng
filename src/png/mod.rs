@@ -337,7 +337,7 @@ impl PngImage {
                     // http://www.libpng.org/pub/png/book/chapter09.html
                     let mut best_filter = 0;
                     let mut best_line = Vec::new();
-                    let mut best_size = std::u64::MAX;
+                    let mut best_size = u64::MAX;
 
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
