@@ -30,21 +30,21 @@ required-features = ["binary"]
 
 [dependencies]
 bit-vec = "^0.6.3"
-byteorder = "^1.4.2"
-crc = "^1.2.0"
-itertools = "^0.10.0"
+byteorder = "^1.4.3"
+crc = "^1.8.1"
+itertools = "^0.10.1"
 zopfli = { version = "^0.4.0", optional = true }
 miniz_oxide = "0.4"
-rgb = "0.8.25"
-indexmap = "1.6.1"
+rgb = "0.8.27"
+indexmap = "1.6.2"
 libdeflater = { version = "0.7.1", optional = true }
 log = "0.4.14"
 stderrlog = { version = "0.5.1", optional = true }
-crossbeam-channel = "0.5.0"
+crossbeam-channel = "0.5.1"
 
 [dependencies.rayon]
 optional = true
-version = "^1.5.0"
+version = "^1.5.1"
 
 [dependencies.clap]
 optional = true
@@ -61,10 +61,10 @@ version = "0.23"
 
 [target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies.cloudflare-zlib]
 features = ["arm-always"]
-version = "^0.2.2"
+version = "^0.2.9"
 
 [build-dependencies]
-rustc_version = "0.3"
+rustc_version = "0.4"
 
 [features]
 binary = [
