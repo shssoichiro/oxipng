@@ -67,7 +67,13 @@ pub fn filter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &
     }
 }
 
-pub fn unfilter_line(filter: u8, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) -> Result<(), PngError> {
+pub fn unfilter_line(
+    filter: u8,
+    bpp: usize,
+    data: &[u8],
+    last_line: &[u8],
+    buf: &mut Vec<u8>,
+) -> Result<(), PngError> {
     buf.clear();
     buf.reserve(data.len());
     assert!(data.len() >= bpp);
