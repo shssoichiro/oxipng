@@ -1,3 +1,12 @@
+### Version 5.0.0
+- [Breaking] Bump minimum Rust version to 1.46.0
+- [Bugfix] Avoid many panics that may occur on broken files
+- [Bugfix] Fix race condition that may cause tests to fail
+- [Performance] Optimizations to unfiltering and copying
+- [Feature] Add `--ng` option to skip grayscale reduction
+- [Feature] Also preserve timestamps when using `--preserve`
+- [Misc] Bump `crc` to 2.x
+
 ### Version 4.0.3
 - Bump itertools to 0.10.x
 - Temporarily disable i686 releases, which were failing due to an odd linker issue,
