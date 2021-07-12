@@ -42,6 +42,10 @@ log = "0.4.14"
 stderrlog = { version = "0.5.1", optional = true }
 crossbeam-channel = "0.5.0"
 
+[dependencies.filetime]
+optional = true
+version = "0.2.13"
+
 [dependencies.rayon]
 optional = true
 version = "^1.5.0"
@@ -72,7 +76,7 @@ binary = [
     "wild",
     "stderrlog",
 ]
-default = ["binary", "parallel", "libdeflater", "zopfli"]
+default = ["binary", "filetime", "parallel", "libdeflater", "zopfli"]
 parallel = ["rayon", "indexmap/rayon"]
 
 [lib]
