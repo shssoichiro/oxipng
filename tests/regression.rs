@@ -611,7 +611,7 @@ fn issue_175() {
 
 #[test]
 fn issue_182() {
-    let input = "tests/files/issue-175.png";
+    let input = "tests/files/issue-182.png";
     let (output, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(0);
 
