@@ -136,7 +136,7 @@ impl PngData {
             transparency_pixel,
             aux_headers,
         };
-        raw.data = raw.unfilter_image();
+        raw.data = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
             idat_data: idat_headers,
@@ -281,7 +281,7 @@ impl PngImage {
     }
 
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
-    fn unfilter_image(&self) -> Vec<u8> {
+    fn unfilter_image(&self) -> Result<Vec<u8>, PngError> {
         let mut unfiltered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
@@ -293,13 +293,13 @@ impl PngImage {
                 last_pass = line.pass;
             }
             last_line.resize(line.data.len(), 0);
-            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf);
+            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf)?;
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
             unfiltered_buf.clear();
         }
-        unfiltered
+        Ok(unfiltered)
     }
 
     /// Apply the specified filter type to all rows in the image
