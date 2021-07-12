@@ -101,6 +101,10 @@ impl BitDepth {
         }
     }
     /// Parse a number of bits per channel per pixel into a `BitDepth`
+    ///
+    /// # Panics
+    ///
+    /// If depth is unsupported
     #[inline]
     pub fn from_u8(depth: u8) -> BitDepth {
         match depth {

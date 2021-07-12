@@ -1,3 +1,9 @@
+### Version 4.0.3
+- Bump itertools to 0.10.x
+- Temporarily disable i686 releases, which were failing due to an odd linker issue,
+  so that at least amd64 builds will publish successfully
+  - This only relates to the releases published on Github. You can still manually compile oxipng for any platform.
+
 ### Version 4.0.2
 - Includes another update to libdeflater that improves support for targets
   without a C stdlib, like wasm32.

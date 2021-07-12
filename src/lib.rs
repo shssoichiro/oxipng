@@ -12,6 +12,7 @@
 #![warn(clippy::path_buf_push_overwrite)]
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
+#![allow(clippy::upper_case_acronyms)]
 #![cfg_attr(
     not(any(feature = "libdeflater", feature = "zopfli")),
     allow(irrefutable_let_patterns),
@@ -97,7 +98,7 @@ impl InFile {
     pub fn path(&self) -> Option<&Path> {
         match *self {
             InFile::Path(ref p) => Some(p.as_path()),
-            _ => None,
+            InFile::StdIn => None,
         }
     }
 }
@@ -168,6 +169,10 @@ pub struct Options {
     ///
     /// Default: `true`
     pub palette_reduction: bool,
+    /// Whether to attempt grayscale reduction
+    ///
+    /// Default: `true`
+    pub grayscale_reduction: bool,
     /// Whether to perform IDAT recoding
     ///
     /// If any type of reduction is performed, IDAT recoding will be performed
@@ -304,6 +309,7 @@ impl Default for Options {
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
+            grayscale_reduction: true,
             idat_recoding: true,
             strip: Headers::None,
             deflate: Deflaters::Zlib {
@@ -616,7 +622,7 @@ fn optimize_png(
                     );
                     return None;
                 }
-                _ => return None,
+                Err(_) => return None,
             };
 
             // update best size across all threads
@@ -682,14 +688,14 @@ fn optimize_png(
             "    file size = {} bytes ({} bytes = {:.2}% decrease)",
             output.len(),
             file_original_size - output.len(),
-            (file_original_size - output.len()) as f64 / file_original_size as f64 * 100f64
+            (file_original_size - output.len()) as f64 / file_original_size as f64 * 100_f64
         );
     } else {
         info!(
             "    file size = {} bytes ({} bytes = {:.2}% increase)",
             output.len(),
             output.len() - file_original_size,
-            (output.len() - file_original_size) as f64 / file_original_size as f64 * 100f64
+            (output.len() - file_original_size) as f64 / file_original_size as f64 * 100_f64
         );
     }
 
@@ -767,7 +773,7 @@ fn perform_reductions(
     }
 
     if opts.color_type_reduction {
-        if let Some(reduced) = reduce_color_type(&png) {
+        if let Some(reduced) = reduce_color_type(&png, opts.grayscale_reduction) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
@@ -812,10 +818,14 @@ impl Deadline {
         if let Some(imp) = &self.imp {
             let elapsed = imp.start.elapsed();
             if elapsed > imp.timeout {
-                if imp
-                    .print_message
-                    .compare_and_swap(true, false, Ordering::SeqCst)
-                {
+                if match imp.print_message.compare_exchange(
+                    true,
+                    false,
+                    Ordering::SeqCst,
+                    Ordering::SeqCst,
+                ) {
+                    Ok(x) | Err(x) => x,
+                } {
                     warn!("Timed out after {} second(s)", elapsed.as_secs());
                 }
                 return true;

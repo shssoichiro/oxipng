@@ -10,14 +10,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options::default();
-    options.force = true;
+    let mut options = oxipng::Options {
+        force: true,
+        ..Default::default()
+    };
     let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
     (
-        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        OutFile::Path(Some(input.with_extension("out.png"))),
         options,
     )
 }
@@ -200,7 +202,7 @@ fn strip_headers_list() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -234,7 +236,7 @@ fn strip_headers_safe() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -268,7 +270,7 @@ fn strip_headers_all() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -302,7 +304,7 @@ fn strip_headers_none() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -334,7 +336,7 @@ fn interlacing_0_to_1() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -364,7 +366,7 @@ fn interlacing_1_to_0() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -396,7 +398,7 @@ fn interlacing_0_to_1_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -430,7 +432,7 @@ fn interlacing_1_to_0_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -465,7 +467,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -560,7 +562,7 @@ fn fix_errors() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, false) {
+    let png = match PngData::new(output, false) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -576,6 +578,7 @@ fn fix_errors() {
 }
 
 #[test]
+#[cfg(feature = "zopfli")]
 fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
@@ -593,6 +596,7 @@ fn zopfli_mode() {
 }
 
 #[test]
+#[cfg(feature = "libdeflater")]
 fn libdeflater_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);

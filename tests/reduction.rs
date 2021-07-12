@@ -6,14 +6,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options::default();
-    options.force = true;
+    let mut options = oxipng::Options {
+        force: true,
+        ..Default::default()
+    };
     let mut filter = IndexSet::new();
     filter.insert(0);
     options.filter = filter;
 
     (
-        OutFile::Path(Some(input.with_extension("out.png").to_owned())),
+        OutFile::Path(Some(input.with_extension("out.png"))),
         options,
     )
 }
@@ -711,7 +713,7 @@ fn small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
@@ -743,7 +745,7 @@ fn palette_should_be_reduced_with_dupes() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
@@ -776,7 +778,7 @@ fn palette_should_be_reduced_with_unused() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();
@@ -809,7 +811,7 @@ fn palette_should_be_reduced_with_both() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(&output, opts.fix_errors) {
+    let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
             remove_file(&output).ok();

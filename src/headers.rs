@@ -25,6 +25,45 @@ pub struct IhdrData {
     pub interlaced: u8,
 }
 
+impl IhdrData {
+    /// Bits per pixel
+    #[must_use]
+    #[inline]
+    pub fn bpp(&self) -> u8 {
+        self.bit_depth.as_u8() * self.color_type.channels_per_pixel()
+    }
+
+    /// Byte length of IDAT that is correct for this IHDR
+    #[must_use]
+    pub fn raw_data_size(&self) -> usize {
+        let w = self.width as usize;
+        let h = self.height as usize;
+        let bpp = self.bpp();
+
+        fn bitmap_size(bpp: u8, w: usize, h: usize) -> usize {
+            (((w / 8) * bpp as usize) + ((w & 7) * bpp as usize + 7) / 8) * h
+        }
+
+        if self.interlaced == 0 {
+            bitmap_size(bpp, w, h) + h
+        } else {
+            let mut size = bitmap_size(bpp, (w + 7) >> 3, (h + 7) >> 3) + ((h + 7) >> 3);
+            if w > 4 {
+                size += bitmap_size(bpp, (w + 3) >> 3, (h + 7) >> 3) + ((h + 7) >> 3);
+            }
+            size += bitmap_size(bpp, (w + 3) >> 2, (h + 3) >> 3) + ((h + 3) >> 3);
+            if w > 2 {
+                size += bitmap_size(bpp, (w + 1) >> 2, (h + 3) >> 2) + ((h + 3) >> 2);
+            }
+            size += bitmap_size(bpp, (w + 1) >> 1, (h + 1) >> 2) + ((h + 1) >> 2);
+            if w > 1 {
+                size += bitmap_size(bpp, w >> 1, (h + 1) >> 1) + ((h + 1) >> 1);
+            }
+            size + bitmap_size(bpp, w, h >> 1) + (h >> 1)
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 /// Options to use for performing operations on headers (such as stripping)
 pub enum Headers {
@@ -98,12 +137,14 @@ pub fn parse_next_header<'a>(
         )));
     }
 
-    let mut name = [0u8; 4];
+    let mut name = [0_u8; 4];
     name.copy_from_slice(chunk_name);
     Ok(Some(RawHeader { name, data }))
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
+    // This eliminates bounds checks for the rest of the function
+    let interlaced = byte_data.get(12).copied().ok_or(PngError::TruncatedData)?;
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {
@@ -122,10 +163,14 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
             16 => BitDepth::Sixteen,
             _ => return Err(PngError::new("Unexpected bit depth in header")),
         },
-        width: rdr.read_u32::<BigEndian>().unwrap(),
-        height: rdr.read_u32::<BigEndian>().unwrap(),
+        width: rdr
+            .read_u32::<BigEndian>()
+            .map_err(|_| PngError::TruncatedData)?,
+        height: rdr
+            .read_u32::<BigEndian>()
+            .map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],
         filter: byte_data[11],
-        interlaced: byte_data[12],
+        interlaced,
     })
 }

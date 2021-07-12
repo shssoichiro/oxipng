@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/shssoichiro/oxipng#readme",
   "devDependencies": {
-    "strip-ansi-cli": "^2.0.0"
+    "strip-ansi-cli": "^3.0.0"
   }
 }

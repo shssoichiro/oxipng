@@ -100,7 +100,7 @@ impl PngData {
         let mut idat_headers: Vec<u8> = Vec::new();
         while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
             match &header.name {
-                b"IDAT" => idat_headers.extend(header.data),
+                b"IDAT" => idat_headers.extend_from_slice(header.data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
                 _ => {
                     aux_headers.insert(header.name, header.data.to_owned());
@@ -118,6 +118,11 @@ impl PngData {
         let ihdr_header = parse_ihdr_header(&ihdr)?;
         let raw_data = deflate::inflate(idat_headers.as_ref())?;
 
+        // Reject files with incorrect width/height or truncated data
+        if raw_data.len() != ihdr_header.raw_data_size() {
+            return Err(PngError::TruncatedData);
+        }
+
         let (palette, transparency_pixel) = Self::palette_to_rgba(
             ihdr_header.color_type,
             aux_headers.remove(b"PLTE"),
@@ -131,7 +136,7 @@ impl PngData {
             transparency_pixel,
             aux_headers,
         };
-        raw.data = raw.unfilter_image();
+        raw.data = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
             idat_data: idat_headers,
@@ -203,10 +208,10 @@ impl PngData {
                     .fold(
                         0,
                         |prev, (index, px)| {
-                            if px.a != 255 {
-                                index + 1
-                            } else {
+                            if px.a == 255 {
                                 prev
+                            } else {
+                                index + 1
                             }
                         },
                     );
@@ -276,32 +281,25 @@ impl PngImage {
     }
 
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
-    fn unfilter_image(&self) -> Vec<u8> {
+    fn unfilter_image(&self) -> Result<Vec<u8>, PngError> {
         let mut unfiltered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: Vec<u8> = Vec::new();
-        let mut last_pass = 1;
+        let mut last_pass = None;
         let mut unfiltered_buf = Vec::new();
         for line in self.scan_lines() {
-            if let Some(pass) = line.pass {
-                if pass != last_pass {
-                    last_line.clear();
-                    last_pass = pass;
-                }
+            if last_pass != line.pass {
+                last_line.clear();
+                last_pass = line.pass;
             }
-            unfilter_line(
-                line.filter,
-                bpp,
-                &line.data,
-                &last_line,
-                &mut unfiltered_buf,
-            );
+            last_line.resize(line.data.len(), 0);
+            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf)?;
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
             unfiltered_buf.clear();
         }
-        unfiltered
+        Ok(unfiltered)
     }
 
     /// Apply the specified filter type to all rows in the image
@@ -319,6 +317,9 @@ impl PngImage {
         let mut f_buf = Vec::new();
         for line in self.scan_lines() {
             f_buf.clear();
+            if last_pass != line.pass {
+                last_line = &[];
+            }
             match filter {
                 0 | 1 | 2 | 3 | 4 => {
                     let filter = if last_pass == line.pass || filter <= 1 {
@@ -327,7 +328,7 @@ impl PngImage {
                         0
                     };
                     filtered.push(filter);
-                    filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
+                    filter_line(filter, bpp, line.data, last_line, &mut f_buf);
                     filtered.extend_from_slice(&f_buf);
                 }
                 5 => {
@@ -336,12 +337,12 @@ impl PngImage {
                     // http://www.libpng.org/pub/png/book/chapter09.html
                     let mut best_filter = 0;
                     let mut best_line = Vec::new();
-                    let mut best_size = std::u64::MAX;
+                    let mut best_size = u64::MAX;
 
                     // Avoid vertical filtering on first line of each interlacing pass
                     for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        filter_line(filter, bpp, &line.data, last_line, &mut f_buf);
-                        let size = f_buf.iter().fold(0u64, |acc, &x| {
+                        filter_line(filter, bpp, line.data, last_line, &mut f_buf);
+                        let size = f_buf.iter().fold(0_u64, |acc, &x| {
                             let signed = x as i8;
                             acc + i16::from(signed).abs() as u64
                         });
