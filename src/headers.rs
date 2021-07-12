@@ -2,7 +2,7 @@ use crate::colors::{BitDepth, ColorType};
 use crate::error::PngError;
 use crate::PngResult;
 use byteorder::{BigEndian, ReadBytesExt};
-use crc::crc32;
+use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexSet;
 use std::io::Cursor;
 
@@ -130,7 +130,7 @@ pub fn parse_next_header<'a>(
     let header_bytes = byte_data
         .get(header_start..header_start + 4 + length as usize)
         .ok_or(PngError::TruncatedData)?;
-    if !fix_errors && crc32::checksum_ieee(header_bytes) != crc {
+    if !fix_errors && Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(header_bytes) != crc {
         return Err(PngError::new(&format!(
             "CRC Mismatch in {} header; May be recoverable by using --fix",
             String::from_utf8_lossy(chunk_name)

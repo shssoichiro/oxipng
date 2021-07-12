@@ -31,7 +31,7 @@ use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
-use crc::crc32;
+use crc::{Crc, CRC_32_ISO_HDLC};
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use log::{debug, error, info, warn};
 use rayon::prelude::*;
@@ -939,7 +939,10 @@ fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
         }
         b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" => {
             // Known-bad profiles are identified by their CRC
-            match (crc32::checksum_ieee(&icc_data), icc_data.len()) {
+            match (
+                Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(&icc_data),
+                icc_data.len(),
+            ) {
                 (0x5d51_29ce, 3024) | (0x182e_a552, 3144) | (0xf29e_526d, 3144) => {
                     Some(rendering_intent)
                 }
