@@ -184,6 +184,9 @@ fn main() {
         .arg(Arg::with_name("no-palette-reduction")
             .help("No palette reduction")
             .long("np"))
+        .arg(Arg::with_name("no-grayscale-reduction")
+            .help("No grayscale reduction")
+            .long("ng"))
         .arg(Arg::with_name("no-reductions")
             .help("No reductions")
             .long("nx"))
@@ -433,10 +436,15 @@ fn parse_opts_into_struct(
         opts.palette_reduction = false;
     }
 
+    if matches.is_present("no-grayscale-reduction") {
+        opts.grayscale_reduction = false;
+    }
+
     if matches.is_present("no-reductions") {
         opts.bit_depth_reduction = false;
         opts.color_type_reduction = false;
         opts.palette_reduction = false;
+        opts.grayscale_reduction = false;
     }
 
     if matches.is_present("no-recoding") {

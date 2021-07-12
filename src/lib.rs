@@ -169,6 +169,10 @@ pub struct Options {
     ///
     /// Default: `true`
     pub palette_reduction: bool,
+    /// Whether to attempt grayscale reduction
+    ///
+    /// Default: `true`
+    pub grayscale_reduction: bool,
     /// Whether to perform IDAT recoding
     ///
     /// If any type of reduction is performed, IDAT recoding will be performed
@@ -305,6 +309,7 @@ impl Default for Options {
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
+            grayscale_reduction: true,
             idat_recoding: true,
             strip: Headers::None,
             deflate: Deflaters::Zlib {
@@ -741,7 +746,7 @@ fn perform_reductions(
     }
 
     if opts.color_type_reduction {
-        if let Some(reduced) = reduce_color_type(&png) {
+        if let Some(reduced) = reduce_color_type(&png, opts.grayscale_reduction) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);

@@ -185,15 +185,19 @@ fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<
 
 /// Attempt to reduce the color type of the image
 /// Returns true if the color type was reduced, false otherwise
-pub fn reduce_color_type(png: &PngImage) -> Option<PngImage> {
+pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<PngImage> {
     let mut should_reduce_bit_depth = false;
     let mut reduced = Cow::Borrowed(png);
 
     // Go down one step at a time
     // Maybe not the most efficient, but it's safe
     if reduced.ihdr.color_type == ColorType::RGBA {
-        if let Some(r) =
-            reduce_rgba_to_grayscale_alpha(&reduced).or_else(|| reduced_alpha_channel(&reduced))
+        if let Some(r) = if grayscale_reduction {
+            reduce_rgba_to_grayscale_alpha(&reduced)
+        } else {
+            None
+        }
+        .or_else(|| reduced_alpha_channel(&reduced))
         {
             reduced = Cow::Owned(r);
         } else if let Some(r) = reduced_color_to_palette(&reduced) {
@@ -210,8 +214,12 @@ pub fn reduce_color_type(png: &PngImage) -> Option<PngImage> {
     }
 
     if reduced.ihdr.color_type == ColorType::RGB {
-        if let Some(r) =
-            reduce_rgb_to_grayscale(&reduced).or_else(|| reduced_color_to_palette(&reduced))
+        if let Some(r) = if grayscale_reduction {
+            reduce_rgb_to_grayscale(&reduced)
+        } else {
+            None
+        }
+        .or_else(|| reduced_color_to_palette(&reduced))
         {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
