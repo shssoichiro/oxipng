@@ -409,7 +409,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                 ))
             })?;
             if let Some(metadata_input) = &opt_metadata_preserved {
-                copy_permissions(&metadata_input, &out_file)?;
+                copy_permissions(metadata_input, &out_file)?;
             }
 
             let mut buffer = BufWriter::new(out_file);
@@ -427,7 +427,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             // force drop and thereby closing of file handle before modifying any timestamp
             std::mem::drop(buffer);
             if let Some(metadata_input) = &opt_metadata_preserved {
-                copy_times(&metadata_input, &output_path)?;
+                copy_times(metadata_input, output_path)?;
             }
             info!("Output: {}", output_path.display());
         }
