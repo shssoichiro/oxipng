@@ -1,8 +1,8 @@
 use crate::colors::ColorType;
 use crate::deflate;
 use crate::error::PngError;
-use crate::filters::*;
-use crate::headers::*;
+use crate::filters::{filter_line, unfilter_line};
+use crate::headers::{file_header_is_valid, parse_ihdr_header, parse_next_header, IhdrData};
 use crate::interlace::{deinterlace_image, interlace_image};
 use byteorder::{BigEndian, WriteBytesExt};
 use crc::{Crc, CRC_32_ISO_HDLC};
@@ -170,6 +170,7 @@ impl PngData {
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream
+    #[must_use]
     pub fn output(&self) -> Vec<u8> {
         // PNG header
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
@@ -264,12 +265,14 @@ impl PngImage {
 
     /// Return the number of channels in the image, based on color type
     #[inline]
+    #[must_use]
     pub fn channels_per_pixel(&self) -> u8 {
         self.ihdr.color_type.channels_per_pixel()
     }
 
     /// Return an iterator over the scanlines of the image
     #[inline]
+    #[must_use]
     pub fn scan_lines(&self) -> ScanLines<'_> {
         ScanLines::new(self)
     }
@@ -309,6 +312,7 @@ impl PngImage {
     /// 3: Average
     /// 4: Paeth
     /// 5: All (heuristically pick the best filter for each line)
+    #[must_use]
     pub fn filter_image(&self, filter: u8) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
@@ -351,7 +355,7 @@ impl PngImage {
                             best_filter = filter;
                             std::mem::swap(&mut best_line, &mut f_buf);
                         }
-                        f_buf.clear() //discard buffer, and start again
+                        f_buf.clear(); //discard buffer, and start again
                     }
                     filtered.push(best_filter);
                     filtered.extend_from_slice(&best_line);

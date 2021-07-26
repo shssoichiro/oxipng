@@ -117,11 +117,11 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
         raw_data.push(line.filter);
         let ok = if png.ihdr.color_type == ColorType::RGB {
             reduce_scanline_to_palette(
-                line.data.as_rgb().iter().cloned().map(|px| {
-                    px.alpha(if Some(px) != transparency_pixel {
-                        255
-                    } else {
+                line.data.as_rgb().iter().copied().map(|px| {
+                    px.alpha(if Some(px) == transparency_pixel {
                         0
+                    } else {
+                        255
                     })
                 }),
                 &mut palette,
@@ -130,7 +130,7 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
         } else {
             debug_assert_eq!(png.ihdr.color_type, ColorType::RGBA);
             reduce_scanline_to_palette(
-                line.data.as_rgba().iter().cloned(),
+                line.data.as_rgba().iter().copied(),
                 &mut palette,
                 &mut raw_data,
             )
@@ -143,10 +143,10 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
     let num_transparent = palette
         .iter()
         .filter_map(|(px, &idx)| {
-            if px.a != 255 {
-                Some(idx as usize + 1)
-            } else {
+            if px.a == 255 {
                 None
+            } else {
+                Some(idx as usize + 1)
             }
         })
         .max();
@@ -180,7 +180,7 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
 
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
         // Some programs save the sBIT header as RGB even if the image is RGBA.
-        aux_headers.insert(*b"sBIT", sbit_header.iter().cloned().take(3).collect());
+        aux_headers.insert(*b"sBIT", sbit_header.iter().copied().take(3).collect());
     }
 
     let mut palette_vec = vec![RGBA8::new(0, 0, 0, 0); palette.len()];
@@ -220,8 +220,8 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
                     let pixel_bytes = cur_pixel
                         .iter()
                         .step_by(2)
-                        .cloned()
-                        .zip(cur_pixel.iter().skip(1).step_by(2).cloned())
+                        .copied()
+                        .zip(cur_pixel.iter().skip(1).step_by(2).copied())
                         .unique()
                         .collect::<Vec<(u8, u8)>>();
                     if pixel_bytes.len() > 1 {
@@ -235,15 +235,16 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
         }
     }
 
-    let transparency_pixel = if let Some(ref trns) = png.transparency_pixel {
-        if trns.len() != 6 || trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
-            None
-        } else {
-            Some(trns[0..2].to_owned())
-        }
-    } else {
-        png.transparency_pixel.clone()
-    };
+    let transparency_pixel = png.transparency_pixel.as_ref().map_or_else(
+        || png.transparency_pixel.clone(),
+        |trns| {
+            if trns.len() != 6 || trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
+                None
+            } else {
+                Some(trns[0..2].to_owned())
+            }
+        },
+    );
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {

@@ -1,0 +1,4 @@
+msrv = "1.46"
+too-many-arguments-threshold = 9
+max-struct-bools = 11
+too-many-lines-threshold = 249

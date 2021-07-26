@@ -37,6 +37,7 @@ impl fmt::Display for PngError {
 
 impl PngError {
     #[cold]
+    #[must_use]
     pub fn new(description: &str) -> PngError {
         PngError::Other(description.into())
     }

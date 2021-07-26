@@ -1,17 +1,41 @@
-#![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
-#![deny(missing_debug_implementations, missing_copy_implementations)]
-#![warn(clippy::expl_impl_clone_on_copy)]
-#![warn(clippy::float_cmp_const)]
-#![warn(clippy::linkedlist)]
-#![warn(clippy::map_flatten)]
-#![warn(clippy::match_same_arms)]
-#![warn(clippy::mem_forget)]
-#![warn(clippy::mut_mut)]
-#![warn(clippy::mutex_integer)]
-#![warn(clippy::needless_continue)]
-#![warn(clippy::path_buf_push_overwrite)]
-#![warn(clippy::range_plus_one)]
-#![allow(clippy::cognitive_complexity)]
+#![deny(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_import_braces,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    rust_2018_idioms,
+    rust_2018_compatibility,
+    future_incompatible,
+    unused,
+    nonstandard_style
+)]
+#![warn(
+    clippy::all,
+    clippy::doc_markdown,
+    clippy::wildcard_imports,
+    clippy::unreadable_literal,
+    clippy::unnested_or_patterns,
+    clippy::must_use_candidate,
+    clippy::map_unwrap_or,
+    clippy::large_types_passed_by_value,
+    clippy::float_cmp_const,
+    clippy::lossy_float_literal,
+    clippy::float_equality_without_abs,
+    clippy::suboptimal_flops,
+    clippy::imprecise_flops,
+    clippy::mem_forget,
+    clippy::mutex_integer,
+    clippy::path_buf_push_overwrite,
+    clippy::expl_impl_clone_on_copy,
+    clippy::linkedlist,
+    clippy::map_flatten,
+    clippy::match_same_arms,
+    clippy::mut_mut,
+    clippy::needless_continue,
+    clippy::range_plus_one,
+    clippy::range_minus_one
+)]
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use indexmap::IndexSet;
@@ -318,12 +342,13 @@ fn collect_files(
             }
             continue;
         };
-        let out_file = if let Some(ref out_dir) = *out_dir {
-            let out_path = Some(out_dir.join(input.file_name().unwrap()));
-            OutFile::Path(out_path)
-        } else {
-            (*out_file).clone()
-        };
+        let out_file = out_dir.as_ref().map_or_else(
+            || (*out_file).clone(),
+            |out_dir| {
+                let out_path = Some(out_dir.join(input.file_name().unwrap()));
+                OutFile::Path(out_path)
+            },
+        );
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
@@ -335,7 +360,7 @@ fn collect_files(
 }
 
 fn parse_opts_into_struct(
-    matches: &ArgMatches,
+    matches: &ArgMatches<'_>,
 ) -> Result<(OutFile, Option<PathBuf>, Options), String> {
     stderrlog::new()
         .module(module_path!())
@@ -389,10 +414,12 @@ fn parse_opts_into_struct(
 
     let out_file = if matches.is_present("stdout") {
         OutFile::StdOut
-    } else if let Some(x) = matches.value_of("output_file") {
-        OutFile::Path(Some(PathBuf::from(x)))
     } else {
-        OutFile::Path(None)
+        matches
+            .value_of("output_file")
+            .map_or(OutFile::Path(None), |x| {
+                OutFile::Path(Some(PathBuf::from(x)))
+            })
     };
 
     if matches.is_present("alpha") {
@@ -452,7 +479,7 @@ fn parse_opts_into_struct(
     }
 
     if let Some(hdrs) = matches.value_of("keep") {
-        opts.strip = Headers::Keep(hdrs.split(',').map(|x| x.trim().to_owned()).collect())
+        opts.strip = Headers::Keep(hdrs.split(',').map(|x| x.trim().to_owned()).collect());
     }
 
     if let Some(hdrs) = matches.value_of("strip") {

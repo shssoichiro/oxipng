@@ -35,6 +35,7 @@ impl fmt::Display for ColorType {
 impl ColorType {
     /// Get the code used by the PNG specification to denote this color type
     #[inline]
+    #[must_use]
     pub fn png_header_code(self) -> u8 {
         match self {
             ColorType::Grayscale => 0,
@@ -46,6 +47,7 @@ impl ColorType {
     }
 
     #[inline]
+    #[must_use]
     pub fn channels_per_pixel(self) -> u8 {
         match self {
             ColorType::Grayscale | ColorType::Indexed => 1,
@@ -91,6 +93,7 @@ impl fmt::Display for BitDepth {
 impl BitDepth {
     /// Retrieve the number of bits per channel per pixel as a `u8`
     #[inline]
+    #[must_use]
     pub fn as_u8(self) -> u8 {
         match self {
             BitDepth::One => 1,
@@ -106,6 +109,7 @@ impl BitDepth {
     ///
     /// If depth is unsupported
     #[inline]
+    #[must_use]
     pub fn from_u8(depth: u8) -> BitDepth {
         match depth {
             1 => BitDepth::One,

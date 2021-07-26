@@ -3,7 +3,7 @@ use crate::Deadline;
 use crate::PngError;
 use crate::PngResult;
 pub use cloudflare_zlib::is_supported;
-use cloudflare_zlib::*;
+use cloudflare_zlib::{Deflate, ZError};
 
 impl From<ZError> for PngError {
     fn from(err: ZError) -> Self {
@@ -40,6 +40,7 @@ pub(crate) fn cfzlib_deflate(
 
 #[test]
 fn compress_test() {
+    use cloudflare_zlib::{Z_BEST_COMPRESSION, Z_DEFAULT_STRATEGY};
     let vec = cfzlib_deflate(
         b"azxcvbnm",
         Z_BEST_COMPRESSION as u8,

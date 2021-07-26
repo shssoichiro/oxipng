@@ -12,7 +12,7 @@ use rayon::prelude::*;
 use std::sync::Arc;
 
 pub(crate) fn try_alpha_reductions(
-    png: Arc<PngImage>,
+    png: &Arc<PngImage>,
     alphas: &IndexSet<AlphaOptim>,
     eval: &Evaluator,
 ) {
@@ -23,10 +23,11 @@ pub(crate) fn try_alpha_reductions(
     alphas
         .par_iter()
         .with_max_len(1)
-        .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
+        .filter_map(|&alpha| filtered_alpha_channel(png, alpha))
         .for_each(|image| eval.try_image(Arc::new(image)));
 }
 
+#[must_use]
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {
     let (bpc, bpp) = match png.ihdr.color_type {
         ColorType::RGBA | ColorType::GrayscaleAlpha => {
@@ -214,7 +215,7 @@ pub fn reduced_alpha_channel(png: &PngImage) -> Option<PngImage> {
     // and alpha has just been removed
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
         // Some programs save the sBIT header as RGB even if the image is RGBA.
-        aux_headers.insert(*b"sBIT", sbit_header.iter().cloned().take(3).collect());
+        aux_headers.insert(*b"sBIT", sbit_header.iter().copied().take(3).collect());
     }
 
     Some(PngImage {

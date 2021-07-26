@@ -1,7 +1,10 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use indexmap::map::{Entry::*, IndexMap};
+use indexmap::map::{
+    Entry::{Occupied, Vacant},
+    IndexMap,
+};
 use rgb::RGBA8;
 use std::borrow::Cow;
 
@@ -10,13 +13,16 @@ use crate::alpha::reduced_alpha_channel;
 pub mod bit_depth;
 use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
-use crate::color::*;
+use crate::color::{
+    reduce_rgb_to_grayscale, reduce_rgba_to_grayscale_alpha, reduced_color_to_palette,
+};
 
 pub(crate) use crate::alpha::try_alpha_reductions;
 pub(crate) use crate::bit_depth::reduce_bit_depth;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
+#[must_use]
 pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
@@ -67,7 +73,7 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
                     .get(i)
                     .copied()
                     .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
-                ((color.a as i32) << 18)
+                ((i32::from(color.a)) << 18)
                 // These are coefficients for standard sRGB to luma conversion
                 - i32::from(color.r) * 299
                 - i32::from(color.g) * 587
@@ -78,14 +84,14 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
 
         let mut next_index = 0_u16;
         let mut seen = IndexMap::with_capacity(palette.len());
-        for (i, used) in used_enumerated.iter().cloned() {
+        for (i, used) in used_enumerated.iter().copied() {
             if !used {
                 continue;
             }
             // There are invalid files that use pixel indices beyond palette size
             let color = palette
                 .get(i)
-                .cloned()
+                .copied()
                 .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
             match seen.entry(color) {
                 Vacant(new) => {
@@ -137,7 +143,7 @@ fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Opti
 }
 
 fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<[u8; 256]> {
-    let len = png.palette.as_ref().map_or(0, |p| p.len());
+    let len = png.palette.as_ref().map_or(0, Vec::len);
     if (0..len).all(|i| palette_map[i].map_or(true, |to| to == i as u8)) {
         // No reduction necessary
         return None;
@@ -148,18 +154,18 @@ fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> O
     // low bit-depths can be pre-computed for every byte value
     match png.ihdr.bit_depth {
         BitDepth::Eight => {
-            for byte in 0..=255usize {
-                byte_map[byte] = palette_map[byte].unwrap_or(0)
+            for byte in 0..=255_usize {
+                byte_map[byte] = palette_map[byte].unwrap_or(0);
             }
         }
         BitDepth::Four => {
-            for byte in 0..=255usize {
+            for byte in 0..=255_usize {
                 byte_map[byte] = palette_map[(byte & 0x0F)].unwrap_or(0)
                     | (palette_map[(byte >> 4)].unwrap_or(0) << 4);
             }
         }
         BitDepth::Two => {
-            for byte in 0..=255usize {
+            for byte in 0..=255_usize {
                 byte_map[byte] = palette_map[(byte & 0x03)].unwrap_or(0)
                     | (palette_map[((byte >> 2) & 0x03)].unwrap_or(0) << 2)
                     | (palette_map[((byte >> 4) & 0x03)].unwrap_or(0) << 4)
@@ -173,7 +179,7 @@ fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> O
 }
 
 fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<RGBA8> {
-    let max_index = palette_map.iter().cloned().flatten().max().unwrap_or(0) as usize;
+    let max_index = palette_map.iter().copied().flatten().max().unwrap_or(0) as usize;
     let mut new_palette = vec![RGBA8::new(0, 0, 0, 255); max_index + 1];
     for (&color, &map_to) in palette.iter().zip(palette_map.iter()) {
         if let Some(map_to) = map_to {
@@ -185,6 +191,7 @@ fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<
 
 /// Attempt to reduce the color type of the image
 /// Returns true if the color type was reduced, false otherwise
+#[must_use]
 pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<PngImage> {
     let mut should_reduce_bit_depth = false;
     let mut reduced = Cow::Borrowed(png);
@@ -244,6 +251,6 @@ pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<Pn
 
     match reduced {
         Cow::Owned(r) => Some(r),
-        _ => None,
+        Cow::Borrowed(_) => None,
     }
 }

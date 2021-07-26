@@ -88,12 +88,12 @@ impl Evaluator {
 
     /// Set baseline image. It will be used only to measure minimum compression level required
     pub fn set_baseline(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, false)
+        self.try_image_inner(image, false);
     }
 
     /// Check if the image is smaller than others
     pub fn try_image(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, true)
+        self.try_image_inner(image, true);
     }
 
     fn try_image_inner(&self, image: Arc<PngImage>, is_reduction: bool) {

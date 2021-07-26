@@ -1,18 +1,41 @@
-#![warn(trivial_casts, trivial_numeric_casts, unused_import_braces)]
-#![deny(missing_debug_implementations, missing_copy_implementations)]
-#![warn(clippy::expl_impl_clone_on_copy)]
-#![warn(clippy::float_cmp_const)]
-#![warn(clippy::linkedlist)]
-#![warn(clippy::map_flatten)]
-#![warn(clippy::match_same_arms)]
-#![warn(clippy::mem_forget)]
-#![warn(clippy::mut_mut)]
-#![warn(clippy::mutex_integer)]
-#![warn(clippy::needless_continue)]
-#![warn(clippy::path_buf_push_overwrite)]
-#![warn(clippy::range_plus_one)]
-#![allow(clippy::cognitive_complexity)]
-#![allow(clippy::upper_case_acronyms)]
+#![deny(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_import_braces,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    rust_2018_idioms,
+    rust_2018_compatibility,
+    future_incompatible,
+    unused,
+    nonstandard_style
+)]
+#![warn(
+    clippy::all,
+    clippy::doc_markdown,
+    clippy::wildcard_imports,
+    clippy::unreadable_literal,
+    clippy::unnested_or_patterns,
+    clippy::must_use_candidate,
+    clippy::map_unwrap_or,
+    clippy::large_types_passed_by_value,
+    clippy::float_cmp_const,
+    clippy::lossy_float_literal,
+    clippy::float_equality_without_abs,
+    clippy::suboptimal_flops,
+    clippy::imprecise_flops,
+    clippy::mem_forget,
+    clippy::mutex_integer,
+    clippy::path_buf_push_overwrite,
+    clippy::expl_impl_clone_on_copy,
+    clippy::linkedlist,
+    clippy::map_flatten,
+    clippy::match_same_arms,
+    clippy::mut_mut,
+    clippy::needless_continue,
+    clippy::range_plus_one,
+    clippy::range_minus_one
+)]
 #![cfg_attr(
     not(any(feature = "libdeflater", feature = "zopfli")),
     allow(irrefutable_let_patterns),
@@ -30,7 +53,10 @@ use crate::deflate::inflate;
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
-use crate::reduction::*;
+use crate::reduction::{
+    alpha, bit_depth, color, reduce_bit_depth, reduce_color_type, reduced_palette,
+    try_alpha_reductions,
+};
 use crc::{Crc, CRC_32_ISO_HDLC};
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
 use log::{debug, error, info, warn};
@@ -79,6 +105,7 @@ pub enum OutFile {
 }
 
 impl OutFile {
+    #[must_use]
     pub fn path(&self) -> Option<&Path> {
         match *self {
             OutFile::Path(Some(ref p)) => Some(p.as_path()),
@@ -95,6 +122,7 @@ pub enum InFile {
 }
 
 impl InFile {
+    #[must_use]
     pub fn path(&self) -> Option<&Path> {
         match *self {
             InFile::Path(ref p) => Some(p.as_path()),
@@ -201,6 +229,7 @@ pub struct Options {
 }
 
 impl Options {
+    #[must_use]
     pub fn from_preset(level: u8) -> Options {
         let opts = Options::default();
         match level {
@@ -221,6 +250,7 @@ impl Options {
         }
     }
 
+    #[must_use]
     pub fn max_compression() -> Options {
         Options::from_preset(6)
     }
@@ -364,7 +394,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;
+    let mut optimized_output = optimize_png(&mut png, &in_data, opts, &deadline)?;
 
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         info!("File already optimized");
@@ -396,8 +426,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
         (&OutFile::Path(ref output_path), _) => {
             let output_path = output_path
                 .as_ref()
-                .map(|p| p.as_path())
-                .unwrap_or_else(|| input.path().unwrap());
+                .map_or_else(|| input.path().unwrap(), PathBuf::as_path);
             if opts.backup {
                 perform_backup(output_path)?;
             }
@@ -447,7 +476,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     let mut png = PngData::from_slice(data, opts.fix_errors)?;
 
     // Run the optimizer on the decoded PNG.
-    let optimized_output = optimize_png(&mut png, data, opts, deadline)?;
+    let optimized_output = optimize_png(&mut png, data, opts, &deadline)?;
 
     if is_fully_optimized(original_size, optimized_output.len(), opts) {
         info!("Image already optimized");
@@ -470,7 +499,7 @@ fn optimize_png(
     png: &mut PngData,
     original_data: &[u8],
     opts: &Options,
-    deadline: Arc<Deadline>,
+    deadline: &Arc<Deadline>,
 ) -> PngResult<Vec<u8>> {
     type TrialWithData = (TrialOptions, Vec<u8>);
 
@@ -532,13 +561,11 @@ fn optimize_png(
     if opts.interlace.is_none() {
         eval.set_baseline(png.raw.clone());
     }
-    perform_reductions(png.raw.clone(), opts, &deadline, &eval);
-    let reduction_occurred = if let Some(result) = eval.get_result() {
+    perform_reductions(png.raw.clone(), opts, deadline, &eval);
+    let reduction_occurred = eval.get_result().map_or(false, |result| {
         *png = result;
         true
-    } else {
-        false
-    };
+    });
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
@@ -605,7 +632,7 @@ fn optimize_png(
                     trial.strategy,
                     window,
                     &best_size,
-                    &deadline,
+                    deadline,
                 ),
                 #[cfg(feature = "zopfli")]
                 Deflaters::Zopfli => deflate::zopfli_deflate(filtered),
@@ -783,7 +810,7 @@ fn perform_reductions(
         }
     }
 
-    try_alpha_reductions(png, &opts.alphas, eval);
+    try_alpha_reductions(&png, &opts.alphas, eval);
 }
 
 #[derive(Debug)]
@@ -801,6 +828,7 @@ pub struct Deadline {
 }
 
 impl Deadline {
+    #[must_use]
     pub fn new(timeout: Option<Duration>) -> Self {
         Self {
             imp: timeout.map(|timeout| DeadlineImp {
@@ -872,7 +900,7 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
                 *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
                 *b"sPLT",
             ];
-            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
+            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().copied().collect();
             for hdr in &keys {
                 if !PRESERVED_HEADERS.contains(hdr) {
                     raw.aux_headers.remove(hdr);
@@ -908,7 +936,7 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
     }
 }
 
-/// If the profile is sRGB, extracts the rendering intent value from it
+/// If the profile is `sRGB`, extracts the rendering intent value from it
 fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
     // Skip (useless) profile name
     loop {
@@ -1032,14 +1060,14 @@ fn copy_permissions(metadata_input: &Metadata, out_file: &File) -> PngResult<()>
                     ))
                 })
                 .and_then(|out_meta_reread| {
-                    if out_meta_reread.permissions().mode() != permissions {
+                    if out_meta_reread.permissions().mode() == permissions {
+                        Ok(())
+                    } else {
                         Err(PngError::new(&format!(
                             "failed to set permissions, expected: {:04o}, found: {:04o}",
                             permissions,
                             out_meta_reread.permissions().mode()
                         )))
-                    } else {
-                        Ok(())
                     }
                 })
         })

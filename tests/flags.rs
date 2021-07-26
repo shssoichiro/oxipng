@@ -36,8 +36,8 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     mut callback_pre: CBPRE,
     mut callback_post: CBPOST,
 ) where
-    CBPOST: FnMut(&Path) -> (),
-    CBPRE: FnMut(&Path) -> (),
+    CBPOST: FnMut(&Path),
+    CBPRE: FnMut(&Path),
 {
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
@@ -46,14 +46,14 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
 
     callback_pre(&input);
 
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+    match oxipng::optimize(&InFile::Path(input), output, opts) {
         Ok(_) => (),
         Err(x) => panic!("{}", x),
     };
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    callback_post(&output);
+    callback_post(output);
 
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,

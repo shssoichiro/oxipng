@@ -1,4 +1,5 @@
 #![feature(test)]
+#![allow(unused_must_use)]
 
 extern crate oxipng;
 extern crate test;
