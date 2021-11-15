@@ -263,7 +263,7 @@ impl Options {
     fn apply_preset_5(mut self) -> Self {
         if let Deflaters::Zlib { compression, .. } = &mut self.deflate {
             compression.clear();
-            for i in 3..9 {
+            for i in 3..10 {
                 compression.insert(i);
             }
         }
@@ -273,11 +273,11 @@ impl Options {
     fn apply_preset_6(mut self) -> Self {
         if let Deflaters::Zlib { compression, .. } = &mut self.deflate {
             compression.clear();
-            for i in 1..3 {
+            for i in 1..10 {
                 compression.insert(i);
             }
         }
-        self.apply_preset_5()
+        self.apply_preset_4()
     }
 }
 
