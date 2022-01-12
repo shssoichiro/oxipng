@@ -1,5 +1,6 @@
 ### Next
 
+- [Breaking] Bump minimum Rust version to 1.56.0
 - [Misc] Bump `clap` to 3.0.0
 - [Misc] Bump `zopfli` to 0.5.0
 
