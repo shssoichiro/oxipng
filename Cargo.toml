@@ -17,6 +17,7 @@ name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
 build = "build.rs"
 version = "5.0.1"
+rust-version = "1.46.0"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
