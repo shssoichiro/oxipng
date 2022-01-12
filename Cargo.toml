@@ -1,16 +1,10 @@
 [package]
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
-categories = [
-    "command-line-utilities",
-    "compression",
-]
+categories = ["command-line-utilities", "compression"]
 description = "A lossless PNG compression optimizer"
 documentation = "https://docs.rs/oxipng"
 edition = "2018"
-exclude = [
-    "tests/*",
-    "bench/*",
-]
+exclude = ["tests/*", "bench/*"]
 homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
@@ -72,11 +66,7 @@ version = "^0.2.2"
 rustc_version = "0.4"
 
 [features]
-binary = [
-    "clap",
-    "wild",
-    "stderrlog",
-]
+binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "libdeflater", "zopfli"]
 parallel = ["rayon", "indexmap/rayon"]
 
