@@ -1,3 +1,8 @@
+### Next
+
+- [Misc] Bump `clap` to 3.0.0
+- [Misc] Bump `zopfli` to 0.5.0
+
 ### Version 5.0.1
 
 - [Bugfix] Fix an issue where -o5 and -o6 were not testing all options
