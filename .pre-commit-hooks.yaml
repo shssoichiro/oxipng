@@ -1,0 +1,7 @@
+-   id: oxipng
+    name: oxipng
+    description: 'Multithreaded PNG optimizer written in Rust.'
+    entry: oxipng
+    language: rust
+    types: [png]
+    require_serial: true
