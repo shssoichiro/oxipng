@@ -3,15 +3,14 @@ authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 categories = ["command-line-utilities", "compression"]
 description = "A lossless PNG compression optimizer"
 documentation = "https://docs.rs/oxipng"
-edition = "2018"
+edition = "2021"
 exclude = ["tests/*", "bench/*"]
 homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-build = "build.rs"
 version = "5.0.1"
-rust-version = "1.46.0"
+rust-version = "1.56.0"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }

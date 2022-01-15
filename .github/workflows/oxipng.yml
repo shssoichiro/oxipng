@@ -13,80 +13,80 @@ jobs:
     strategy:
       matrix:
         target:
-        - x86_64-unknown-linux-gnu
-        - x86_64-unknown-linux-musl
-        - x86_64-pc-windows-msvc
-        - x86_64-apple-darwin
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - x86_64-pc-windows-msvc
+          - x86_64-apple-darwin
         toolchain:
-        # Minimum stable
-        - "1.46.0"
-        - stable
-        - beta
-        - nightly
+          # Minimum stable
+          - "1.56.0"
+          - stable
+          - beta
+          - nightly
         include:
-        - target: x86_64-unknown-linux-gnu
-          os: ubuntu-latest
-        - target: x86_64-unknown-linux-musl
-          os: ubuntu-latest
-        - target: x86_64-pc-windows-msvc
-          os: windows-latest
-        - target: x86_64-apple-darwin
-          os: macOS-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-apple-darwin
+            os: macOS-latest
         exclude:
-        - target: x86_64-pc-windows-msvc
-          toolchain: beta
-        - target: x86_64-pc-windows-msvc
-          toolchain: nightly
-        - target: x86_64-apple-darwin
-          toolchain: beta
-        - target: x86_64-apple-darwin
-          toolchain: nightly
-        - target: x86_64-unknown-linux-musl
-          toolchain: beta
-        - target: x86_64-unknown-linux-musl
-          toolchain: nightly
+          - target: x86_64-pc-windows-msvc
+            toolchain: beta
+          - target: x86_64-pc-windows-msvc
+            toolchain: nightly
+          - target: x86_64-apple-darwin
+            toolchain: beta
+          - target: x86_64-apple-darwin
+            toolchain: nightly
+          - target: x86_64-unknown-linux-musl
+            toolchain: beta
+          - target: x86_64-unknown-linux-musl
+            toolchain: nightly
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Install musl tools
-      run: sudo apt-get install musl-tools
-      if: "contains(matrix.target, 'musl')"
-    - name: Install ${{ matrix.toolchain }}
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.toolchain }}
-        override: true
-        components: clippy, rustfmt
-    - name: Cache cargo registry
-      uses: actions/cache@v1
-      with:
-        path: ~/.cargo/registry/cache
-        key: ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-
-    - name: Run rustfmt
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: -- --check
-    - name: Run clippy
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings
-    - name: Run tests
-      run: cargo test
-    - name: Build benchmarks
-      if: matrix.toolchain == 'nightly'
-      run: cargo bench --no-run
-    - name: Build docs
-      run: cargo doc --no-deps
-    - name: Check no default features
-      if: matrix.toolchain == 'stable'
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: --no-default-features -- -D warnings
+      - uses: actions/checkout@v2
+      - name: Install musl tools
+        run: sudo apt-get install musl-tools
+        if: "contains(matrix.target, 'musl')"
+      - name: Install ${{ matrix.toolchain }}
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+          components: clippy, rustfmt
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry/cache
+          key: ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ matrix.target }}-${{ matrix.toolchain }}-cargo-registry-
+      - name: Run rustfmt
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+      - name: Run clippy
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -D warnings
+      - name: Run tests
+        run: cargo test
+      - name: Build benchmarks
+        if: matrix.toolchain == 'nightly'
+        run: cargo bench --no-run
+      - name: Build docs
+        run: cargo doc --no-deps
+      - name: Check no default features
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --no-default-features -- -D warnings
