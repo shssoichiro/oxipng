@@ -13,7 +13,7 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
-use clap::{App, AppSettings, Arg, ArgMatches};
+use clap::{AppSettings, Arg, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::AlphaOptim;
@@ -27,7 +27,7 @@ use std::process::exit;
 use std::time::Duration;
 
 fn main() {
-    let matches = App::new("oxipng")
+    let matches = Command::new("oxipng")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Joshua Holmer <jholmer.in@gmail.com>")
         .about("Losslessly improves compression of PNG files")
@@ -36,7 +36,7 @@ fn main() {
             .help("File(s) to compress (use \"-\" for stdin)")
             .index(1)
             .multiple_values(true)
-            .use_delimiter(false)
+            .use_value_delimiter(false)
             .required(true))
         .arg(Arg::new("optimization")
             .help("Optimization level - Default: 2")
