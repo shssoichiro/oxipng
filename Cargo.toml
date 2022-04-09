@@ -55,7 +55,7 @@ version = "2.0.4"
 [dependencies.image]
 default-features = false
 features = ["png"]
-version = "0.23"
+version = "0.24"
 
 [target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies.cloudflare-zlib]
 features = ["arm-always"]
