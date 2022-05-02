@@ -131,6 +131,10 @@ pub struct Options {
     ///
     /// Default: `false`
     pub fix_errors: bool,
+    /// Don't actually run any optimizations, just parse the PNG file.
+    ///
+    /// Default: `false`
+    pub check: bool,
     /// Don't actually write any output, just calculate the best results.
     ///
     /// Default: `false`
@@ -299,6 +303,7 @@ impl Default for Options {
 
         Options {
             backup: false,
+            check: false,
             pretend: false,
             fix_errors: false,
             force: false,
@@ -362,6 +367,11 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     };
 
     let mut png = PngData::from_slice(&in_data, opts.fix_errors)?;
+
+    if opts.check {
+        info!("Running in check mode, not optimizing");
+        return Ok(());
+    }
 
     // Run the optimizer on the decoded PNG.
     let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;

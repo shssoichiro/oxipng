@@ -83,6 +83,10 @@ fn main() {
             .help("Preserve file attributes if possible")
             .short('p')
             .long("preserve"))
+        .arg(Arg::new("check")
+            .help("Do not run any optimization passes")
+            .short('c')
+            .long("check"))
         .arg(Arg::new("pretend")
             .help("Do not write any files, only calculate compression gains")
             .short('P')
@@ -413,6 +417,10 @@ fn parse_opts_into_struct(
 
     if matches.is_present("fix") {
         opts.fix_errors = true;
+    }
+
+    if matches.is_present("check") {
+        opts.check = true;
     }
 
     if matches.is_present("pretend") {
