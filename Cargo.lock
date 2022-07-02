@@ -506,9 +506,9 @@ checksum = "a4a3381e03edd24287172047536f20cabde766e2cd3e65e6b00fb3af51c4f38d"
 
 [[package]]
 name = "stderrlog"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45a53e2eff3e94a019afa6265e8ee04cb05b9d33fe9f5078b14e4e391d155a38"
+checksum = "5b81364c25bf70a0f9beae4ae704d466bf37e704e887ebac89eb9a28d01d491f"
 dependencies = [
  "atty",
  "chrono",
