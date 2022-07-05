@@ -64,7 +64,7 @@ impl IhdrData {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 /// Options to use for performing operations on headers (such as stripping)
 pub enum Headers {
     /// None

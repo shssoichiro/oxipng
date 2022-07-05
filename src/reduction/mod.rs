@@ -117,7 +117,7 @@ fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Opti
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
         if let Some(Some(map_to)) = bkgd_header
-            .get(0)
+            .first()
             .and_then(|&idx| palette_map.get(idx as usize))
         {
             aux_headers.insert(*b"bKGD", vec![*map_to]);

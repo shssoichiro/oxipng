@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 /// The color type used to represent this image
 pub enum ColorType {
     /// Grayscale, with one color channel

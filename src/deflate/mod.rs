@@ -62,7 +62,7 @@ pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
     Ok(output)
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// DEFLATE algorithms supported by oxipng
 pub enum Deflaters {
     /// Use the Zlib/Miniz DEFLATE implementation

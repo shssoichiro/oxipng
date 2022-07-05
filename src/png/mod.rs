@@ -344,7 +344,7 @@ impl PngImage {
                         filter_line(filter, bpp, line.data, last_line, &mut f_buf);
                         let size = f_buf.iter().fold(0_u64, |acc, &x| {
                             let signed = x as i8;
-                            acc + i16::from(signed).abs() as u64
+                            acc + i16::from(signed).unsigned_abs() as u64
                         });
                         if size < best_size {
                             best_size = size;

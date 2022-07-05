@@ -53,7 +53,7 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngImage) -> Option<PngImage> {
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        if let Some(&s) = sbit_header.get(0) {
+        if let Some(&s) = sbit_header.first() {
             aux_headers.insert(*b"sBIT", vec![s]);
         }
     }
@@ -247,7 +247,7 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        if let Some(&byte) = sbit_header.get(0) {
+        if let Some(&byte) = sbit_header.first() {
             aux_headers.insert(*b"sBIT", vec![byte]);
         }
     }
