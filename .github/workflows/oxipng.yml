@@ -19,7 +19,7 @@ jobs:
           - x86_64-apple-darwin
         toolchain:
           # Minimum stable
-          - "1.56.1"
+          - "1.57.0"
           - stable
           - beta
           - nightly
