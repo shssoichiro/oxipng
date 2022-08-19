@@ -37,7 +37,7 @@ use log::{debug, error, info, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
-use std::io::{stdin, stdout, BufWriter, Read, Write, Cursor};
+use std::io::{stdin, stdout, BufWriter, Cursor, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;

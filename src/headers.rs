@@ -1,9 +1,9 @@
-use std::io;
 use crate::colors::{BitDepth, ColorType};
 use crate::error::PngError;
 use crate::PngResult;
 use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexSet;
+use std::io;
 use std::io::{Cursor, Read};
 
 #[derive(Debug, Clone, Copy)]
@@ -163,10 +163,8 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
             16 => BitDepth::Sixteen,
             _ => return Err(PngError::new("Unexpected bit depth in header")),
         },
-        width: read_be_u32(&mut rdr)
-            .map_err(|_| PngError::TruncatedData)?,
-        height: read_be_u32(&mut rdr)
-            .map_err(|_| PngError::TruncatedData)?,
+        width: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
+        height: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],
         filter: byte_data[11],
         interlaced,

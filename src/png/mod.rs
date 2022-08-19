@@ -175,9 +175,13 @@ impl PngData {
         // IHDR
         let mut ihdr_data = Vec::with_capacity(13);
         ihdr_data.write_all(&self.raw.ihdr.width.to_be_bytes()).ok();
-        ihdr_data.write_all(&self.raw.ihdr.height.to_be_bytes()).ok();
+        ihdr_data
+            .write_all(&self.raw.ihdr.height.to_be_bytes())
+            .ok();
         ihdr_data.write_all(&[self.raw.ihdr.bit_depth.as_u8()]).ok();
-        ihdr_data.write_all(&[self.raw.ihdr.color_type.png_header_code()]).ok();
+        ihdr_data
+            .write_all(&[self.raw.ihdr.color_type.png_header_code()])
+            .ok();
         ihdr_data.write_all(&[0]).ok(); // Compression -- deflate
         ihdr_data.write_all(&[0]).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_all(&[self.raw.ihdr.interlaced]).ok();
