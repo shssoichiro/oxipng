@@ -37,7 +37,7 @@ use log::{debug, error, info, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
-use std::io::{stdin, stdout, BufWriter, Read, Write};
+use std::io::{stdin, stdout, BufWriter, Read, Write, Cursor};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -710,8 +710,8 @@ fn optimize_png(
     }
 
     let (old_png, new_png) = rayon::join(
-        || image::load_from_memory_with_format(original_data, ImageFormat::Png),
-        || image::load_from_memory_with_format(&output, ImageFormat::Png),
+        || load_png_image_from_memory(original_data),
+        || load_png_image_from_memory(&output),
     );
 
     if let Ok(new_png) = new_png {
@@ -1074,6 +1074,14 @@ fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
             out_path, err_io
         ))
     })
+}
+
+/// Loads a PNG image from memory to a [DynamicImage]
+fn load_png_image_from_memory(png_data: &[u8]) -> Result<DynamicImage, image::ImageError> {
+    let mut reader = image::io::Reader::new(Cursor::new(png_data));
+    reader.set_format(ImageFormat::Png);
+    reader.no_limits();
+    reader.decode()
 }
 
 /// Compares images pixel by pixel for equivalent content

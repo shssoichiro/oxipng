@@ -1,10 +1,10 @@
+use std::io;
 use crate::colors::{BitDepth, ColorType};
 use crate::error::PngError;
 use crate::PngResult;
-use byteorder::{BigEndian, ReadBytesExt};
 use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexSet;
-use std::io::Cursor;
+use std::io::{Cursor, Read};
 
 #[derive(Debug, Clone, Copy)]
 /// Headers from the IHDR chunk of the image
@@ -102,7 +102,7 @@ pub fn parse_next_header<'a>(
             .get(*byte_offset..*byte_offset + 4)
             .ok_or(PngError::TruncatedData)?,
     );
-    let length = rdr.read_u32::<BigEndian>().unwrap();
+    let length = read_be_u32(&mut rdr).unwrap();
     *byte_offset += 4;
 
     let header_start = *byte_offset;
@@ -124,7 +124,7 @@ pub fn parse_next_header<'a>(
             .get(*byte_offset..*byte_offset + 4)
             .ok_or(PngError::TruncatedData)?,
     );
-    let crc = rdr.read_u32::<BigEndian>().unwrap();
+    let crc = read_be_u32(&mut rdr).unwrap();
     *byte_offset += 4;
 
     let header_bytes = byte_data
@@ -163,14 +163,19 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
             16 => BitDepth::Sixteen,
             _ => return Err(PngError::new("Unexpected bit depth in header")),
         },
-        width: rdr
-            .read_u32::<BigEndian>()
+        width: read_be_u32(&mut rdr)
             .map_err(|_| PngError::TruncatedData)?,
-        height: rdr
-            .read_u32::<BigEndian>()
+        height: read_be_u32(&mut rdr)
             .map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],
         filter: byte_data[11],
         interlaced,
     })
+}
+
+#[inline]
+fn read_be_u32<T: AsRef<[u8]>>(rdr: &mut Cursor<T>) -> Result<u32, io::Error> {
+    let mut int_buf = [0; 4];
+    rdr.read_exact(&mut int_buf)?;
+    Ok(u32::from_be_bytes(int_buf))
 }
