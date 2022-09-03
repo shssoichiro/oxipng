@@ -3,6 +3,7 @@ use crate::error::PngError;
 use crate::Deadline;
 use crate::PngResult;
 use indexmap::IndexSet;
+use std::num::NonZeroU8;
 
 #[doc(hidden)]
 pub mod miniz_stream;
@@ -49,11 +50,14 @@ pub fn deflate(
 }
 
 #[cfg(feature = "zopfli")]
-pub fn zopfli_deflate(data: &[u8]) -> PngResult<Vec<u8>> {
+pub fn zopfli_deflate(data: &[u8], iterations: NonZeroU8) -> PngResult<Vec<u8>> {
     use std::cmp::max;
 
     let mut output = Vec::with_capacity(max(1024, data.len() / 20));
-    let options = zopfli::Options::default();
+    let options = zopfli::Options {
+        iteration_count: iterations,
+        ..Default::default()
+    };
     match zopfli::compress(&options, &zopfli::Format::Zlib, data, &mut output) {
         Ok(_) => (),
         Err(_) => return Err(PngError::new("Failed to compress in zopfli")),
@@ -85,7 +89,12 @@ pub enum Deflaters {
     },
     #[cfg(feature = "zopfli")]
     /// Use the better but slower Zopfli implementation
-    Zopfli,
+    Zopfli {
+        /// The number of compression iterations to do. 15 iterations are fine
+        /// for small files, but bigger files will need to be compressed with
+        /// less iterations, or else they will be too slow.
+        iterations: NonZeroU8,
+    },
     #[cfg(feature = "libdeflater")]
     /// Use libdeflater.
     Libdeflater,

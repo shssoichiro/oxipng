@@ -22,6 +22,7 @@ use oxipng::Headers;
 use oxipng::Options;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
+use std::num::NonZeroU8;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::Duration;
@@ -495,7 +496,9 @@ fn parse_opts_into_struct(
     }
 
     if matches.is_present("zopfli") {
-        opts.deflate = Deflaters::Zopfli;
+        opts.deflate = Deflaters::Zopfli {
+            iterations: NonZeroU8::new(15).unwrap(),
+        };
     } else if matches.is_present("libdeflater") {
         opts.deflate = Deflaters::Libdeflater;
     } else if let Deflaters::Zlib {
