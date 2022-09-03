@@ -3,6 +3,8 @@ use crate::error::PngError;
 use crate::Deadline;
 use crate::PngResult;
 use indexmap::IndexSet;
+
+#[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 
 #[doc(hidden)]
