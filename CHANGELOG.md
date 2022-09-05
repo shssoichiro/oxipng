@@ -1,8 +1,18 @@
-### Next
+### Version 6.0.0
 
-- [Breaking] Bump minimum Rust version to 1.56.0
-- [Misc] Bump `clap` to 3.0.0
-- [Misc] Bump `zopfli` to 0.5.0
+- [Breaking] Bump minimum Rust version to 1.57.0
+- [Feature] Add `--check`/`-c` CLI option
+- [Security] Update stderrlog to 0.5.2 (Fixes RUSTSEC-2022-0006)
+- [Security] Remove chrono as a transitive dependency (Fixes )
+- [Misc] Bump `clap` to 3.2
+- [Misc] Bump `zopfli` to 0.7
+- [Misc] Bump `libdeflater` to 0.10
+- [Misc] Remove `byteorder` dependency in favor of stdlib functions
+- [Misc] Bump `image` to 0.24
+- [Misc] Bump `crc` to 3.0
+- [Misc] Bump `miniz_oxide` to 0.6
+- [Misc] Update to Rust edition 2021
+- [Misc] Various internal improvements
 
 ### Version 5.0.1
 

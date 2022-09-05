@@ -9,8 +9,8 @@ homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
-version = "5.0.1"
-rust-version = "1.56.0"
+version = "6.0.0"
+rust-version = "1.57.0"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
@@ -27,7 +27,7 @@ bit-vec = "0.6.3"
 crc = "3.0.0"
 itertools = "0.10.3"
 zopfli = { version = "0.7.0", optional = true }
-miniz_oxide = "0.5.3"
+miniz_oxide = "0.6.2"
 rgb = "0.8.33"
 indexmap = "1.9.1"
 libdeflater = { version = "0.10.0", optional = true }
