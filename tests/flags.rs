@@ -4,6 +4,7 @@ use oxipng::{InFile, OutFile};
 #[cfg(feature = "filetime")]
 use std::cell::RefCell;
 use std::fs::remove_file;
+use std::num::NonZeroU8;
 #[cfg(feature = "filetime")]
 use std::ops::Deref;
 use std::path::Path;
@@ -582,7 +583,9 @@ fn fix_errors() {
 fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
-    opts.deflate = Deflaters::Zopfli;
+    opts.deflate = Deflaters::Zopfli {
+        iterations: NonZeroU8::new(15).unwrap(),
+    };
 
     test_it_converts(
         input,

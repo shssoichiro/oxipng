@@ -618,7 +618,7 @@ fn optimize_png(
                     &deadline,
                 ),
                 #[cfg(feature = "zopfli")]
-                Deflaters::Zopfli => deflate::zopfli_deflate(filtered),
+                Deflaters::Zopfli { iterations } => deflate::zopfli_deflate(filtered, iterations),
                 #[cfg(feature = "libdeflater")]
                 Deflaters::Libdeflater => deflate::libdeflater_deflate(filtered, &best_size),
             };
