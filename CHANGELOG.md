@@ -3,7 +3,7 @@
 - [Breaking] Bump minimum Rust version to 1.57.0
 - [Feature] Add `--check`/`-c` CLI option
 - [Security] Update stderrlog to 0.5.2 (Fixes RUSTSEC-2022-0006)
-- [Security] Remove chrono as a transitive dependency (Fixes )
+- [Security] Remove chrono as a transitive dependency (Fixes RUSTSEC-2020-0159)
 - [Misc] Bump `clap` to 3.2
 - [Misc] Bump `zopfli` to 0.7
 - [Misc] Bump `libdeflater` to 0.10
