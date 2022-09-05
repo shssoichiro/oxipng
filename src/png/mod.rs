@@ -4,13 +4,12 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
-use byteorder::{BigEndian, WriteBytesExt};
 use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
 use std::fs::File;
-use std::io::{BufReader, Read};
+use std::io::{BufReader, Read, Write};
 use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
@@ -175,13 +174,17 @@ impl PngData {
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
         // IHDR
         let mut ihdr_data = Vec::with_capacity(13);
-        let _ = ihdr_data.write_u32::<BigEndian>(self.raw.ihdr.width);
-        let _ = ihdr_data.write_u32::<BigEndian>(self.raw.ihdr.height);
-        let _ = ihdr_data.write_u8(self.raw.ihdr.bit_depth.as_u8());
-        let _ = ihdr_data.write_u8(self.raw.ihdr.color_type.png_header_code());
-        let _ = ihdr_data.write_u8(0); // Compression -- deflate
-        let _ = ihdr_data.write_u8(0); // Filter method -- 5-way adaptive filtering
-        let _ = ihdr_data.write_u8(self.raw.ihdr.interlaced);
+        ihdr_data.write_all(&self.raw.ihdr.width.to_be_bytes()).ok();
+        ihdr_data
+            .write_all(&self.raw.ihdr.height.to_be_bytes())
+            .ok();
+        ihdr_data.write_all(&[self.raw.ihdr.bit_depth.as_u8()]).ok();
+        ihdr_data
+            .write_all(&[self.raw.ihdr.color_type.png_header_code()])
+            .ok();
+        ihdr_data.write_all(&[0]).ok(); // Compression -- deflate
+        ihdr_data.write_all(&[0]).ok(); // Filter method -- 5-way adaptive filtering
+        ihdr_data.write_all(&[self.raw.ihdr.interlaced]).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
         for (key, header) in self
@@ -369,8 +372,8 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     header_data.extend_from_slice(key);
     header_data.extend_from_slice(header);
     output.reserve(header_data.len() + 8);
-    let _ = output.write_u32::<BigEndian>(header_data.len() as u32 - 4);
+    output.extend_from_slice(&(header_data.len() as u32 - 4).to_be_bytes());
     let crc = Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(&header_data);
     output.append(&mut header_data);
-    let _ = output.write_u32::<BigEndian>(crc);
+    output.extend_from_slice(&crc.to_be_bytes());
 }
