@@ -1,3 +1,7 @@
+### Next
+
+- [Bugfix] Fix an issue where Zopfli mode could generate corrupt images
+
 ### Version 6.0.0
 
 - [Breaking] Bump minimum Rust version to 1.57.0
