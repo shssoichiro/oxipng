@@ -1,4 +1,4 @@
-### Next
+### Version 6.0.1
 
 - [Bugfix] Fix an issue where Zopfli mode could generate corrupt images
 
