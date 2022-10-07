@@ -27,8 +27,13 @@ pub mod cfzlib {
 
 /// Decompress a data stream using the DEFLATE algorithm
 pub fn inflate(data: &[u8]) -> PngResult<Vec<u8>> {
-    miniz_oxide::inflate::decompress_to_vec_zlib(data)
-        .map_err(|e| PngError::new(&format!("Error on decompress: {:?}", e)))
+    miniz_oxide::inflate::decompress_to_vec_zlib(data).map_err(|e| {
+        PngError::new(&format!(
+            "Error on decompress: {:?} (after {:?} decompressed bytes)",
+            e.status,
+            e.output.len()
+        ))
+    })
 }
 
 /// Compress a data stream using the DEFLATE algorithm
