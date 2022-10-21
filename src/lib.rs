@@ -560,26 +560,43 @@ fn optimize_png(
         let mut results: Vec<TrialOptions> = Vec::with_capacity(combinations);
 
         for f in &filter {
-            if let Deflaters::Zlib { compression, .. } = &opts.deflate {
-                for zc in compression {
-                    for zs in strategies.as_ref().unwrap() {
+            match &opts.deflate {
+                Deflaters::Zlib { compression, .. } => {
+                    for zc in compression {
+                        for zs in strategies.as_ref().unwrap() {
+                            results.push(TrialOptions {
+                                filter: *f,
+                                compression: *zc,
+                                strategy: *zs,
+                            });
+                        }
+                        if deadline.passed() {
+                            break;
+                        }
+                    }
+                }
+                #[cfg(feature = "zopfli")]
+                Deflaters::Zopfli { .. } => {
+                    // Zopfli has no additional options.
+                    results.push(TrialOptions {
+                        filter: *f,
+                        compression: 0,
+                        strategy: 0,
+                    });
+                }
+                #[cfg(feature = "libdeflater")]
+                Deflaters::Libdeflater { compression } => {
+                    for zc in compression {
                         results.push(TrialOptions {
                             filter: *f,
                             compression: *zc,
-                            strategy: *zs,
+                            strategy: 0,
                         });
-                    }
-                    if deadline.passed() {
-                        break;
+                        if deadline.passed() {
+                            break;
+                        }
                     }
                 }
-            } else {
-                // Zopfli and Libdeflater compression have no additional options.
-                results.push(TrialOptions {
-                    filter: *f,
-                    compression: 0,
-                    strategy: 0,
-                });
             }
 
             if deadline.passed() {
@@ -620,7 +637,9 @@ fn optimize_png(
                 #[cfg(feature = "zopfli")]
                 Deflaters::Zopfli { iterations } => deflate::zopfli_deflate(filtered, iterations),
                 #[cfg(feature = "libdeflater")]
-                Deflaters::Libdeflater => deflate::libdeflater_deflate(filtered, &best_size),
+                Deflaters::Libdeflater { .. } => {
+                    deflate::libdeflater_deflate(filtered, trial.compression, &best_size)
+                }
             };
 
             let new_idat = match new_idat {

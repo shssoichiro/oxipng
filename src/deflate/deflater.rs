@@ -2,8 +2,8 @@ use crate::atomicmin::AtomicMin;
 use crate::{PngError, PngResult};
 use libdeflater::{CompressionError, CompressionLvl, Compressor};
 
-pub fn deflate(data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
-    let mut compressor = Compressor::new(CompressionLvl::best());
+pub fn deflate(data: &[u8], level: u8, max_size: &AtomicMin) -> PngResult<Vec<u8>> {
+    let mut compressor = Compressor::new(CompressionLvl::new(level.into()).unwrap());
     let capacity = max_size.get().unwrap_or(data.len() / 2);
     let mut dest = vec![0; capacity];
     let len = compressor

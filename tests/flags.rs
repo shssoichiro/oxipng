@@ -603,7 +603,9 @@ fn zopfli_mode() {
 fn libdeflater_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
-    opts.deflate = Deflaters::Libdeflater;
+    let mut compression = IndexSet::new();
+    compression.insert(0);
+    opts.deflate = Deflaters::Libdeflater { compression };
 
     test_it_converts(
         input,

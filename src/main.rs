@@ -14,7 +14,7 @@
 #![allow(clippy::cognitive_complexity)]
 
 use clap::{AppSettings, Arg, ArgMatches, Command};
-use indexmap::IndexSet;
+use indexmap::{indexset, IndexSet};
 use log::{error, warn};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
@@ -143,17 +143,17 @@ fn main() {
                 }
             }))
         .arg(Arg::new("compression")
-            .help("zlib compression levels (1-9) - Default: 9")
+            .help("compression levels (zlib: 1-9, libdeflater: 1-12) - Default: 9 or 12")
             .long("zc")
             .takes_value(true)
             .value_name("levels")
             .validator(|x| {
-                match parse_numeric_range_opts(x, 1, 9) {
+                match parse_numeric_range_opts(x, 1, 12) {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for compression".to_owned()),
                 }
             })
-        .conflicts_with_all(&["zopfli", "libdeflater"]))
+            .conflicts_with("zopfli"))
         .arg(Arg::new("strategies")
             .help("zlib compression strategies (0-3) - Default: 0-3")
             .long("zs")
@@ -500,7 +500,12 @@ fn parse_opts_into_struct(
             iterations: NonZeroU8::new(15).unwrap(),
         };
     } else if matches.is_present("libdeflater") {
-        opts.deflate = Deflaters::Libdeflater;
+        opts.deflate = Deflaters::Libdeflater {
+            compression: match matches.value_of("compression") {
+                Some(x) => parse_numeric_range_opts(x, 1, 12).unwrap(),
+                _ => indexset! { 12 },
+            },
+        };
     } else if let Deflaters::Zlib {
         compression,
         strategies,
@@ -508,7 +513,8 @@ fn parse_opts_into_struct(
     } = &mut opts.deflate
     {
         if let Some(x) = matches.value_of("compression") {
-            *compression = parse_numeric_range_opts(x, 1, 9).unwrap();
+            *compression = parse_numeric_range_opts(x, 1, 9)
+                .map_err(|_| "Compression levels 10-12 are only valid for libdeflater".to_owned())?
         }
 
         if let Some(x) = matches.value_of("strategies") {
