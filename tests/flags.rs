@@ -173,7 +173,7 @@ fn verbose_mode() {
     assert_eq!(logs.len(), 1);
     logs.sort();
     for (i, log) in logs.into_iter().enumerate() {
-        let expected_prefix = format!("    zc = 11  zs = 0  f = 0 ");
+        let expected_prefix = format!("    zc = 11  f = 0 ");
         assert!(
             log.starts_with(&expected_prefix),
             "logs[{}] = {:?} doesn't start with {:?}",

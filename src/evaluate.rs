@@ -114,7 +114,7 @@ impl Evaluator {
                 if deadline.passed() {
                     return;
                 }
-                if let Ok(idat_data) = deflate::libdeflater_deflate(
+                if let Ok(idat_data) = deflate::deflate(
                     &image.filter_image(filter),
                     STD_COMPRESSION,
                     &best_candidate_size,

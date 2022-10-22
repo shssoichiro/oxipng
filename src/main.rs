@@ -14,7 +14,7 @@
 #![allow(clippy::cognitive_complexity)]
 
 use clap::{AppSettings, Arg, ArgMatches, Command};
-use indexmap::{indexset, IndexSet};
+use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
@@ -501,10 +501,6 @@ fn parse_opts_into_struct(
     if matches.is_present("zopfli") {
         opts.deflate = Deflaters::Zopfli {
             iterations: NonZeroU8::new(15).unwrap(),
-        };
-    } else if matches.is_present("libdeflater") {
-        opts.deflate = Deflaters::Libdeflater {
-            compression: indexset! { 12 },
         };
     } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
         if let Some(x) = matches.value_of("compression") {

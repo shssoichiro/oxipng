@@ -14,7 +14,7 @@
 #![allow(clippy::cognitive_complexity)]
 #![allow(clippy::upper_case_acronyms)]
 #![cfg_attr(
-    not(any(feature = "libdeflater", feature = "zopfli")),
+    not(feature = "zopfli"),
     allow(irrefutable_let_patterns),
     allow(unreachable_patterns)
 )]
@@ -26,7 +26,7 @@ mod rayon;
 
 use crate::atomicmin::AtomicMin;
 use crate::colors::BitDepth;
-use crate::deflate::{crc32, libdeflater_inflate};
+use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
@@ -467,7 +467,6 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
 struct TrialOptions {
     pub filter: u8,
     pub compression: u8,
-    pub strategy: u8,
 }
 
 /// Perform optimization on the input PNG object using the options provided
@@ -506,27 +505,18 @@ fn optimize_png(
     info!("    File size = {} bytes", file_original_size);
 
     let mut filter = opts.filter.clone();
-    let mut strategies = match &opts.deflate {
-        Deflaters::Zlib { strategies, .. } => Some(strategies.clone()),
-        _ => None,
-    };
 
     if opts.use_heuristics {
         // Heuristically determine which set of options to use
-        let (use_filter, use_strategy) = if png.raw.ihdr.bit_depth.as_u8() >= 8
+        let use_filter = if png.raw.ihdr.bit_depth.as_u8() >= 8
             && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
-            (5, 1)
+            5
         } else {
-            (0, 0)
+            0
         };
         if filter.is_empty() {
             filter.insert(use_filter);
-        }
-        if let Some(strategies) = &mut strategies {
-            if strategies.is_empty() {
-                strategies.insert(use_strategy);
-            }
         }
     }
 
@@ -547,51 +537,30 @@ fn optimize_png(
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
-        let combinations = if let Deflaters::Zlib { compression, .. } = &opts.deflate {
-            filter.len() * compression.len() * strategies.as_ref().unwrap().len()
+        let combinations = if let Deflaters::Libdeflater { compression } = &opts.deflate {
+            filter.len() * compression.len()
         } else {
             filter.len()
         };
         let mut results: Vec<TrialOptions> = Vec::with_capacity(combinations);
 
         for f in &filter {
-            match &opts.deflate {
-                Deflaters::Zlib { compression, .. } => {
-                    for zc in compression {
-                        for zs in strategies.as_ref().unwrap() {
-                            results.push(TrialOptions {
-                                filter: *f,
-                                compression: *zc,
-                                strategy: *zs,
-                            });
-                        }
-                        if deadline.passed() {
-                            break;
-                        }
-                    }
-                }
-                #[cfg(feature = "zopfli")]
-                Deflaters::Zopfli { .. } => {
-                    // Zopfli has no additional options.
+            if let Deflaters::Libdeflater { compression } = &opts.deflate {
+                for zc in compression {
                     results.push(TrialOptions {
                         filter: *f,
-                        compression: 0,
-                        strategy: 0,
+                        compression: *zc,
                     });
-                }
-                #[cfg(feature = "libdeflater")]
-                Deflaters::Libdeflater { compression } => {
-                    for zc in compression {
-                        results.push(TrialOptions {
-                            filter: *f,
-                            compression: *zc,
-                            strategy: 0,
-                        });
-                        if deadline.passed() {
-                            break;
-                        }
+                    if deadline.passed() {
+                        break;
                     }
                 }
+            } else {
+                // Zopfli has no additional options.
+                results.push(TrialOptions {
+                    filter: *f,
+                    compression: 0,
+                });
             }
 
             if deadline.passed() {
@@ -621,28 +590,19 @@ fn optimize_png(
             }
             let filtered = &filters[&trial.filter];
             let new_idat = match opts.deflate {
-                Deflaters::Zlib { window, .. } => deflate::deflate(
-                    filtered,
-                    trial.compression,
-                    trial.strategy,
-                    window,
-                    &best_size,
-                    &deadline,
-                ),
+                Deflaters::Libdeflater { .. } => {
+                    deflate::deflate(filtered, trial.compression, &best_size)
+                }
                 #[cfg(feature = "zopfli")]
                 Deflaters::Zopfli { iterations } => deflate::zopfli_deflate(filtered, iterations),
-                #[cfg(feature = "libdeflater")]
-                Deflaters::Libdeflater { .. } => {
-                    deflate::libdeflater_deflate(filtered, trial.compression, &best_size)
-                }
             };
 
             let new_idat = match new_idat {
                 Ok(n) => n,
                 Err(PngError::DeflatedDataTooLong(max)) => {
                     debug!(
-                        "    zc = {}  zs = {}  f = {}       >{} bytes",
-                        trial.compression, trial.strategy, trial.filter, max,
+                        "    zc = {}  f = {}       >{} bytes",
+                        trial.compression, trial.filter, max,
                     );
                     return None;
                 }
@@ -654,9 +614,8 @@ fn optimize_png(
             best_size.set_min(new_size);
 
             debug!(
-                "    zc = {}  zs = {}  f = {}        {} bytes",
+                "    zc = {}  f = {}        {} bytes",
                 trial.compression,
-                trial.strategy,
                 trial.filter,
                 new_idat.len()
             );
@@ -679,9 +638,8 @@ fn optimize_png(
             png.idat_data = idat_data;
             info!("Found better combination:");
             info!(
-                "    zc = {}  zs = {}  f = {}        {} bytes",
+                "    zc = {}  f = {}        {} bytes",
                 opts.compression,
-                opts.strategy,
                 opts.filter,
                 png.idat_data.len()
             );
@@ -949,7 +907,7 @@ fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
     }
     // The decompressed size is unknown so we have to guess the required buffer size
     let max_size = (compressed_data.len() * 2).max(1000);
-    let icc_data = libdeflater_inflate(compressed_data, max_size).ok()?;
+    let icc_data = inflate(compressed_data, max_size).ok()?;
 
     let rendering_intent = *icc_data.get(67)?;
 
