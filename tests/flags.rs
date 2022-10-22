@@ -170,10 +170,10 @@ fn verbose_mode() {
     });
 
     let mut logs: Vec<_> = receiver.into_iter().collect();
-    assert_eq!(logs.len(), 4);
+    assert_eq!(logs.len(), 1);
     logs.sort();
     for (i, log) in logs.into_iter().enumerate() {
-        let expected_prefix = format!("    zc = 9  zs = {}  f = 0 ", i);
+        let expected_prefix = format!("    zc = 11  zs = 0  f = 0 ");
         assert!(
             log.starts_with(&expected_prefix),
             "logs[{}] = {:?} doesn't start with {:?}",
@@ -586,26 +586,6 @@ fn zopfli_mode() {
     opts.deflate = Deflaters::Zopfli {
         iterations: NonZeroU8::new(15).unwrap(),
     };
-
-    test_it_converts(
-        input,
-        &output,
-        &opts,
-        ColorType::RGB,
-        BitDepth::Eight,
-        ColorType::RGB,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-#[cfg(feature = "libdeflater")]
-fn libdeflater_mode() {
-    let input = PathBuf::from("tests/files/zopfli_mode.png");
-    let (output, mut opts) = get_opts(&input);
-    let mut compression = IndexSet::new();
-    compression.insert(0);
-    opts.deflate = Deflaters::Libdeflater { compression };
 
     test_it_converts(
         input,

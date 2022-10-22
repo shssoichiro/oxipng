@@ -143,7 +143,7 @@ fn main() {
                 }
             }))
         .arg(Arg::new("compression")
-            .help("compression levels (zlib: 1-9, libdeflater: 1-12) - Default: 9 or 12")
+            .help("zlib compression levels (1-12) - Default: 12")
             .long("zc")
             .takes_value(true)
             .value_name("levels")
@@ -153,7 +153,7 @@ fn main() {
                     Err(_) => Err("Invalid option for compression".to_owned()),
                 }
             })
-            .conflicts_with("zopfli"))
+            .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::new("strategies")
             .help("zlib compression strategies (0-3) - Default: 0-3")
             .long("zs")
@@ -164,6 +164,7 @@ fn main() {
                     Err(_) => Err("Invalid option for strategies".to_owned()),
                 }
             })
+            .hide(true)
             .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::new("window")
             .help("zlib window size - Default: 32k")
@@ -178,6 +179,7 @@ fn main() {
             .possible_value("8k")
             .possible_value("16k")
             .possible_value("32k")
+            .hide(true)
             .conflicts_with_all(&["zopfli", "libdeflater"]))
         .arg(Arg::new("no-bit-reduction")
             .help("No bit depth reduction")
@@ -204,7 +206,7 @@ fn main() {
             .help("Write the output even if it is larger than the input")
             .long("force"))
         .arg(Arg::new("zopfli")
-            .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
+            .help("Use the slower but better compressing Zopfli algorithm")
             .short('Z')
             .long("zopfli")
             .conflicts_with("libdeflater"))
@@ -212,6 +214,7 @@ fn main() {
             .help("Use an alternative Libdeflater algorithm, overrides zlib-specific options")
             .short('D')
             .long("libdeflater")
+            .hide(true)
             .conflicts_with("zopfli"))
         .arg(Arg::new("timeout")
             .help("Maximum amount of time, in seconds, to spend on optimizations")
@@ -237,16 +240,16 @@ fn main() {
                 }
             }))
         .after_help("Optimization levels:
-    -o 0   =>  --zc 3 --nz                  (0 or 1 trials)
-    -o 1   =>  --zc 9                       (1 trial, determined heuristically)
-    -o 2   =>  --zc 9 --zs 0-3 -f 0,5       (8 trials with zlib or 2 trials with other compressors)
-    -o 3   =>  --zc 9 --zs 0-3 -f 0-5       (24 trials with zlib or 6 trials with other compressors)
-    -o 4   =>                               (deprecated; same as `-o 3`)
-    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (168 trials with zlib; same as `-o 3` for other compressors)
-    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (216 trials with zlib; same as `-o 3` for other compressors)
-    -o max =>                               (stable alias for the max compression)
+    -o 0   =>  --zc 6 --nz          (0 or 1 trials)
+    -o 1   =>  --zc 10              (1 trial, determined heuristically)
+    -o 2   =>  --zc 11 -f 0,5       (2 trials)
+    -o 3   =>  --zc 11 -f 0-5       (6 trials)
+    -o 4   =>  --zc 12 -f 0-5       (6 trials; same as `-o 3` for zopfli)
+    -o 5   =>  --zc 9-12 -f 0-5     (24 trials; same as `-o 3` for zopfli)
+    -o 6   =>  --zc 1-12 -f 0-5     (72 trials; same as `-o 3` for zopfli)
+    -o max =>                       (stable alias for the max compression)
 
-    Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
+    Manually specifying a compression option (zc, f, etc.) will override the optimization preset,
     regardless of the order you write the arguments.")
         .get_matches_from(wild::args());
 
@@ -501,46 +504,19 @@ fn parse_opts_into_struct(
         };
     } else if matches.is_present("libdeflater") {
         opts.deflate = Deflaters::Libdeflater {
-            compression: match matches.value_of("compression") {
-                Some(x) => parse_numeric_range_opts(x, 1, 12).unwrap(),
-                _ => indexset! { 12 },
-            },
+            compression: indexset! { 12 },
         };
-    } else if let Deflaters::Zlib {
-        compression,
-        strategies,
-        window,
-    } = &mut opts.deflate
-    {
+    } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
         if let Some(x) = matches.value_of("compression") {
-            *compression = parse_numeric_range_opts(x, 1, 9)
-                .map_err(|_| "Compression levels 10-12 are only valid for libdeflater".to_owned())?
-        }
-
-        if let Some(x) = matches.value_of("strategies") {
-            *strategies = parse_numeric_range_opts(x, 0, 3).unwrap();
-        }
-
-        match matches.value_of("window") {
-            Some("256") => *window = 8,
-            Some("512") => *window = 9,
-            Some("1k") => *window = 10,
-            Some("2k") => *window = 11,
-            Some("4k") => *window = 12,
-            Some("8k") => *window = 13,
-            Some("16k") => *window = 14,
-            // 32k is default
-            _ => (),
+            *compression = parse_numeric_range_opts(x, 1, 12).unwrap();
         }
     }
 
     if explicit_level > Some(3) {
         match opts.deflate {
-            Deflaters::Zlib { .. } => {}
+            Deflaters::Libdeflater { .. } => {}
             _ => {
-                warn!(
-                    "Level 4 and above are equivalent to level 3 for compressors other than zlib"
-                );
+                warn!("Level 4 and above are equivalent to level 3 for zopfli");
             }
         }
     }
