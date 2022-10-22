@@ -237,7 +237,7 @@ impl Options {
             compression.clear();
             compression.insert(3);
         }
-        self
+        self.apply_preset_1()
     }
 
     fn apply_preset_1(mut self) -> Self {
