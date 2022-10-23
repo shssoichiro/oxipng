@@ -14,11 +14,8 @@ use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
 
-pub(crate) const STD_COMPRESSION: u8 = 6;
-/// Must use normal compression, as faster ones (Huffman/RLE-only) are not representative
-pub(crate) const STD_STRATEGY: u8 = 0;
-/// OK to use a bit smalller window for evaluation
-pub(crate) const STD_WINDOW: u8 = 13;
+/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
+pub(crate) const STD_COMPRESSION: u8 = 5;
 pub(crate) const STD_FILTERS: [u8; 2] = [0, 5];
 
 pub(crate) mod scan_lines;

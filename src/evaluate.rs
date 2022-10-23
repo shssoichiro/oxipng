@@ -7,8 +7,6 @@ use crate::png::PngData;
 use crate::png::PngImage;
 use crate::png::STD_COMPRESSION;
 use crate::png::STD_FILTERS;
-use crate::png::STD_STRATEGY;
-use crate::png::STD_WINDOW;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
 use crate::Deadline;
@@ -116,13 +114,10 @@ impl Evaluator {
                 if deadline.passed() {
                     return;
                 }
-                if let Ok(idat_data) = deflate::deflate(
+                if let Ok(idat_data) = deflate::libdeflater_deflate(
                     &image.filter_image(filter),
                     STD_COMPRESSION,
-                    STD_STRATEGY,
-                    STD_WINDOW,
                     &best_candidate_size,
-                    &deadline,
                 ) {
                     best_candidate_size.set_min(idat_data.len());
                     // ignore baseline images after this point
