@@ -112,7 +112,7 @@ impl PngData {
             None => return Err(PngError::ChunkMissing("IHDR")),
         };
         let ihdr_header = parse_ihdr_header(&ihdr)?;
-        let raw_data = deflate::inflate(idat_headers.as_ref())?;
+        let raw_data = deflate::libdeflater_inflate(idat_headers.as_ref(), ihdr_header.raw_data_size())?;
 
         // Reject files with incorrect width/height or truncated data
         if raw_data.len() != ihdr_header.raw_data_size() {

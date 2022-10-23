@@ -14,6 +14,8 @@ pub mod miniz_stream;
 mod deflater;
 #[cfg(feature = "libdeflater")]
 pub use deflater::deflate as libdeflater_deflate;
+#[cfg(feature = "libdeflater")]
+pub use deflater::inflate as libdeflater_inflate;
 
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 pub mod cfzlib;

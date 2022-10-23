@@ -26,7 +26,7 @@ mod rayon;
 
 use crate::atomicmin::AtomicMin;
 use crate::colors::BitDepth;
-use crate::deflate::inflate;
+use crate::deflate::libdeflater_inflate;
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
@@ -948,7 +948,9 @@ fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
     if compression_method != 0 {
         return None; // The profile is supposed to be compressed (method 0)
     }
-    let icc_data = inflate(compressed_data).ok()?;
+    // The decompressed size is unknown so we have to guess the required buffer size
+    let max_size = (compressed_data.len() * 2).max(1000);
+    let icc_data = libdeflater_inflate(compressed_data, max_size).ok()?;
 
     let rendering_intent = *icc_data.get(67)?;
 
