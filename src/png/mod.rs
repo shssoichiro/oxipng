@@ -4,7 +4,6 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
-use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
@@ -370,7 +369,7 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     header_data.extend_from_slice(header);
     output.reserve(header_data.len() + 8);
     output.extend_from_slice(&(header_data.len() as u32 - 4).to_be_bytes());
-    let crc = Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(&header_data);
+    let crc = deflate::crc32(&header_data);
     output.append(&mut header_data);
     output.extend_from_slice(&crc.to_be_bytes());
 }

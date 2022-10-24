@@ -13,6 +13,8 @@ pub mod miniz_stream;
 #[cfg(feature = "libdeflater")]
 mod deflater;
 #[cfg(feature = "libdeflater")]
+pub use deflater::crc32;
+#[cfg(feature = "libdeflater")]
 pub use deflater::deflate as libdeflater_deflate;
 #[cfg(feature = "libdeflater")]
 pub use deflater::inflate as libdeflater_inflate;

@@ -36,3 +36,9 @@ pub fn inflate(data: &[u8], out_size: usize) -> PngResult<Vec<u8>> {
     dest.truncate(len);
     Ok(dest)
 }
+
+pub fn crc32(data: &[u8]) -> u32 {
+    let mut crc = Crc::new();
+    crc.update(data);
+    crc.sum()
+}
