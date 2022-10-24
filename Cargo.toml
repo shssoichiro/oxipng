@@ -61,6 +61,7 @@ rustc_version = "0.4.0"
 binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon"]
+freestanding = ["libdeflater/freestanding"]
 
 [lib]
 name = "oxipng"
