@@ -1,9 +1,4 @@
-use crate::error::PngError;
-use crate::PngResult;
 use indexmap::IndexSet;
-
-#[cfg(feature = "zopfli")]
-use std::num::NonZeroU8;
 
 mod deflater;
 pub use deflater::crc32;
@@ -11,21 +6,11 @@ pub use deflater::deflate;
 pub use deflater::inflate;
 
 #[cfg(feature = "zopfli")]
-pub fn zopfli_deflate(data: &[u8], iterations: NonZeroU8) -> PngResult<Vec<u8>> {
-    use std::cmp::max;
-
-    let mut output = Vec::with_capacity(max(1024, data.len() / 20));
-    let options = zopfli::Options {
-        iteration_count: iterations,
-        ..Default::default()
-    };
-    match zopfli::compress(&options, &zopfli::Format::Zlib, data, &mut output) {
-        Ok(_) => (),
-        Err(_) => return Err(PngError::new("Failed to compress in zopfli")),
-    };
-    output.shrink_to_fit();
-    Ok(output)
-}
+use std::num::NonZeroU8;
+#[cfg(feature = "zopfli")]
+mod zopfli_oxipng;
+#[cfg(feature = "zopfli")]
+pub use zopfli_oxipng::deflate as zopfli_deflate;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// DEFLATE algorithms supported by oxipng

@@ -22,6 +22,7 @@ use oxipng::Headers;
 use oxipng::Options;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
+#[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 use std::path::PathBuf;
 use std::process::exit;
@@ -513,24 +514,20 @@ fn parse_opts_into_struct(
     }
 
     if matches.is_present("zopfli") {
-        opts.deflate = Deflaters::Zopfli {
-            iterations: NonZeroU8::new(15).unwrap(),
-        };
+        if explicit_level > Some(3) {
+            warn!("Level 4 and above are equivalent to level 3 for zopfli");
+        }
+        #[cfg(feature = "zopfli")]
+        if let Some(iterations) = NonZeroU8::new(15) {
+            opts.deflate = Deflaters::Zopfli { iterations };
+        }
     } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
         if let Some(x) = matches.value_of("compression") {
             *compression = parse_numeric_range_opts(x, 1, 12).unwrap();
         }
     }
 
-    if explicit_level > Some(3) {
-        match opts.deflate {
-            Deflaters::Libdeflater { .. } => {}
-            _ => {
-                warn!("Level 4 and above are equivalent to level 3 for zopfli");
-            }
-        }
-    }
-
+    #[cfg(feature = "parallel")]
     if let Some(x) = matches.value_of("threads") {
         let threads = x.parse::<usize>().unwrap();
 
