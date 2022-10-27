@@ -500,11 +500,6 @@ fn optimize_png(
 
     // This will collect all versions of images and pick one that compresses best
     let eval = Evaluator::new(deadline.clone());
-    // Usually we want transformations that are smaller than the unmodified original,
-    // but if we're interlacing, we have to accept a possible file size increase.
-    if opts.interlace.is_none() {
-        eval.set_baseline(png.raw.clone());
-    }
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
     let reduction_occurred = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;
@@ -663,11 +658,17 @@ fn perform_reductions(
     deadline: &Deadline,
     eval: &Evaluator,
 ) {
+    // The eval baseline will be set from the original png only if we attempt any reductions
+    let mut baseline = Some(png.clone());
+    let mut reduction_occurred = false;
+
     // must be done first to evaluate rest with the correct interlacing
     if let Some(interlacing) = opts.interlace {
         if let Some(reduced) = png.change_interlacing(interlacing) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
+            // If we're interlacing, we have to accept a possible file size increase
+            baseline = None;
         }
         if deadline.passed() {
             return;
@@ -679,6 +680,7 @@ fn perform_reductions(
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
+            reduction_occurred = true;
         }
         if deadline.passed() {
             return;
@@ -700,6 +702,7 @@ fn perform_reductions(
                 }
             }
             report_reduction(&png);
+            reduction_occurred = true;
         }
         if deadline.passed() {
             return;
@@ -711,13 +714,22 @@ fn perform_reductions(
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
+            reduction_occurred = true;
         }
         if deadline.passed() {
             return;
         }
     }
 
-    try_alpha_reductions(png, &opts.alphas, eval);
+    if try_alpha_reductions(png, &opts.alphas, eval) {
+        reduction_occurred = true;
+    }
+
+    if let Some(baseline) = baseline {
+        if reduction_occurred {
+            eval.set_baseline(baseline);
+        }
+    }
 }
 
 #[derive(Debug)]

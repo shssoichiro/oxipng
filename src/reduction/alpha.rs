@@ -14,16 +14,18 @@ pub(crate) fn try_alpha_reductions(
     png: Arc<PngImage>,
     alphas: &IndexSet<AlphaOptim>,
     eval: &Evaluator,
-) {
-    if alphas.is_empty() {
-        return;
+) -> bool {
+    match png.ihdr.color_type {
+        ColorType::RGBA | ColorType::GrayscaleAlpha if !alphas.is_empty() => {
+            alphas
+                .par_iter()
+                .with_max_len(1)
+                .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
+                .for_each(|image| eval.try_image(Arc::new(image)));
+            true
+        }
+        _ => false,
     }
-
-    alphas
-        .par_iter()
-        .with_max_len(1)
-        .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
-        .for_each(|image| eval.try_image(Arc::new(image)));
 }
 
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {
