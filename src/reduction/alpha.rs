@@ -149,8 +149,8 @@ fn reduced_alpha_to_left(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
                 line_bytes.resize(line_bytes.len() + bpc, 0);
             } else {
                 line_bytes.extend_from_slice(pixel);
+                last_pixel = pixel.to_owned();
             }
-            last_pixel = pixel.to_owned();
         }
         reduced.push(line.filter);
         reduced.extend(line_bytes.chunks(bpp).rev().flatten());
@@ -169,8 +169,8 @@ fn reduced_alpha_to_right(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
                 reduced.resize(reduced.len() + bpc, 0);
             } else {
                 reduced.extend_from_slice(pixel);
+                last_pixel = pixel.to_owned();
             }
-            last_pixel = pixel.to_owned();
         }
     }
     reduced
