@@ -108,7 +108,7 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
                 current_line.extend_from_slice(pixel);
             }
         }
-        last_line = current_line.clone();
+        last_line = current_line[1..current_line.len()].to_vec();
         lines.push(current_line.clone());
         current_line.clear();
     }
@@ -118,6 +118,7 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
 fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     let mut reduced = Vec::with_capacity(png.data.len());
     let mut last_line = Vec::new();
+    let mut pos = 0;
     for line in png.scan_lines() {
         if line.data.len() != last_line.len() {
             last_line = vec![0; line.data.len()];
@@ -131,7 +132,8 @@ fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
                 reduced.extend_from_slice(pixel);
             }
         }
-        last_line = reduced.clone();
+        last_line = reduced[(pos + 1)..reduced.len()].to_vec();
+        pos = reduced.len();
     }
     reduced
 }
