@@ -104,5 +104,8 @@ pub enum Deflaters {
     },
     #[cfg(feature = "libdeflater")]
     /// Use libdeflater.
-    Libdeflater,
+    Libdeflater {
+        /// Which compression levels to try on the file (1-12)
+        compression: IndexSet<u8>,
+    },
 }

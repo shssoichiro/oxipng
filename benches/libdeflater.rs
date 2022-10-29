@@ -13,7 +13,7 @@ fn libdeflater_16_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        libdeflater_deflate(png.raw.data.as_ref(), &AtomicMin::new(None)).ok();
+        libdeflater_deflate(png.raw.data.as_ref(), 12, &AtomicMin::new(None)).ok();
     });
 }
 
@@ -23,7 +23,7 @@ fn libdeflater_8_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        libdeflater_deflate(png.raw.data.as_ref(), &AtomicMin::new(None)).ok();
+        libdeflater_deflate(png.raw.data.as_ref(), 12, &AtomicMin::new(None)).ok();
     });
 }
 
@@ -35,7 +35,7 @@ fn libdeflater_4_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        libdeflater_deflate(png.raw.data.as_ref(), &AtomicMin::new(None)).ok();
+        libdeflater_deflate(png.raw.data.as_ref(), 12, &AtomicMin::new(None)).ok();
     });
 }
 
@@ -47,7 +47,7 @@ fn libdeflater_2_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        libdeflater_deflate(png.raw.data.as_ref(), &AtomicMin::new(None)).ok();
+        libdeflater_deflate(png.raw.data.as_ref(), 12, &AtomicMin::new(None)).ok();
     });
 }
 
@@ -59,6 +59,6 @@ fn libdeflater_1_bits_strategy_0(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        libdeflater_deflate(png.raw.data.as_ref(), &AtomicMin::new(None)).ok();
+        libdeflater_deflate(png.raw.data.as_ref(), 12, &AtomicMin::new(None)).ok();
     });
 }
