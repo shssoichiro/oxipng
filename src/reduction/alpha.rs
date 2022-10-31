@@ -2,7 +2,6 @@ use crate::colors::AlphaOptim;
 use crate::colors::ColorType;
 use crate::evaluate::Evaluator;
 use crate::headers::IhdrData;
-use crate::png::scan_lines::ScanLine;
 use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon::prelude::*;
@@ -90,50 +89,69 @@ fn reduced_alpha_to_white(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
 }
 
 fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
-    let mut scan_lines = png.scan_lines().collect::<Vec<ScanLine<'_>>>();
-    scan_lines.reverse();
-    let mut lines = Vec::with_capacity(scan_lines.len());
-    let mut last_line = Vec::new();
-    let mut current_line = Vec::with_capacity(scan_lines[0].data.len() + 1); // filter size + pixels
-    for line in scan_lines {
-        if line.data.len() != last_line.len() {
-            last_line = vec![0; line.data.len()];
+    let mut reduced = Vec::with_capacity(png.data.len());
+    let mut prev_line = Vec::new();
+    let mut transparent = Vec::new();
+    for line in png.scan_lines() {
+        if line.data.len() != prev_line.len() {
+            prev_line = vec![0; line.data.len()];
+            transparent = vec![0; line.data.len()];
         }
-        current_line.push(line.filter);
-        for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
+        reduced.push(line.filter);
+        let line_start = reduced.len();
+        let mut line_transparent = true;
+        for (col, (pixel, prev_pixel)) in
+            line.data.chunks(bpp).zip(prev_line.chunks(bpp)).enumerate()
+        {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                current_line.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                current_line.resize(current_line.len() + bpc, 0);
+                // Copy the color values from the previous line
+                reduced.extend_from_slice(&prev_pixel[0..(bpp - bpc)]);
+                reduced.resize(reduced.len() + bpc, 0);
+                transparent[col] += 1;
             } else {
-                current_line.extend_from_slice(pixel);
+                if transparent[col] > 0 {
+                    // Copy the current color values upwards in this column
+                    let mut offset = line_start + col * bpp;
+                    for _ in 0..transparent[col] {
+                        offset -= prev_line.len() + 1;
+                        reduced[offset..(offset + bpp - bpc)]
+                            .copy_from_slice(&pixel[..(bpp - bpc)]);
+                    }
+                    transparent[col] = 0;
+                }
+                reduced.extend_from_slice(pixel);
+                line_transparent = false;
             }
         }
-        last_line = current_line[1..current_line.len()].to_vec();
-        lines.push(current_line.clone());
-        current_line.clear();
+        if line_transparent {
+            // Zero out the line if it's fully transparent
+            reduced.truncate(line_start);
+            reduced.resize(line_start + prev_line.len(), 0);
+            transparent = vec![0; prev_line.len()];
+        }
+        prev_line = reduced[line_start..].to_vec();
     }
-    lines.into_iter().rev().flatten().collect()
+    reduced
 }
 
 fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     let mut reduced = Vec::with_capacity(png.data.len());
-    let mut last_line = Vec::new();
-    let mut pos = 0;
+    let mut prev_line = Vec::new();
     for line in png.scan_lines() {
-        if line.data.len() != last_line.len() {
-            last_line = vec![0; line.data.len()];
+        if line.data.len() != prev_line.len() {
+            prev_line = vec![0; line.data.len()];
         }
         reduced.push(line.filter);
-        for (pixel, last_pixel) in line.data.chunks(bpp).zip(last_line.chunks(bpp)) {
+        let line_start = reduced.len();
+        for (pixel, prev_pixel) in line.data.chunks(bpp).zip(prev_line.chunks(bpp)) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                reduced.extend_from_slice(&prev_pixel[0..(bpp - bpc)]);
                 reduced.resize(reduced.len() + bpc, 0);
             } else {
                 reduced.extend_from_slice(pixel);
             }
         }
-        last_line = reduced[(pos + 1)..reduced.len()].to_vec();
-        pos = reduced.len();
+        prev_line = reduced[line_start..].to_vec();
     }
     reduced
 }
@@ -141,19 +159,26 @@ fn reduced_alpha_to_down(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
 fn reduced_alpha_to_left(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     let mut reduced = Vec::with_capacity(png.data.len());
     for line in png.scan_lines() {
-        let mut line_bytes = Vec::with_capacity(line.data.len());
-        let mut last_pixel = vec![0; bpp];
-        for pixel in line.data.chunks(bpp).rev() {
+        reduced.push(line.filter);
+        let mut prev_pixel = vec![0; bpp];
+        let mut transparent = 0;
+        for pixel in line.data.chunks(bpp) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                line_bytes.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
-                line_bytes.resize(line_bytes.len() + bpc, 0);
+                // Count number of consecutive transparent pixel bytes
+                transparent += bpp;
             } else {
-                line_bytes.extend_from_slice(pixel);
-                last_pixel = pixel.to_owned();
+                prev_pixel[..(bpp - bpc)].copy_from_slice(&pixel[..(bpp - bpc)]);
+                if transparent > 0 {
+                    // Copy the current color values to preceding transparent pixels
+                    reduced.extend(prev_pixel.iter().cycle().take(transparent));
+                    transparent = 0;
+                }
+                reduced.extend_from_slice(pixel);
             }
         }
-        reduced.push(line.filter);
-        reduced.extend(line_bytes.chunks(bpp).rev().flatten());
+        if transparent > 0 {
+            reduced.extend(prev_pixel.iter().cycle().take(transparent));
+        }
     }
     reduced
 }
@@ -162,14 +187,14 @@ fn reduced_alpha_to_right(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
     let mut reduced = Vec::with_capacity(png.data.len());
     for line in png.scan_lines() {
         reduced.push(line.filter);
-        let mut last_pixel = vec![0; bpp];
+        let mut prev_pixel = vec![0; bpp];
         for pixel in line.data.chunks(bpp) {
             if pixel.iter().skip(bpp - bpc).fold(0, |sum, i| sum | i) == 0 {
-                reduced.extend_from_slice(&last_pixel[0..(bpp - bpc)]);
+                reduced.extend_from_slice(&prev_pixel[0..(bpp - bpc)]);
                 reduced.resize(reduced.len() + bpc, 0);
             } else {
+                prev_pixel[..(bpp - bpc)].copy_from_slice(&pixel[..(bpp - bpc)]);
                 reduced.extend_from_slice(pixel);
-                last_pixel = pixel.to_owned();
             }
         }
     }
