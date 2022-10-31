@@ -117,8 +117,8 @@ fn reduced_alpha_to_up(png: &PngImage, bpc: usize, bpp: usize) -> Vec<u8> {
                         reduced[offset..(offset + bpp - bpc)]
                             .copy_from_slice(&pixel[..(bpp - bpc)]);
                     }
-                    transparent[col] = 0;
                 }
+                transparent[col] = i32::MIN; // Prevent copying upwards again
                 reduced.extend_from_slice(pixel);
                 line_transparent = false;
             }
