@@ -4,7 +4,6 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
-use crc::{Crc, CRC_32_ISO_HDLC};
 use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
@@ -14,11 +13,8 @@ use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
 
-pub(crate) const STD_COMPRESSION: u8 = 6;
-/// Must use normal compression, as faster ones (Huffman/RLE-only) are not representative
-pub(crate) const STD_STRATEGY: u8 = 0;
-/// OK to use a bit smalller window for evaluation
-pub(crate) const STD_WINDOW: u8 = 13;
+/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
+pub(crate) const STD_COMPRESSION: u8 = 5;
 pub(crate) const STD_FILTERS: [u8; 2] = [0, 5];
 
 pub(crate) mod scan_lines;
@@ -115,7 +111,7 @@ impl PngData {
             None => return Err(PngError::ChunkMissing("IHDR")),
         };
         let ihdr_header = parse_ihdr_header(&ihdr)?;
-        let raw_data = deflate::inflate(idat_headers.as_ref())?;
+        let raw_data = deflate::inflate(idat_headers.as_ref(), ihdr_header.raw_data_size())?;
 
         // Reject files with incorrect width/height or truncated data
         if raw_data.len() != ihdr_header.raw_data_size() {
@@ -373,7 +369,7 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     header_data.extend_from_slice(header);
     output.reserve(header_data.len() + 8);
     output.extend_from_slice(&(header_data.len() as u32 - 4).to_be_bytes());
-    let crc = Crc::<u32>::new(&CRC_32_ISO_HDLC).checksum(&header_data);
+    let crc = deflate::crc32(&header_data);
     output.append(&mut header_data);
     output.extend_from_slice(&crc.to_be_bytes());
 }

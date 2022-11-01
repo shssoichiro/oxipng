@@ -14,7 +14,7 @@
 #![allow(clippy::cognitive_complexity)]
 
 use clap::{AppSettings, Arg, ArgMatches, Command};
-use indexmap::{indexset, IndexSet};
+use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::AlphaOptim;
 use oxipng::Deflaters;
@@ -22,6 +22,7 @@ use oxipng::Headers;
 use oxipng::Options;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
+#[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 use std::path::PathBuf;
 use std::process::exit;
@@ -33,199 +34,214 @@ fn main() {
         .author("Joshua Holmer <jholmer.in@gmail.com>")
         .about("Losslessly improves compression of PNG files")
         .setting(AppSettings::DeriveDisplayOrder)
-        .arg(Arg::new("files")
-            .help("File(s) to compress (use \"-\" for stdin)")
-            .index(1)
-            .multiple_values(true)
-            .use_value_delimiter(false)
-            .required(true))
-        .arg(Arg::new("optimization")
-            .help("Optimization level - Default: 2")
-            .short('o')
-            .long("opt")
-            .takes_value(true)
-            .value_name("level")
-            .possible_value("0")
-            .possible_value("1")
-            .possible_value("2")
-            .possible_value("3")
-            .possible_value("4")
-            .possible_value("5")
-            .possible_value("6")
-            .possible_value("max"))
-        .arg(Arg::new("backup")
-            .help("Back up modified files")
-            .short('b')
-            .long("backup"))
-        .arg(Arg::new("recursive")
-            .help("Recurse into subdirectories")
-            .short('r')
-            .long("recursive"))
-        .arg(Arg::new("output_dir")
-            .help("Write output file(s) to <directory>")
-            .long("dir")
-            .takes_value(true)
-            .value_name("directory")
-            .conflicts_with("output_file")
-            .conflicts_with("stdout"))
-        .arg(Arg::new("output_file")
-            .help("Write output file to <file>")
-            .long("out")
-            .takes_value(true)
-            .value_name("file")
-            .conflicts_with("output_dir")
-            .conflicts_with("stdout"))
-        .arg(Arg::new("stdout")
-            .help("Write output to stdout")
-            .long("stdout")
-            .conflicts_with("output_dir")
-            .conflicts_with("output_file"))
-        .arg(Arg::new("preserve")
-            .help("Preserve file attributes if possible")
-            .short('p')
-            .long("preserve"))
-        .arg(Arg::new("check")
-            .help("Do not run any optimization passes")
-            .short('c')
-            .long("check"))
-        .arg(Arg::new("pretend")
-            .help("Do not write any files, only calculate compression gains")
-            .short('P')
-            .long("pretend"))
-        .arg(Arg::new("strip-safe")
-            .help("Strip safely-removable metadata objects")
-            .short('s')
-            .conflicts_with("strip"))
-        .arg(Arg::new("strip")
-            .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
-            .long("strip")
-            .takes_value(true)
-            .value_name("mode")
-            .conflicts_with("strip-safe"))
-        .arg(Arg::new("keep")
-            .help("Strip all optional metadata except objects in the comma-separated list")
-            .long("keep")
-            .takes_value(true)
-            .value_name("list")
-            .conflicts_with("strip")
-            .conflicts_with("strip-safe"))
-        .arg(Arg::new("alpha")
-            .help("Perform additional alpha optimizations")
-            .short('a')
-            .long("alpha"))
-        .arg(Arg::new("interlace")
-            .help("PNG interlace type")
-            .short('i')
-            .long("interlace")
-            .takes_value(true)
-            .value_name("0/1")
-            .possible_value("0")
-            .possible_value("1"))
-        .arg(Arg::new("verbose")
-            .help("Run in verbose mode")
-            .short('v')
-            .long("verbose")
-            .conflicts_with("quiet"))
-        .arg(Arg::new("quiet")
-            .help("Run in quiet mode")
-            .short('q')
-            .long("quiet")
-            .conflicts_with("verbose"))
-        .arg(Arg::new("filters")
-            .help("PNG delta filters (0-5) - Default: 0,5")
-            .short('f')
-            .long("filters")
-            .takes_value(true)
-            .validator(|x| {
-                match parse_numeric_range_opts(x, 0, 5) {
+        .arg(
+            Arg::new("files")
+                .help("File(s) to compress (use \"-\" for stdin)")
+                .index(1)
+                .multiple_values(true)
+                .use_value_delimiter(false)
+                .required(true),
+        )
+        .arg(
+            Arg::new("optimization")
+                .help("Optimization level - Default: 2")
+                .short('o')
+                .long("opt")
+                .takes_value(true)
+                .value_name("level")
+                .possible_value("0")
+                .possible_value("1")
+                .possible_value("2")
+                .possible_value("3")
+                .possible_value("4")
+                .possible_value("5")
+                .possible_value("6")
+                .possible_value("max"),
+        )
+        .arg(
+            Arg::new("backup")
+                .help("Back up modified files")
+                .short('b')
+                .long("backup"),
+        )
+        .arg(
+            Arg::new("recursive")
+                .help("Recurse into subdirectories")
+                .short('r')
+                .long("recursive"),
+        )
+        .arg(
+            Arg::new("output_dir")
+                .help("Write output file(s) to <directory>")
+                .long("dir")
+                .takes_value(true)
+                .value_name("directory")
+                .conflicts_with("output_file")
+                .conflicts_with("stdout"),
+        )
+        .arg(
+            Arg::new("output_file")
+                .help("Write output file to <file>")
+                .long("out")
+                .takes_value(true)
+                .value_name("file")
+                .conflicts_with("output_dir")
+                .conflicts_with("stdout"),
+        )
+        .arg(
+            Arg::new("stdout")
+                .help("Write output to stdout")
+                .long("stdout")
+                .conflicts_with("output_dir")
+                .conflicts_with("output_file"),
+        )
+        .arg(
+            Arg::new("preserve")
+                .help("Preserve file attributes if possible")
+                .short('p')
+                .long("preserve"),
+        )
+        .arg(
+            Arg::new("check")
+                .help("Do not run any optimization passes")
+                .short('c')
+                .long("check"),
+        )
+        .arg(
+            Arg::new("pretend")
+                .help("Do not write any files, only calculate compression gains")
+                .short('P')
+                .long("pretend"),
+        )
+        .arg(
+            Arg::new("strip-safe")
+                .help("Strip safely-removable metadata objects")
+                .short('s')
+                .conflicts_with("strip"),
+        )
+        .arg(
+            Arg::new("strip")
+                .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
+                .long("strip")
+                .takes_value(true)
+                .value_name("mode")
+                .conflicts_with("strip-safe"),
+        )
+        .arg(
+            Arg::new("keep")
+                .help("Strip all optional metadata except objects in the comma-separated list")
+                .long("keep")
+                .takes_value(true)
+                .value_name("list")
+                .conflicts_with("strip")
+                .conflicts_with("strip-safe"),
+        )
+        .arg(
+            Arg::new("alpha")
+                .help("Perform additional alpha optimizations")
+                .short('a')
+                .long("alpha"),
+        )
+        .arg(
+            Arg::new("interlace")
+                .help("PNG interlace type")
+                .short('i')
+                .long("interlace")
+                .takes_value(true)
+                .value_name("0/1")
+                .possible_value("0")
+                .possible_value("1"),
+        )
+        .arg(
+            Arg::new("verbose")
+                .help("Run in verbose mode")
+                .short('v')
+                .long("verbose")
+                .conflicts_with("quiet"),
+        )
+        .arg(
+            Arg::new("quiet")
+                .help("Run in quiet mode")
+                .short('q')
+                .long("quiet")
+                .conflicts_with("verbose"),
+        )
+        .arg(
+            Arg::new("filters")
+                .help("PNG delta filters (0-5) - Default: 0,5")
+                .short('f')
+                .long("filters")
+                .takes_value(true)
+                .validator(|x| match parse_numeric_range_opts(x, 0, 5) {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for filters".to_owned()),
-                }
-            }))
-        .arg(Arg::new("compression")
-            .help("compression levels (zlib: 1-9, libdeflater: 1-12) - Default: 9 or 12")
-            .long("zc")
-            .takes_value(true)
-            .value_name("levels")
-            .validator(|x| {
-                match parse_numeric_range_opts(x, 1, 12) {
+                }),
+        )
+        .arg(
+            Arg::new("compression")
+                .help("zlib compression levels (1-12) - Default: 12")
+                .long("zc")
+                .takes_value(true)
+                .value_name("levels")
+                .validator(|x| match parse_numeric_range_opts(x, 1, 12) {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for compression".to_owned()),
-                }
-            })
-            .conflicts_with("zopfli"))
-        .arg(Arg::new("strategies")
-            .help("zlib compression strategies (0-3) - Default: 0-3")
-            .long("zs")
-            .takes_value(true)
-            .validator(|x| {
-                match parse_numeric_range_opts(x, 0, 3) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err("Invalid option for strategies".to_owned()),
-                }
-            })
-            .conflicts_with_all(&["zopfli", "libdeflater"]))
-        .arg(Arg::new("window")
-            .help("zlib window size - Default: 32k")
-            .long("zw")
-            .takes_value(true)
-            .value_name("size")
-            .possible_value("256")
-            .possible_value("512")
-            .possible_value("1k")
-            .possible_value("2k")
-            .possible_value("4k")
-            .possible_value("8k")
-            .possible_value("16k")
-            .possible_value("32k")
-            .conflicts_with_all(&["zopfli", "libdeflater"]))
-        .arg(Arg::new("no-bit-reduction")
-            .help("No bit depth reduction")
-            .long("nb"))
-        .arg(Arg::new("no-color-reduction")
-            .help("No color type reduction")
-            .long("nc"))
-        .arg(Arg::new("no-palette-reduction")
-            .help("No palette reduction")
-            .long("np"))
-        .arg(Arg::new("no-grayscale-reduction")
-            .help("No grayscale reduction")
-            .long("ng"))
-        .arg(Arg::new("no-reductions")
-            .help("No reductions")
-            .long("nx"))
-        .arg(Arg::new("no-recoding")
-            .help("No IDAT recoding unless necessary")
-            .long("nz"))
-        .arg(Arg::new("fix")
-            .help("Enable error recovery")
-            .long("fix"))
-        .arg(Arg::new("force")
-            .help("Write the output even if it is larger than the input")
-            .long("force"))
-        .arg(Arg::new("zopfli")
-            .help("Use the slower but better compressing Zopfli algorithm, overrides zlib-specific options")
-            .short('Z')
-            .long("zopfli")
-            .conflicts_with("libdeflater"))
-        .arg(Arg::new("libdeflater")
-            .help("Use an alternative Libdeflater algorithm, overrides zlib-specific options")
-            .short('D')
-            .long("libdeflater")
-            .conflicts_with("zopfli"))
-        .arg(Arg::new("timeout")
-            .help("Maximum amount of time, in seconds, to spend on optimizations")
-            .takes_value(true)
-            .value_name("secs")
-            .long("timeout"))
-        .arg(Arg::new("threads")
-            .help("Set number of threads to use - default 1.5x CPU cores")
-            .long("threads")
-            .short('t')
-            .takes_value(true)
-            .value_name("num")
-            .validator(|x| {
-                match x.parse::<usize>() {
+                })
+                .conflicts_with("zopfli"),
+        )
+        .arg(
+            Arg::new("no-bit-reduction")
+                .help("No bit depth reduction")
+                .long("nb"),
+        )
+        .arg(
+            Arg::new("no-color-reduction")
+                .help("No color type reduction")
+                .long("nc"),
+        )
+        .arg(
+            Arg::new("no-palette-reduction")
+                .help("No palette reduction")
+                .long("np"),
+        )
+        .arg(
+            Arg::new("no-grayscale-reduction")
+                .help("No grayscale reduction")
+                .long("ng"),
+        )
+        .arg(Arg::new("no-reductions").help("No reductions").long("nx"))
+        .arg(
+            Arg::new("no-recoding")
+                .help("No IDAT recoding unless necessary")
+                .long("nz"),
+        )
+        .arg(Arg::new("fix").help("Enable error recovery").long("fix"))
+        .arg(
+            Arg::new("force")
+                .help("Write the output even if it is larger than the input")
+                .long("force"),
+        )
+        .arg(
+            Arg::new("zopfli")
+                .help("Use the slower but better compressing Zopfli algorithm")
+                .short('Z')
+                .long("zopfli"),
+        )
+        .arg(
+            Arg::new("timeout")
+                .help("Maximum amount of time, in seconds, to spend on optimizations")
+                .takes_value(true)
+                .value_name("secs")
+                .long("timeout"),
+        )
+        .arg(
+            Arg::new("threads")
+                .help("Set number of threads to use - default 1.5x CPU cores")
+                .long("threads")
+                .short('t')
+                .takes_value(true)
+                .value_name("num")
+                .validator(|x| match x.parse::<usize>() {
                     Ok(val) => {
                         if val > 0 {
                             Ok(())
@@ -234,20 +250,22 @@ fn main() {
                         }
                     }
                     Err(_) => Err("Thread count must be >= 1".to_owned()),
-                }
-            }))
-        .after_help("Optimization levels:
-    -o 0   =>  --zc 3 --nz                  (0 or 1 trials)
-    -o 1   =>  --zc 9                       (1 trial, determined heuristically)
-    -o 2   =>  --zc 9 --zs 0-3 -f 0,5       (8 trials with zlib or 2 trials with other compressors)
-    -o 3   =>  --zc 9 --zs 0-3 -f 0-5       (24 trials with zlib or 6 trials with other compressors)
-    -o 4   =>                               (deprecated; same as `-o 3`)
-    -o 5   =>  --zc 3-9 --zs 0-3 -f 0-5     (168 trials with zlib; same as `-o 3` for other compressors)
-    -o 6   =>  --zc 1-9 --zs 0-3 -f 0-5     (216 trials with zlib; same as `-o 3` for other compressors)
-    -o max =>                               (stable alias for the max compression)
+                }),
+        )
+        .after_help(
+            "Optimization levels:
+    -o 0   =>  --zc 6 --nz          (0 or 1 trials)
+    -o 1   =>  --zc 10              (1 trial, determined heuristically)
+    -o 2   =>  --zc 11 -f 0,5       (2 trials)
+    -o 3   =>  --zc 11 -f 0-5       (6 trials)
+    -o 4   =>  --zc 12 -f 0-5       (6 trials; same as `-o 3` for zopfli)
+    -o 5   =>  --zc 9-12 -f 0-5     (24 trials; same as `-o 3` for zopfli)
+    -o 6   =>  --zc 1-12 -f 0-5     (72 trials; same as `-o 3` for zopfli)
+    -o max =>                       (stable alias for the max compression)
 
-    Manually specifying a compression option (zc, zs, etc.) will override the optimization preset,
-    regardless of the order you write the arguments.")
+    Manually specifying a compression option (zc, f, etc.) will override the optimization preset,
+    regardless of the order you write the arguments.",
+        )
         .get_matches_from(wild::args());
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
@@ -496,55 +514,20 @@ fn parse_opts_into_struct(
     }
 
     if matches.is_present("zopfli") {
-        opts.deflate = Deflaters::Zopfli {
-            iterations: NonZeroU8::new(15).unwrap(),
-        };
-    } else if matches.is_present("libdeflater") {
-        opts.deflate = Deflaters::Libdeflater {
-            compression: match matches.value_of("compression") {
-                Some(x) => parse_numeric_range_opts(x, 1, 12).unwrap(),
-                _ => indexset! { 12 },
-            },
-        };
-    } else if let Deflaters::Zlib {
-        compression,
-        strategies,
-        window,
-    } = &mut opts.deflate
-    {
+        if explicit_level > Some(3) {
+            warn!("Level 4 and above are equivalent to level 3 for zopfli");
+        }
+        #[cfg(feature = "zopfli")]
+        if let Some(iterations) = NonZeroU8::new(15) {
+            opts.deflate = Deflaters::Zopfli { iterations };
+        }
+    } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
         if let Some(x) = matches.value_of("compression") {
-            *compression = parse_numeric_range_opts(x, 1, 9)
-                .map_err(|_| "Compression levels 10-12 are only valid for libdeflater".to_owned())?
-        }
-
-        if let Some(x) = matches.value_of("strategies") {
-            *strategies = parse_numeric_range_opts(x, 0, 3).unwrap();
-        }
-
-        match matches.value_of("window") {
-            Some("256") => *window = 8,
-            Some("512") => *window = 9,
-            Some("1k") => *window = 10,
-            Some("2k") => *window = 11,
-            Some("4k") => *window = 12,
-            Some("8k") => *window = 13,
-            Some("16k") => *window = 14,
-            // 32k is default
-            _ => (),
+            *compression = parse_numeric_range_opts(x, 1, 12).unwrap();
         }
     }
 
-    if explicit_level > Some(3) {
-        match opts.deflate {
-            Deflaters::Zlib { .. } => {}
-            _ => {
-                warn!(
-                    "Level 4 and above are equivalent to level 3 for compressors other than zlib"
-                );
-            }
-        }
-    }
-
+    #[cfg(feature = "parallel")]
     if let Some(x) = matches.value_of("threads") {
         let threads = x.parse::<usize>().unwrap();
 
