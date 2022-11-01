@@ -421,9 +421,7 @@ fn parse_opts_into_struct(
         opts.alphas.insert(AlphaOptim::Black);
         opts.alphas.insert(AlphaOptim::White);
         opts.alphas.insert(AlphaOptim::Up);
-        opts.alphas.insert(AlphaOptim::Down);
         opts.alphas.insert(AlphaOptim::Left);
-        opts.alphas.insert(AlphaOptim::Right);
     }
 
     if matches.is_present("backup") {
