@@ -23,7 +23,6 @@ path = "src/main.rs"
 required-features = ["binary"]
 
 [dependencies]
-bit-vec = "0.6.3"
 itertools = "0.10.3"
 zopfli = { version = "0.7.1", optional = true }
 rgb = "0.8.33"
@@ -75,5 +74,5 @@ opt-level = 2
 [profile.release]
 lto = "thin"
 
-[profile.dev.package.bit-vec]
+[profile.dev.package.bitvec]
 opt-level = 3
