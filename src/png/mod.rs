@@ -309,41 +309,69 @@ impl PngImage {
             if last_pass != line.pass {
                 last_line = &[];
             }
-            match filter {
-                RowFilter::MinSum => {
-                    // Heuristically guess best filter per line
-                    // Uses MSAD algorithm mentioned in libpng reference docs
-                    // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut best_line = Vec::new();
-                    let mut best_size = u64::MAX;
 
-                    for try_filter in RowFilter::STANDARD {
-                        // Avoid vertical filtering on first line of each interlacing pass
-                        if last_pass != line.pass && try_filter > RowFilter::Sub {
-                            continue;
-                        }
-                        try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
-                        let size = f_buf.iter().fold(0_u64, |acc, &x| {
-                            let signed = x as i8;
-                            acc + i16::from(signed).unsigned_abs() as u64
-                        });
-                        if size < best_size {
-                            best_size = size;
-                            std::mem::swap(&mut best_line, &mut f_buf);
+            if filter <= RowFilter::Paeth {
+                // Standard filters
+                let filter = if last_pass == line.pass || filter <= RowFilter::Sub {
+                    filter
+                } else {
+                    RowFilter::None
+                };
+                filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                filtered.extend_from_slice(&f_buf);
+            } else {
+                // Heuristic filter selection strategies
+                let mut best_line = Vec::new();
+                // Avoid vertical filtering on first line of each interlacing pass
+                let try_filters = if last_pass == line.pass {
+                    RowFilter::STANDARD.iter()
+                } else {
+                    RowFilter::SINGLE_LINE.iter()
+                };
+                match filter {
+                    RowFilter::MinSum => {
+                        // MSAD algorithm mentioned in libpng reference docs
+                        // http://www.libpng.org/pub/png/book/chapter09.html
+                        let mut best_size = usize::MAX;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let size = f_buf.iter().fold(0, |acc, &x| {
+                                let signed = x as i8;
+                                acc + signed.unsigned_abs() as usize
+                            });
+                            if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
                         }
                     }
-                    filtered.extend_from_slice(&best_line);
+                    RowFilter::Entropy => {
+                        // Shannon entropy algorithm, from LodePNG
+                        // https://github.com/lvandeve/lodepng
+                        let mut best_size = i32::MIN;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let mut counts = vec![0; 0x100];
+                            for &i in f_buf.iter() {
+                                counts[i as usize] += 1;
+                            }
+                            let size = counts.into_iter().fold(0, |acc, x| {
+                                if x == 0 {
+                                    return acc;
+                                }
+                                acc + ilog2i(x)
+                            }) as i32;
+                            if size > best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    _ => unreachable!(),
                 }
-                _ => {
-                    let filter = if last_pass == line.pass || filter <= RowFilter::Sub {
-                        filter
-                    } else {
-                        RowFilter::None
-                    };
-                    filter.filter_line(bpp, line.data, last_line, &mut f_buf);
-                    filtered.extend_from_slice(&f_buf);
-                }
+                filtered.extend_from_slice(&best_line);
             }
+
             last_line = line.data;
             last_pass = line.pass;
         }
@@ -359,4 +387,10 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     let crc = deflate::crc32(&header_data);
     output.append(&mut header_data);
     output.extend_from_slice(&crc.to_be_bytes());
+}
+
+// Integer approximation for i * log2(i) - much faster than float calculations
+fn ilog2i(i: u32) -> u32 {
+    let log = 32 - i.leading_zeros() - 1;
+    i * log + ((i - (1 << log)) << 1)
 }

@@ -13,6 +13,7 @@ pub enum RowFilter {
     Paeth,
     // Heuristic strategies
     MinSum,
+    Entropy,
 }
 
 impl TryFrom<u8> for RowFilter {
@@ -38,14 +39,16 @@ impl Display for RowFilter {
                 Self::Average => "Average",
                 Self::Paeth => "Paeth",
                 Self::MinSum => "MinSum",
+                Self::Entropy => "Entropy",
             }
         )
     }
 }
 
 impl RowFilter {
-    pub const LAST: u8 = Self::MinSum as u8;
+    pub const LAST: u8 = Self::Entropy as u8;
     pub const STANDARD: [Self; 5] = [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
+    pub const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
 
     pub fn filter_line(self, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
         assert!(data.len() >= bpp);
