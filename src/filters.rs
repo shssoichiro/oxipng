@@ -50,7 +50,9 @@ impl RowFilter {
     pub fn filter_line(self, bpp: usize, data: &[u8], last_line: &[u8], buf: &mut Vec<u8>) {
         assert!(data.len() >= bpp);
         assert!(last_line.is_empty() || data.len() == last_line.len());
-        buf.reserve(data.len());
+        buf.clear();
+        buf.reserve(data.len() + 1);
+        buf.push(self as u8);
         match self {
             Self::None => {
                 buf.extend_from_slice(data);

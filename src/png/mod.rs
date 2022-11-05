@@ -306,7 +306,6 @@ impl PngImage {
         let mut last_pass: Option<u8> = None;
         let mut f_buf = Vec::new();
         for line in self.scan_lines() {
-            f_buf.clear();
             if last_pass != line.pass {
                 last_line = &[];
             }
@@ -315,7 +314,6 @@ impl PngImage {
                     // Heuristically guess best filter per line
                     // Uses MSAD algorithm mentioned in libpng reference docs
                     // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut best_filter = RowFilter::None;
                     let mut best_line = Vec::new();
                     let mut best_size = u64::MAX;
 
@@ -331,12 +329,9 @@ impl PngImage {
                         });
                         if size < best_size {
                             best_size = size;
-                            best_filter = try_filter;
                             std::mem::swap(&mut best_line, &mut f_buf);
                         }
-                        f_buf.clear() //discard buffer, and start again
                     }
-                    filtered.push(best_filter as u8);
                     filtered.extend_from_slice(&best_line);
                 }
                 _ => {
@@ -345,7 +340,6 @@ impl PngImage {
                     } else {
                         RowFilter::None
                     };
-                    filtered.push(filter as u8);
                     filter.filter_line(bpp, line.data, last_line, &mut f_buf);
                     filtered.extend_from_slice(&f_buf);
                 }
