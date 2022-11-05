@@ -8,6 +8,7 @@ use bitvec::bitarr;
 use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
+use rustc_hash::FxHashMap;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::iter::Iterator;
@@ -381,6 +382,25 @@ impl PngImage {
                             }
                             let size = set.count_ones();
                             if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    RowFilter::BigEnt => {
+                        // Bigram entropy, combined from Entropy and Bigrams filters
+                        let mut best_size = i32::MIN;
+                        // FxHasher is the fastest rust hasher currently available for this purpose
+                        let mut counts = FxHashMap::<u16, u32>::default();
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            counts.clear();
+                            for i in 1..f_buf.len() {
+                                let bigram = (f_buf[i - 1] as u16) << 8 | f_buf[i] as u16;
+                                counts.entry(bigram).and_modify(|e| *e += 1).or_insert(1);
+                            }
+                            let size = counts.values().fold(0, |acc, &x| acc + ilog2i(x)) as i32;
+                            if size > best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                             }

@@ -15,6 +15,7 @@ pub enum RowFilter {
     MinSum,
     Entropy,
     Bigrams,
+    BigEnt,
 }
 
 impl TryFrom<u8> for RowFilter {
@@ -42,13 +43,14 @@ impl Display for RowFilter {
                 Self::MinSum => "MinSum",
                 Self::Entropy => "Entropy",
                 Self::Bigrams => "Bigrams",
+                Self::BigEnt => "BigEnt",
             }
         )
     }
 }
 
 impl RowFilter {
-    pub const LAST: u8 = Self::Bigrams as u8;
+    pub const LAST: u8 = Self::BigEnt as u8;
     pub const STANDARD: [Self; 5] = [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
     pub const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
 

@@ -392,6 +392,7 @@ dependencies = [
  "log",
  "rayon",
  "rgb",
+ "rustc-hash",
  "rustc_version",
  "stderrlog",
  "wild",
@@ -457,6 +458,12 @@ checksum = "c3b221de559e4a29df3b957eec92bc0de6bc8eaf6ca9cfed43e5e1d67ff65a34"
 dependencies = [
  "bytemuck",
 ]
+
+[[package]]
+name = "rustc-hash"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc_version"
