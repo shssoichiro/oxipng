@@ -6,6 +6,7 @@ use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
 use bitvec::bitarr;
 use indexmap::IndexMap;
+use libdeflater::{CompressionLvl, Compressor};
 use rgb::ComponentSlice;
 use rgb::RGBA8;
 use rustc_hash::FxHashMap;
@@ -18,6 +19,11 @@ use std::sync::Arc;
 pub(crate) mod scan_lines;
 
 use self::scan_lines::{ScanLines, ScanLinesMut};
+
+/// Compression level to use for the Brute filter strategy
+const BRUTE_LEVEL: i32 = 1; // 1 is fastest, 2-4 are not useful, 5 is slower but more effective
+/// Number of lines to compress with the Brute filter strategy
+const BRUTE_LINES: usize = 4; // Values over 8 are generally not useful
 
 #[derive(Debug, Clone)]
 pub struct PngImage {
@@ -405,6 +411,31 @@ impl PngImage {
                                 std::mem::swap(&mut best_line, &mut f_buf);
                             }
                         }
+                    }
+                    RowFilter::Brute => {
+                        // Brute force by compressing each filter attempt
+                        // Similar to that of LodePNG but includes some previous lines for context
+                        let mut best_size = usize::MAX;
+                        let line_start = filtered.len();
+                        filtered.resize(filtered.len() + line.data.len() + 1, 0);
+                        let mut compressor =
+                            Compressor::new(CompressionLvl::new(BRUTE_LEVEL).unwrap());
+                        let limit = filtered.len().min((line.data.len() + 1) * BRUTE_LINES);
+                        let capacity = compressor.zlib_compress_bound(limit);
+                        let mut dest = vec![0; capacity];
+
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            filtered[line_start..].copy_from_slice(&f_buf);
+                            let size = compressor
+                                .zlib_compress(&filtered[filtered.len() - limit..], &mut dest)
+                                .unwrap_or(usize::MAX);
+                            if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                        filtered.resize(line_start, 0);
                     }
                     _ => unreachable!(),
                 }
