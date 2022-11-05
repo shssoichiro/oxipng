@@ -45,6 +45,7 @@ use std::time::{Duration, Instant};
 pub use crate::colors::AlphaOptim;
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
+pub use crate::filters::RowFilter;
 pub use crate::headers::Headers;
 pub use indexmap::{IndexMap, IndexSet};
 
@@ -149,7 +150,7 @@ pub struct Options {
     /// Which filters to try on the file (0-5)
     ///
     /// Default: `0,5`
-    pub filter: IndexSet<u8>,
+    pub filter: IndexSet<RowFilter>,
     /// Whether to change the interlacing type of the file.
     ///
     /// `None` will not change the current interlacing type.
@@ -253,9 +254,10 @@ impl Options {
     }
 
     fn apply_preset_3(mut self) -> Self {
-        for i in 1..=4 {
-            self.filter.insert(i);
-        }
+        self.filter.insert(RowFilter::Sub);
+        self.filter.insert(RowFilter::Up);
+        self.filter.insert(RowFilter::Average);
+        self.filter.insert(RowFilter::Paeth);
         self
     }
 
@@ -292,8 +294,8 @@ impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface
         let mut filter = IndexSet::new();
-        filter.insert(0);
-        filter.insert(5);
+        filter.insert(RowFilter::None);
+        filter.insert(RowFilter::MinSum);
         let mut compression = IndexSet::new();
         compression.insert(11);
         // We always need NoOp to be present
@@ -465,7 +467,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 /// Defines options to be used for a single compression trial
 struct TrialOptions {
-    pub filter: u8,
+    pub filter: RowFilter,
     pub compression: u8,
 }
 
@@ -511,9 +513,9 @@ fn optimize_png(
         let use_filter = if png.raw.ihdr.bit_depth.as_u8() >= 8
             && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
-            5
+            RowFilter::MinSum
         } else {
-            0
+            RowFilter::None
         };
         if filter.is_empty() {
             filter.insert(use_filter);
@@ -570,7 +572,7 @@ fn optimize_png(
 
         info!("Trying: {} combinations", results.len());
 
-        let filters: IndexMap<u8, Vec<u8>> = filter
+        let filters: IndexMap<RowFilter, Vec<u8>> = filter
             .par_iter()
             .with_max_len(1)
             .map(|f| {
@@ -601,7 +603,7 @@ fn optimize_png(
                 Ok(n) => n,
                 Err(PngError::DeflatedDataTooLong(max)) => {
                     debug!(
-                        "    zc = {}  f = {}       >{} bytes",
+                        "    zc = {}  f = {} >{} bytes",
                         trial.compression, trial.filter, max,
                     );
                     return None;
@@ -614,7 +616,7 @@ fn optimize_png(
             best_size.set_min(new_size);
 
             debug!(
-                "    zc = {}  f = {}        {} bytes",
+                "    zc = {}  f = {}  {} bytes",
                 trial.compression,
                 trial.filter,
                 new_idat.len()
@@ -638,7 +640,7 @@ fn optimize_png(
             png.idat_data = idat_data;
             info!("Found better combination:");
             info!(
-                "    zc = {}  f = {}        {} bytes",
+                "    zc = {}  f = {}  {} bytes",
                 opts.compression,
                 opts.filter,
                 png.idat_data.len()

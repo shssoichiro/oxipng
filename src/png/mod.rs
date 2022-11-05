@@ -13,10 +13,6 @@ use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
 
-/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
-pub(crate) const STD_COMPRESSION: u8 = 5;
-pub(crate) const STD_FILTERS: [u8; 2] = [0, 5];
-
 pub(crate) mod scan_lines;
 
 use self::scan_lines::{ScanLines, ScanLinesMut};
@@ -292,7 +288,8 @@ impl PngImage {
                 last_pass = line.pass;
             }
             last_line.resize(line.data.len(), 0);
-            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf)?;
+            let filter = RowFilter::try_from(line.filter).map_err(|_| PngError::InvalidData)?;
+            filter.unfilter_line(bpp, line.data, &last_line, &mut unfiltered_buf)?;
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
@@ -302,13 +299,7 @@ impl PngImage {
     }
 
     /// Apply the specified filter type to all rows in the image
-    /// 0: None
-    /// 1: Sub
-    /// 2: Up
-    /// 3: Average
-    /// 4: Paeth
-    /// 5: All (heuristically pick the best filter for each line)
-    pub fn filter_image(&self, filter: u8) -> Vec<u8> {
+    pub fn filter_image(&self, filter: RowFilter) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: &[u8] = &[];
@@ -320,42 +311,44 @@ impl PngImage {
                 last_line = &[];
             }
             match filter {
-                0 | 1 | 2 | 3 | 4 => {
-                    let filter = if last_pass == line.pass || filter <= 1 {
-                        filter
-                    } else {
-                        0
-                    };
-                    filtered.push(filter);
-                    filter_line(filter, bpp, line.data, last_line, &mut f_buf);
-                    filtered.extend_from_slice(&f_buf);
-                }
-                5 => {
+                RowFilter::MinSum => {
                     // Heuristically guess best filter per line
                     // Uses MSAD algorithm mentioned in libpng reference docs
                     // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut best_filter = 0;
+                    let mut best_filter = RowFilter::None;
                     let mut best_line = Vec::new();
                     let mut best_size = u64::MAX;
 
-                    // Avoid vertical filtering on first line of each interlacing pass
-                    for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        filter_line(filter, bpp, line.data, last_line, &mut f_buf);
+                    for try_filter in RowFilter::STANDARD {
+                        // Avoid vertical filtering on first line of each interlacing pass
+                        if last_pass != line.pass && try_filter > RowFilter::Sub {
+                            continue;
+                        }
+                        try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
                         let size = f_buf.iter().fold(0_u64, |acc, &x| {
                             let signed = x as i8;
                             acc + i16::from(signed).unsigned_abs() as u64
                         });
                         if size < best_size {
                             best_size = size;
-                            best_filter = filter;
+                            best_filter = try_filter;
                             std::mem::swap(&mut best_line, &mut f_buf);
                         }
                         f_buf.clear() //discard buffer, and start again
                     }
-                    filtered.push(best_filter);
+                    filtered.push(best_filter as u8);
                     filtered.extend_from_slice(&best_line);
                 }
-                _ => unreachable!(),
+                _ => {
+                    let filter = if last_pass == line.pass || filter <= RowFilter::Sub {
+                        filter
+                    } else {
+                        RowFilter::None
+                    };
+                    filtered.push(filter as u8);
+                    filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                    filtered.extend_from_slice(&f_buf);
+                }
             }
             last_line = line.data;
             last_pass = line.pass;

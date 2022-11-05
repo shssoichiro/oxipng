@@ -20,6 +20,7 @@ use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::Options;
+use oxipng::RowFilter;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
 #[cfg(feature = "zopfli")]
@@ -168,11 +169,15 @@ fn main() {
         )
         .arg(
             Arg::new("filters")
-                .help("PNG delta filters (0-5) - Default: 0,5")
+                .help(&*format!(
+                    "PNG delta filters (0-{}) - Default: 0,{}",
+                    RowFilter::LAST,
+                    RowFilter::MinSum as u8
+                ))
                 .short('f')
                 .long("filters")
                 .takes_value(true)
-                .validator(|x| match parse_numeric_range_opts(x, 0, 5) {
+                .validator(|x| match parse_numeric_range_opts(x, 0, RowFilter::LAST) {
                     Ok(_) => Ok(()),
                     Err(_) => Err("Invalid option for filters".to_owned()),
                 }),
@@ -381,7 +386,10 @@ fn parse_opts_into_struct(
     }
 
     if let Some(x) = matches.value_of("filters") {
-        opts.filter = parse_numeric_range_opts(x, 0, 5).unwrap();
+        opts.filter.clear();
+        for f in parse_numeric_range_opts(x, 0, RowFilter::LAST).unwrap() {
+            opts.filter.insert(RowFilter::try_from(f).unwrap());
+        }
     }
 
     if let Some(x) = matches.value_of("timeout") {
