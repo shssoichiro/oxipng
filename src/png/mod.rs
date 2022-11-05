@@ -4,6 +4,7 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
+use bitvec::bitarr;
 use indexmap::IndexMap;
 use rgb::ComponentSlice;
 use rgb::RGBA8;
@@ -362,6 +363,24 @@ impl PngImage {
                                 acc + ilog2i(x)
                             }) as i32;
                             if size > best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    RowFilter::Bigrams => {
+                        // Count distinct bigrams, from pngwolf
+                        // https://bjoern.hoehrmann.de/pngwolf/
+                        let mut best_size = usize::MAX;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let mut set = bitarr![0; 0x10000];
+                            for i in 1..f_buf.len() {
+                                let bigram = (f_buf[i - 1] as usize) << 8 | f_buf[i] as usize;
+                                set.set(bigram, true);
+                            }
+                            let size = set.count_ones();
+                            if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                             }
