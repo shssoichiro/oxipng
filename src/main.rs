@@ -269,7 +269,20 @@ fn main() {
     -o max =>                       (stable alias for the max compression)
 
     Manually specifying a compression option (zc, f, etc.) will override the optimization preset,
-    regardless of the order you write the arguments.",
+    regardless of the order you write the arguments.
+
+PNG delta filters:
+    0  =>  None
+    1  =>  Sub
+    2  =>  Up
+    3  =>  Average
+    4  =>  Paeth
+Heuristic filter selection strategies:
+    5  =>  MinSum    Minimum sum of absolute differences
+    6  =>  Entropy   Highest Shannon entropy
+    7  =>  Bigrams   Lowest count of distinct bigrams
+    8  =>  BigEnt    Highest Shannon entropy of bigrams
+    9  =>  Brute     Smallest compressed size (slow)",
         )
         .get_matches_from(wild::args());
 
