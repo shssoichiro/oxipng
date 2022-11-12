@@ -484,22 +484,22 @@ fn optimize_png(
 
     let mut filter = opts.filter.clone();
 
-    if opts.use_heuristics {
+    if filter.is_empty() {
         // Heuristically determine which set of options to use
-        let use_filter = if png.raw.ihdr.bit_depth.as_u8() >= 8
+        if png.raw.ihdr.bit_depth.as_u8() >= 8
             && png.raw.ihdr.color_type != colors::ColorType::Indexed
         {
-            RowFilter::MinSum
+            filter.insert(RowFilter::MinSum);
         } else {
-            RowFilter::None
+            filter.insert(RowFilter::None);
         };
-        if filter.is_empty() {
-            filter.insert(use_filter);
-        }
     }
 
+    // Must use normal (lazy) compression, as faster ones (greedy) are not representative
+    let eval_compression = 5;
+    let eval_filters = indexset! {RowFilter::None, RowFilter::MinSum};
     // This will collect all versions of images and pick one that compresses best
-    let eval = Evaluator::new(deadline.clone());
+    let eval = Evaluator::new(deadline.clone(), eval_filters, eval_compression);
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
     let reduction_occurred = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;

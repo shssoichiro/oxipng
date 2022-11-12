@@ -11,16 +11,13 @@ use crate::rayon;
 use crate::Deadline;
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
+use indexmap::IndexSet;
 use rayon::prelude::*;
 #[cfg(not(feature = "parallel"))]
 use std::cell::RefCell;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
-
-/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
-const STD_COMPRESSION: u8 = 5;
-const STD_FILTERS: [RowFilter; 2] = [RowFilter::None, RowFilter::MinSum];
 
 pub struct Candidate {
     pub image: PngData,
@@ -45,6 +42,8 @@ impl Candidate {
 /// Collect image versions and pick one that compresses best
 pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
+    filters: IndexSet<RowFilter>,
+    compression: u8,
     nth: AtomicUsize,
     best_candidate_size: Arc<AtomicMin>,
     /// images are sent to the caller thread for evaluation
@@ -56,11 +55,13 @@ pub(crate) struct Evaluator {
 }
 
 impl Evaluator {
-    pub fn new(deadline: Arc<Deadline>) -> Self {
+    pub fn new(deadline: Arc<Deadline>, filters: IndexSet<RowFilter>, compression: u8) -> Self {
         #[cfg(feature = "parallel")]
         let eval_channel = unbounded();
         Self {
             deadline,
+            filters,
+            compression,
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
             #[cfg(feature = "parallel")]
@@ -98,13 +99,15 @@ impl Evaluator {
         let nth = self.nth.fetch_add(1, SeqCst);
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
+        let filters = self.filters.clone();
+        let compression = self.compression;
         let best_candidate_size = self.best_candidate_size.clone();
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
         #[cfg(feature = "parallel")]
         let eval_send = self.eval_channel.0.clone();
         rayon::spawn(move || {
-            let filters_iter = STD_FILTERS.par_iter().with_max_len(1);
+            let filters_iter = filters.par_iter().with_max_len(1);
 
             // Updating of best result inside the parallel loop would require locks,
             // which are dangerous to do in side Rayon's loop.
@@ -116,7 +119,7 @@ impl Evaluator {
                 }
                 if let Ok(idat_data) = deflate::deflate(
                     &image.filter_image(filter),
-                    STD_COMPRESSION,
+                    compression,
                     &best_candidate_size,
                 ) {
                     best_candidate_size.set_min(idat_data.len());
