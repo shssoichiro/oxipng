@@ -15,5 +15,6 @@ FROM alpine as tool
 
 COPY --from=base /src/target/release/oxipng /usr/local/bin
 
+WORKDIR /src
 ENTRYPOINT [ "oxipng" ]
 CMD [ "--help" ]
