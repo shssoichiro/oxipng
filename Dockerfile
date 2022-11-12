@@ -1,0 +1,18 @@
+FROM rust:alpine as base
+
+COPY . /src
+
+RUN rustup update 1.64 && rustup default 1.64
+
+RUN apk update \
+    && apk add \
+        gcc
+
+RUN cd /src && cargo build --release
+
+FROM alpine as tool
+
+COPY --from=base /src/target/release/oxipng /usr/local/bin
+
+ENTRYPOINT [ "oxipng" ]
+CMD [ "--help" ]
