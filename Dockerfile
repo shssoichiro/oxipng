@@ -6,7 +6,8 @@ RUN rustup update 1.64 && rustup default 1.64
 
 RUN apk update \
     && apk add \
-        gcc
+        gcc \
+        g++
 
 RUN cd /src && cargo build --release
 
