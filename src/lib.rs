@@ -47,7 +47,7 @@ pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
 pub use crate::headers::Headers;
-pub use indexmap::{IndexMap, IndexSet};
+pub use indexmap::{indexset, IndexMap, IndexSet};
 
 mod atomicmin;
 mod colors;
@@ -232,8 +232,7 @@ impl Options {
         self.idat_recoding = false;
         self.filter.clear();
         if let Deflaters::Libdeflater { compression } = &mut self.deflate {
-            compression.clear();
-            compression.insert(5);
+            *compression = 5;
         }
         self.use_heuristics = true;
         self
@@ -242,8 +241,7 @@ impl Options {
     fn apply_preset_1(mut self) -> Self {
         self.filter.clear();
         if let Deflaters::Libdeflater { compression } = &mut self.deflate {
-            compression.clear();
-            compression.insert(10);
+            *compression = 10;
         }
         self.use_heuristics = true;
         self
@@ -263,45 +261,23 @@ impl Options {
 
     fn apply_preset_4(mut self) -> Self {
         if let Deflaters::Libdeflater { compression } = &mut self.deflate {
-            compression.clear();
-            compression.insert(12);
+            *compression = 12;
         }
         self.apply_preset_3()
     }
 
-    fn apply_preset_5(mut self) -> Self {
-        if let Deflaters::Libdeflater { compression } = &mut self.deflate {
-            compression.clear();
-            for i in 9..=12 {
-                compression.insert(i);
-            }
-        }
-        self.apply_preset_3()
+    fn apply_preset_5(self) -> Self {
+        self.apply_preset_4()
     }
 
-    fn apply_preset_6(mut self) -> Self {
-        if let Deflaters::Libdeflater { compression } = &mut self.deflate {
-            compression.clear();
-            for i in 1..=12 {
-                compression.insert(i);
-            }
-        }
-        self.apply_preset_3()
+    fn apply_preset_6(self) -> Self {
+        self.apply_preset_4()
     }
 }
 
 impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface
-        let mut filter = IndexSet::new();
-        filter.insert(RowFilter::None);
-        filter.insert(RowFilter::MinSum);
-        let mut compression = IndexSet::new();
-        compression.insert(11);
-        // We always need NoOp to be present
-        let mut alphas = IndexSet::new();
-        alphas.insert(AlphaOptim::NoOp);
-
         Options {
             backup: false,
             check: false,
@@ -309,16 +285,16 @@ impl Default for Options {
             fix_errors: false,
             force: false,
             preserve_attrs: false,
-            filter,
+            filter: indexset! {RowFilter::None, RowFilter::MinSum},
             interlace: None,
-            alphas,
+            alphas: IndexSet::new(),
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
             grayscale_reduction: true,
             idat_recoding: true,
             strip: Headers::None,
-            deflate: Deflaters::Libdeflater { compression },
+            deflate: Deflaters::Libdeflater { compression: 11 },
             use_heuristics: false,
             timeout: None,
         }
@@ -539,47 +515,19 @@ fn optimize_png(
 
     if opts.idat_recoding || reduction_occurred {
         // Go through selected permutations and determine the best
-        let combinations = if let Deflaters::Libdeflater { compression } = &opts.deflate {
-            filter.len() * compression.len()
-        } else {
-            filter.len()
-        };
-        let mut results: Vec<TrialOptions> = Vec::with_capacity(combinations);
+        let mut results: Vec<TrialOptions> = Vec::with_capacity(filter.len());
 
         for f in &filter {
-            if let Deflaters::Libdeflater { compression } = &opts.deflate {
-                for zc in compression {
-                    results.push(TrialOptions {
-                        filter: *f,
-                        compression: *zc,
-                    });
-                    if deadline.passed() {
-                        break;
-                    }
-                }
-            } else {
-                // Zopfli has no additional options.
-                results.push(TrialOptions {
-                    filter: *f,
-                    compression: 0,
-                });
-            }
-
-            if deadline.passed() {
-                break;
-            }
+            results.push(TrialOptions {
+                filter: *f,
+                compression: match opts.deflate {
+                    Deflaters::Libdeflater { compression } => compression,
+                    _ => 0,
+                },
+            });
         }
 
         info!("Trying: {} combinations", results.len());
-
-        let filters: IndexMap<RowFilter, Vec<u8>> = filter
-            .par_iter()
-            .with_max_len(1)
-            .map(|f| {
-                let png = png.clone();
-                (*f, png.raw.filter_image(*f))
-            })
-            .collect();
 
         let original_len = original_png.idat_data.len();
         let added_interlacing = opts.interlace == Some(1) && original_png.raw.ihdr.interlaced == 0;
@@ -590,7 +538,7 @@ fn optimize_png(
             if deadline.passed() {
                 return None;
             }
-            let filtered = &filters[&trial.filter];
+            let filtered = &png.raw.filter_image(trial.filter);
             let new_idat = match opts.deflate {
                 Deflaters::Libdeflater { .. } => {
                     deflate::deflate(filtered, trial.compression, &best_size)

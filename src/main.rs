@@ -184,14 +184,11 @@ fn main() {
         )
         .arg(
             Arg::new("compression")
-                .help("zlib compression levels (1-12) - Default: 12")
+                .help("zlib compression level (1-12) - Default: 11")
                 .long("zc")
                 .takes_value(true)
-                .value_name("levels")
-                .validator(|x| match parse_numeric_range_opts(x, 1, 12) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err("Invalid option for compression".to_owned()),
-                })
+                .value_name("level")
+                .value_parser(1..=12)
                 .conflicts_with("zopfli"),
         )
         .arg(
@@ -541,8 +538,8 @@ fn parse_opts_into_struct(
             opts.deflate = Deflaters::Zopfli { iterations };
         }
     } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
-        if let Some(x) = matches.value_of("compression") {
-            *compression = parse_numeric_range_opts(x, 1, 12).unwrap();
+        if let Some(x) = matches.get_one::<i64>("compression") {
+            *compression = *x as u8;
         }
     }
 

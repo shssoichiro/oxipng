@@ -1,5 +1,3 @@
-use indexmap::IndexSet;
-
 mod deflater;
 pub use deflater::crc32;
 pub use deflater::deflate;
@@ -17,8 +15,8 @@ pub use zopfli_oxipng::deflate as zopfli_deflate;
 pub enum Deflaters {
     /// Use libdeflater.
     Libdeflater {
-        /// Which compression levels to try on the file (1-12)
-        compression: IndexSet<u8>,
+        /// Which compression level to use on the file (1-12)
+        compression: u8,
     },
     #[cfg(feature = "zopfli")]
     /// Use the better but slower Zopfli implementation
@@ -29,3 +27,5 @@ pub enum Deflaters {
         iterations: NonZeroU8,
     },
 }
+
+impl Copy for Deflaters {}
