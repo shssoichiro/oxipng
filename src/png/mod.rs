@@ -382,8 +382,8 @@ impl PngImage {
                         for try_filter in try_filters {
                             try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
                             let mut set = bitarr![0; 0x10000];
-                            for i in 1..f_buf.len() {
-                                let bigram = (f_buf[i - 1] as usize) << 8 | f_buf[i] as usize;
+                            for pair in f_buf.windows(2) {
+                                let bigram = (pair[0] as usize) << 8 | pair[1] as usize;
                                 set.set(bigram, true);
                             }
                             let size = set.count_ones();
@@ -401,8 +401,8 @@ impl PngImage {
                         for try_filter in try_filters {
                             try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
                             counts.clear();
-                            for i in 1..f_buf.len() {
-                                let bigram = (f_buf[i - 1] as u16) << 8 | f_buf[i] as u16;
+                            for pair in f_buf.windows(2) {
+                                let bigram = (pair[0] as u16) << 8 | pair[1] as u16;
                                 counts.entry(bigram).and_modify(|e| *e += 1).or_insert(1);
                             }
                             let size = counts.values().fold(0, |acc, &x| acc + ilog2i(x)) as i32;
