@@ -22,9 +22,10 @@ use std::sync::Arc;
 const STD_COMPRESSION: u8 = 5;
 const STD_FILTERS: [RowFilter; 2] = [RowFilter::None, RowFilter::MinSum];
 
-struct Candidate {
-    image: PngData,
-    filter: RowFilter,
+pub struct Candidate {
+    pub image: PngData,
+    pub filter: RowFilter,
+    pub is_reduction: bool,
     // first wins tie-breaker
     nth: usize,
 }
@@ -72,19 +73,15 @@ impl Evaluator {
     /// Wait for all evaluations to finish and return smallest reduction
     /// Or `None` if all reductions were worse than baseline.
     #[cfg(feature = "parallel")]
-    fn get_best_candidate(self) -> Option<Candidate> {
+    pub fn get_best_candidate(self) -> Option<Candidate> {
         let (eval_send, eval_recv) = self.eval_channel;
         drop(eval_send); // disconnect the sender, breaking the loop in the thread
         eval_recv.into_iter().min_by_key(Candidate::cmp_key)
     }
 
     #[cfg(not(feature = "parallel"))]
-    fn get_best_candidate(self) -> Option<Candidate> {
+    pub fn get_best_candidate(self) -> Option<Candidate> {
         self.eval_best_candidate.into_inner()
-    }
-
-    pub fn get_result(self) -> Option<PngData> {
-        self.get_best_candidate().map(|candidate| candidate.image)
     }
 
     /// Set baseline image. It will be used only to measure minimum compression level required
@@ -123,17 +120,13 @@ impl Evaluator {
                     &best_candidate_size,
                 ) {
                     best_candidate_size.set_min(idat_data.len());
-                    // ignore baseline images after this point
-                    if !is_reduction {
-                        return;
-                    }
-                    // the rest is shipped to the evavluation/collection thread
                     let new = Candidate {
                         image: PngData {
                             idat_data,
                             raw: Arc::clone(&image),
                         },
                         filter,
+                        is_reduction,
                         nth,
                     };
 

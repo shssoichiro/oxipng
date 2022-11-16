@@ -506,9 +506,9 @@ fn optimize_png(
         eval.set_baseline(png.raw.clone());
     }
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
-    let reduction_occurred = if let Some(result) = eval.get_result() {
-        *png = result;
-        true
+    let reduction_occurred = if let Some(result) = eval.get_best_candidate() {
+        *png = result.image;
+        result.is_reduction
     } else {
         false
     };
@@ -593,9 +593,11 @@ fn optimize_png(
                 opts.filter,
                 png.idat_data.len()
             );
-        } else if reduction_occurred {
+        } else {
             *png = original_png;
         }
+    } else if png.idat_data.len() > idat_original_size {
+        *png = original_png;
     }
 
     perform_strip(png, opts);
