@@ -27,7 +27,8 @@ impl AtomicMin {
         &self.val
     }
 
-    pub fn set_min(&self, new_val: usize) {
-        self.val.fetch_min(new_val, SeqCst);
+    /// Try a new value, returning true if it is the new minimum
+    pub fn set_min(&self, new_val: usize) -> bool {
+        new_val < self.val.fetch_min(new_val, SeqCst)
     }
 }

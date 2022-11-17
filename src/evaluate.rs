@@ -90,6 +90,11 @@ impl Evaluator {
         self.try_image_inner(image, false)
     }
 
+    /// Set best size, if known in advance
+    pub fn set_best_size(&self, size: usize) {
+        self.best_candidate_size.set_min(size);
+    }
+
     /// Check if the image is smaller than others
     pub fn try_image(&self, image: Arc<PngImage>) {
         self.try_image_inner(image, true)
