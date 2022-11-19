@@ -1,47 +1,47 @@
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use bit_vec::BitVec;
+use bitvec::prelude::*;
 
 #[must_use]
 pub fn interlace_image(png: &PngImage) -> PngImage {
-    let mut passes: Vec<BitVec> = vec![BitVec::new(); 7];
+    let mut passes: Vec<BitVec<u8, Msb0>> = vec![BitVec::new(); 7];
     let bits_per_pixel = png.ihdr.bpp();
     for (index, line) in png.scan_lines().enumerate() {
         match index % 8 {
             // Add filter bytes to passes that will be in the output image
             0 => {
-                passes[0].extend(BitVec::from_elem(8, false));
+                passes[0].extend_from_raw_slice(&[0]);
                 if png.ihdr.width >= 5 {
-                    passes[1].extend(BitVec::from_elem(8, false));
+                    passes[1].extend_from_raw_slice(&[0]);
                 }
                 if png.ihdr.width >= 3 {
-                    passes[3].extend(BitVec::from_elem(8, false));
+                    passes[3].extend_from_raw_slice(&[0]);
                 }
                 if png.ihdr.width >= 2 {
-                    passes[5].extend(BitVec::from_elem(8, false));
+                    passes[5].extend_from_raw_slice(&[0]);
                 }
             }
             4 => {
-                passes[2].extend(BitVec::from_elem(8, false));
+                passes[2].extend_from_raw_slice(&[0]);
                 if png.ihdr.width >= 3 {
-                    passes[3].extend(BitVec::from_elem(8, false));
+                    passes[3].extend_from_raw_slice(&[0]);
                 }
                 if png.ihdr.width >= 2 {
-                    passes[5].extend(BitVec::from_elem(8, false));
+                    passes[5].extend_from_raw_slice(&[0]);
                 }
             }
             2 | 6 => {
-                passes[4].extend(BitVec::from_elem(8, false));
+                passes[4].extend_from_raw_slice(&[0]);
                 if png.ihdr.width >= 2 {
-                    passes[5].extend(BitVec::from_elem(8, false));
+                    passes[5].extend_from_raw_slice(&[0]);
                 }
             }
             _ => {
-                passes[6].extend(BitVec::from_elem(8, false));
+                passes[6].extend_from_raw_slice(&[0]);
             }
         }
-        let bit_vec = BitVec::from_bytes(line.data);
-        for (i, bit) in bit_vec.iter().enumerate() {
+        let bit_vec = line.data.view_bits::<Msb0>();
+        for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= (png.ihdr.width * u32::from(bits_per_pixel)) as usize {
                 break;
@@ -79,7 +79,7 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
 
     let mut output = Vec::with_capacity(png.data.len());
     for pass in &passes {
-        output.extend(pass.to_bytes());
+        output.extend_from_slice(pass.as_raw_slice());
     }
 
     PngImage {
@@ -99,19 +99,19 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
     let bits_per_line = 8 + bits_per_pixel as usize * png.ihdr.width as usize;
     // Initialize each output line with a starting filter byte of 0
     // as well as some blank data
-    let mut lines: Vec<BitVec> =
-        vec![BitVec::from_elem(bits_per_line, false); png.ihdr.height as usize];
+    let mut lines: Vec<BitVec<u8, Msb0>> =
+        vec![bitvec![u8, Msb0; 0; bits_per_line]; png.ihdr.height as usize];
     let mut current_pass = 1;
     let mut pass_constants = interlaced_constants(current_pass);
     let mut current_y: usize = pass_constants.y_shift as usize;
     for line in png.scan_lines() {
-        let bit_vec = BitVec::from_bytes(line.data);
+        let bit_vec = line.data.view_bits::<Msb0>();
         let bits_in_line = ((png.ihdr.width - u32::from(pass_constants.x_shift)
             + u32::from(pass_constants.x_step)
             - 1)
             / u32::from(pass_constants.x_step)) as usize
             * bits_per_pixel as usize;
-        for (i, bit) in bit_vec.iter().enumerate() {
+        for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= bits_in_line {
                 break;
@@ -157,7 +157,7 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
         while line.len() % 8 != 0 {
             line.push(false);
         }
-        output.extend(line.to_bytes());
+        output.extend_from_slice(line.as_raw_slice());
     }
     PngImage {
         data: output,

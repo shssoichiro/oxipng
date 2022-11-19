@@ -1,7 +1,7 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use bit_vec::BitVec;
+use bitvec::prelude::*;
 
 const ONE_BIT_PERMUTATIONS: [u8; 2] = [0b0000_0000, 0b1111_1111];
 const TWO_BIT_PERMUTATIONS: [u8; 4] = [0b0000_0000, 0b0101_0101, 0b1010_1010, 0b1111_1111];
@@ -108,8 +108,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
                 }
             }
         } else {
-            let bit_vec = BitVec::from_bytes(line.data);
-            for byte in bit_vec.to_bytes() {
+            for &byte in line.data {
                 while minimum_bits < bit_depth {
                     let permutations: &[u8] = if minimum_bits == 1 {
                         &ONE_BIT_PERMUTATIONS
@@ -129,11 +128,11 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         }
     }
 
-    let mut reduced = BitVec::with_capacity(png.data.len() * 8);
+    let mut reduced = BitVec::<u8, Msb0>::with_capacity(png.data.len() * 8);
     for line in png.scan_lines() {
-        reduced.extend(BitVec::from_bytes(&[line.filter]));
-        let bit_vec = BitVec::from_bytes(line.data);
-        for (i, bit) in bit_vec.iter().enumerate() {
+        reduced.extend_from_raw_slice(&[line.filter]);
+        let bit_vec = line.data.view_bits::<Msb0>();
+        for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             let bit_index = bit_depth - (i % bit_depth);
             if bit_index <= minimum_bits {
                 reduced.push(bit);
@@ -146,7 +145,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     }
 
     Some(PngImage {
-        data: reduced.to_bytes(),
+        data: reduced.as_raw_slice().to_vec(),
         ihdr: IhdrData {
             bit_depth: BitDepth::from_u8(minimum_bits as u8),
             ..png.ihdr

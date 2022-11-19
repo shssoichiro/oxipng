@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use oxipng::internal_tests::*;
+use oxipng::{internal_tests::*, RowFilter};
 use oxipng::{InFile, OutFile};
 use std::fs::remove_file;
 use std::path::Path;
@@ -11,7 +11,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
         ..Default::default()
     };
     let mut filter = IndexSet::new();
-    filter.insert(0);
+    filter.insert(RowFilter::None);
     options.filter = filter;
 
     (
@@ -288,7 +288,7 @@ fn issue_92_filter_0() {
 fn issue_92_filter_5() {
     let input = "tests/files/issue-92.png";
     let (_, mut opts) = get_opts(Path::new(input));
-    opts.filter = [5].iter().cloned().collect();
+    opts.filter = [RowFilter::MinSum].iter().cloned().collect();
     let output = OutFile::Path(Some(Path::new(input).with_extension("-f5-out.png")));
 
     test_it_converts(

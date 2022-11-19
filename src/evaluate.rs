@@ -3,10 +3,9 @@
 
 use crate::atomicmin::AtomicMin;
 use crate::deflate;
+use crate::filters::RowFilter;
 use crate::png::PngData;
 use crate::png::PngImage;
-use crate::png::STD_COMPRESSION;
-use crate::png::STD_FILTERS;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
 use crate::Deadline;
@@ -19,9 +18,13 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
 
+/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
+const STD_COMPRESSION: u8 = 5;
+const STD_FILTERS: [RowFilter; 2] = [RowFilter::None, RowFilter::MinSum];
+
 struct Candidate {
     image: PngData,
-    filter: u8,
+    filter: RowFilter,
     // first wins tie-breaker
     nth: usize,
 }
