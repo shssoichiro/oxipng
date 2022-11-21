@@ -261,14 +261,14 @@ fn main() {
         )
         .after_help(
             "Optimization levels:
-    -o 0   =>  --zc 6 --nz          (0 or 1 trials)
-    -o 1   =>  --zc 10              (1 trial, determined heuristically)
-    -o 2   =>  --zc 11 -f 0,5       (2 trials)
-    -o 3   =>  --zc 11 -f 0-5       (6 trials)
-    -o 4   =>  --zc 12 -f 0-5       (6 trials; same as `-o 3` for zopfli)
-    -o 5   =>  --zc 9-12 -f 0-5     (24 trials; same as `-o 3` for zopfli)
-    -o 6   =>  --zc 1-12 -f 0-5     (72 trials; same as `-o 3` for zopfli)
-    -o max =>                       (stable alias for the max compression)
+    -o 0   =>  --zc 5 --fast                (1 trial, determined heuristically)
+    -o 1   =>  --zc 10 --fast               (1 trial, determined heuristically)
+    -o 2   =>  --zc 11 -f 0,1,6,7 --fast    (1 trial, determined by fast evaluation)
+    -o 3   =>  --zc 11 -f 0,7,8,9           (4 trials)
+    -o 4   =>  --zc 12 -f 0,7,8,9           (4 trials; same as `-o 3` for zopfli)
+    -o 5   =>  --zc 12 -f 0,1,2,5,6,7,8,9   (8 trials)
+    -o 6   =>  --zc 12 -f 0-9               (10 trials)
+    -o max =>                               (stable alias for the max compression)
 
     Manually specifying a compression option (zc, f, etc.) will override the optimization preset,
     regardless of the order you write the arguments.
@@ -387,13 +387,10 @@ fn parse_opts_into_struct(
         .init()
         .unwrap();
 
-    let (explicit_level, mut opts) = match matches.value_of("optimization") {
-        None => (None, Options::default()),
-        Some("max") => (None, Options::max_compression()),
-        Some(level) => {
-            let level = level.parse::<u8>().unwrap();
-            (Some(level), Options::from_preset(level))
-        }
+    let mut opts = match matches.value_of("optimization") {
+        None => Options::default(),
+        Some("max") => Options::max_compression(),
+        Some(level) => Options::from_preset(level.parse::<u8>().unwrap()),
     };
 
     if let Some(x) = matches.value_of("interlace") {
@@ -539,9 +536,6 @@ fn parse_opts_into_struct(
     }
 
     if matches.is_present("zopfli") {
-        if explicit_level > Some(3) {
-            warn!("Level 4 and above are equivalent to level 3 for zopfli");
-        }
         #[cfg(feature = "zopfli")]
         if let Some(iterations) = NonZeroU8::new(15) {
             opts.deflate = Deflaters::Zopfli { iterations };
