@@ -183,6 +183,11 @@ fn main() {
                 }),
         )
         .arg(
+            Arg::new("fast")
+                .help("Use fast filter evaluation")
+                .long("fast"),
+        )
+        .arg(
             Arg::new("compression")
                 .help("zlib compression level (1-12) - Default: 11")
                 .long("zc")
@@ -440,6 +445,10 @@ fn parse_opts_into_struct(
         opts.alphas.insert(AlphaOptim::White);
         opts.alphas.insert(AlphaOptim::Up);
         opts.alphas.insert(AlphaOptim::Left);
+    }
+
+    if matches.is_present("fast") {
+        opts.fast_evaluation = true;
     }
 
     if matches.is_present("backup") {
