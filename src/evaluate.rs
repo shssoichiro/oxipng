@@ -122,15 +122,15 @@ impl Evaluator {
                 if deadline.passed() {
                     return;
                 }
-                if let Ok(idat_data) = deflate::deflate(
-                    &image.filter_image(filter),
-                    compression,
-                    &best_candidate_size,
-                ) {
+                let filtered = image.filter_image(filter);
+                if let Ok(idat_data) =
+                    deflate::deflate(&filtered, compression, &best_candidate_size)
+                {
                     best_candidate_size.set_min(idat_data.len());
                     let new = Candidate {
                         image: PngData {
                             idat_data,
+                            filtered,
                             raw: Arc::clone(&image),
                         },
                         filter,

@@ -548,7 +548,7 @@ fn optimize_png(
                 info!("Trying: {}", trial.filter);
                 let original_len = idat_original_size;
                 let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
-                perform_trial(&png.raw, opts, trial, &best_size)
+                perform_trial(&png.filtered, opts, trial, &best_size)
             }
         } else {
             // Perform full compression trials of selected filters and determine the best
@@ -585,7 +585,8 @@ fn optimize_png(
                 if deadline.passed() {
                     return None;
                 }
-                perform_trial(&png.raw, opts, trial, &best_size)
+                let filtered = &png.raw.filter_image(trial.filter);
+                perform_trial(filtered, opts, trial, &best_size)
             });
             best.reduce_with(|i, j| {
                 if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
@@ -749,12 +750,11 @@ fn perform_reductions(
 
 /// Execute a compression trial
 fn perform_trial(
-    png: &PngImage,
+    filtered: &[u8],
     opts: &Options,
     trial: TrialOptions,
     best_size: &AtomicMin,
 ) -> Option<TrialWithData> {
-    let filtered = &png.filter_image(trial.filter);
     let new_idat = match opts.deflate {
         Deflaters::Libdeflater { .. } => deflate::deflate(filtered, trial.compression, best_size),
         #[cfg(feature = "zopfli")]
