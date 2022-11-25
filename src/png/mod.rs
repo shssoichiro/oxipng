@@ -4,22 +4,26 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image};
+use bitvec::bitarr;
 use indexmap::IndexMap;
+use libdeflater::{CompressionLvl, Compressor};
 use rgb::ComponentSlice;
 use rgb::RGBA8;
+use rustc_hash::FxHashMap;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::iter::Iterator;
 use std::path::Path;
 use std::sync::Arc;
 
-/// Must use normal (lazy) compression, as faster ones (greedy) are not representative
-pub(crate) const STD_COMPRESSION: u8 = 5;
-pub(crate) const STD_FILTERS: [u8; 2] = [0, 5];
-
 pub(crate) mod scan_lines;
 
 use self::scan_lines::{ScanLines, ScanLinesMut};
+
+/// Compression level to use for the Brute filter strategy
+const BRUTE_LEVEL: i32 = 1; // 1 is fastest, 2-4 are not useful, 5 is slower but more effective
+/// Number of lines to compress with the Brute filter strategy
+const BRUTE_LINES: usize = 4; // Values over 8 are generally not useful
 
 #[derive(Debug, Clone)]
 pub struct PngImage {
@@ -292,7 +296,8 @@ impl PngImage {
                 last_pass = line.pass;
             }
             last_line.resize(line.data.len(), 0);
-            unfilter_line(line.filter, bpp, line.data, &last_line, &mut unfiltered_buf)?;
+            let filter = RowFilter::try_from(line.filter).map_err(|_| PngError::InvalidData)?;
+            filter.unfilter_line(bpp, line.data, &last_line, &mut unfiltered_buf)?;
             unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
@@ -302,61 +307,141 @@ impl PngImage {
     }
 
     /// Apply the specified filter type to all rows in the image
-    /// 0: None
-    /// 1: Sub
-    /// 2: Up
-    /// 3: Average
-    /// 4: Paeth
-    /// 5: All (heuristically pick the best filter for each line)
-    pub fn filter_image(&self, filter: u8) -> Vec<u8> {
+    pub fn filter_image(&self, filter: RowFilter) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
         let mut last_line: &[u8] = &[];
         let mut last_pass: Option<u8> = None;
         let mut f_buf = Vec::new();
         for line in self.scan_lines() {
-            f_buf.clear();
             if last_pass != line.pass {
                 last_line = &[];
             }
-            match filter {
-                0 | 1 | 2 | 3 | 4 => {
-                    let filter = if last_pass == line.pass || filter <= 1 {
-                        filter
-                    } else {
-                        0
-                    };
-                    filtered.push(filter);
-                    filter_line(filter, bpp, line.data, last_line, &mut f_buf);
-                    filtered.extend_from_slice(&f_buf);
-                }
-                5 => {
-                    // Heuristically guess best filter per line
-                    // Uses MSAD algorithm mentioned in libpng reference docs
-                    // http://www.libpng.org/pub/png/book/chapter09.html
-                    let mut best_filter = 0;
-                    let mut best_line = Vec::new();
-                    let mut best_size = u64::MAX;
 
-                    // Avoid vertical filtering on first line of each interlacing pass
-                    for filter in if last_pass == line.pass { 0..5 } else { 0..2 } {
-                        filter_line(filter, bpp, line.data, last_line, &mut f_buf);
-                        let size = f_buf.iter().fold(0_u64, |acc, &x| {
-                            let signed = x as i8;
-                            acc + i16::from(signed).unsigned_abs() as u64
-                        });
-                        if size < best_size {
-                            best_size = size;
-                            best_filter = filter;
-                            std::mem::swap(&mut best_line, &mut f_buf);
+            if filter <= RowFilter::Paeth {
+                // Standard filters
+                let filter = if last_pass == line.pass || filter <= RowFilter::Sub {
+                    filter
+                } else {
+                    RowFilter::None
+                };
+                filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                filtered.extend_from_slice(&f_buf);
+            } else {
+                // Heuristic filter selection strategies
+                let mut best_line = Vec::new();
+                // Avoid vertical filtering on first line of each interlacing pass
+                let try_filters = if last_pass == line.pass {
+                    RowFilter::STANDARD.iter()
+                } else {
+                    RowFilter::SINGLE_LINE.iter()
+                };
+                match filter {
+                    RowFilter::MinSum => {
+                        // MSAD algorithm mentioned in libpng reference docs
+                        // http://www.libpng.org/pub/png/book/chapter09.html
+                        let mut best_size = usize::MAX;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let size = f_buf.iter().fold(0, |acc, &x| {
+                                let signed = x as i8;
+                                acc + signed.unsigned_abs() as usize
+                            });
+                            if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
                         }
-                        f_buf.clear() //discard buffer, and start again
                     }
-                    filtered.push(best_filter);
-                    filtered.extend_from_slice(&best_line);
+                    RowFilter::Entropy => {
+                        // Shannon entropy algorithm, from LodePNG
+                        // https://github.com/lvandeve/lodepng
+                        let mut best_size = i32::MIN;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let mut counts = vec![0; 0x100];
+                            for &i in f_buf.iter() {
+                                counts[i as usize] += 1;
+                            }
+                            let size = counts.into_iter().fold(0, |acc, x| {
+                                if x == 0 {
+                                    return acc;
+                                }
+                                acc + ilog2i(x)
+                            }) as i32;
+                            if size > best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    RowFilter::Bigrams => {
+                        // Count distinct bigrams, from pngwolf
+                        // https://bjoern.hoehrmann.de/pngwolf/
+                        let mut best_size = usize::MAX;
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            let mut set = bitarr![0; 0x10000];
+                            for pair in f_buf.windows(2) {
+                                let bigram = (pair[0] as usize) << 8 | pair[1] as usize;
+                                set.set(bigram, true);
+                            }
+                            let size = set.count_ones();
+                            if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    RowFilter::BigEnt => {
+                        // Bigram entropy, combined from Entropy and Bigrams filters
+                        let mut best_size = i32::MIN;
+                        // FxHasher is the fastest rust hasher currently available for this purpose
+                        let mut counts = FxHashMap::<u16, u32>::default();
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            counts.clear();
+                            for pair in f_buf.windows(2) {
+                                let bigram = (pair[0] as u16) << 8 | pair[1] as u16;
+                                counts.entry(bigram).and_modify(|e| *e += 1).or_insert(1);
+                            }
+                            let size = counts.values().fold(0, |acc, &x| acc + ilog2i(x)) as i32;
+                            if size > best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                    }
+                    RowFilter::Brute => {
+                        // Brute force by compressing each filter attempt
+                        // Similar to that of LodePNG but includes some previous lines for context
+                        let mut best_size = usize::MAX;
+                        let line_start = filtered.len();
+                        filtered.resize(filtered.len() + line.data.len() + 1, 0);
+                        let mut compressor =
+                            Compressor::new(CompressionLvl::new(BRUTE_LEVEL).unwrap());
+                        let limit = filtered.len().min((line.data.len() + 1) * BRUTE_LINES);
+                        let capacity = compressor.zlib_compress_bound(limit);
+                        let mut dest = vec![0; capacity];
+
+                        for try_filter in try_filters {
+                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                            filtered[line_start..].copy_from_slice(&f_buf);
+                            let size = compressor
+                                .zlib_compress(&filtered[filtered.len() - limit..], &mut dest)
+                                .unwrap_or(usize::MAX);
+                            if size < best_size {
+                                best_size = size;
+                                std::mem::swap(&mut best_line, &mut f_buf);
+                            }
+                        }
+                        filtered.resize(line_start, 0);
+                    }
+                    _ => unreachable!(),
                 }
-                _ => unreachable!(),
+                filtered.extend_from_slice(&best_line);
             }
+
             last_line = line.data;
             last_pass = line.pass;
         }
@@ -372,4 +457,10 @@ fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
     let crc = deflate::crc32(&header_data);
     output.append(&mut header_data);
     output.extend_from_slice(&crc.to_be_bytes());
+}
+
+// Integer approximation for i * log2(i) - much faster than float calculations
+fn ilog2i(i: u32) -> u32 {
+    let log = 32 - i.leading_zeros() - 1;
+    i * log + ((i - (1 << log)) << 1)
 }

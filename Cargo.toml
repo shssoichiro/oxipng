@@ -23,7 +23,6 @@ path = "src/main.rs"
 required-features = ["binary"]
 
 [dependencies]
-bit-vec = "0.6.3"
 itertools = "0.10.3"
 zopfli = { version = "0.7.1", optional = true }
 rgb = "0.8.33"
@@ -32,6 +31,8 @@ libdeflater = "0.11.0"
 log = "0.4.17"
 stderrlog = { version = "0.5.3", optional = true, default-features = false }
 crossbeam-channel = "0.5.6"
+bitvec = "1.0.1"
+rustc-hash = "1.1.0"
 
 [dependencies.filetime]
 optional = true
@@ -73,5 +74,5 @@ opt-level = 2
 [profile.release]
 lto = "thin"
 
-[profile.dev.package.bit-vec]
+[profile.dev.package.bitvec]
 opt-level = 3

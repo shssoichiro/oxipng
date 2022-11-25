@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use oxipng::internal_tests::*;
+use oxipng::{internal_tests::*, RowFilter};
 use oxipng::{InFile, OutFile};
 #[cfg(feature = "filetime")]
 use std::cell::RefCell;
@@ -16,7 +16,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
         ..Default::default()
     };
     let mut filter = IndexSet::new();
-    filter.insert(0);
+    filter.insert(RowFilter::None);
     options.filter = filter;
 
     (
@@ -173,7 +173,7 @@ fn verbose_mode() {
     assert_eq!(logs.len(), 1);
     logs.sort();
     for (i, log) in logs.into_iter().enumerate() {
-        let expected_prefix = format!("    zc = 11  f = 0 ");
+        let expected_prefix = format!("    zc = 11  f = None ");
         assert!(
             log.starts_with(&expected_prefix),
             "logs[{}] = {:?} doesn't start with {:?}",
@@ -454,7 +454,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(1);
     let mut filter = IndexSet::new();
-    filter.insert(4);
+    filter.insert(RowFilter::Paeth);
     opts.filter = filter;
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
