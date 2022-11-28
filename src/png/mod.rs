@@ -198,7 +198,11 @@ impl PngData {
         // Palette
         if let Some(ref palette) = self.raw.palette {
             let mut palette_data = Vec::with_capacity(palette.len() * 3);
-            let max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
+            let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
+            // Ensure bKGD color doesn't get truncated from palette
+            if let Some(&idx) = self.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
+                max_palette_size = max_palette_size.max(idx as usize + 1);
+            }
             for px in palette.iter().take(max_palette_size) {
                 palette_data.extend_from_slice(px.rgb().as_slice());
             }
