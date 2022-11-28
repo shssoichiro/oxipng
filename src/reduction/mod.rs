@@ -76,6 +76,13 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
             color_val(a.0).cmp(&color_val(b.0))
         });
 
+        // Make sure the background is also included, but only after sorting since it may not be used in idat
+        if let Some(&idx) = png.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
+            if !used[idx as usize] {
+                used_enumerated.push((idx as usize, &true));
+            }
+        }
+
         let mut next_index = 0_u16;
         let mut seen = IndexMap::with_capacity(palette.len());
         for (i, used) in used_enumerated.iter().cloned() {
