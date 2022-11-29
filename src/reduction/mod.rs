@@ -144,8 +144,7 @@ fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Opti
 }
 
 fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<[u8; 256]> {
-    let len = png.palette.as_ref().map_or(0, |p| p.len());
-    if (0..len).all(|i| palette_map[i].map_or(true, |to| to == i as u8)) {
+    if (0..256).all(|i| palette_map[i].map_or(true, |to| to == i as u8)) {
         // No reduction necessary
         return None;
     }
