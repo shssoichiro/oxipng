@@ -10,7 +10,7 @@ mod zopfli_oxipng;
 #[cfg(feature = "zopfli")]
 pub use zopfli_oxipng::deflate as zopfli_deflate;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 /// DEFLATE algorithms supported by oxipng
 pub enum Deflaters {
     /// Use libdeflater.
@@ -27,5 +27,3 @@ pub enum Deflaters {
         iterations: NonZeroU8,
     },
 }
-
-impl Copy for Deflaters {}
