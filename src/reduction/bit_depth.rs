@@ -144,6 +144,28 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         }
     }
 
+    // If the image is grayscale we also need to reduce the transparency pixel
+    let mut transparency_pixel = png
+        .transparency_pixel
+        .clone()
+        .filter(|t| png.ihdr.color_type == ColorType::Grayscale && t.len() >= 2);
+    if let Some(trans) = transparency_pixel {
+        let reduced_trans = trans[1] >> (bit_depth - minimum_bits);
+        // Verify the reduction is valid by restoring back to original bit depth
+        let mut check = reduced_trans;
+        let mut bits = minimum_bits;
+        while bits < bit_depth {
+            check = check << bits | check;
+            bits <<= 1;
+        }
+        if trans[0] == 0 && trans[1] == check {
+            transparency_pixel = Some(vec![0, reduced_trans]);
+        } else {
+            // The transparency doesn't fit the new bit depth and is therefore unused - set it to None
+            transparency_pixel = None;
+        }
+    }
+
     Some(PngImage {
         data: reduced.as_raw_slice().to_vec(),
         ihdr: IhdrData {
@@ -152,6 +174,6 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         },
         aux_headers: png.aux_headers.clone(),
         palette: png.palette.clone(),
-        transparency_pixel: png.transparency_pixel.clone(),
+        transparency_pixel,
     })
 }
