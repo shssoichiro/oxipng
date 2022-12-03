@@ -642,3 +642,27 @@ fn issue_195() {
         BitDepth::Eight,
     );
 }
+
+#[test]
+fn issue_426_01() {
+    test_it_converts(
+        "tests/files/issue-426-01.png",
+        None,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
+
+#[test]
+fn issue_426_02() {
+    test_it_converts(
+        "tests/files/issue-426-02.png",
+        None,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
