@@ -47,6 +47,8 @@ pub struct PngData {
     pub raw: Arc<PngImage>,
     /// The filtered and compressed data of the IDAT chunk
     pub idat_data: Vec<u8>,
+    /// The filtered, uncompressed data of the IDAT chunk
+    pub filtered: Vec<u8>,
 }
 
 type PaletteWithTrns = (Option<Vec<RGBA8>>, Option<Vec<u8>>);
@@ -135,10 +137,11 @@ impl PngData {
             transparency_pixel,
             aux_headers,
         };
-        raw.data = raw.unfilter_image()?;
+        let unfiltered = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
             idat_data: idat_headers,
+            filtered: std::mem::replace(&mut raw.data, unfiltered),
             raw: Arc::new(raw),
         })
     }
