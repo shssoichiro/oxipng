@@ -455,8 +455,6 @@ fn optimize_png(
     opts: &Options,
     deadline: Arc<Deadline>,
 ) -> PngResult<Vec<u8>> {
-    let original_png = png.clone();
-
     // Print png info
     let file_original_size = original_data.len();
     let idat_original_size = png.idat_data.len();
@@ -480,6 +478,10 @@ fn optimize_png(
     }
     info!("    IDAT size = {} bytes", idat_original_size);
     info!("    File size = {} bytes", file_original_size);
+
+    // Do this first so that reductions can ignore certain chunks such as bKGD
+    perform_strip(png, opts);
+    let stripped_png = png.clone();
 
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
     let eval_compression = 5;
@@ -592,13 +594,11 @@ fn optimize_png(
                 png.idat_data.len()
             );
         } else if eval_filter.is_some() {
-            *png = original_png;
+            *png = stripped_png;
         }
     } else if png.idat_data.len() >= idat_original_size {
-        *png = original_png;
+        *png = stripped_png;
     }
-
-    perform_strip(png, opts);
 
     let output = png.output();
 
@@ -857,10 +857,8 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
             }
         }
         Headers::Safe => {
-            const PRESERVED_HEADERS: [[u8; 4]; 9] = [
-                *b"cHRM", *b"gAMA", *b"iCCP", *b"sBIT", *b"sRGB", *b"bKGD", *b"hIST", *b"pHYs",
-                *b"sPLT",
-            ];
+            const PRESERVED_HEADERS: [[u8; 4]; 5] =
+                [*b"cICP", *b"iCCP", *b"sBIT", *b"sRGB", *b"pHYs"];
             let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
             for hdr in &keys {
                 if !PRESERVED_HEADERS.contains(hdr) {

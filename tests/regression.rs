@@ -62,7 +62,13 @@ fn test_it_converts(
         "optimized to wrong bit depth"
     );
     if let Some(palette) = png.raw.palette.as_ref() {
-        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
+        let mut max_palette_size = 1 << (png.raw.ihdr.bit_depth.as_u8() as usize);
+        // Ensure bKGD color is valid
+        if let Some(&idx) = png.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
+            assert!(palette.len() > idx as usize);
+            max_palette_size = max_palette_size.max(idx as usize + 1);
+        }
+        assert!(palette.len() <= max_palette_size);
     } else {
         assert_ne!(png.raw.ihdr.color_type, ColorType::Indexed);
     }

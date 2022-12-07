@@ -71,7 +71,7 @@ pub enum Headers {
     None,
     /// Remove specific chunks
     Strip(Vec<String>),
-    /// Headers that won't affect rendering (all but cHRM, gAMA, iCCP, sBIT, sRGB, bKGD, hIST, pHYs, sPLT)
+    /// Headers that won't affect rendering (all but cICP, iCCP, sBIT, sRGB, pHYs)
     Safe,
     /// Remove all non-critical chunks except these
     Keep(IndexSet<String>),
