@@ -630,3 +630,15 @@ fn issue_182() {
         BitDepth::One,
     );
 }
+
+#[test]
+fn issue_195() {
+    test_it_converts(
+        "tests/files/issue-195.png",
+        None,
+        ColorType::RGBA,
+        BitDepth::Eight,
+        ColorType::Indexed,
+        BitDepth::Eight,
+    );
+}

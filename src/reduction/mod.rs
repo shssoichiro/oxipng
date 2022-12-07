@@ -12,7 +12,7 @@ use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
 use crate::color::*;
 
-pub(crate) use crate::alpha::try_alpha_reductions;
+pub(crate) use crate::alpha::{filtered_alpha_channel, try_alpha_reductions};
 pub(crate) use crate::bit_depth::reduce_bit_depth;
 
 /// Attempt to reduce the number of colors in the palette
@@ -206,14 +206,14 @@ pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<Pn
         .or_else(|| reduced_alpha_channel(&reduced))
         {
             reduced = Cow::Owned(r);
-        } else if let Some(r) = reduced_color_to_palette(&reduced) {
+        } else if let Some(r) = reduce_to_palette(&reduced) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }
     }
 
     if reduced.ihdr.color_type == ColorType::GrayscaleAlpha {
-        if let Some(r) = reduced_alpha_channel(&reduced) {
+        if let Some(r) = reduced_alpha_channel(&reduced).or_else(|| reduce_to_palette(&reduced)) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }
@@ -225,7 +225,7 @@ pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<Pn
         } else {
             None
         }
-        .or_else(|| reduced_color_to_palette(&reduced))
+        .or_else(|| reduce_to_palette(&reduced))
         {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;

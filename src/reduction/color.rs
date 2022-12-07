@@ -3,7 +3,7 @@ use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use rgb::{FromSlice, RGB8, RGBA8};
+use rgb::{FromSlice, RGB8, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
@@ -105,7 +105,7 @@ where
 }
 
 #[must_use]
-pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
+pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
@@ -127,6 +127,17 @@ pub fn reduced_color_to_palette(png: &PngImage) -> Option<PngImage> {
                     } else {
                         0
                     })
+                }),
+                &mut palette,
+                &mut raw_data,
+            )
+        } else if png.ihdr.color_type == ColorType::GrayscaleAlpha {
+            reduce_scanline_to_palette(
+                line.data.as_gray_alpha().iter().cloned().map(|px| RGBA {
+                    r: px.0,
+                    g: px.0,
+                    b: px.0,
+                    a: px.1,
                 }),
                 &mut palette,
                 &mut raw_data,

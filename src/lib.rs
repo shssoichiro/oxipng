@@ -726,6 +726,13 @@ fn perform_reductions(
     }
 
     if opts.color_type_reduction {
+        // Perform a black alpha reduction before color type reductions
+        // This can allow reductions from alpha to indexed which may not have been possible otherwise
+        if !opts.alphas.is_empty() {
+            if let Some(reduced) = filtered_alpha_channel(&png, AlphaOptim::Black) {
+                png = Arc::new(reduced);
+            }
+        }
         if let Some(reduced) = reduce_color_type(&png, opts.grayscale_reduction) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
