@@ -1,3 +1,21 @@
+## Version 7.0.0
+
+- [Breaking] Switch to libdeflater as the default
+- [Breaking] Rebalance presets
+- [Breaking] Update safe headers to remove
+- [Breaking] Bump minimum Rust version to 1.61.0
+- [Feature] Introduce new filter strategies
+- [Feature] Allow setting libdeflate compression level
+- [Feature] Add optional dockerization
+- [Improvement] Improve alpha reductions
+- [Improvement] Fast deinterlace for 8-bit
+- [Improvement] Refactor heuristics for fast filter evaluation
+- [Improvement] Improve file size reduction further
+- [Bugfix] Avoid printing output bytes on decompress error
+- [Bugfix] Fix compression level 0
+- [Bugfix] Fix directional alpha reductions
+- [Bugfix] Fix edge cases in palette reduction
+
 ### Version 6.0.1
 
 - [Bugfix] Fix an issue where Zopfli mode could generate corrupt images
