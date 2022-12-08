@@ -470,20 +470,7 @@ fn optimize_png(
         "    {}x{} pixels, PNG format",
         png.raw.ihdr.width, png.raw.ihdr.height
     );
-    if let Some(ref palette) = png.raw.palette {
-        info!(
-            "    {} bits/pixel, {} colors in palette",
-            png.raw.ihdr.bit_depth,
-            palette.len()
-        );
-    } else {
-        info!(
-            "    {}x{} bits/pixel, {:?}",
-            png.raw.channels_per_pixel(),
-            png.raw.ihdr.bit_depth,
-            png.raw.ihdr.color_type
-        );
-    }
+    report_format("    ", &png.raw);
     info!("    IDAT size = {} bytes", idat_original_size);
     info!("    File size = {} bytes", file_original_size);
 
@@ -527,6 +514,10 @@ fn optimize_png(
     } else {
         None
     };
+
+    if reduction_occurred {
+        report_format("Reducing image to ", &png.raw);
+    }
 
     if opts.idat_recoding || reduction_occurred {
         let mut filters = opts.filter.clone();
@@ -704,7 +695,6 @@ fn perform_reductions(
         if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
-            report_reduction(&png);
             reduction_occurred = true;
         }
         if deadline.passed() {
@@ -726,7 +716,6 @@ fn perform_reductions(
                     eval.try_image(Arc::new(reduced));
                 }
             }
-            report_reduction(&png);
             reduction_occurred = true;
         }
         if deadline.passed() {
@@ -740,7 +729,6 @@ fn perform_reductions(
         {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
-            report_reduction(&png);
             reduction_occurred = true;
         }
         if deadline.passed() {
@@ -841,20 +829,24 @@ impl Deadline {
     }
 }
 
-/// Display the status of the image data after a reduction has taken place
-fn report_reduction(png: &PngImage) {
+/// Display the format of the image data
+fn report_format(prefix: &str, png: &PngImage) {
     if let Some(ref palette) = png.palette {
         info!(
-            "Reducing image to {} bits/pixel, {} colors in palette",
+            "{}{} bits/pixel, {} colors in palette ({})",
+            prefix,
             png.ihdr.bit_depth,
-            palette.len()
+            palette.len(),
+            png.ihdr.interlaced
         );
     } else {
         info!(
-            "Reducing image to {}x{} bits/pixel, {}",
+            "{}{}x{} bits/pixel, {} ({})",
+            prefix,
             png.channels_per_pixel(),
             png.ihdr.bit_depth,
-            png.ihdr.color_type
+            png.ihdr.color_type,
+            png.ihdr.interlaced
         );
     }
 }
