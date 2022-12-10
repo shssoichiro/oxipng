@@ -548,7 +548,7 @@ fn optimize_png(
                     _ => 0,
                 },
             };
-            if trial.compression <= eval_compression {
+            if trial.compression > 0 && trial.compression <= eval_compression {
                 // No further compression required
                 if png.idat_data.len() < idat_original_size || opts.force {
                     Some((trial, png.idat_data.clone()))
