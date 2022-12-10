@@ -196,49 +196,9 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
 }
 
 #[bench]
-fn reductions_alpha_black(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_black.png"));
+fn reductions_alpha(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Black));
-}
-
-#[bench]
-fn reductions_alpha_white(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_white.png"));
-    let png = PngData::new(&input, false).unwrap();
-
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::White));
-}
-
-#[bench]
-fn reductions_alpha_left(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_left.png"));
-    let png = PngData::new(&input, false).unwrap();
-
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Left));
-}
-
-#[bench]
-fn reductions_alpha_right(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_right.png"));
-    let png = PngData::new(&input, false).unwrap();
-
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Right));
-}
-
-#[bench]
-fn reductions_alpha_up(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_up.png"));
-    let png = PngData::new(&input, false).unwrap();
-
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Up));
-}
-
-#[bench]
-fn reductions_alpha_down(b: &mut Bencher) {
-    let input = test::black_box(PathBuf::from("tests/files/rgba_8_reduce_alpha_down.png"));
-    let png = PngData::new(&input, false).unwrap();
-
-    b.iter(|| alpha::filtered_alpha_channel(&png.raw, AlphaOptim::Down));
+    b.iter(|| alpha::cleaned_alpha_channel(&png.raw));
 }

@@ -42,7 +42,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub use crate::colors::AlphaOptim;
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
@@ -159,8 +158,8 @@ pub struct Options {
     ///
     /// Default: `None`
     pub interlace: Option<u8>,
-    /// Alpha filtering strategies to use
-    pub alphas: IndexSet<colors::AlphaOptim>,
+    /// Whether to allow transparent pixels to be altered to improve compression.
+    pub optimize_alpha: bool,
     /// Whether to attempt bit depth reduction
     ///
     /// Default: `true`
@@ -295,7 +294,7 @@ impl Default for Options {
             preserve_attrs: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
             interlace: None,
-            alphas: IndexSet::new(),
+            optimize_alpha: false,
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
@@ -493,8 +492,8 @@ fn optimize_png(
 
     // If alpha optimization is enabled, first perform a black alpha reduction
     // This can allow reductions from alpha to indexed which may not have been possible otherwise
-    if !opts.alphas.is_empty() {
-        if let Some(reduced) = filtered_alpha_channel(&png.raw, AlphaOptim::Black) {
+    if opts.optimize_alpha {
+        if let Some(reduced) = cleaned_alpha_channel(&png.raw) {
             png.raw = Arc::new(reduced);
         }
     }
@@ -531,8 +530,7 @@ fn optimize_png(
 
             if !filters.is_empty() {
                 debug!("Evaluating: {} filters", filters.len());
-                let eval =
-                    Evaluator::new(deadline, filters, eval_compression, !opts.alphas.is_empty());
+                let eval = Evaluator::new(deadline, filters, eval_compression, opts.optimize_alpha);
                 if eval_filter.is_some() {
                     eval.set_best_size(png.idat_data.len());
                 }
@@ -598,7 +596,7 @@ fn optimize_png(
                 if deadline.passed() {
                     return None;
                 }
-                let filtered = &png.raw.filter_image(trial.filter, !opts.alphas.is_empty());
+                let filtered = &png.raw.filter_image(trial.filter, opts.optimize_alpha);
                 perform_trial(filtered, opts, trial, &best_size)
             });
             best.reduce_with(|i, j| {
