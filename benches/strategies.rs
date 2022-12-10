@@ -13,7 +13,7 @@ fn filters_minsum(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        png.raw.filter_image(RowFilter::MinSum);
+        png.raw.filter_image(RowFilter::MinSum, false);
     });
 }
 
@@ -23,7 +23,7 @@ fn filters_entropy(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        png.raw.filter_image(RowFilter::Entropy);
+        png.raw.filter_image(RowFilter::Entropy, false);
     });
 }
 
@@ -33,7 +33,7 @@ fn filters_bigrams(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        png.raw.filter_image(RowFilter::Bigrams);
+        png.raw.filter_image(RowFilter::Bigrams, false);
     });
 }
 
@@ -43,7 +43,7 @@ fn filters_bigent(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        png.raw.filter_image(RowFilter::BigEnt);
+        png.raw.filter_image(RowFilter::BigEnt, false);
     });
 }
 
@@ -53,6 +53,6 @@ fn filters_brute(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        png.raw.filter_image(RowFilter::Brute);
+        png.raw.filter_image(RowFilter::Brute, false);
     });
 }

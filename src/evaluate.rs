@@ -44,6 +44,7 @@ pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
     filters: IndexSet<RowFilter>,
     compression: u8,
+    optimize_alpha: bool,
     nth: AtomicUsize,
     best_candidate_size: Arc<AtomicMin>,
     /// images are sent to the caller thread for evaluation
@@ -55,13 +56,19 @@ pub(crate) struct Evaluator {
 }
 
 impl Evaluator {
-    pub fn new(deadline: Arc<Deadline>, filters: IndexSet<RowFilter>, compression: u8) -> Self {
+    pub fn new(
+        deadline: Arc<Deadline>,
+        filters: IndexSet<RowFilter>,
+        compression: u8,
+        optimize_alpha: bool,
+    ) -> Self {
         #[cfg(feature = "parallel")]
         let eval_channel = unbounded();
         Self {
             deadline,
             filters,
             compression,
+            optimize_alpha,
             best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
             #[cfg(feature = "parallel")]
@@ -106,6 +113,7 @@ impl Evaluator {
         let deadline = self.deadline.clone();
         let filters = self.filters.clone();
         let compression = self.compression;
+        let optimize_alpha = self.optimize_alpha;
         let best_candidate_size = self.best_candidate_size.clone();
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
@@ -122,7 +130,7 @@ impl Evaluator {
                 if deadline.passed() {
                     return;
                 }
-                let filtered = image.filter_image(filter);
+                let filtered = image.filter_image(filter, optimize_alpha);
                 if let Ok(idat_data) =
                     deflate::deflate(&filtered, compression, &best_candidate_size)
                 {

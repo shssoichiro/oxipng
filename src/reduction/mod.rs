@@ -12,7 +12,7 @@ use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
 use crate::color::*;
 
-pub(crate) use crate::alpha::{filtered_alpha_channel, try_alpha_reductions};
+pub(crate) use crate::alpha::filtered_alpha_channel;
 pub(crate) use crate::bit_depth::reduce_bit_depth;
 
 /// Attempt to reduce the number of colors in the palette

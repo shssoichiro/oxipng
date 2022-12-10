@@ -314,31 +314,43 @@ impl PngImage {
     }
 
     /// Apply the specified filter type to all rows in the image
-    pub fn filter_image(&self, filter: RowFilter) -> Vec<u8> {
+    pub fn filter_image(&self, filter: RowFilter, optimize_alpha: bool) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
-        let mut last_line: &[u8] = &[];
-        let mut last_pass: Option<u8> = None;
+        // If alpha optimization is enabled, determine how many bytes of alpha there are per pixel
+        let alpha_bytes = match self.ihdr.color_type {
+            ColorType::RGBA | ColorType::GrayscaleAlpha if optimize_alpha => {
+                (self.ihdr.bit_depth.as_u8() / 8) as usize
+            }
+            _ => 0,
+        };
+
+        let mut prev_line = Vec::new();
+        let mut prev_pass: Option<u8> = None;
         let mut f_buf = Vec::new();
         for line in self.scan_lines() {
-            if last_pass != line.pass {
-                last_line = &[];
+            if prev_pass != line.pass || line.data.len() != prev_line.len() {
+                prev_line = vec![0; line.data.len()];
             }
+            // Alpha optimisation may alter the line data, so we need a mutable copy of it
+            let mut line_data = line.data.to_vec();
 
             if filter <= RowFilter::Paeth {
                 // Standard filters
-                let filter = if last_pass == line.pass || filter <= RowFilter::Sub {
+                let filter = if prev_pass == line.pass || filter <= RowFilter::Sub {
                     filter
                 } else {
                     RowFilter::None
                 };
-                filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                filter.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                 filtered.extend_from_slice(&f_buf);
+                prev_line = line_data;
             } else {
                 // Heuristic filter selection strategies
                 let mut best_line = Vec::new();
+                let mut best_line_raw = Vec::new();
                 // Avoid vertical filtering on first line of each interlacing pass
-                let try_filters = if last_pass == line.pass {
+                let try_filters = if prev_pass == line.pass {
                     RowFilter::STANDARD.iter()
                 } else {
                     RowFilter::SINGLE_LINE.iter()
@@ -348,8 +360,8 @@ impl PngImage {
                         // MSAD algorithm mentioned in libpng reference docs
                         // http://www.libpng.org/pub/png/book/chapter09.html
                         let mut best_size = usize::MAX;
-                        for try_filter in try_filters {
-                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                        for f in try_filters {
+                            f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let size = f_buf.iter().fold(0, |acc, &x| {
                                 let signed = x as i8;
                                 acc + signed.unsigned_abs() as usize
@@ -357,6 +369,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
+                                best_line_raw = line_data.clone();
                             }
                         }
                     }
@@ -364,8 +377,8 @@ impl PngImage {
                         // Shannon entropy algorithm, from LodePNG
                         // https://github.com/lvandeve/lodepng
                         let mut best_size = i32::MIN;
-                        for try_filter in try_filters {
-                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                        for f in try_filters {
+                            f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let mut counts = vec![0; 0x100];
                             for &i in f_buf.iter() {
                                 counts[i as usize] += 1;
@@ -379,6 +392,7 @@ impl PngImage {
                             if size > best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
+                                best_line_raw = line_data.clone();
                             }
                         }
                     }
@@ -386,8 +400,8 @@ impl PngImage {
                         // Count distinct bigrams, from pngwolf
                         // https://bjoern.hoehrmann.de/pngwolf/
                         let mut best_size = usize::MAX;
-                        for try_filter in try_filters {
-                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                        for f in try_filters {
+                            f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let mut set = bitarr![0; 0x10000];
                             for pair in f_buf.windows(2) {
                                 let bigram = (pair[0] as usize) << 8 | pair[1] as usize;
@@ -397,6 +411,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
+                                best_line_raw = line_data.clone();
                             }
                         }
                     }
@@ -405,8 +420,8 @@ impl PngImage {
                         let mut best_size = i32::MIN;
                         // FxHasher is the fastest rust hasher currently available for this purpose
                         let mut counts = FxHashMap::<u16, u32>::default();
-                        for try_filter in try_filters {
-                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                        for f in try_filters {
+                            f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             counts.clear();
                             for pair in f_buf.windows(2) {
                                 let bigram = (pair[0] as u16) << 8 | pair[1] as u16;
@@ -416,6 +431,7 @@ impl PngImage {
                             if size > best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
+                                best_line_raw = line_data.clone();
                             }
                         }
                     }
@@ -431,8 +447,8 @@ impl PngImage {
                         let capacity = compressor.zlib_compress_bound(limit);
                         let mut dest = vec![0; capacity];
 
-                        for try_filter in try_filters {
-                            try_filter.filter_line(bpp, line.data, last_line, &mut f_buf);
+                        for f in try_filters {
+                            f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             filtered[line_start..].copy_from_slice(&f_buf);
                             let size = compressor
                                 .zlib_compress(&filtered[filtered.len() - limit..], &mut dest)
@@ -440,6 +456,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
+                                best_line_raw = line_data.clone();
                             }
                         }
                         filtered.resize(line_start, 0);
@@ -447,10 +464,10 @@ impl PngImage {
                     _ => unreachable!(),
                 }
                 filtered.extend_from_slice(&best_line);
+                prev_line = best_line_raw;
             }
 
-            last_line = line.data;
-            last_pass = line.pass;
+            prev_pass = line.pass;
         }
         filtered
     }

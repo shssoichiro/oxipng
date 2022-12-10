@@ -1,32 +1,7 @@
 use crate::colors::AlphaOptim;
 use crate::colors::ColorType;
-use crate::evaluate::Evaluator;
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-#[cfg(not(feature = "parallel"))]
-use crate::rayon::prelude::*;
-use indexmap::IndexSet;
-#[cfg(feature = "parallel")]
-use rayon::prelude::*;
-use std::sync::Arc;
-
-pub(crate) fn try_alpha_reductions(
-    png: Arc<PngImage>,
-    alphas: &IndexSet<AlphaOptim>,
-    eval: &Evaluator,
-) -> bool {
-    match png.ihdr.color_type {
-        ColorType::RGBA | ColorType::GrayscaleAlpha if !alphas.is_empty() => {
-            alphas
-                .par_iter()
-                .with_max_len(1)
-                .filter_map(|&alpha| filtered_alpha_channel(&png, alpha))
-                .for_each(|image| eval.try_image(Arc::new(image)));
-            true
-        }
-        _ => false,
-    }
-}
 
 pub fn filtered_alpha_channel(png: &PngImage, optim: AlphaOptim) -> Option<PngImage> {
     let (bpc, bpp) = match png.ihdr.color_type {
