@@ -129,13 +129,19 @@ impl RowFilter {
         let prev_pixels: Vec<_> = prev_line.chunks(bpp).collect();
         for i in 0..pixels.len() {
             if pixels[i].iter().skip(color_bytes).all(|b| *b == 0) {
+                // If the first pixel in the row is transparent, find the next non-transparent pixel and pretend
+                // it is the previous one. This can help improve effectiveness of the Sub and Paeth filters.
+                let prev = match i {
+                    0 => pixels
+                        .iter()
+                        .position(|px| px.iter().skip(color_bytes).any(|b| *b != 0))
+                        .unwrap_or(i),
+                    _ => i - 1,
+                };
                 match self {
                     Self::Sub => {
                         for j in 0..color_bytes {
-                            pixels[i][j] = match i {
-                                0 => 0,
-                                _ => pixels[i - 1][j],
-                            };
+                            pixels[i][j] = pixels[prev][j];
                         }
                     }
                     Self::Up => {
@@ -153,17 +159,15 @@ impl RowFilter {
                         }
                     }
                     Self::Paeth => {
-                        if i == 0 {
-                            pixels[i][0..color_bytes]
-                                .copy_from_slice(&prev_pixels[i][0..color_bytes]);
-                        } else {
-                            for j in 0..color_bytes {
-                                pixels[i][j] = paeth_predictor(
+                        for j in 0..color_bytes {
+                            pixels[i][j] = match i {
+                                0 => pixels[prev][j].min(prev_pixels[i][j]),
+                                _ => paeth_predictor(
                                     pixels[i - 1][j],
                                     prev_pixels[i][j],
                                     prev_pixels[i - 1][j],
-                                );
-                            }
+                                ),
+                            };
                         }
                     }
                     _ => unreachable!(),
