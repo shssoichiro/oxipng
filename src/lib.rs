@@ -703,7 +703,7 @@ fn perform_reductions(
     }
 
     if opts.palette_reduction {
-        if let Some(reduced) = reduced_palette(&png) {
+        if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
@@ -737,7 +737,9 @@ fn perform_reductions(
     }
 
     if opts.color_type_reduction {
-        if let Some(reduced) = reduce_color_type(&png, opts.grayscale_reduction) {
+        if let Some(reduced) =
+            reduce_color_type(&png, opts.grayscale_reduction, opts.optimize_alpha)
+        {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);

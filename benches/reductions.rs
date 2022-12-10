@@ -80,7 +80,7 @@ fn reductions_rgba_to_rgb_16(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_16_should_be_rgb_16.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -88,7 +88,7 @@ fn reductions_rgba_to_rgb_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_should_be_rgb_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -98,7 +98,7 @@ fn reductions_rgba_to_grayscale_alpha_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -108,7 +108,7 @@ fn reductions_rgba_to_grayscale_alpha_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -118,7 +118,7 @@ fn reductions_rgba_to_grayscale_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -128,7 +128,7 @@ fn reductions_rgba_to_grayscale_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -138,7 +138,7 @@ fn reductions_rgb_to_grayscale_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -146,7 +146,7 @@ fn reductions_rgb_to_grayscale_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -154,7 +154,7 @@ fn reductions_rgba_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -162,7 +162,7 @@ fn reductions_rgb_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduce_color_type(&png.raw, true));
+    b.iter(|| reduce_color_type(&png.raw, true, false));
 }
 
 #[bench]
@@ -172,7 +172,7 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw));
+    b.iter(|| reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -182,7 +182,7 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw));
+    b.iter(|| reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -192,7 +192,7 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw));
+    b.iter(|| reduced_palette(&png.raw, false));
 }
 
 #[bench]
