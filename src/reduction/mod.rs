@@ -12,12 +12,12 @@ use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
 use crate::color::*;
 
-pub(crate) use crate::alpha::{filtered_alpha_channel, try_alpha_reductions};
+pub(crate) use crate::alpha::cleaned_alpha_channel;
 pub(crate) use crate::bit_depth::reduce_bit_depth;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
-pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
+pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage> {
     if png.ihdr.color_type != ColorType::Indexed {
         // Can't reduce if there is no palette
         return None;
@@ -90,10 +90,16 @@ pub fn reduced_palette(png: &PngImage) -> Option<PngImage> {
                 continue;
             }
             // There are invalid files that use pixel indices beyond palette size
-            let color = palette
+            let mut color = palette
                 .get(i)
                 .cloned()
                 .unwrap_or_else(|| RGBA8::new(0, 0, 0, 255));
+            // If there are multiple fully transparent entries, reduce them into one
+            if optimize_alpha && color.a == 0 {
+                color.r = 0;
+                color.g = 0;
+                color.b = 0;
+            }
             match seen.entry(color) {
                 Vacant(new) => {
                     palette_map[i] = Some(next_index as u8);
@@ -191,7 +197,11 @@ fn reordered_palette(palette: &[RGBA8], palette_map: &[Option<u8>; 256]) -> Vec<
 
 /// Attempt to reduce the color type of the image
 /// Returns true if the color type was reduced, false otherwise
-pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<PngImage> {
+pub fn reduce_color_type(
+    png: &PngImage,
+    grayscale_reduction: bool,
+    optimize_alpha: bool,
+) -> Option<PngImage> {
     let mut should_reduce_bit_depth = false;
     let mut reduced = Cow::Borrowed(png);
 
@@ -234,7 +244,7 @@ pub fn reduce_color_type(png: &PngImage, grayscale_reduction: bool) -> Option<Pn
 
     //Make sure that palette gets sorted. Ideally, this should be done within reduced_color_to_palette.
     if should_reduce_bit_depth && reduced.ihdr.color_type == ColorType::Indexed {
-        if let Some(r) = reduced_palette(&reduced) {
+        if let Some(r) = reduced_palette(&reduced, optimize_alpha) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }

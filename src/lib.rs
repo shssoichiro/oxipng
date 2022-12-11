@@ -42,7 +42,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub use crate::colors::AlphaOptim;
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
@@ -159,8 +158,8 @@ pub struct Options {
     ///
     /// Default: `None`
     pub interlace: Option<u8>,
-    /// Alpha filtering strategies to use
-    pub alphas: IndexSet<colors::AlphaOptim>,
+    /// Whether to allow transparent pixels to be altered to improve compression.
+    pub optimize_alpha: bool,
     /// Whether to attempt bit depth reduction
     ///
     /// Default: `true`
@@ -295,7 +294,7 @@ impl Default for Options {
             preserve_attrs: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
             interlace: None,
-            alphas: IndexSet::new(),
+            optimize_alpha: false,
             bit_depth_reduction: true,
             color_type_reduction: true,
             palette_reduction: true,
@@ -491,13 +490,25 @@ fn optimize_png(
     perform_strip(png, opts);
     let stripped_png = png.clone();
 
+    // If alpha optimization is enabled, first perform a black alpha reduction
+    // This can allow reductions from alpha to indexed which may not have been possible otherwise
+    if opts.optimize_alpha {
+        if let Some(reduced) = cleaned_alpha_channel(&png.raw) {
+            png.raw = Arc::new(reduced);
+        }
+    }
+
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
-    // Alpha reductions can benefit from higher compression but otherwise it's not beneficial
     let eval_compression = 5;
     // None and Bigrams work well together, especially for alpha reductions
     let eval_filters = indexset! {RowFilter::None, RowFilter::Bigrams};
     // This will collect all versions of images and pick one that compresses best
-    let eval = Evaluator::new(deadline.clone(), eval_filters.clone(), eval_compression);
+    let eval = Evaluator::new(
+        deadline.clone(),
+        eval_filters.clone(),
+        eval_compression,
+        false,
+    );
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
     let (reduction_occurred, mut eval_filter) = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;
@@ -519,7 +530,7 @@ fn optimize_png(
 
             if !filters.is_empty() {
                 debug!("Evaluating: {} filters", filters.len());
-                let eval = Evaluator::new(deadline, filters, eval_compression);
+                let eval = Evaluator::new(deadline, filters, eval_compression, opts.optimize_alpha);
                 if eval_filter.is_some() {
                     eval.set_best_size(png.idat_data.len());
                 }
@@ -585,7 +596,7 @@ fn optimize_png(
                 if deadline.passed() {
                     return None;
                 }
-                let filtered = &png.raw.filter_image(trial.filter);
+                let filtered = &png.raw.filter_image(trial.filter, opts.optimize_alpha);
                 perform_trial(filtered, opts, trial, &best_size)
             });
             best.reduce_with(|i, j| {
@@ -606,7 +617,7 @@ fn optimize_png(
                 opts.filter,
                 png.idat_data.len()
             );
-        } else if eval_filter.is_some() {
+        } else {
             *png = stripped_png;
         }
     } else if png.idat_data.len() >= idat_original_size {
@@ -692,7 +703,7 @@ fn perform_reductions(
     }
 
     if opts.palette_reduction {
-        if let Some(reduced) = reduced_palette(&png) {
+        if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
@@ -726,14 +737,9 @@ fn perform_reductions(
     }
 
     if opts.color_type_reduction {
-        // Perform a black alpha reduction before color type reductions
-        // This can allow reductions from alpha to indexed which may not have been possible otherwise
-        if !opts.alphas.is_empty() {
-            if let Some(reduced) = filtered_alpha_channel(&png, AlphaOptim::Black) {
-                png = Arc::new(reduced);
-            }
-        }
-        if let Some(reduced) = reduce_color_type(&png, opts.grayscale_reduction) {
+        if let Some(reduced) =
+            reduce_color_type(&png, opts.grayscale_reduction, opts.optimize_alpha)
+        {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             report_reduction(&png);
@@ -742,10 +748,6 @@ fn perform_reductions(
         if deadline.passed() {
             return;
         }
-    }
-
-    if try_alpha_reductions(png, &opts.alphas, eval) {
-        reduction_occurred = true;
     }
 
     if let Some(baseline) = baseline {

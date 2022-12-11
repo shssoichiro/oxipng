@@ -16,7 +16,6 @@
 use clap::{AppSettings, Arg, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
-use oxipng::AlphaOptim;
 use oxipng::Deflaters;
 use oxipng::Headers;
 use oxipng::Options;
@@ -438,10 +437,7 @@ fn parse_opts_into_struct(
     };
 
     if matches.is_present("alpha") {
-        opts.alphas.insert(AlphaOptim::Black);
-        opts.alphas.insert(AlphaOptim::White);
-        opts.alphas.insert(AlphaOptim::Up);
-        opts.alphas.insert(AlphaOptim::Left);
+        opts.optimize_alpha = true;
     }
 
     if matches.is_present("fast") {
