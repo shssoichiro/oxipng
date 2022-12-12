@@ -393,13 +393,13 @@ fn parse_opts_into_struct(
     };
 
     if let Some(x) = matches.value_of("interlace") {
-        opts.interlace = x.parse::<u8>().ok();
+        opts.interlace = x.parse::<u8>().unwrap().try_into().ok();
     }
 
     if let Some(x) = matches.value_of("filters") {
         opts.filter.clear();
         for f in parse_numeric_range_opts(x, 0, RowFilter::LAST).unwrap() {
-            opts.filter.insert(RowFilter::try_from(f).unwrap());
+            opts.filter.insert(f.try_into().unwrap());
         }
     }
 
