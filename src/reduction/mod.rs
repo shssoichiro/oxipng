@@ -213,7 +213,7 @@ pub fn reduce_color_type(
         } else {
             None
         }
-        .or_else(|| reduced_alpha_channel(&reduced))
+        .or_else(|| reduced_alpha_channel(&reduced, optimize_alpha))
         {
             reduced = Cow::Owned(r);
         } else if let Some(r) = reduce_to_palette(&reduced) {
@@ -223,7 +223,9 @@ pub fn reduce_color_type(
     }
 
     if reduced.ihdr.color_type == ColorType::GrayscaleAlpha {
-        if let Some(r) = reduced_alpha_channel(&reduced).or_else(|| reduce_to_palette(&reduced)) {
+        if let Some(r) =
+            reduced_alpha_channel(&reduced, optimize_alpha).or_else(|| reduce_to_palette(&reduced))
+        {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }
