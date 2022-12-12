@@ -1,6 +1,7 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::deflate::crc32;
 use crate::error::PngError;
+use crate::interlace::Interlacing;
 use crate::PngResult;
 use indexmap::IndexSet;
 use std::io;
@@ -21,8 +22,8 @@ pub struct IhdrData {
     pub compression: u8,
     /// The filter mode used for this image (currently only 0 is valid)
     pub filter: u8,
-    /// The interlacing mode of the image (0 = None, 1 = Adam7)
-    pub interlaced: u8,
+    /// The interlacing mode of the image
+    pub interlaced: Interlacing,
 }
 
 impl IhdrData {
@@ -44,7 +45,7 @@ impl IhdrData {
             (((w / 8) * bpp as usize) + ((w & 7) * bpp as usize + 7) / 8) * h
         }
 
-        if self.interlaced == 0 {
+        if self.interlaced == Interlacing::None {
             bitmap_size(bpp, w, h) + h
         } else {
             let mut size = bitmap_size(bpp, (w + 7) >> 3, (h + 7) >> 3) + ((h + 7) >> 3);
@@ -167,7 +168,7 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
         height: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],
         filter: byte_data[11],
-        interlaced,
+        interlaced: interlaced.try_into()?,
     })
 }
 

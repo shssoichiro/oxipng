@@ -46,6 +46,7 @@ pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
 pub use crate::headers::Headers;
+pub use crate::interlace::Interlacing;
 pub use indexmap::{indexset, IndexMap, IndexSet};
 
 mod atomicmin;
@@ -157,7 +158,7 @@ pub struct Options {
     /// `Some(x)` will change the file to interlacing mode `x`.
     ///
     /// Default: `None`
-    pub interlace: Option<u8>,
+    pub interlace: Option<Interlacing>,
     /// Whether to allow transparent pixels to be altered to improve compression.
     pub optimize_alpha: bool,
     /// Whether to attempt bit depth reduction

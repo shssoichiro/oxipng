@@ -1,6 +1,41 @@
+use std::fmt::Display;
+
 use crate::headers::IhdrData;
 use crate::png::PngImage;
+use crate::PngError;
 use bitvec::prelude::*;
+
+#[repr(u8)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Interlacing {
+    None,
+    Adam7,
+}
+
+impl TryFrom<u8> for Interlacing {
+    type Error = PngError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::None),
+            1 => Ok(Self::Adam7),
+            _ => Err(PngError::new("Unexpected interlacing in header")),
+        }
+    }
+}
+
+impl Display for Interlacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match *self {
+                Self::None => "non-interlaced",
+                Self::Adam7 => "interlaced",
+            }
+        )
+    }
+}
 
 #[must_use]
 pub fn interlace_image(png: &PngImage) -> PngImage {
@@ -85,7 +120,7 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
     PngImage {
         data: output,
         ihdr: IhdrData {
-            interlaced: 1,
+            interlaced: Interlacing::Adam7,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
@@ -101,7 +136,7 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
             _ => deinterlace_bits(png),
         },
         ihdr: IhdrData {
-            interlaced: 0,
+            interlaced: Interlacing::None,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),

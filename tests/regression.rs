@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use oxipng::{internal_tests::*, RowFilter};
+use oxipng::{internal_tests::*, Interlacing, RowFilter};
 use oxipng::{InFile, OutFile};
 use std::fs::remove_file;
 use std::path::Path;
@@ -92,11 +92,11 @@ fn issue_29() {
 fn issue_42() {
     let input = PathBuf::from("tests/files/issue_42.png");
     let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(1);
+    opts.interlace = Some(Interlacing::Adam7);
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.interlaced, 0);
+    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
     assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
@@ -115,7 +115,7 @@ fn issue_42() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.interlaced, 1);
+    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
     assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
@@ -311,7 +311,7 @@ fn issue_92_filter_5() {
 fn issue_113() {
     let input = "tests/files/issue-113.png";
     let (output, mut opts) = get_opts(Path::new(input));
-    opts.interlace = Some(1);
+    opts.interlace = Some(Interlacing::Adam7);
     opts.optimize_alpha = true;
     test_it_converts(
         input,
@@ -440,7 +440,7 @@ fn issue_175() {
 fn issue_182() {
     let input = "tests/files/issue-182.png";
     let (output, mut opts) = get_opts(Path::new(input));
-    opts.interlace = Some(0);
+    opts.interlace = Some(Interlacing::Adam7);
 
     test_it_converts(
         input,

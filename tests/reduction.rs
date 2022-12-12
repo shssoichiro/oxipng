@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use oxipng::{internal_tests::*, RowFilter};
+use oxipng::{internal_tests::*, Interlacing, RowFilter};
 use oxipng::{InFile, OutFile};
 use std::fs::remove_file;
 use std::path::Path;
@@ -35,7 +35,7 @@ fn test_it_converts(
 
     assert_eq!(png.raw.ihdr.color_type, color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in, "test file is broken");
-    assert_eq!(png.raw.ihdr.interlaced, 0);
+    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),

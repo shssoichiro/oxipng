@@ -3,7 +3,7 @@ use crate::deflate;
 use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
-use crate::interlace::{deinterlace_image, interlace_image};
+use crate::interlace::{deinterlace_image, interlace_image, Interlacing};
 use bitvec::bitarr;
 use indexmap::IndexMap;
 use libdeflater::{CompressionLvl, Compressor};
@@ -187,7 +187,7 @@ impl PngData {
             .ok();
         ihdr_data.write_all(&[0]).ok(); // Compression -- deflate
         ihdr_data.write_all(&[0]).ok(); // Filter method -- 5-way adaptive filtering
-        ihdr_data.write_all(&[self.raw.ihdr.interlaced]).ok();
+        ihdr_data.write_all(&[self.raw.ihdr.interlaced as u8]).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
         // Ancillary headers
         for (key, header) in self
@@ -258,12 +258,12 @@ impl PngImage {
     /// Assumes that the data has already been de-filtered
     #[inline]
     #[must_use]
-    pub fn change_interlacing(&self, interlace: u8) -> Option<PngImage> {
+    pub fn change_interlacing(&self, interlace: Interlacing) -> Option<PngImage> {
         if interlace == self.ihdr.interlaced {
             return None;
         }
 
-        Some(if interlace == 1 {
+        Some(if interlace == Interlacing::Adam7 {
             // Convert progressive to interlaced data
             interlace_image(self)
         } else {
