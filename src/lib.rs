@@ -491,7 +491,16 @@ fn optimize_png(
     perform_strip(png, opts);
     let stripped_png = png.clone();
 
-    // If alpha optimization is enabled, first perform a black alpha reduction
+    // Interlacing is not part of the evaluator trials but must be done first to evaluate the rest correctly
+    let mut reduction_occurred = false;
+    if let Some(interlacing) = opts.interlace {
+        if let Some(reduced) = png.raw.change_interlacing(interlacing) {
+            png.raw = Arc::new(reduced);
+            reduction_occurred = true;
+        }
+    }
+
+    // If alpha optimization is enabled, perform a black alpha reduction before evaluating reductions
     // This can allow reductions from alpha to indexed which may not have been possible otherwise
     if opts.optimize_alpha {
         if let Some(reduced) = cleaned_alpha_channel(&png.raw) {
@@ -511,11 +520,12 @@ fn optimize_png(
         false,
     );
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
-    let (reduction_occurred, mut eval_filter) = if let Some(result) = eval.get_best_candidate() {
+    let mut eval_filter = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;
-        (result.is_reduction, Some(result.filter))
+        reduction_occurred = true;
+        Some(result.filter)
     } else {
-        (false, None)
+        None
     };
 
     if opts.idat_recoding || reduction_occurred {
@@ -687,21 +697,8 @@ fn perform_reductions(
     eval: &Evaluator,
 ) {
     // The eval baseline will be set from the original png only if we attempt any reductions
-    let mut baseline = Some(png.clone());
+    let baseline = png.clone();
     let mut reduction_occurred = false;
-
-    // must be done first to evaluate rest with the correct interlacing
-    if let Some(interlacing) = opts.interlace {
-        if let Some(reduced) = png.change_interlacing(interlacing) {
-            png = Arc::new(reduced);
-            eval.try_image(png.clone());
-            // If we're interlacing, we have to accept a possible file size increase
-            baseline = None;
-        }
-        if deadline.passed() {
-            return;
-        }
-    }
 
     if opts.palette_reduction {
         if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
@@ -751,10 +748,8 @@ fn perform_reductions(
         }
     }
 
-    if let Some(baseline) = baseline {
-        if reduction_occurred {
-            eval.set_baseline(baseline);
-        }
+    if reduction_occurred {
+        eval.set_baseline(baseline);
     }
 }
 
