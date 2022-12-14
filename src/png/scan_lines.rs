@@ -7,13 +7,16 @@ pub struct ScanLines<'a> {
     iter: ScanLineRanges,
     /// A reference to the PNG image being iterated upon
     raw_data: &'a [u8],
+    /// Whether the raw data contains filter bytes
+    has_filter: bool,
 }
 
 impl<'a> ScanLines<'a> {
-    pub fn new(png: &'a PngImage) -> Self {
+    pub fn new(png: &'a PngImage, has_filter: bool) -> Self {
         Self {
-            iter: ScanLineRanges::new(png),
+            iter: ScanLineRanges::new(png, has_filter),
             raw_data: &png.data,
+            has_filter,
         }
     }
 }
@@ -25,39 +28,12 @@ impl<'a> Iterator for ScanLines<'a> {
         self.iter.next().map(|(len, pass)| {
             let (data, rest) = self.raw_data.split_at(len);
             self.raw_data = rest;
-            let (&filter, data) = data.split_first().unwrap();
+            let (&filter, data) = if self.has_filter {
+                data.split_first().unwrap()
+            } else {
+                (&0, data)
+            };
             ScanLine { filter, data, pass }
-        })
-    }
-}
-
-#[derive(Debug)]
-/// An iterator over the scan lines of a PNG image
-pub struct ScanLinesMut<'a> {
-    iter: ScanLineRanges,
-    /// A reference to the PNG image being iterated upon
-    raw_data: Option<&'a mut [u8]>,
-}
-
-impl<'a> ScanLinesMut<'a> {
-    pub fn new(png: &'a mut PngImage) -> Self {
-        Self {
-            iter: ScanLineRanges::new(png),
-            raw_data: Some(&mut png.data),
-        }
-    }
-}
-
-impl<'a> Iterator for ScanLinesMut<'a> {
-    type Item = ScanLineMut<'a>;
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(len, pass)| {
-            let tmp = self.raw_data.take().unwrap();
-            let (data, rest) = tmp.split_at_mut(len);
-            self.raw_data = Some(rest);
-            let (&mut filter, data) = data.split_first_mut().unwrap();
-            ScanLineMut { filter, data, pass }
         })
     }
 }
@@ -71,10 +47,11 @@ struct ScanLineRanges {
     width: u32,
     height: u32,
     left: usize,
+    has_filter: bool,
 }
 
 impl ScanLineRanges {
-    pub fn new(png: &PngImage) -> Self {
+    pub fn new(png: &PngImage, has_filter: bool) -> Self {
         Self {
             bits_per_pixel: png.ihdr.bit_depth.as_u8() * png.channels_per_pixel(),
             width: png.ihdr.width,
@@ -85,6 +62,7 @@ impl ScanLineRanges {
             } else {
                 None
             },
+            has_filter,
         }
     }
 }
@@ -166,8 +144,10 @@ impl Iterator for ScanLineRanges {
             (self.width, None)
         };
         let bits_per_line = pixels_per_line * u32::from(self.bits_per_pixel);
-        let bytes_per_line = ((bits_per_line + 7) / 8) as usize;
-        let len = bytes_per_line + 1;
+        let mut len = ((bits_per_line + 7) / 8) as usize;
+        if self.has_filter {
+            len += 1;
+        }
         self.left = self.left.checked_sub(len)?;
         Some((len, current_pass))
     }
@@ -180,17 +160,6 @@ pub struct ScanLine<'a> {
     pub filter: u8,
     /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
     pub data: &'a [u8],
-    /// The current pass if the image is interlaced
-    pub pass: Option<u8>,
-}
-
-#[derive(Debug)]
-/// A scan line in a PNG image
-pub struct ScanLineMut<'a> {
-    /// The filter type used to encode the current scan line (0-4)
-    pub filter: u8,
-    /// The byte data for the current scan line, encoded with the filter specified in the `filter` field
-    pub data: &'a mut [u8],
     /// The current pass if the image is interlaced
     pub pass: Option<u8>,
 }

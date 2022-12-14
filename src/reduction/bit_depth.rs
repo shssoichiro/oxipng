@@ -38,13 +38,11 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
 
     // Reduce from 16 to 8 bits per channel per pixel
     let mut reduced = Vec::with_capacity(
-        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel()) + png.ihdr.height)
-            as usize,
+        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel())) as usize,
     );
     let mut high_byte = 0;
 
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
+    for line in png.scan_lines(false) {
         for (i, &byte) in line.data.iter().enumerate() {
             if i % 2 == 0 {
                 // High byte
@@ -79,7 +77,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     if minimum_bits >= bit_depth {
         return None;
     }
-    for line in png.scan_lines() {
+    for line in png.scan_lines(false) {
         if png.ihdr.color_type == ColorType::Indexed {
             let line_max = line
                 .data
@@ -129,8 +127,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     }
 
     let mut reduced = BitVec::<u8, Msb0>::with_capacity(png.data.len() * 8);
-    for line in png.scan_lines() {
-        reduced.extend_from_raw_slice(&[line.filter]);
+    for line in png.scan_lines(false) {
         let bit_vec = line.data.view_bits::<Msb0>();
         for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             let bit_index = bit_depth - (i % bit_depth);
