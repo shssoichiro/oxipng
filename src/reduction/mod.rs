@@ -34,29 +34,27 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
         let palette = png.palette.as_ref()?;
 
         // Find palette entries that are never used
-        for line in png.scan_lines(false) {
-            match png.ihdr.bit_depth {
-                BitDepth::Eight => {
-                    for &byte in line.data {
-                        used[byte as usize] = true;
-                    }
+        match png.ihdr.bit_depth {
+            BitDepth::Eight => {
+                for &byte in &png.data {
+                    used[byte as usize] = true;
                 }
-                BitDepth::Four => {
-                    for &byte in line.data {
-                        used[(byte & 0x0F) as usize] = true;
-                        used[(byte >> 4) as usize] = true;
-                    }
-                }
-                BitDepth::Two => {
-                    for &byte in line.data {
-                        used[(byte & 0x03) as usize] = true;
-                        used[((byte >> 2) & 0x03) as usize] = true;
-                        used[((byte >> 4) & 0x03) as usize] = true;
-                        used[(byte >> 6) as usize] = true;
-                    }
-                }
-                _ => unreachable!(),
             }
+            BitDepth::Four => {
+                for &byte in &png.data {
+                    used[(byte & 0x0F) as usize] = true;
+                    used[(byte >> 4) as usize] = true;
+                }
+            }
+            BitDepth::Two => {
+                for &byte in &png.data {
+                    used[(byte & 0x03) as usize] = true;
+                    used[((byte >> 2) & 0x03) as usize] = true;
+                    used[((byte >> 4) & 0x03) as usize] = true;
+                    used[(byte >> 6) as usize] = true;
+                }
+            }
+            _ => unreachable!(),
         }
 
         let mut used_enumerated: Vec<(usize, &bool)> = used.iter().enumerate().collect();
@@ -117,14 +115,9 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
 #[must_use]
 fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<PngImage> {
     let byte_map = palette_map_to_byte_map(png, palette_map)?;
-    let mut raw_data = Vec::with_capacity(png.data.len());
 
     // Reassign data bytes to new indices
-    for line in png.scan_lines(false) {
-        for byte in line.data {
-            raw_data.push(byte_map[*byte as usize]);
-        }
-    }
+    let raw_data = png.data.iter().map(|b| byte_map[*b as usize]).collect();
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {

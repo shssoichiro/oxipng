@@ -37,29 +37,13 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
     }
 
     // Reduce from 16 to 8 bits per channel per pixel
-    let mut reduced = Vec::with_capacity(
-        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel())) as usize,
-    );
-    let mut high_byte = 0;
-
-    for line in png.scan_lines(false) {
-        for (i, &byte) in line.data.iter().enumerate() {
-            if i % 2 == 0 {
-                // High byte
-                high_byte = byte;
-            } else {
-                // Low byte
-                if high_byte != byte {
-                    // Can't reduce, exit early
-                    return None;
-                }
-                reduced.push(byte);
-            }
-        }
+    if png.data.chunks(2).any(|pair| pair[0] != pair[1]) {
+        // Can't reduce
+        return None;
     }
 
     Some(PngImage {
-        data: reduced,
+        data: png.data.iter().step_by(2).cloned().collect(),
         ihdr: IhdrData {
             bit_depth: BitDepth::Eight,
             ..png.ihdr
@@ -77,8 +61,8 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     if minimum_bits >= bit_depth {
         return None;
     }
-    for line in png.scan_lines(false) {
-        if png.ihdr.color_type == ColorType::Indexed {
+    if png.ihdr.color_type == ColorType::Indexed {
+        for line in png.scan_lines(false) {
             let line_max = line
                 .data
                 .iter()
@@ -105,23 +89,23 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
                     return None;
                 }
             }
-        } else {
-            for &byte in line.data {
-                while minimum_bits < bit_depth {
-                    let permutations: &[u8] = if minimum_bits == 1 {
-                        &ONE_BIT_PERMUTATIONS
-                    } else if minimum_bits == 2 {
-                        &TWO_BIT_PERMUTATIONS
-                    } else if minimum_bits == 4 {
-                        &FOUR_BIT_PERMUTATIONS
-                    } else {
-                        return None;
-                    };
-                    if permutations.iter().any(|perm| *perm == byte) {
-                        break;
-                    }
-                    minimum_bits <<= 1;
+        }
+    } else {
+        for &byte in &png.data {
+            while minimum_bits < bit_depth {
+                let permutations: &[u8] = if minimum_bits == 1 {
+                    &ONE_BIT_PERMUTATIONS
+                } else if minimum_bits == 2 {
+                    &TWO_BIT_PERMUTATIONS
+                } else if minimum_bits == 4 {
+                    &FOUR_BIT_PERMUTATIONS
+                } else {
+                    return None;
+                };
+                if permutations.iter().any(|perm| *perm == byte) {
+                    break;
                 }
+                minimum_bits <<= 1;
             }
         }
     }

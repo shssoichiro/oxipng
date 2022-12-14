@@ -19,37 +19,35 @@ pub fn reduce_rgba_to_grayscale_alpha(png: &PngImage) -> Option<PngImage> {
         return None;
     }
     let colored_bytes = bpp - byte_depth;
-    for line in png.scan_lines(false) {
-        let mut low_bytes = Vec::with_capacity(4);
-        let mut high_bytes = Vec::with_capacity(4);
-        let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
-        for (i, byte) in line.data.iter().enumerate() {
-            if i as u8 & bpp_mask < colored_bytes {
-                if byte_depth == 1 || i % 2 == 1 {
-                    low_bytes.push(*byte);
-                } else {
-                    high_bytes.push(*byte);
-                }
+    let mut low_bytes = Vec::with_capacity(4);
+    let mut high_bytes = Vec::with_capacity(4);
+    let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
+    for (i, byte) in png.data.iter().enumerate() {
+        if i as u8 & bpp_mask < colored_bytes {
+            if byte_depth == 1 || i % 2 == 1 {
+                low_bytes.push(*byte);
             } else {
-                trans_bytes.push(*byte);
+                high_bytes.push(*byte);
             }
+        } else {
+            trans_bytes.push(*byte);
+        }
 
-            if (i as u8 & bpp_mask) == bpp - 1 {
-                if low_bytes.iter().unique().count() > 1 {
+        if (i as u8 & bpp_mask) == bpp - 1 {
+            if low_bytes.iter().unique().count() > 1 {
+                return None;
+            }
+            if byte_depth == 2 {
+                if high_bytes.iter().unique().count() > 1 {
                     return None;
                 }
-                if byte_depth == 2 {
-                    if high_bytes.iter().unique().count() > 1 {
-                        return None;
-                    }
-                    reduced.push(high_bytes[0]);
-                    high_bytes.clear();
-                }
-                reduced.push(low_bytes[0]);
-                low_bytes.clear();
-                reduced.extend_from_slice(&trans_bytes);
-                trans_bytes.clear();
+                reduced.push(high_bytes[0]);
+                high_bytes.clear();
             }
+            reduced.push(low_bytes[0]);
+            low_bytes.clear();
+            reduced.extend_from_slice(&trans_bytes);
+            trans_bytes.clear();
         }
     }
 
@@ -116,41 +114,39 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
         .as_ref()
         .filter(|t| png.ihdr.color_type == ColorType::RGB && t.len() >= 6)
         .map(|t| RGB8::new(t[1], t[3], t[5]));
-    for line in png.scan_lines(false) {
-        let ok = if png.ihdr.color_type == ColorType::RGB {
-            reduce_scanline_to_palette(
-                line.data.as_rgb().iter().cloned().map(|px| {
-                    px.alpha(if Some(px) != transparency_pixel {
-                        255
-                    } else {
-                        0
-                    })
-                }),
-                &mut palette,
-                &mut raw_data,
-            )
-        } else if png.ihdr.color_type == ColorType::GrayscaleAlpha {
-            reduce_scanline_to_palette(
-                line.data.as_gray_alpha().iter().cloned().map(|px| RGBA {
-                    r: px.0,
-                    g: px.0,
-                    b: px.0,
-                    a: px.1,
-                }),
-                &mut palette,
-                &mut raw_data,
-            )
-        } else {
-            debug_assert_eq!(png.ihdr.color_type, ColorType::RGBA);
-            reduce_scanline_to_palette(
-                line.data.as_rgba().iter().cloned(),
-                &mut palette,
-                &mut raw_data,
-            )
-        };
-        if !ok {
-            return None;
-        }
+    let ok = if png.ihdr.color_type == ColorType::RGB {
+        reduce_scanline_to_palette(
+            png.data.as_rgb().iter().cloned().map(|px| {
+                px.alpha(if Some(px) != transparency_pixel {
+                    255
+                } else {
+                    0
+                })
+            }),
+            &mut palette,
+            &mut raw_data,
+        )
+    } else if png.ihdr.color_type == ColorType::GrayscaleAlpha {
+        reduce_scanline_to_palette(
+            png.data.as_gray_alpha().iter().cloned().map(|px| RGBA {
+                r: px.0,
+                g: px.0,
+                b: px.0,
+                a: px.1,
+            }),
+            &mut palette,
+            &mut raw_data,
+        )
+    } else {
+        debug_assert_eq!(png.ihdr.color_type, ColorType::RGBA);
+        reduce_scanline_to_palette(
+            png.data.as_rgba().iter().cloned(),
+            &mut palette,
+            &mut raw_data,
+        )
+    };
+    if !ok {
+        return None;
     }
 
     let num_transparent = palette
@@ -219,31 +215,29 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     let byte_depth: u8 = png.ihdr.bit_depth.as_u8() >> 3;
     let bpp: usize = 3 * byte_depth as usize;
     let mut cur_pixel = Vec::with_capacity(bpp);
-    for line in png.scan_lines(false) {
-        for (i, byte) in line.data.iter().enumerate() {
-            cur_pixel.push(*byte);
-            if i % bpp == bpp - 1 {
-                if bpp == 3 {
-                    if cur_pixel.iter().unique().count() > 1 {
-                        return None;
-                    }
-                    reduced.push(cur_pixel[0]);
-                } else {
-                    let pixel_bytes = cur_pixel
-                        .iter()
-                        .step_by(2)
-                        .cloned()
-                        .zip(cur_pixel.iter().skip(1).step_by(2).cloned())
-                        .unique()
-                        .collect::<Vec<(u8, u8)>>();
-                    if pixel_bytes.len() > 1 {
-                        return None;
-                    }
-                    reduced.push(pixel_bytes[0].0);
-                    reduced.push(pixel_bytes[0].1);
+    for (i, byte) in png.data.iter().enumerate() {
+        cur_pixel.push(*byte);
+        if i % bpp == bpp - 1 {
+            if bpp == 3 {
+                if cur_pixel.iter().unique().count() > 1 {
+                    return None;
                 }
-                cur_pixel.clear();
+                reduced.push(cur_pixel[0]);
+            } else {
+                let pixel_bytes = cur_pixel
+                    .iter()
+                    .step_by(2)
+                    .cloned()
+                    .zip(cur_pixel.iter().skip(1).step_by(2).cloned())
+                    .unique()
+                    .collect::<Vec<(u8, u8)>>();
+                if pixel_bytes.len() > 1 {
+                    return None;
+                }
+                reduced.push(pixel_bytes[0].0);
+                reduced.push(pixel_bytes[0].1);
             }
+            cur_pixel.clear();
         }
     }
 

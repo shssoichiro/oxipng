@@ -16,13 +16,11 @@ pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {
     };
 
     let mut reduced = Vec::with_capacity(png.data.len());
-    for line in png.scan_lines(false) {
-        for pixel in line.data.chunks(bpp) {
-            if pixel.iter().skip(bpp - bpc).all(|b| *b == 0) {
-                reduced.resize(reduced.len() + bpp, 0);
-            } else {
-                reduced.extend_from_slice(pixel);
-            }
+    for pixel in png.data.chunks(bpp) {
+        if pixel.iter().skip(bpp - bpc).all(|b| *b == 0) {
+            reduced.resize(reduced.len() + bpp, 0);
+        } else {
+            reduced.extend_from_slice(pixel);
         }
     }
 
@@ -53,18 +51,16 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
     let mut has_transparency = false;
     let mut used_colors = vec![false; 256];
 
-    for line in png.scan_lines(false) {
-        for pixel in line.data.chunks(bpp) {
-            if optimize_alpha && pixel.iter().skip(colored_bytes).all(|b| *b == 0) {
-                // Fully transparent, we may be able to reduce with tRNS
-                has_transparency = true;
-            } else if pixel.iter().skip(colored_bytes).any(|b| *b != 255) {
-                // Partially transparent, the image is not reducible
-                return None;
-            } else if optimize_alpha && pixel.iter().take(colored_bytes).all(|b| *b == pixel[0]) {
-                // Opaque shade of gray, we can't use this color for tRNS
-                used_colors[pixel[0] as usize] = true;
-            }
+    for pixel in png.data.chunks(bpp) {
+        if optimize_alpha && pixel.iter().skip(colored_bytes).all(|b| *b == 0) {
+            // Fully transparent, we may be able to reduce with tRNS
+            has_transparency = true;
+        } else if pixel.iter().skip(colored_bytes).any(|b| *b != 255) {
+            // Partially transparent, the image is not reducible
+            return None;
+        } else if optimize_alpha && pixel.iter().take(colored_bytes).all(|b| *b == pixel[0]) {
+            // Opaque shade of gray, we can't use this color for tRNS
+            used_colors[pixel[0] as usize] = true;
         }
     }
 
@@ -82,15 +78,13 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
     };
 
     let mut raw_data = Vec::with_capacity(png.data.len());
-    for line in png.scan_lines(false) {
-        for pixel in line.data.chunks(bpp) {
-            match transparency_pixel {
-                Some(ref trns) if pixel.iter().skip(colored_bytes).all(|b| *b == 0) => {
-                    raw_data.resize(raw_data.len() + colored_bytes, trns[1]);
-                }
-                _ => raw_data.extend_from_slice(&pixel[0..colored_bytes]),
-            };
-        }
+    for pixel in png.data.chunks(bpp) {
+        match transparency_pixel {
+            Some(ref trns) if pixel.iter().skip(colored_bytes).all(|b| *b == 0) => {
+                raw_data.resize(raw_data.len() + colored_bytes, trns[1]);
+            }
+            _ => raw_data.extend_from_slice(&pixel[0..colored_bytes]),
+        };
     }
 
     let mut aux_headers = png.aux_headers.clone();
