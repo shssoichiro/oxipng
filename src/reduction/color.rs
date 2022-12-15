@@ -2,79 +2,11 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexMap;
-use itertools::Itertools;
 use rgb::{FromSlice, RGB8, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
 type FxIndexMap<K, V> = IndexMap<K, V, BuildHasherDefault<FxHasher>>;
-
-#[must_use]
-pub fn reduce_rgba_to_grayscale_alpha(png: &PngImage) -> Option<PngImage> {
-    let mut reduced = Vec::with_capacity(png.data.len());
-    let byte_depth = png.ihdr.bit_depth.as_u8() >> 3;
-    let bpp = 4 * byte_depth;
-    let bpp_mask = bpp - 1;
-    if 0 != bpp & bpp_mask {
-        return None;
-    }
-    let colored_bytes = bpp - byte_depth;
-    let mut low_bytes = Vec::with_capacity(4);
-    let mut high_bytes = Vec::with_capacity(4);
-    let mut trans_bytes = Vec::with_capacity(byte_depth as usize);
-    for (i, byte) in png.data.iter().enumerate() {
-        if i as u8 & bpp_mask < colored_bytes {
-            if byte_depth == 1 || i % 2 == 1 {
-                low_bytes.push(*byte);
-            } else {
-                high_bytes.push(*byte);
-            }
-        } else {
-            trans_bytes.push(*byte);
-        }
-
-        if (i as u8 & bpp_mask) == bpp - 1 {
-            if low_bytes.iter().unique().count() > 1 {
-                return None;
-            }
-            if byte_depth == 2 {
-                if high_bytes.iter().unique().count() > 1 {
-                    return None;
-                }
-                reduced.push(high_bytes[0]);
-                high_bytes.clear();
-            }
-            reduced.push(low_bytes[0]);
-            low_bytes.clear();
-            reduced.extend_from_slice(&trans_bytes);
-            trans_bytes.clear();
-        }
-    }
-
-    let mut aux_headers = png.aux_headers.clone();
-    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        if let Some(&s) = sbit_header.first() {
-            aux_headers.insert(*b"sBIT", vec![s]);
-        }
-    }
-
-    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
-        if let Some(b) = bkgd_header.get(0..2) {
-            aux_headers.insert(*b"bKGD", b.to_owned());
-        }
-    }
-
-    Some(PngImage {
-        data: reduced,
-        ihdr: IhdrData {
-            color_type: ColorType::GrayscaleAlpha,
-            ..png.ihdr
-        },
-        palette: None,
-        transparency_pixel: None,
-        aux_headers,
-    })
-}
 
 fn reduce_scanline_to_palette<T>(
     iter: impl IntoIterator<Item = T>,
@@ -212,33 +144,18 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
 #[must_use]
 pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     let mut reduced = Vec::with_capacity(png.data.len());
-    let byte_depth: u8 = png.ihdr.bit_depth.as_u8() >> 3;
-    let bpp: usize = 3 * byte_depth as usize;
-    let mut cur_pixel = Vec::with_capacity(bpp);
-    for (i, byte) in png.data.iter().enumerate() {
-        cur_pixel.push(*byte);
-        if i % bpp == bpp - 1 {
-            if bpp == 3 {
-                if cur_pixel.iter().unique().count() > 1 {
-                    return None;
-                }
-                reduced.push(cur_pixel[0]);
-            } else {
-                let pixel_bytes = cur_pixel
-                    .iter()
-                    .step_by(2)
-                    .cloned()
-                    .zip(cur_pixel.iter().skip(1).step_by(2).cloned())
-                    .unique()
-                    .collect::<Vec<(u8, u8)>>();
-                if pixel_bytes.len() > 1 {
-                    return None;
-                }
-                reduced.push(pixel_bytes[0].0);
-                reduced.push(pixel_bytes[0].1);
+    let byte_depth = png.ihdr.bit_depth.as_u8() as usize >> 3;
+    let bpp = png.channels_per_pixel() as usize * byte_depth;
+    let last_color = 2 * byte_depth;
+    for pixel in png.data.chunks(bpp) {
+        if byte_depth == 1 {
+            if pixel[0] != pixel[1] || pixel[1] != pixel[2] {
+                return None;
             }
-            cur_pixel.clear();
+        } else if pixel[0..2] != pixel[2..4] || pixel[2..4] != pixel[4..6] {
+            return None;
         }
+        reduced.extend_from_slice(&pixel[last_color..]);
     }
 
     let transparency_pixel = if let Some(ref trns) = png.transparency_pixel {
@@ -266,7 +183,10 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     Some(PngImage {
         data: reduced,
         ihdr: IhdrData {
-            color_type: ColorType::Grayscale,
+            color_type: match png.ihdr.color_type {
+                ColorType::RGBA => ColorType::GrayscaleAlpha,
+                _ => ColorType::Grayscale,
+            },
             ..png.ihdr
         },
         aux_headers,

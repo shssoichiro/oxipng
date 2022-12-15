@@ -201,7 +201,7 @@ pub fn reduce_color_type(
     // Maybe not the most efficient, but it's safe
     if reduced.ihdr.color_type == ColorType::RGBA {
         if let Some(r) = if grayscale_reduction {
-            reduce_rgba_to_grayscale_alpha(&reduced)
+            reduce_rgb_to_grayscale(&reduced)
         } else {
             None
         }
