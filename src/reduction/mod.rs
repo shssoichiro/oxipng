@@ -199,48 +199,40 @@ pub fn reduce_color_type(
 
     // Go down one step at a time
     // Maybe not the most efficient, but it's safe
-    if reduced.ihdr.color_type == ColorType::RGBA {
-        if let Some(r) = if grayscale_reduction {
-            reduce_rgb_to_grayscale(&reduced)
-        } else {
-            None
-        }
-        .or_else(|| reduced_alpha_channel(&reduced, optimize_alpha))
-        {
+    if grayscale_reduction && matches!(reduced.ihdr.color_type, ColorType::RGBA | ColorType::RGB) {
+        if let Some(r) = reduce_rgb_to_grayscale(&reduced) {
             reduced = Cow::Owned(r);
-        } else if let Some(r) = reduce_to_palette(&reduced) {
-            reduced = Cow::Owned(r);
-            should_reduce_bit_depth = true;
+            should_reduce_bit_depth = reduced.ihdr.color_type == ColorType::Grayscale;
         }
     }
 
+    // Attempt grayscale alpha reduction before palette, as grayscale will typically be smaller than indexed
     if reduced.ihdr.color_type == ColorType::GrayscaleAlpha {
-        if let Some(r) =
-            reduced_alpha_channel(&reduced, optimize_alpha).or_else(|| reduce_to_palette(&reduced))
-        {
+        if let Some(r) = reduced_alpha_channel(&reduced, optimize_alpha) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }
     }
 
-    if reduced.ihdr.color_type == ColorType::RGB {
-        if let Some(r) = if grayscale_reduction {
-            reduce_rgb_to_grayscale(&reduced)
-        } else {
-            None
-        }
-        .or_else(|| reduce_to_palette(&reduced))
-        {
+    if matches!(
+        reduced.ihdr.color_type,
+        ColorType::RGBA | ColorType::RGB | ColorType::GrayscaleAlpha
+    ) {
+        if let Some(r) = reduce_to_palette(&reduced) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
+
+            // Make sure that palette gets sorted. Ideally, this should be done within reduce_to_palette.
+            if let Some(r) = reduced_palette(&reduced, optimize_alpha) {
+                reduced = Cow::Owned(r);
+            }
         }
     }
 
-    //Make sure that palette gets sorted. Ideally, this should be done within reduced_color_to_palette.
-    if should_reduce_bit_depth && reduced.ihdr.color_type == ColorType::Indexed {
-        if let Some(r) = reduced_palette(&reduced, optimize_alpha) {
+    // Attempt RGBA alpha reduction after palette, so it can be skipped if palette was successful
+    if reduced.ihdr.color_type == ColorType::RGBA {
+        if let Some(r) = reduced_alpha_channel(&reduced, optimize_alpha) {
             reduced = Cow::Owned(r);
-            should_reduce_bit_depth = true;
         }
     }
 
