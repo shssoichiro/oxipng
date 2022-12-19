@@ -81,7 +81,7 @@ impl Evaluator {
     }
 
     /// Wait for all evaluations to finish and return smallest reduction
-    /// Or `None` if all reductions were worse than baseline.
+    /// Or `None` if the queue is empty.
     #[cfg(feature = "parallel")]
     pub fn get_best_candidate(self) -> Option<Candidate> {
         let (eval_send, eval_recv) = self.eval_channel;
