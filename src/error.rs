@@ -1,3 +1,4 @@
+use crate::colors::{BitDepth, ColorType};
 use std::error::Error;
 use std::fmt;
 
@@ -11,6 +12,8 @@ pub enum PngError {
     InvalidData,
     TruncatedData,
     ChunkMissing(&'static str),
+    InvalidDepthForType(BitDepth, ColorType),
+    IncorrectDataLength(usize, usize),
     Other(Box<str>),
 }
 
@@ -30,6 +33,14 @@ impl fmt::Display for PngError {
             }
             PngError::APNGNotSupported => f.write_str("APNG files are not (yet) supported"),
             PngError::ChunkMissing(s) => write!(f, "Chunk {} missing or empty", s),
+            PngError::InvalidDepthForType(d, ref c) => {
+                write!(f, "Invalid bit depth {} for color type {}", d, c)
+            }
+            PngError::IncorrectDataLength(l1, l2) => write!(
+                f,
+                "Data length {} does not match the expected length {}",
+                l1, l2
+            ),
             PngError::Other(ref s) => f.write_str(s),
         }
     }

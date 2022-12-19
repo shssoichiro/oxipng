@@ -331,6 +331,24 @@ impl RawImage {
         bit_depth: BitDepth,
         data: Vec<u8>,
     ) -> Result<Self, PngError> {
+        // Validate bit depth
+        let valid_depth = match color_type {
+            ColorType::Grayscale { .. } => true,
+            ColorType::Indexed { .. } => (bit_depth as u8) <= 8,
+            _ => (bit_depth as u8) >= 8,
+        };
+        if !valid_depth {
+            return Err(PngError::InvalidDepthForType(bit_depth, color_type));
+        }
+
+        // Validate data length
+        let bpp = bit_depth as usize * color_type.channels_per_pixel() as usize;
+        let row_bytes = (bpp * width as usize + 7) / 8;
+        let expected_len = row_bytes * height as usize;
+        if data.len() != expected_len {
+            return Err(PngError::IncorrectDataLength(data.len(), expected_len));
+        }
+
         Ok(Self {
             png: Arc::new(PngImage {
                 ihdr: IhdrData {
