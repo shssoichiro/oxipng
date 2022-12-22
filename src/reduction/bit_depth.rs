@@ -1,28 +1,6 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use bitvec::prelude::*;
-
-const ONE_BIT_PERMUTATIONS: [u8; 2] = [0b0000_0000, 0b1111_1111];
-const TWO_BIT_PERMUTATIONS: [u8; 4] = [0b0000_0000, 0b0101_0101, 0b1010_1010, 0b1111_1111];
-const FOUR_BIT_PERMUTATIONS: [u8; 16] = [
-    0b0000_0000,
-    0b0001_0001,
-    0b0010_0010,
-    0b0011_0011,
-    0b0100_0100,
-    0b0101_0101,
-    0b0110_0110,
-    0b0111_0111,
-    0b1000_1000,
-    0b1001_1001,
-    0b1010_1010,
-    0b1011_1011,
-    0b1100_1100,
-    0b1101_1101,
-    0b1110_1110,
-    0b1111_1111,
-];
 
 /// Attempt to reduce the bit depth of the image
 /// Returns true if the bit depth was reduced, false otherwise
@@ -37,31 +15,13 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
     }
 
     // Reduce from 16 to 8 bits per channel per pixel
-    let mut reduced = Vec::with_capacity(
-        (png.ihdr.width * png.ihdr.height * u32::from(png.channels_per_pixel()) + png.ihdr.height)
-            as usize,
-    );
-    let mut high_byte = 0;
-
-    for line in png.scan_lines() {
-        reduced.push(line.filter);
-        for (i, &byte) in line.data.iter().enumerate() {
-            if i % 2 == 0 {
-                // High byte
-                high_byte = byte;
-            } else {
-                // Low byte
-                if high_byte != byte {
-                    // Can't reduce, exit early
-                    return None;
-                }
-                reduced.push(byte);
-            }
-        }
+    if png.data.chunks(2).any(|pair| pair[0] != pair[1]) {
+        // Can't reduce
+        return None;
     }
 
     Some(PngImage {
-        data: reduced,
+        data: png.data.iter().step_by(2).cloned().collect(),
         ihdr: IhdrData {
             bit_depth: BitDepth::Eight,
             ..png.ihdr
@@ -76,11 +36,14 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
 pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
     assert!((1..8).contains(&minimum_bits));
     let bit_depth: usize = png.ihdr.bit_depth.as_u8() as usize;
-    if minimum_bits >= bit_depth {
+    if minimum_bits >= bit_depth || bit_depth > 8 {
         return None;
     }
-    for line in png.scan_lines() {
-        if png.ihdr.color_type == ColorType::Indexed {
+    // Calculate the current number of pixels per byte
+    let ppb = 8 / bit_depth;
+
+    if png.ihdr.color_type == ColorType::Indexed {
+        for line in png.scan_lines(false) {
             let line_max = line
                 .data
                 .iter()
@@ -107,40 +70,62 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
                     return None;
                 }
             }
-        } else {
-            for &byte in line.data {
-                while minimum_bits < bit_depth {
-                    let permutations: &[u8] = if minimum_bits == 1 {
-                        &ONE_BIT_PERMUTATIONS
-                    } else if minimum_bits == 2 {
-                        &TWO_BIT_PERMUTATIONS
-                    } else if minimum_bits == 4 {
-                        &FOUR_BIT_PERMUTATIONS
-                    } else {
-                        return None;
-                    };
-                    if permutations.iter().any(|perm| *perm == byte) {
-                        break;
+        }
+    } else {
+        // Checking for grayscale depth reduction is quite different than for indexed
+        // Note: In rare cases, padding bits in the data may cause this to incorrectly return None
+        let mut mask = (1 << minimum_bits) - 1;
+        let mut divisions = 1..(bit_depth / minimum_bits);
+        for &b in &png.data {
+            if b == 0 || b == 255 {
+                continue;
+            }
+            'try_depth: loop {
+                let mut byte = b;
+                // Loop over each pixel in the byte
+                for _ in 0..ppb {
+                    // Align the first pixel division with the mask
+                    byte = byte.rotate_left(minimum_bits as u32);
+                    // Each potential division of this pixel must be identical to successfully reduce
+                    let compare = byte & mask;
+                    for _ in divisions.clone() {
+                        // Align the next division with the mask
+                        byte = byte.rotate_left(minimum_bits as u32);
+                        if byte & mask != compare {
+                            // This depth is not possible, try the next one up
+                            minimum_bits <<= 1;
+                            if minimum_bits == bit_depth {
+                                return None;
+                            }
+                            mask = (1 << minimum_bits) - 1;
+                            divisions = 1..(bit_depth / minimum_bits);
+                            continue 'try_depth;
+                        }
                     }
-                    minimum_bits <<= 1;
                 }
+                break;
             }
         }
     }
 
-    let mut reduced = BitVec::<u8, Msb0>::with_capacity(png.data.len() * 8);
-    for line in png.scan_lines() {
-        reduced.extend_from_raw_slice(&[line.filter]);
-        let bit_vec = line.data.view_bits::<Msb0>();
-        for (i, bit) in bit_vec.iter().by_vals().enumerate() {
-            let bit_index = bit_depth - (i % bit_depth);
-            if bit_index <= minimum_bits {
-                reduced.push(bit);
+    let mut reduced = Vec::with_capacity(png.data.len());
+    let mask = (1 << minimum_bits) - 1;
+    for line in png.scan_lines(false) {
+        // Loop over the data in chunks that will produce 1 byte of output
+        for chunk in line.data.chunks(bit_depth / minimum_bits) {
+            let mut new_byte = 0;
+            let mut shift = 8;
+            for &(mut byte) in chunk {
+                // Loop over each pixel in the byte
+                for _ in 0..ppb {
+                    // Align the current pixel with the mask
+                    byte = byte.rotate_left(bit_depth as u32);
+                    shift -= minimum_bits;
+                    // Take the low bits of the pixel and shift them into the output byte
+                    new_byte |= (byte & mask) << shift;
+                }
             }
-        }
-        // Pad end of line to get 8 bits per byte
-        while reduced.len() % 8 != 0 {
-            reduced.push(false);
+            reduced.push(new_byte);
         }
     }
 
@@ -167,7 +152,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     }
 
     Some(PngImage {
-        data: reduced.as_raw_slice().to_vec(),
+        data: reduced,
         ihdr: IhdrData {
             bit_depth: BitDepth::from_u8(minimum_bits as u8),
             ..png.ihdr

@@ -34,29 +34,27 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
         let palette = png.palette.as_ref()?;
 
         // Find palette entries that are never used
-        for line in png.scan_lines() {
-            match png.ihdr.bit_depth {
-                BitDepth::Eight => {
-                    for &byte in line.data {
-                        used[byte as usize] = true;
-                    }
+        match png.ihdr.bit_depth {
+            BitDepth::Eight => {
+                for &byte in &png.data {
+                    used[byte as usize] = true;
                 }
-                BitDepth::Four => {
-                    for &byte in line.data {
-                        used[(byte & 0x0F) as usize] = true;
-                        used[(byte >> 4) as usize] = true;
-                    }
-                }
-                BitDepth::Two => {
-                    for &byte in line.data {
-                        used[(byte & 0x03) as usize] = true;
-                        used[((byte >> 2) & 0x03) as usize] = true;
-                        used[((byte >> 4) & 0x03) as usize] = true;
-                        used[(byte >> 6) as usize] = true;
-                    }
-                }
-                _ => unreachable!(),
             }
+            BitDepth::Four => {
+                for &byte in &png.data {
+                    used[(byte & 0x0F) as usize] = true;
+                    used[(byte >> 4) as usize] = true;
+                }
+            }
+            BitDepth::Two => {
+                for &byte in &png.data {
+                    used[(byte & 0x03) as usize] = true;
+                    used[((byte >> 2) & 0x03) as usize] = true;
+                    used[((byte >> 4) & 0x03) as usize] = true;
+                    used[(byte >> 6) as usize] = true;
+                }
+            }
+            _ => unreachable!(),
         }
 
         let mut used_enumerated: Vec<(usize, &bool)> = used.iter().enumerate().collect();
@@ -117,15 +115,9 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
 #[must_use]
 fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<PngImage> {
     let byte_map = palette_map_to_byte_map(png, palette_map)?;
-    let mut raw_data = Vec::with_capacity(png.data.len());
 
     // Reassign data bytes to new indices
-    for line in png.scan_lines() {
-        raw_data.push(line.filter);
-        for byte in line.data {
-            raw_data.push(byte_map[*byte as usize]);
-        }
-    }
+    let raw_data = png.data.iter().map(|b| byte_map[*b as usize]).collect();
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
@@ -207,48 +199,40 @@ pub fn reduce_color_type(
 
     // Go down one step at a time
     // Maybe not the most efficient, but it's safe
-    if reduced.ihdr.color_type == ColorType::RGBA {
-        if let Some(r) = if grayscale_reduction {
-            reduce_rgba_to_grayscale_alpha(&reduced)
-        } else {
-            None
-        }
-        .or_else(|| reduced_alpha_channel(&reduced, optimize_alpha))
-        {
+    if grayscale_reduction && matches!(reduced.ihdr.color_type, ColorType::RGBA | ColorType::RGB) {
+        if let Some(r) = reduce_rgb_to_grayscale(&reduced) {
             reduced = Cow::Owned(r);
-        } else if let Some(r) = reduce_to_palette(&reduced) {
-            reduced = Cow::Owned(r);
-            should_reduce_bit_depth = true;
+            should_reduce_bit_depth = reduced.ihdr.color_type == ColorType::Grayscale;
         }
     }
 
+    // Attempt grayscale alpha reduction before palette, as grayscale will typically be smaller than indexed
     if reduced.ihdr.color_type == ColorType::GrayscaleAlpha {
-        if let Some(r) =
-            reduced_alpha_channel(&reduced, optimize_alpha).or_else(|| reduce_to_palette(&reduced))
-        {
+        if let Some(r) = reduced_alpha_channel(&reduced, optimize_alpha) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
         }
     }
 
-    if reduced.ihdr.color_type == ColorType::RGB {
-        if let Some(r) = if grayscale_reduction {
-            reduce_rgb_to_grayscale(&reduced)
-        } else {
-            None
-        }
-        .or_else(|| reduce_to_palette(&reduced))
-        {
+    if matches!(
+        reduced.ihdr.color_type,
+        ColorType::RGBA | ColorType::RGB | ColorType::GrayscaleAlpha
+    ) {
+        if let Some(r) = reduce_to_palette(&reduced) {
             reduced = Cow::Owned(r);
             should_reduce_bit_depth = true;
+
+            // Make sure that palette gets sorted. Ideally, this should be done within reduce_to_palette.
+            if let Some(r) = reduced_palette(&reduced, optimize_alpha) {
+                reduced = Cow::Owned(r);
+            }
         }
     }
 
-    //Make sure that palette gets sorted. Ideally, this should be done within reduced_color_to_palette.
-    if should_reduce_bit_depth && reduced.ihdr.color_type == ColorType::Indexed {
-        if let Some(r) = reduced_palette(&reduced, optimize_alpha) {
+    // Attempt RGBA alpha reduction after palette, so it can be skipped if palette was successful
+    if reduced.ihdr.color_type == ColorType::RGBA {
+        if let Some(r) = reduced_alpha_channel(&reduced, optimize_alpha) {
             reduced = Cow::Owned(r);
-            should_reduce_bit_depth = true;
         }
     }
 

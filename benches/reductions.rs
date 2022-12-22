@@ -76,6 +76,66 @@ fn reductions_2_to_1_bits(b: &mut Bencher) {
 }
 
 #[bench]
+fn reductions_grayscale_8_to_4_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_8_should_be_grayscale_4.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
+fn reductions_grayscale_8_to_2_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_8_should_be_grayscale_2.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
+fn reductions_grayscale_8_to_1_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_8_should_be_grayscale_1.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
+fn reductions_grayscale_4_to_2_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_4_should_be_grayscale_2.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
+fn reductions_grayscale_4_to_1_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_4_should_be_grayscale_1.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
+fn reductions_grayscale_2_to_1_bits(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_2_should_be_grayscale_1.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+}
+
+#[bench]
 fn reductions_rgba_to_rgb_16(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_16_should_be_rgb_16.png"));
     let png = PngData::new(&input, false).unwrap();

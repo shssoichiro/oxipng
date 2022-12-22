@@ -18,7 +18,7 @@ use std::sync::Arc;
 
 pub(crate) mod scan_lines;
 
-use self::scan_lines::{ScanLines, ScanLinesMut};
+use self::scan_lines::ScanLines;
 
 /// Compression level to use for the Brute filter strategy
 const BRUTE_LEVEL: i32 = 1; // 1 is fastest, 2-4 are not useful, 5 is slower but more effective
@@ -29,7 +29,7 @@ const BRUTE_LINES: usize = 4; // Values over 8 are generally not useful
 pub struct PngImage {
     /// The headers stored in the IHDR chunk
     pub ihdr: IhdrData,
-    /// The uncompressed, optionally filtered data from the IDAT chunk
+    /// The uncompressed, unfiltered data from the IDAT chunk
     pub data: Vec<u8>,
     /// The palette containing colors used in an Indexed image
     /// Contains 3 bytes per color (R+G+B), up to 768
@@ -280,14 +280,8 @@ impl PngImage {
 
     /// Return an iterator over the scanlines of the image
     #[inline]
-    pub fn scan_lines(&self) -> ScanLines<'_> {
-        ScanLines::new(self)
-    }
-
-    /// Return an iterator over the scanlines of the image
-    #[inline]
-    pub fn scan_lines_mut(&mut self) -> ScanLinesMut<'_> {
-        ScanLinesMut::new(self)
+    pub fn scan_lines(&self, has_filter: bool) -> ScanLines<'_> {
+        ScanLines::new(self, has_filter)
     }
 
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
@@ -297,7 +291,7 @@ impl PngImage {
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = None;
         let mut unfiltered_buf = Vec::new();
-        for line in self.scan_lines() {
+        for line in self.scan_lines(true) {
             if last_pass != line.pass {
                 last_line.clear();
                 last_pass = line.pass;
@@ -305,7 +299,6 @@ impl PngImage {
             last_line.resize(line.data.len(), 0);
             let filter = RowFilter::try_from(line.filter).map_err(|_| PngError::InvalidData)?;
             filter.unfilter_line(bpp, line.data, &last_line, &mut unfiltered_buf)?;
-            unfiltered.push(0);
             unfiltered.extend_from_slice(&unfiltered_buf);
             std::mem::swap(&mut last_line, &mut unfiltered_buf);
             unfiltered_buf.clear();
@@ -328,7 +321,7 @@ impl PngImage {
         let mut prev_line = Vec::new();
         let mut prev_pass: Option<u8> = None;
         let mut f_buf = Vec::new();
-        for line in self.scan_lines() {
+        for line in self.scan_lines(false) {
             if prev_pass != line.pass || line.data.len() != prev_line.len() {
                 prev_line = vec![0; line.data.len()];
             }

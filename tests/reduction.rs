@@ -719,6 +719,78 @@ fn grayscale_8_should_be_grayscale_8() {
 }
 
 #[test]
+fn grayscale_8_should_be_grayscale_4() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_grayscale_4.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::Four,
+    );
+}
+
+#[test]
+fn grayscale_8_should_be_grayscale_2() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_grayscale_2.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::Two,
+    );
+}
+
+#[test]
+fn grayscale_4_should_be_grayscale_2() {
+    test_it_converts(
+        "tests/files/grayscale_4_should_be_grayscale_2.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Four,
+        ColorType::Grayscale,
+        BitDepth::Two,
+    );
+}
+
+#[test]
+fn grayscale_8_should_be_grayscale_1() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_grayscale_1.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Eight,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
+
+#[test]
+fn grayscale_4_should_be_grayscale_1() {
+    test_it_converts(
+        "tests/files/grayscale_4_should_be_grayscale_1.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Four,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
+
+#[test]
+fn grayscale_2_should_be_grayscale_1() {
+    test_it_converts(
+        "tests/files/grayscale_2_should_be_grayscale_1.png",
+        false,
+        ColorType::Grayscale,
+        BitDepth::Two,
+        ColorType::Grayscale,
+        BitDepth::One,
+    );
+}
+
+#[test]
 fn grayscale_alpha_16_should_be_grayscale_trns_16() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_trns_16.png",
