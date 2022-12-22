@@ -657,28 +657,9 @@ fn optimize_png(
         );
     }
 
-    let (old_png, new_png) = rayon::join(
-        || load_png_image_from_memory(original_data),
-        || load_png_image_from_memory(&output),
-    );
+    debug_assert!(validate_output(&output, original_data));
 
-    if let Ok(new_png) = new_png {
-        if let Ok(old_png) = old_png {
-            if images_equal(&old_png, &new_png) {
-                return Ok(output);
-            }
-        } else {
-            // The original image might be invalid if, for example, there is a CRC error,
-            // and we set fix_errors to true. In that case, all we can do is check that the
-            // new image is decodable.
-            return Ok(output);
-        }
-    }
-
-    error!(
-        "The resulting image is corrupted and will not be outputted.\nThis is a bug! Please report it at https://github.com/shssoichiro/oxipng/issues"
-    );
-    Err(PngError::new("The resulting image is corrupted"))
+    Ok(output)
 }
 
 fn perform_reductions(
@@ -1059,6 +1040,29 @@ fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
             out_path, err_io
         ))
     })
+}
+
+/// Validate that the output png data still matches the original image
+fn validate_output(output: &[u8], original_data: &[u8]) -> bool {
+    let (old_png, new_png) = rayon::join(
+        || load_png_image_from_memory(original_data),
+        || load_png_image_from_memory(output),
+    );
+
+    match (new_png, old_png) {
+        (Err(new_err), _) => {
+            error!("Failed to read output image for validation: {}", new_err);
+            false
+        }
+        (_, Err(old_err)) => {
+            // The original image might be invalid if, for example, there is a CRC error,
+            // and we set fix_errors to true. In that case, all we can do is check that the
+            // new image is decodable.
+            warn!("Failed to read input image for validation: {}", old_err);
+            true
+        }
+        (Ok(new_png), Ok(old_png)) => images_equal(&old_png, &new_png),
+    }
 }
 
 /// Loads a PNG image from memory to a [DynamicImage]
