@@ -1,3 +1,13 @@
+## Version 8.0.0
+
+- [Breaking] Revamp alpha optimization
+- [Bugfix] Fix grayscale depth reduction with tRNS pixel
+- [Bugfix] Fix fast mode with zopfli
+- [Improvement] Tweaks to interlacing and format display
+- [Improvement] Ability to reduce alpha channel to tRNS pixel
+- [Improvement] Performance improvements to colorspace reduction
+- [Misc] Disable image validation in release mode, as it is deemed no longer necessary
+
 ## Version 7.0.0
 
 - [Breaking] Switch to libdeflater as the default
