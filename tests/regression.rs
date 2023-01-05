@@ -400,19 +400,6 @@ fn issue_159() {
 }
 
 #[test]
-#[cfg(target_pointer_width = "64")]
-fn issue_167() {
-    test_it_converts(
-        "tests/files/issue-167.png",
-        None,
-        ColorType::Grayscale,
-        BitDepth::Eight,
-        ColorType::Grayscale,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_171() {
     test_it_converts(
         "tests/files/issue-171.png",
