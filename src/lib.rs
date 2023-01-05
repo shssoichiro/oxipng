@@ -509,7 +509,9 @@ fn optimize_png(
     perform_reductions(png.raw.clone(), opts, &deadline, &eval);
     let mut eval_filter = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;
-        reduction_occurred = true;
+        if result.is_reduction {
+            reduction_occurred = true;
+        }
         Some(result.filter)
     } else {
         None
