@@ -73,7 +73,6 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         }
     } else {
         // Checking for grayscale depth reduction is quite different than for indexed
-        // Note: In rare cases, padding bits in the data may cause this to incorrectly return None
         let mut mask = (1 << minimum_bits) - 1;
         let mut divisions = 1..(bit_depth / minimum_bits);
         for &b in &png.data {
