@@ -30,7 +30,7 @@ pub struct Candidate {
 impl Candidate {
     fn cmp_key(&self) -> impl Ord {
         (
-            self.image.idat_data.len(),
+            self.image.estimated_output_size(),
             self.image.raw.data.len(),
             self.image.raw.ihdr.bit_depth,
             self.filter,
@@ -134,7 +134,6 @@ impl Evaluator {
                 if let Ok(idat_data) =
                     deflate::deflate(&filtered, compression, &best_candidate_size)
                 {
-                    best_candidate_size.set_min(idat_data.len());
                     let new = Candidate {
                         image: PngData {
                             idat_data,
@@ -145,6 +144,7 @@ impl Evaluator {
                         is_reduction,
                         nth,
                     };
+                    best_candidate_size.set_min(new.image.estimated_output_size());
 
                     #[cfg(feature = "parallel")]
                     {
