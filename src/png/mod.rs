@@ -134,6 +134,27 @@ impl PngData {
         })
     }
 
+    /// Return an estimate of the output size
+    pub fn estimated_output_size(&self) -> usize {
+        // Add the size of the PLTE and tRNS chunks to the compressed idat size
+        // This can help with evaluation of very small data
+        let size = self.idat_data.len();
+        size + match &self.raw.ihdr.color_type {
+            ColorType::Indexed { palette } => {
+                let plte = 12 + palette.len() * 3;
+                let trns = palette.iter().filter(|p| p.a != 255).count();
+                if trns != 0 {
+                    plte + 12 + trns
+                } else {
+                    plte
+                }
+            }
+            ColorType::Grayscale { transparent_shade } if transparent_shade.is_some() => 12 + 2,
+            ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
+            _ => 0,
+        }
+    }
+
     /// Format the `PngData` struct into a valid PNG bytestream
     pub fn output(&self) -> Vec<u8> {
         // PNG header
