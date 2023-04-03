@@ -644,14 +644,14 @@ fn optimize_png(
         );
     }
     if file_original_size >= output.len() {
-        debug!(
+        info!(
             "    file size = {} bytes ({} bytes = {:.2}% decrease)",
             output.len(),
             file_original_size - output.len(),
             (file_original_size - output.len()) as f64 / file_original_size as f64 * 100_f64
         );
     } else {
-        debug!(
+        info!(
             "    file size = {} bytes ({} bytes = {:.2}% increase)",
             output.len(),
             output.len() - file_original_size,

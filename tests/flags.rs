@@ -170,17 +170,34 @@ fn verbose_mode() {
     });
 
     let mut logs: Vec<_> = receiver.into_iter().collect();
-    assert_eq!(logs.len(), 1);
-    logs.sort();
-    for (i, log) in logs.into_iter().enumerate() {
-        let expected_prefix = format!("    zc = 11  f = None ");
-        assert!(
-            log.starts_with(&expected_prefix),
-            "logs[{}] = {:?} doesn't start with {:?}",
-            i,
-            log,
-            expected_prefix
-        );
+    println!("logs={:?}", logs);
+    assert_eq!(logs.len(), 9);
+    let expected_logs = [
+        "    500x400 pixels, PNG format",
+        "    3x8 bits/pixel, RGB (non-interlaced)",
+        "    IDAT size = 113794 bytes",
+        "    File size = 114708 bytes",
+        "Trying: 1 filters",
+        "    zc = 11  f = None      149409 bytes",
+        "Found better combination:",
+        "    zc = 11  f = None      149409 bytes",
+        "    IDAT size = 149409 bytes",
+    ];
+    for (idx, expected_log) in expected_logs.into_iter().enumerate() {
+        if let Some(log) = logs.get(idx) {
+            if !log.starts_with(expected_log) {
+                panic!(
+                    "logs[{}] = {:?} doesn't start with {:?}",
+                    idx, log, expected_log
+                );
+            }
+        } else {
+            panic!(
+                "Expected to find {} log entries, but got {}",
+                expected_logs.len(),
+                logs.len()
+            );
+        }
     }
 }
 
