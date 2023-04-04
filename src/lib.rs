@@ -466,13 +466,13 @@ fn optimize_png(
     // Print png info
     let file_original_size = original_data.len();
     let idat_original_size = png.idat_data.len();
-    info!(
+    debug!(
         "    {}x{} pixels, PNG format",
         png.raw.ihdr.width, png.raw.ihdr.height
     );
     report_format("    ", &png.raw);
-    info!("    IDAT size = {} bytes", idat_original_size);
-    info!("    File size = {} bytes", file_original_size);
+    debug!("    IDAT size = {} bytes", idat_original_size);
+    debug!("    File size = {} bytes", file_original_size);
 
     // Do this first so that reductions can ignore certain chunks such as bKGD
     perform_strip(png, opts);
@@ -560,7 +560,7 @@ fn optimize_png(
                     None
                 }
             } else {
-                info!("Trying: {}", trial.filter);
+                debug!("Trying: {}", trial.filter);
                 let original_len = idat_original_size;
                 let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
                 perform_trial(&png.filtered, opts, trial, &best_size)
@@ -591,7 +591,7 @@ fn optimize_png(
                 });
             }
 
-            info!("Trying: {} filters", results.len());
+            debug!("Trying: {} filters", results.len());
 
             let original_len = idat_original_size;
             let best_size = AtomicMin::new(if opts.force { None } else { Some(original_len) });
@@ -614,8 +614,8 @@ fn optimize_png(
 
         if let Some((opts, idat_data)) = best {
             png.idat_data = idat_data;
-            info!("Found better combination:");
-            info!(
+            debug!("Found better combination:");
+            debug!(
                 "    zc = {}  f = {}  {} bytes",
                 opts.compression,
                 opts.filter,
@@ -631,13 +631,13 @@ fn optimize_png(
     let output = png.output();
 
     if idat_original_size >= png.idat_data.len() {
-        info!(
+        debug!(
             "    IDAT size = {} bytes ({} bytes decrease)",
             png.idat_data.len(),
             idat_original_size - png.idat_data.len()
         );
     } else {
-        info!(
+        debug!(
             "    IDAT size = {} bytes ({} bytes increase)",
             png.idat_data.len(),
             png.idat_data.len() - idat_original_size
@@ -815,7 +815,7 @@ impl Deadline {
 /// Display the format of the image data
 fn report_format(prefix: &str, png: &PngImage) {
     if let Some(ref palette) = png.palette {
-        info!(
+        debug!(
             "{}{} bits/pixel, {} colors in palette ({})",
             prefix,
             png.ihdr.bit_depth,
@@ -823,7 +823,7 @@ fn report_format(prefix: &str, png: &PngImage) {
             png.ihdr.interlaced
         );
     } else {
-        info!(
+        debug!(
             "{}{}x{} bits/pixel, {} ({})",
             prefix,
             png.channels_per_pixel(),
