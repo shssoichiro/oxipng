@@ -361,7 +361,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
         info!("File already optimized");
         match (output, input) {
             // if p is None, it also means same as the input path
-            (&OutFile::Path(ref p), &InFile::Path(ref input_path))
+            (OutFile::Path(ref p), InFile::Path(ref input_path))
                 if p.as_ref().map_or(true, |p| p == input_path) =>
             {
                 return Ok(());
@@ -384,7 +384,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                 .write_all(&optimized_output)
                 .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
         }
-        (&OutFile::Path(ref output_path), _) => {
+        (OutFile::Path(ref output_path), _) => {
             let output_path = output_path
                 .as_ref()
                 .map(|p| p.as_path())
