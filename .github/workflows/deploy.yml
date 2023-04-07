@@ -6,8 +6,9 @@ on:
       - 'v*.*.*'
 
 jobs:
-
   create-windows-binaries:
+    runs-on: windows-latest
+    if: github.repository == 'shssoichiro/oxipng'
 
     strategy:
       matrix:
@@ -16,51 +17,53 @@ jobs:
 # and I don't have a Windows machine set up to experiment with fixing it.
 #        conf: [x86_64, i686]
 
-    runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
-    - name: Install stable
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        target: ${{ matrix.conf }}-pc-windows-msvc
-        override: true
+      - name: Install stable
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.conf }}-pc-windows-msvc
+          override: true
 
-    - name: Build oxipng
-      run: |
-        cargo build --release --target ${{ matrix.conf }}-pc-windows-msvc
+      - name: Build oxipng
+        run: |
+          cargo build --release --target ${{ matrix.conf }}-pc-windows-msvc
 
-    - name: Get the version
-      shell: bash
-      id: tagName
-      run: |
-        VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-        echo "::set-output name=tag::$VERSION"
+      - name: Get the version
+        shell: bash
+        id: tagName
+        run: |
+          VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          echo "::set-output name=tag::$VERSION"
 
-    - name: Build package
-      id: package
-      shell: bash
-      run: |
-        ARCHIVE_TARGET="${{ matrix.conf }}-pc-windows-msvc"
-        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
-        ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
-        mv LICENSE LICENSE.txt
-        7z a ${ARCHIVE_FILE} \
-             ./target/${{ matrix.conf }}-pc-windows-msvc/release/oxipng.exe \
-             ./CHANGELOG.md ./LICENSE.txt ./README.md
-        echo "::set-output name=file::${ARCHIVE_FILE}"
-        echo "::set-output name=name::${ARCHIVE_NAME}.zip"
+      - name: Build package
+        id: package
+        shell: bash
+        run: |
+          ARCHIVE_TARGET="${{ matrix.conf }}-pc-windows-msvc"
+          ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
+          ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
+          mv LICENSE LICENSE.txt
+          7z a ${ARCHIVE_FILE} \
+               ./target/${{ matrix.conf }}-pc-windows-msvc/release/oxipng.exe \
+               ./CHANGELOG.md ./LICENSE.txt ./README.md
+          echo "::set-output name=file::${ARCHIVE_FILE}"
+          echo "::set-output name=name::${ARCHIVE_NAME}.zip"
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ steps.package.outputs.name }}
-        path: ${{ steps.package.outputs.file }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ steps.package.outputs.file }}
 
   create-unix-binaries:
+    runs-on: ${{ matrix.os }}
+    if: github.repository == 'shssoichiro/oxipng'
 
     strategy:
       matrix:
@@ -71,67 +74,68 @@ jobs:
           - os: macos-latest
             target: x86_64-apple-darwin
 
-    runs-on: ${{ matrix.os }}
-
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        target: ${{ matrix.target }}
-        override: true
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
 
-    - name: Install musl
-      if: contains(matrix.target, 'linux-musl')
-      run: |
-        sudo apt-get install musl-tools
+      - name: Install musl
+        if: contains(matrix.target, 'linux-musl')
+        run: |
+          sudo apt-get install musl-tools
 
-    - name: Build oxipng
-      run: |
-        cargo build --release --target ${{ matrix.target }}
+      - name: Build oxipng
+        run: |
+          cargo build --release --target ${{ matrix.target }}
 
-    - name: Strip binary
-      run: |
-        strip target/${{ matrix.target }}/release/oxipng
+      - name: Strip binary
+        run: |
+          strip target/${{ matrix.target }}/release/oxipng
 
-    - name: Get the version
-      id: tagName
-      run: |
-        VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-        echo "::set-output name=tag::$VERSION"
+      - name: Get the version
+        id: tagName
+        run: |
+          VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          echo "::set-output name=tag::$VERSION"
 
-    - name: Build package
-      id: package
-      run: |
-        ARCHIVE_TARGET=${{ matrix.target }}
-        ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
-        ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
-        mkdir "/tmp/${ARCHIVE_NAME}"
-        cp README.md CHANGELOG.md LICENSE \
-           target/${{ matrix.target }}/release/oxipng \
-           /tmp/${ARCHIVE_NAME}
-        tar -czf ${PWD}/${ARCHIVE_FILE} -C /tmp/ ${ARCHIVE_NAME}
-        echo ::set-output "name=file::${ARCHIVE_FILE}"
-        echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
+      - name: Build package
+        id: package
+        run: |
+          ARCHIVE_TARGET=${{ matrix.target }}
+          ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
+          ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
+          mkdir "/tmp/${ARCHIVE_NAME}"
+          cp README.md CHANGELOG.md LICENSE \
+             target/${{ matrix.target }}/release/oxipng \
+             /tmp/${ARCHIVE_NAME}
+          tar -czf ${PWD}/${ARCHIVE_FILE} -C /tmp/ ${ARCHIVE_NAME}
+          echo ::set-output "name=file::${ARCHIVE_FILE}"
+          echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ steps.package.outputs.name }}
-        path: ${{ steps.package.outputs.file }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ steps.package.outputs.file }}
 
 
   deploy:
-
+    runs-on: ubuntu-latest
+    if: github.repository == 'shssoichiro/oxipng'
     needs: [create-windows-binaries, create-unix-binaries]
 
-    runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Get version and release description
         id: tagName
@@ -141,7 +145,7 @@ jobs:
           echo "::set-output name=tag::$VERSION"
 
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: ./binaries
 
