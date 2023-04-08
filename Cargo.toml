@@ -24,10 +24,10 @@ required-features = ["binary"]
 
 [dependencies]
 itertools = "0.10.3"
-zopfli = { version = "0.7.1", optional = true }
+zopfli = { version = "0.7.2", optional = true }
 rgb = "0.8.33"
 indexmap = "1.9.1"
-libdeflater = "0.11.0"
+libdeflater = "0.13.0"
 log = "0.4.17"
 stderrlog = { version = "0.5.3", optional = true, default-features = false }
 crossbeam-channel = "0.5.6"
@@ -44,7 +44,7 @@ version = "1.5.3"
 
 [dependencies.clap]
 optional = true
-version = "3.2.20"
+version = "3.2.23"
 
 [dependencies.wild]
 optional = true
