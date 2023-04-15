@@ -23,7 +23,6 @@ path = "src/main.rs"
 required-features = ["binary"]
 
 [dependencies]
-itertools = "0.10.3"
 zopfli = { version = "0.7.1", optional = true }
 rgb = "0.8.33"
 indexmap = "1.9.1"
