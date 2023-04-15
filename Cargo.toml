@@ -53,6 +53,7 @@ optional = true
 version = "2.1.0"
 
 [dependencies.image]
+optional = true
 default-features = false
 features = ["png"]
 version = "0.24.3"
@@ -65,6 +66,7 @@ binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
+sanity-checks = ["image"]
 
 [lib]
 name = "oxipng"
