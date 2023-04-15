@@ -22,6 +22,10 @@ name = "oxipng"
 path = "src/main.rs"
 required-features = ["binary"]
 
+[[bench]]
+name = "zopfli"
+required-features = ["zopfli"]
+
 [dependencies]
 zopfli = { version = "0.7.1", optional = true }
 rgb = "0.8.33"

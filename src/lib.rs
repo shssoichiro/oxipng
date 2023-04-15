@@ -31,11 +31,11 @@ use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
-use std::io::{stdin, stdout, BufWriter, Cursor, Read, Write};
+use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -1048,6 +1048,8 @@ fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
 mod sanity_checks {
     use super::*;
     use image::{DynamicImage, GenericImageView, ImageFormat, Pixel};
+    use log::error;
+    use std::io::Cursor;
 
     /// Validate that the output png data still matches the original image
     pub(super) fn validate_output(output: &[u8], original_data: &[u8]) -> bool {
