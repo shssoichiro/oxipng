@@ -4,6 +4,7 @@ use oxipng::{InFile, OutFile};
 #[cfg(feature = "filetime")]
 use std::cell::RefCell;
 use std::fs::remove_file;
+#[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 #[cfg(feature = "filetime")]
 use std::ops::Deref;
@@ -95,9 +96,12 @@ fn test_it_converts(
 
 #[test]
 fn verbose_mode() {
+    #[cfg(feature = "parallel")]
     use crossbeam_channel::{unbounded, Sender};
     use log::{set_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record};
     use std::cell::RefCell;
+    #[cfg(not(feature = "parallel"))]
+    use std::sync::mpsc::{channel as unbounded, Sender};
 
     // Rust runs tests in parallel by default.
     // We want to make sure that we verify only logs from our test.
@@ -169,7 +173,7 @@ fn verbose_mode() {
         thread_exec();
     });
 
-    let mut logs: Vec<_> = receiver.into_iter().collect();
+    let logs: Vec<_> = receiver.into_iter().collect();
     println!("logs={:?}", logs);
     assert_eq!(logs.len(), 9);
     let expected_logs = [

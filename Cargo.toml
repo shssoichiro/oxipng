@@ -23,16 +23,18 @@ path = "src/main.rs"
 required-features = ["binary"]
 
 [dependencies]
-itertools = "0.10.3"
 zopfli = { version = "0.7.2", optional = true }
 rgb = "0.8.33"
 indexmap = "1.9.1"
 libdeflater = "0.13.0"
 log = "0.4.17"
 stderrlog = { version = "0.5.3", optional = true, default-features = false }
-crossbeam-channel = "0.5.6"
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
+
+[dependencies.crossbeam-channel]
+optional = true
+version = "0.5.6"
 
 [dependencies.filetime]
 optional = true
@@ -61,7 +63,7 @@ rustc_version = "0.4.0"
 [features]
 binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
-parallel = ["rayon", "indexmap/rayon"]
+parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
 
 [lib]
