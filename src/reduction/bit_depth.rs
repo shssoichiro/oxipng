@@ -2,16 +2,16 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 
-/// Attempt to reduce the bit depth of the image
-/// Returns true if the bit depth was reduced, false otherwise
+/// Attempt to reduce the bit depth of the image, returning the reduced image if successful
 #[must_use]
 pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
-        if png.ihdr.color_type == ColorType::Indexed || png.ihdr.color_type == ColorType::Grayscale
-        {
-            return reduce_bit_depth_8_or_less(png, minimum_bits);
-        }
-        return None;
+        return match png.ihdr.color_type {
+            ColorType::Indexed { .. } | ColorType::Grayscale { .. } => {
+                reduce_bit_depth_8_or_less(png, minimum_bits)
+            }
+            _ => None,
+        };
     }
 
     // Reduce from 16 to 8 bits per channel per pixel
@@ -23,11 +23,10 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
     Some(PngImage {
         data: png.data.iter().step_by(2).cloned().collect(),
         ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
             bit_depth: BitDepth::Eight,
             ..png.ihdr
         },
-        palette: None,
-        transparency_pixel: png.transparency_pixel.clone(),
         aux_headers: png.aux_headers.clone(),
     })
 }
@@ -42,7 +41,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     // Calculate the current number of pixels per byte
     let ppb = 8 / bit_depth;
 
-    if png.ihdr.color_type == ColorType::Indexed {
+    if let ColorType::Indexed { .. } = png.ihdr.color_type {
         for line in png.scan_lines(false) {
             let line_max = line
                 .data
@@ -129,12 +128,11 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
     }
 
     // If the image is grayscale we also need to reduce the transparency pixel
-    let mut transparency_pixel = png
-        .transparency_pixel
-        .clone()
-        .filter(|t| png.ihdr.color_type == ColorType::Grayscale && t.len() >= 2);
-    if let Some(trans) = transparency_pixel {
-        let reduced_trans = trans[1] >> (bit_depth - minimum_bits);
+    let color_type = if let ColorType::Grayscale {
+        transparent: Some(trans),
+    } = png.ihdr.color_type
+    {
+        let reduced_trans = (trans & 0xFF) >> (bit_depth - minimum_bits);
         // Verify the reduction is valid by restoring back to original bit depth
         let mut check = reduced_trans;
         let mut bits = minimum_bits;
@@ -142,22 +140,25 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
             check = check << bits | check;
             bits <<= 1;
         }
-        if trans[0] == 0 && trans[1] == check {
-            transparency_pixel = Some(vec![0, reduced_trans]);
-        } else {
-            // The transparency doesn't fit the new bit depth and is therefore unused - set it to None
-            transparency_pixel = None;
+        // If the transparency doesn't fit the new bit depth it is therefore unused - set it to None
+        ColorType::Grayscale {
+            transparent: if trans == check {
+                Some(reduced_trans)
+            } else {
+                None
+            },
         }
-    }
+    } else {
+        png.ihdr.color_type.clone()
+    };
 
     Some(PngImage {
         data: reduced,
         ihdr: IhdrData {
+            color_type,
             bit_depth: BitDepth::from_u8(minimum_bits as u8),
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
-        palette: png.palette.clone(),
-        transparency_pixel,
     })
 }

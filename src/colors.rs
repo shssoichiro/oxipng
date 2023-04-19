@@ -1,14 +1,15 @@
+use rgb::{RGB16, RGBA8};
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 /// The color type used to represent this image
 pub enum ColorType {
     /// Grayscale, with one color channel
-    Grayscale,
+    Grayscale { transparent: Option<u16> },
     /// RGB, with three color channels
-    RGB,
+    RGB { transparent: Option<RGB16> },
     /// Indexed, with one byte per pixel representing one of up to 256 colors in the image
-    Indexed,
+    Indexed { palette: Vec<RGBA8> },
     /// Grayscale + Alpha, with two color channels
     GrayscaleAlpha,
     /// RGBA, with four color channels
@@ -22,9 +23,9 @@ impl fmt::Display for ColorType {
             f,
             "{}",
             match *self {
-                ColorType::Grayscale => "Grayscale",
-                ColorType::RGB => "RGB",
-                ColorType::Indexed => "Indexed",
+                ColorType::Grayscale { .. } => "Grayscale",
+                ColorType::RGB { .. } => "RGB",
+                ColorType::Indexed { .. } => "Indexed",
                 ColorType::GrayscaleAlpha => "Grayscale + Alpha",
                 ColorType::RGBA => "RGB + Alpha",
             }
@@ -35,22 +36,22 @@ impl fmt::Display for ColorType {
 impl ColorType {
     /// Get the code used by the PNG specification to denote this color type
     #[inline]
-    pub fn png_header_code(self) -> u8 {
+    pub fn png_header_code(&self) -> u8 {
         match self {
-            ColorType::Grayscale => 0,
-            ColorType::RGB => 2,
-            ColorType::Indexed => 3,
+            ColorType::Grayscale { .. } => 0,
+            ColorType::RGB { .. } => 2,
+            ColorType::Indexed { .. } => 3,
             ColorType::GrayscaleAlpha => 4,
             ColorType::RGBA => 6,
         }
     }
 
     #[inline]
-    pub fn channels_per_pixel(self) -> u8 {
+    pub fn channels_per_pixel(&self) -> u8 {
         match self {
-            ColorType::Grayscale | ColorType::Indexed => 1,
+            ColorType::Grayscale { .. } | ColorType::Indexed { .. } => 1,
             ColorType::GrayscaleAlpha => 2,
-            ColorType::RGB => 3,
+            ColorType::RGB { .. } => 3,
             ColorType::RGBA => 4,
         }
     }

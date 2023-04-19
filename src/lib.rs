@@ -25,7 +25,7 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::colors::BitDepth;
+use crate::colors::{BitDepth, ColorType};
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
@@ -814,7 +814,7 @@ impl Deadline {
 
 /// Display the format of the image data
 fn report_format(prefix: &str, png: &PngImage) {
-    if let Some(ref palette) = png.palette {
+    if let ColorType::Indexed { palette } = &png.ihdr.color_type {
         debug!(
             "{}{} bits/pixel, {} colors in palette ({})",
             prefix,

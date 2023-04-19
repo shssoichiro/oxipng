@@ -87,12 +87,11 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
     PngImage {
         data: output,
         ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
             interlaced: Interlacing::Adam7,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
-        palette: png.palette.clone(),
-        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 
@@ -103,12 +102,11 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
             _ => deinterlace_bits(png),
         },
         ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
             interlaced: Interlacing::None,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
-        palette: png.palette.clone(),
-        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 
@@ -143,7 +141,7 @@ fn deinterlace_bits(png: &PngImage) -> Vec<u8> {
         // Calculate the next line and move to next pass if necessary
         current_y += pass_constants.y_step as usize;
         if current_y >= png.ihdr.height as usize {
-            if !increment_pass(&mut current_pass, png.ihdr) {
+            if !increment_pass(&mut current_pass, &png.ihdr) {
                 break;
             }
             pass_constants = interlaced_constants(current_pass);
@@ -180,7 +178,7 @@ fn deinterlace_bytes(png: &PngImage) -> Vec<u8> {
         // Calculate the next line and move to next pass if necessary
         current_y += pass_constants.y_step as usize;
         if current_y >= png.ihdr.height as usize {
-            if !increment_pass(&mut current_pass, png.ihdr) {
+            if !increment_pass(&mut current_pass, &png.ihdr) {
                 break;
             }
             pass_constants = interlaced_constants(current_pass);
@@ -190,7 +188,7 @@ fn deinterlace_bytes(png: &PngImage) -> Vec<u8> {
     lines.concat()
 }
 
-fn increment_pass(current_pass: &mut u8, ihdr: IhdrData) -> bool {
+fn increment_pass(current_pass: &mut u8, ihdr: &IhdrData) -> bool {
     if *current_pass == 7 {
         return false;
     }

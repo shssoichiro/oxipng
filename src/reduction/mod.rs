@@ -18,10 +18,10 @@ pub(crate) use crate::bit_depth::reduce_bit_depth;
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
 pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage> {
-    if png.ihdr.color_type != ColorType::Indexed {
+    let ColorType::Indexed { palette } = &png.ihdr.color_type else {
         // Can't reduce if there is no palette
         return None;
-    }
+    };
     if png.ihdr.bit_depth == BitDepth::One {
         // Gains from 1-bit images will be at most 1 byte
         // Not worth the CPU time
@@ -31,8 +31,6 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
     let mut palette_map = [None; 256];
     let mut used = [false; 256];
     {
-        let palette = png.palette.as_ref()?;
-
         // Find palette entries that are never used
         match png.ihdr.bit_depth {
             BitDepth::Eight => {
@@ -109,11 +107,15 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
         }
     }
 
-    do_palette_reduction(png, &palette_map)
+    do_palette_reduction(png, palette, &palette_map)
 }
 
 #[must_use]
-fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Option<PngImage> {
+fn do_palette_reduction(
+    png: &PngImage,
+    palette: &[RGBA8],
+    palette_map: &[Option<u8>; 256],
+) -> Option<PngImage> {
     let byte_map = palette_map_to_byte_map(png, palette_map)?;
 
     // Reassign data bytes to new indices
@@ -131,12 +133,12 @@ fn do_palette_reduction(png: &PngImage, palette_map: &[Option<u8>; 256]) -> Opti
 
     Some(PngImage {
         ihdr: IhdrData {
-            color_type: ColorType::Indexed,
+            color_type: ColorType::Indexed {
+                palette: reordered_palette(palette, palette_map),
+            },
             ..png.ihdr
         },
         data: raw_data,
-        transparency_pixel: None,
-        palette: Some(reordered_palette(png.palette.as_ref()?, palette_map)),
         aux_headers,
     })
 }
@@ -199,10 +201,15 @@ pub fn reduce_color_type(
 
     // Go down one step at a time
     // Maybe not the most efficient, but it's safe
-    if grayscale_reduction && matches!(reduced.ihdr.color_type, ColorType::RGBA | ColorType::RGB) {
+    if grayscale_reduction
+        && matches!(
+            reduced.ihdr.color_type,
+            ColorType::RGBA | ColorType::RGB { .. }
+        )
+    {
         if let Some(r) = reduce_rgb_to_grayscale(&reduced) {
             reduced = Cow::Owned(r);
-            should_reduce_bit_depth = reduced.ihdr.color_type == ColorType::Grayscale;
+            should_reduce_bit_depth = reduced.ihdr.color_type != ColorType::GrayscaleAlpha;
         }
     }
 
@@ -216,7 +223,7 @@ pub fn reduce_color_type(
 
     if matches!(
         reduced.ihdr.color_type,
-        ColorType::RGBA | ColorType::RGB | ColorType::GrayscaleAlpha
+        ColorType::RGBA | ColorType::RGB { .. } | ColorType::GrayscaleAlpha
     ) {
         if let Some(r) = reduce_to_palette(&reduced) {
             reduced = Cow::Owned(r);

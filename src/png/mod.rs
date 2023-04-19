@@ -8,7 +8,6 @@ use bitvec::bitarr;
 use indexmap::IndexMap;
 use libdeflater::{CompressionLvl, Compressor};
 use rgb::ComponentSlice;
-use rgb::RGBA8;
 use rustc_hash::FxHashMap;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
@@ -31,11 +30,6 @@ pub struct PngImage {
     pub ihdr: IhdrData,
     /// The uncompressed, unfiltered data from the IDAT chunk
     pub data: Vec<u8>,
-    /// The palette containing colors used in an Indexed image
-    /// Contains 3 bytes per color (R+G+B), up to 768
-    pub palette: Option<Vec<RGBA8>>,
-    /// The pixel value that should be rendered as transparent
-    pub transparency_pixel: Option<Vec<u8>>,
     /// All non-critical headers from the PNG are stored here
     pub aux_headers: IndexMap<[u8; 4], Vec<u8>>,
 }
@@ -50,8 +44,6 @@ pub struct PngData {
     /// The filtered, uncompressed data of the IDAT chunk
     pub filtered: Vec<u8>,
 }
-
-type PaletteWithTrns = (Option<Vec<RGBA8>>, Option<Vec<u8>>);
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
@@ -116,7 +108,11 @@ impl PngData {
             Some(ihdr) => ihdr,
             None => return Err(PngError::ChunkMissing("IHDR")),
         };
-        let ihdr_header = parse_ihdr_header(&ihdr)?;
+        let ihdr_header = parse_ihdr_header(
+            &ihdr,
+            aux_headers.remove(b"PLTE"),
+            aux_headers.remove(b"tRNS"),
+        )?;
         let raw_data = deflate::inflate(idat_headers.as_ref(), ihdr_header.raw_data_size())?;
 
         // Reject files with incorrect width/height or truncated data
@@ -124,17 +120,9 @@ impl PngData {
             return Err(PngError::TruncatedData);
         }
 
-        let (palette, transparency_pixel) = Self::palette_to_rgba(
-            ihdr_header.color_type,
-            aux_headers.remove(b"PLTE"),
-            aux_headers.remove(b"tRNS"),
-        )?;
-
         let mut raw = PngImage {
             ihdr: ihdr_header,
             data: raw_data,
-            palette,
-            transparency_pixel,
             aux_headers,
         };
         let unfiltered = raw.unfilter_image()?;
@@ -144,31 +132,6 @@ impl PngData {
             filtered: std::mem::replace(&mut raw.data, unfiltered),
             raw: Arc::new(raw),
         })
-    }
-
-    /// Handle transparency header
-    fn palette_to_rgba(
-        color_type: ColorType,
-        palette_data: Option<Vec<u8>>,
-        trns_data: Option<Vec<u8>>,
-    ) -> Result<PaletteWithTrns, PngError> {
-        if color_type == ColorType::Indexed {
-            let palette_data =
-                palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
-            let mut palette: Vec<_> = palette_data
-                .chunks(3)
-                .map(|color| RGBA8::new(color[0], color[1], color[2], 255))
-                .collect();
-
-            if let Some(trns_data) = trns_data {
-                for (color, trns) in palette.iter_mut().zip(trns_data) {
-                    color.a = trns;
-                }
-            }
-            Ok((Some(palette), None))
-        } else {
-            Ok((None, trns_data))
-        }
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream
@@ -198,40 +161,49 @@ impl PngData {
         {
             write_png_block(key, header, &mut output);
         }
-        // Palette
-        if let Some(ref palette) = self.raw.palette {
-            let mut palette_data = Vec::with_capacity(palette.len() * 3);
-            let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
-            // Ensure bKGD color doesn't get truncated from palette
-            if let Some(&idx) = self.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
-                max_palette_size = max_palette_size.max(idx as usize + 1);
+        // Palette and transparency
+        match &self.raw.ihdr.color_type {
+            ColorType::Indexed { palette } => {
+                let mut palette_data = Vec::with_capacity(palette.len() * 3);
+                let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
+                // Ensure bKGD color doesn't get truncated from palette
+                if let Some(&idx) = self.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
+                    max_palette_size = max_palette_size.max(idx as usize + 1);
+                }
+                for px in palette.iter().take(max_palette_size) {
+                    palette_data.extend_from_slice(px.rgb().as_slice());
+                }
+                write_png_block(b"PLTE", &palette_data, &mut output);
+                let num_transparent = palette.iter().take(max_palette_size).enumerate().fold(
+                    0,
+                    |prev, (index, px)| {
+                        if px.a == 255 {
+                            prev
+                        } else {
+                            index + 1
+                        }
+                    },
+                );
+                if num_transparent > 0 {
+                    let trns_data: Vec<_> =
+                        palette[0..num_transparent].iter().map(|px| px.a).collect();
+                    write_png_block(b"tRNS", &trns_data, &mut output);
+                }
             }
-            for px in palette.iter().take(max_palette_size) {
-                palette_data.extend_from_slice(px.rgb().as_slice());
+            ColorType::Grayscale {
+                transparent: Some(trns),
+            } => {
+                // Transparency pixel - 2 byte u16
+                write_png_block(b"tRNS", &trns.to_be_bytes(), &mut output);
             }
-            write_png_block(b"PLTE", &palette_data, &mut output);
-            let num_transparent =
-                palette
-                    .iter()
-                    .take(max_palette_size)
-                    .enumerate()
-                    .fold(
-                        0,
-                        |prev, (index, px)| {
-                            if px.a == 255 {
-                                prev
-                            } else {
-                                index + 1
-                            }
-                        },
-                    );
-            if num_transparent > 0 {
-                let trns_data: Vec<_> = palette[0..num_transparent].iter().map(|px| px.a).collect();
+            ColorType::RGB {
+                transparent: Some(trns),
+            } => {
+                // Transparency pixel - 6 byte RGB16
+                let trns_data: Vec<_> = trns.iter().flat_map(|c| c.to_be_bytes()).collect();
                 write_png_block(b"tRNS", &trns_data, &mut output);
             }
-        } else if let Some(ref transparency_pixel) = self.raw.transparency_pixel {
-            // Transparency pixel
-            write_png_block(b"tRNS", transparency_pixel, &mut output);
+            _ => {}
         }
         // Special ancillary headers that need to come after PLTE but before IDAT
         for (key, header) in self

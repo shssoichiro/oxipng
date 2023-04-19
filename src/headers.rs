@@ -4,10 +4,11 @@ use crate::error::PngError;
 use crate::interlace::Interlacing;
 use crate::PngResult;
 use indexmap::IndexSet;
+use rgb::{RGB16, RGBA8};
 use std::io;
 use std::io::{Cursor, Read};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Headers from the IHDR chunk of the image
 pub struct IhdrData {
     /// The width of the image in pixels
@@ -143,15 +144,31 @@ pub fn parse_next_header<'a>(
     Ok(Some(RawHeader { name, data }))
 }
 
-pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
+pub fn parse_ihdr_header(
+    byte_data: &[u8],
+    palette_data: Option<Vec<u8>>,
+    trns_data: Option<Vec<u8>>,
+) -> PngResult<IhdrData> {
     // This eliminates bounds checks for the rest of the function
     let interlaced = byte_data.get(12).copied().ok_or(PngError::TruncatedData)?;
     let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {
-            0 => ColorType::Grayscale,
-            2 => ColorType::RGB,
-            3 => ColorType::Indexed,
+            0 => ColorType::Grayscale {
+                transparent: trns_data
+                    .filter(|t| t.len() >= 2)
+                    .map(|t| u16::from_be_bytes([t[0], t[1]])),
+            },
+            2 => ColorType::RGB {
+                transparent: trns_data.filter(|t| t.len() >= 6).map(|t| RGB16 {
+                    r: u16::from_be_bytes([t[0], t[1]]),
+                    g: u16::from_be_bytes([t[2], t[3]]),
+                    b: u16::from_be_bytes([t[4], t[5]]),
+                }),
+            },
+            3 => ColorType::Indexed {
+                palette: palette_to_rgba(palette_data, trns_data).unwrap_or(vec![]),
+            },
             4 => ColorType::GrayscaleAlpha,
             6 => ColorType::RGBA,
             _ => return Err(PngError::new("Unexpected color type in header")),
@@ -170,6 +187,25 @@ pub fn parse_ihdr_header(byte_data: &[u8]) -> PngResult<IhdrData> {
         filter: byte_data[11],
         interlaced: interlaced.try_into()?,
     })
+}
+
+/// Construct an RGBA palette from the raw palette and transparency data
+fn palette_to_rgba(
+    palette_data: Option<Vec<u8>>,
+    trns_data: Option<Vec<u8>>,
+) -> Result<Vec<RGBA8>, PngError> {
+    let palette_data = palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
+    let mut palette: Vec<_> = palette_data
+        .chunks(3)
+        .map(|color| RGBA8::new(color[0], color[1], color[2], 255))
+        .collect();
+
+    if let Some(trns_data) = trns_data {
+        for (color, trns) in palette.iter_mut().zip(trns_data) {
+            color.a = trns;
+        }
+    }
+    Ok(palette)
 }
 
 #[inline]
