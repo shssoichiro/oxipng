@@ -55,6 +55,16 @@ impl ColorType {
             ColorType::RGBA => 4,
         }
     }
+
+    #[inline]
+    pub fn is_rgb(&self) -> bool {
+        matches!(self, ColorType::RGB { .. } | ColorType::RGBA)
+    }
+
+    #[inline]
+    pub fn has_alpha(&self) -> bool {
+        matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]

@@ -141,8 +141,8 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
 #[must_use]
 pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     let mut reduced = Vec::with_capacity(png.data.len());
-    let byte_depth = png.ihdr.bit_depth.as_u8() as usize >> 3;
-    let bpp = png.channels_per_pixel() as usize * byte_depth;
+    let byte_depth = png.bytes_per_channel();
+    let bpp = png.channels_per_pixel() * byte_depth;
     let last_color = 2 * byte_depth;
     for pixel in png.data.chunks(bpp) {
         if byte_depth == 1 {

@@ -31,8 +31,8 @@ impl IhdrData {
     /// Bits per pixel
     #[must_use]
     #[inline]
-    pub fn bpp(&self) -> u8 {
-        self.bit_depth.as_u8() * self.color_type.channels_per_pixel()
+    pub fn bpp(&self) -> usize {
+        (self.bit_depth.as_u8() * self.color_type.channels_per_pixel()) as usize
     }
 
     /// Byte length of IDAT that is correct for this IHDR
@@ -42,8 +42,8 @@ impl IhdrData {
         let h = self.height as usize;
         let bpp = self.bpp();
 
-        fn bitmap_size(bpp: u8, w: usize, h: usize) -> usize {
-            (((w / 8) * bpp as usize) + ((w & 7) * bpp as usize + 7) / 8) * h
+        fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
+            ((w * bpp + 7) / 8) * h
         }
 
         if self.interlaced == Interlacing::None {

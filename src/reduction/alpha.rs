@@ -6,20 +6,16 @@ use crate::png::PngImage;
 
 /// Clean the alpha channel by setting the color of all fully transparent pixels to black
 pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {
-    let (bpc, bpp) = match png.ihdr.color_type {
-        ColorType::RGBA | ColorType::GrayscaleAlpha => {
-            let cpp = png.channels_per_pixel();
-            let bpc = png.ihdr.bit_depth.as_u8() / 8;
-            (bpc as usize, (bpc * cpp) as usize)
-        }
-        _ => {
-            return None;
-        }
-    };
+    if !png.ihdr.color_type.has_alpha() {
+        return None;
+    }
+    let byte_depth = png.bytes_per_channel();
+    let bpp = png.channels_per_pixel() * byte_depth;
+    let colored_bytes = bpp - byte_depth;
 
     let mut reduced = Vec::with_capacity(png.data.len());
     for pixel in png.data.chunks(bpp) {
-        if pixel.iter().skip(bpp - bpc).all(|b| *b == 0) {
+        if pixel.iter().skip(colored_bytes).all(|b| *b == 0) {
             reduced.resize(reduced.len() + bpp, 0);
         } else {
             reduced.extend_from_slice(pixel);
@@ -35,15 +31,11 @@ pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {
 
 #[must_use]
 pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<PngImage> {
-    if !matches!(
-        png.ihdr.color_type,
-        ColorType::GrayscaleAlpha | ColorType::RGBA
-    ) {
+    if !png.ihdr.color_type.has_alpha() {
         return None;
     }
-    let byte_depth = (png.ihdr.bit_depth.as_u8() >> 3) as usize;
-    let channels = png.channels_per_pixel() as usize;
-    let bpp = channels * byte_depth;
+    let byte_depth = png.bytes_per_channel();
+    let bpp = png.channels_per_pixel() * byte_depth;
     let colored_bytes = bpp - byte_depth;
 
     // If alpha optimisation is enabled, see if the image contains only fully opaque and fully transparent pixels.

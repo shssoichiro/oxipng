@@ -1,4 +1,4 @@
-use crate::colors::ColorType;
+use crate::colors::{BitDepth, ColorType};
 use crate::deflate;
 use crate::error::PngError;
 use crate::filters::*;
@@ -246,8 +246,18 @@ impl PngImage {
 
     /// Return the number of channels in the image, based on color type
     #[inline]
-    pub fn channels_per_pixel(&self) -> u8 {
-        self.ihdr.color_type.channels_per_pixel()
+    pub fn channels_per_pixel(&self) -> usize {
+        self.ihdr.color_type.channels_per_pixel() as usize
+    }
+
+    /// Return the number of bytes per channel in the image
+    #[inline]
+    pub fn bytes_per_channel(&self) -> usize {
+        match self.ihdr.bit_depth {
+            BitDepth::Sixteen => 2,
+            // Depths lower than 8 will round up to 1 byte
+            _ => 1,
+        }
     }
 
     /// Return an iterator over the scanlines of the image
@@ -259,7 +269,7 @@ impl PngImage {
     /// Reverse all filters applied on the image, returning an unfiltered IDAT bytestream
     fn unfilter_image(&self) -> Result<Vec<u8>, PngError> {
         let mut unfiltered = Vec::with_capacity(self.data.len());
-        let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
+        let bpp = self.bytes_per_channel() * self.channels_per_pixel();
         let mut last_line: Vec<u8> = Vec::new();
         let mut last_pass = None;
         let mut unfiltered_buf = Vec::new();
@@ -281,13 +291,12 @@ impl PngImage {
     /// Apply the specified filter type to all rows in the image
     pub fn filter_image(&self, filter: RowFilter, optimize_alpha: bool) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
-        let bpp = ((self.ihdr.bit_depth.as_u8() * self.channels_per_pixel() + 7) / 8) as usize;
+        let bpp = self.bytes_per_channel() * self.channels_per_pixel();
         // If alpha optimization is enabled, determine how many bytes of alpha there are per pixel
-        let alpha_bytes = match self.ihdr.color_type {
-            ColorType::RGBA | ColorType::GrayscaleAlpha if optimize_alpha => {
-                (self.ihdr.bit_depth.as_u8() / 8) as usize
-            }
-            _ => 0,
+        let alpha_bytes = if optimize_alpha && self.ihdr.color_type.has_alpha() {
+            self.bytes_per_channel()
+        } else {
+            0
         };
 
         let mut prev_line = Vec::new();

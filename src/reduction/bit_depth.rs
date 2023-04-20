@@ -6,12 +6,10 @@ use crate::png::PngImage;
 #[must_use]
 pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
-        return match png.ihdr.color_type {
-            ColorType::Indexed { .. } | ColorType::Grayscale { .. } => {
-                reduce_bit_depth_8_or_less(png, minimum_bits)
-            }
-            _ => None,
-        };
+        if png.channels_per_pixel() == 1 {
+            return reduce_bit_depth_8_or_less(png, minimum_bits);
+        }
+        return None;
     }
 
     // Reduce from 16 to 8 bits per channel per pixel
