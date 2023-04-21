@@ -18,9 +18,10 @@ pub(crate) use crate::bit_depth::reduce_bit_depth;
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
 pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage> {
-    let ColorType::Indexed { palette } = &png.ihdr.color_type else {
+    let palette = match &png.ihdr.color_type {
+        ColorType::Indexed { palette } => palette,
         // Can't reduce if there is no palette
-        return None;
+        _ => return None,
     };
     if png.ihdr.bit_depth == BitDepth::One {
         // Gains from 1-bit images will be at most 1 byte
