@@ -167,7 +167,7 @@ pub fn parse_ihdr_header(
                 }),
             },
             3 => ColorType::Indexed {
-                palette: palette_to_rgba(palette_data, trns_data).unwrap_or(vec![]),
+                palette: palette_to_rgba(palette_data, trns_data).unwrap_or_default(),
             },
             4 => ColorType::GrayscaleAlpha,
             6 => ColorType::RGBA,
