@@ -569,7 +569,7 @@ fn optimize_png(
 
             if filters.is_empty() {
                 // Pick a filter automatically
-                if png.raw.ihdr.bit_depth.as_u8() >= 8 {
+                if png.raw.ihdr.bit_depth as u8 >= 8 {
                     // Bigrams is the best all-rounder when there's at least one byte per pixel
                     filters.insert(RowFilter::Bigrams);
                 } else {

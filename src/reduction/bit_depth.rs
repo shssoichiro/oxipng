@@ -32,7 +32,7 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
 #[must_use]
 pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
     assert!((1..8).contains(&minimum_bits));
-    let bit_depth: usize = png.ihdr.bit_depth.as_u8() as usize;
+    let bit_depth = png.ihdr.bit_depth as usize;
     if minimum_bits >= bit_depth || bit_depth > 8 {
         return None;
     }
@@ -154,7 +154,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         data: reduced,
         ihdr: IhdrData {
             color_type,
-            bit_depth: BitDepth::from_u8(minimum_bits as u8),
+            bit_depth: (minimum_bits as u8).try_into().unwrap(),
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),

@@ -70,7 +70,7 @@ fn test_it_converts(
         "optimized to wrong bit depth"
     );
     if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
-        let mut max_palette_size = 1 << (png.raw.ihdr.bit_depth.as_u8() as usize);
+        let mut max_palette_size = 1 << (png.raw.ihdr.bit_depth as u8);
         // Ensure bKGD color is valid
         if let Some(&idx) = png.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
             assert!(palette.len() > idx as usize);

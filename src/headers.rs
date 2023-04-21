@@ -32,7 +32,7 @@ impl IhdrData {
     #[must_use]
     #[inline]
     pub fn bpp(&self) -> usize {
-        (self.bit_depth.as_u8() * self.color_type.channels_per_pixel()) as usize
+        self.bit_depth as usize * self.color_type.channels_per_pixel() as usize
     }
 
     /// Byte length of IDAT that is correct for this IHDR
@@ -173,14 +173,7 @@ pub fn parse_ihdr_header(
             6 => ColorType::RGBA,
             _ => return Err(PngError::new("Unexpected color type in header")),
         },
-        bit_depth: match byte_data[8] {
-            1 => BitDepth::One,
-            2 => BitDepth::Two,
-            4 => BitDepth::Four,
-            8 => BitDepth::Eight,
-            16 => BitDepth::Sixteen,
-            _ => return Err(PngError::new("Unexpected bit depth in header")),
-        },
+        bit_depth: byte_data[8].try_into()?,
         width: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
         height: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
         compression: byte_data[10],

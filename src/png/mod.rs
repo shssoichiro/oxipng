@@ -144,7 +144,7 @@ impl PngData {
         ihdr_data
             .write_all(&self.raw.ihdr.height.to_be_bytes())
             .ok();
-        ihdr_data.write_all(&[self.raw.ihdr.bit_depth.as_u8()]).ok();
+        ihdr_data.write_all(&[self.raw.ihdr.bit_depth as u8]).ok();
         ihdr_data
             .write_all(&[self.raw.ihdr.color_type.png_header_code()])
             .ok();
@@ -165,7 +165,7 @@ impl PngData {
         match &self.raw.ihdr.color_type {
             ColorType::Indexed { palette } => {
                 let mut palette_data = Vec::with_capacity(palette.len() * 3);
-                let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth.as_u8() as usize);
+                let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth as u8);
                 // Ensure bKGD color doesn't get truncated from palette
                 if let Some(&idx) = self.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
                     max_palette_size = max_palette_size.max(idx as usize + 1);
