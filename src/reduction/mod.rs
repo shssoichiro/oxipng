@@ -158,16 +158,16 @@ fn palette_map_to_byte_map(png: &PngImage, palette_map: &[Option<u8>; 256]) -> O
         }
         BitDepth::Four => {
             for byte in 0..=255usize {
-                byte_map[byte] = palette_map[(byte & 0x0F)].unwrap_or(0)
-                    | (palette_map[(byte >> 4)].unwrap_or(0) << 4);
+                byte_map[byte] = palette_map[byte & 0x0F].unwrap_or(0)
+                    | (palette_map[byte >> 4].unwrap_or(0) << 4);
             }
         }
         BitDepth::Two => {
             for byte in 0..=255usize {
-                byte_map[byte] = palette_map[(byte & 0x03)].unwrap_or(0)
-                    | (palette_map[((byte >> 2) & 0x03)].unwrap_or(0) << 2)
-                    | (palette_map[((byte >> 4) & 0x03)].unwrap_or(0) << 4)
-                    | (palette_map[(byte >> 6)].unwrap_or(0) << 6);
+                byte_map[byte] = palette_map[byte & 0x03].unwrap_or(0)
+                    | (palette_map[(byte >> 2) & 0x03].unwrap_or(0) << 2)
+                    | (palette_map[(byte >> 4) & 0x03].unwrap_or(0) << 4)
+                    | (palette_map[byte >> 6].unwrap_or(0) << 6);
             }
         }
         _ => {}
