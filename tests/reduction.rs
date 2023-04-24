@@ -834,7 +834,7 @@ fn small_files() {
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
-            remove_file(&output).ok();
+            remove_file(output).ok();
             panic!("{}", x)
         }
     };
@@ -866,7 +866,7 @@ fn palette_should_be_reduced_with_dupes() {
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
-            remove_file(&output).ok();
+            remove_file(output).ok();
             panic!("{}", x)
         }
     };
@@ -899,7 +899,7 @@ fn palette_should_be_reduced_with_unused() {
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
-            remove_file(&output).ok();
+            remove_file(output).ok();
             panic!("{}", x)
         }
     };
@@ -932,7 +932,7 @@ fn palette_should_be_reduced_with_both() {
     let png = match PngData::new(output, opts.fix_errors) {
         Ok(x) => x,
         Err(x) => {
-            remove_file(&output).ok();
+            remove_file(output).ok();
             panic!("{}", x)
         }
     };

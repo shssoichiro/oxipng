@@ -78,7 +78,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: -- -D warnings
       - name: Run tests
-        run: cargo test
+        run: cargo test --features sanity-checks
       - name: Build benchmarks
         if: matrix.toolchain == 'nightly'
         run: cargo bench --no-run

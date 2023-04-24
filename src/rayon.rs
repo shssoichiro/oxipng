@@ -52,6 +52,7 @@ where
 
 impl<I: Iterator> ParallelIterator for I {}
 
+#[allow(dead_code)]
 pub fn join<A, B>(a: impl FnOnce() -> A, b: impl FnOnce() -> B) -> (A, B) {
     (a(), b())
 }
