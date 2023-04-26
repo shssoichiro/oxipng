@@ -180,34 +180,26 @@ fn verbose_mode() {
     });
 
     let logs: Vec<_> = receiver.into_iter().collect();
-    println!("logs={:?}", logs);
-    assert_eq!(logs.len(), 9);
-    let expected_logs = [
+    let expected_prefixes = [
         "    500x400 pixels, PNG format",
         "    3x8 bits/pixel, RGB (non-interlaced)",
         "    IDAT size = 113794 bytes",
         "    File size = 114708 bytes",
         "Trying: 1 filters",
-        "    zc = 11  f = None      149409 bytes",
         "Found better combination:",
-        "    zc = 11  f = None      149409 bytes",
-        "    IDAT size = 149409 bytes",
+        "    zc = 11  f = None ",
+        "    IDAT size = ",
     ];
-    for (idx, expected_log) in expected_logs.into_iter().enumerate() {
-        if let Some(log) = logs.get(idx) {
-            if !log.starts_with(expected_log) {
-                panic!(
-                    "logs[{}] = {:?} doesn't start with {:?}",
-                    idx, log, expected_log
-                );
-            }
-        } else {
-            panic!(
-                "Expected to find {} log entries, but got {}",
-                expected_logs.len(),
-                logs.len()
-            );
-        }
+    assert_eq!(logs.len(), expected_prefixes.len());
+    for (i, log) in logs.into_iter().enumerate() {
+        let expected_prefix = expected_prefixes[i];
+        assert!(
+            log.starts_with(&expected_prefix),
+            "logs[{}] = {:?} doesn't start with {:?}",
+            i,
+            log,
+            expected_prefix
+        );
     }
 }
 
