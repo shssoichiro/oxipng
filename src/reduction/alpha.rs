@@ -80,9 +80,11 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
         _ => trns as u16,
     });
     let target_color_type = match png.ihdr.color_type {
-        ColorType::GrayscaleAlpha => ColorType::Grayscale { transparent },
+        ColorType::GrayscaleAlpha => ColorType::Grayscale {
+            transparent_shade: transparent,
+        },
         _ => ColorType::RGB {
-            transparent: transparent.map(|t| RGB16::new(t, t, t)),
+            transparent_color: transparent.map(|t| RGB16::new(t, t, t)),
         },
     };
 

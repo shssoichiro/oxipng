@@ -155,12 +155,12 @@ pub fn parse_ihdr_header(
     Ok(IhdrData {
         color_type: match byte_data[9] {
             0 => ColorType::Grayscale {
-                transparent: trns_data
+                transparent_shade: trns_data
                     .filter(|t| t.len() >= 2)
                     .map(|t| u16::from_be_bytes([t[0], t[1]])),
             },
             2 => ColorType::RGB {
-                transparent: trns_data.filter(|t| t.len() >= 6).map(|t| RGB16 {
+                transparent_color: trns_data.filter(|t| t.len() >= 6).map(|t| RGB16 {
                     r: u16::from_be_bytes([t[0], t[1]]),
                     g: u16::from_be_bytes([t[2], t[3]]),
                     b: u16::from_be_bytes([t[4], t[5]]),

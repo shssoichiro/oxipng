@@ -191,13 +191,13 @@ impl PngData {
                 }
             }
             ColorType::Grayscale {
-                transparent: Some(trns),
+                transparent_shade: Some(trns),
             } => {
                 // Transparency pixel - 2 byte u16
                 write_png_block(b"tRNS", &trns.to_be_bytes(), &mut output);
             }
             ColorType::RGB {
-                transparent: Some(trns),
+                transparent_color: Some(trns),
             } => {
                 // Transparency pixel - 6 byte RGB16
                 let trns_data: Vec<_> = trns.iter().flat_map(|c| c.to_be_bytes()).collect();

@@ -127,7 +127,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
 
     // If the image is grayscale we also need to reduce the transparency pixel
     let color_type = if let ColorType::Grayscale {
-        transparent: Some(trans),
+        transparent_shade: Some(trans),
     } = png.ihdr.color_type
     {
         let reduced_trans = (trans & 0xFF) >> (bit_depth - minimum_bits);
@@ -140,7 +140,7 @@ pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Op
         }
         // If the transparency doesn't fit the new bit depth it is therefore unused - set it to None
         ColorType::Grayscale {
-            transparent: if trans == check {
+            transparent_shade: if trans == check {
                 Some(reduced_trans)
             } else {
                 None

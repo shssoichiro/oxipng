@@ -7,11 +7,20 @@ use crate::PngError;
 /// The color type used to represent this image
 pub enum ColorType {
     /// Grayscale, with one color channel
-    Grayscale { transparent: Option<u16> },
+    Grayscale {
+        /// Optional shade of gray that should be rendered as transparent
+        transparent_shade: Option<u16>,
+    },
     /// RGB, with three color channels
-    RGB { transparent: Option<RGB16> },
-    /// Indexed, with one byte per pixel representing one of up to 256 colors in the image
-    Indexed { palette: Vec<RGBA8> },
+    RGB {
+        /// Optional color value that should be rendered as transparent
+        transparent_color: Option<RGB16>,
+    },
+    /// Indexed, with one byte per pixel representing a color from the palette
+    Indexed {
+        /// The palette containing the colors used, up to 256 entries
+        palette: Vec<RGBA8>,
+    },
     /// Grayscale + Alpha, with two color channels
     GrayscaleAlpha,
     /// RGBA, with four color channels

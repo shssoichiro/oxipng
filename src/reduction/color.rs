@@ -41,9 +41,9 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
     let mut raw_data = Vec::with_capacity(png.data.len());
     let mut palette = FxIndexMap::default();
     palette.reserve(257);
-    let ok = if let ColorType::RGB { transparent } = png.ihdr.color_type {
+    let ok = if let ColorType::RGB { transparent_color } = png.ihdr.color_type {
         // Convert the RGB16 transparency to RGB8
-        let transparency_pixel = transparent.map(|t| t.map(|c| c as u8));
+        let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
         reduce_scanline_to_palette(
             png.data.as_rgb().iter().cloned().map(|px| {
                 px.alpha(if Some(px) != transparency_pixel {
@@ -168,9 +168,9 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     }
 
     let color_type = match png.ihdr.color_type {
-        ColorType::RGB { transparent } => ColorType::Grayscale {
+        ColorType::RGB { transparent_color } => ColorType::Grayscale {
             // Copy the transparent component if it is also gray
-            transparent: transparent
+            transparent_shade: transparent_color
                 .filter(|t| t.r == t.g && t.g == t.b)
                 .map(|t| t.r),
         },
