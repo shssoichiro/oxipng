@@ -43,7 +43,7 @@ impl<'a> Iterator for ScanLines<'a> {
 struct ScanLineRanges {
     /// Current pass number, and 0-indexed row within the pass
     pass: Option<(u8, u32)>,
-    bits_per_pixel: u8,
+    bits_per_pixel: usize,
     width: u32,
     height: u32,
     left: usize,
@@ -53,7 +53,7 @@ struct ScanLineRanges {
 impl ScanLineRanges {
     pub fn new(png: &PngImage, has_filter: bool) -> Self {
         Self {
-            bits_per_pixel: png.ihdr.bit_depth.as_u8() * png.channels_per_pixel(),
+            bits_per_pixel: png.ihdr.bpp(),
             width: png.ihdr.width,
             height: png.ihdr.height,
             left: png.data.len(),
@@ -143,8 +143,8 @@ impl Iterator for ScanLineRanges {
             // Standard, non-interlaced PNG scanlines
             (self.width, None)
         };
-        let bits_per_line = pixels_per_line * u32::from(self.bits_per_pixel);
-        let mut len = ((bits_per_line + 7) / 8) as usize;
+        let bits_per_line = pixels_per_line as usize * self.bits_per_pixel;
+        let mut len = (bits_per_line + 7) / 8;
         if self.has_filter {
             len += 1;
         }

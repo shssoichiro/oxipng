@@ -25,7 +25,7 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::colors::BitDepth;
+use crate::colors::{BitDepth, ColorType};
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
@@ -569,7 +569,7 @@ fn optimize_png(
 
             if filters.is_empty() {
                 // Pick a filter automatically
-                if png.raw.ihdr.bit_depth.as_u8() >= 8 {
+                if png.raw.ihdr.bit_depth as u8 >= 8 {
                     // Bigrams is the best all-rounder when there's at least one byte per pixel
                     filters.insert(RowFilter::Bigrams);
                 } else {
@@ -814,7 +814,7 @@ impl Deadline {
 
 /// Display the format of the image data
 fn report_format(prefix: &str, png: &PngImage) {
-    if let Some(ref palette) = png.palette {
+    if let ColorType::Indexed { palette } = &png.ihdr.color_type {
         debug!(
             "{}{} bits/pixel, {} colors in palette ({})",
             prefix,

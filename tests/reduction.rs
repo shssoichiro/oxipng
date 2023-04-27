@@ -5,6 +5,12 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
+const GRAYSCALE: u8 = 0;
+const RGB: u8 = 2;
+const INDEXED: u8 = 3;
+const GRAYSCALE_ALPHA: u8 = 4;
+const RGBA: u8 = 6;
+
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
         force: true,
@@ -23,9 +29,9 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 fn test_it_converts(
     input: &str,
     optimize_alpha: bool,
-    color_type_in: ColorType,
+    color_type_in: u8,
     bit_depth_in: BitDepth,
-    color_type_out: ColorType,
+    color_type_out: u8,
     bit_depth_out: BitDepth,
 ) {
     let input = PathBuf::from(input);
@@ -33,7 +39,7 @@ fn test_it_converts(
     opts.optimize_alpha = optimize_alpha;
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in, "test file is broken");
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
 
@@ -52,7 +58,7 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
@@ -63,9 +69,9 @@ fn rgba_16_should_be_rgba_16() {
     test_it_converts(
         "tests/files/rgba_16_should_be_rgba_16.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -75,9 +81,9 @@ fn rgba_16_should_be_rgba_8() {
     test_it_converts(
         "tests/files/rgba_16_should_be_rgba_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -87,9 +93,9 @@ fn rgba_8_should_be_rgba_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_rgba_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -99,9 +105,9 @@ fn rgba_16_should_be_rgb_16() {
     test_it_converts(
         "tests/files/rgba_16_should_be_rgb_16.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -111,9 +117,9 @@ fn rgba_16_should_be_rgb_8() {
     test_it_converts(
         "tests/files/rgba_16_should_be_rgb_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -123,9 +129,9 @@ fn rgba_8_should_be_rgb_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_rgb_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -135,9 +141,9 @@ fn rgba_16_should_be_rgb_trns_16() {
     test_it_converts(
         "tests/files/rgba_16_should_be_rgb_trns_16.png",
         true,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -147,9 +153,9 @@ fn rgba_8_should_be_rgb_trns_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_rgb_trns_8.png",
         true,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -159,9 +165,9 @@ fn rgba_16_should_be_palette_8() {
     test_it_converts(
         "tests/files/rgba_16_should_be_palette_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -171,9 +177,9 @@ fn rgba_8_should_be_palette_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_palette_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -183,9 +189,9 @@ fn rgba_16_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgba_16_should_be_palette_4.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -195,9 +201,9 @@ fn rgba_8_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgba_8_should_be_palette_4.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -207,9 +213,9 @@ fn rgba_16_should_be_palette_2() {
     test_it_converts(
         "tests/files/rgba_16_should_be_palette_2.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -219,9 +225,9 @@ fn rgba_8_should_be_palette_2() {
     test_it_converts(
         "tests/files/rgba_8_should_be_palette_2.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -231,9 +237,9 @@ fn rgba_16_should_be_palette_1() {
     test_it_converts(
         "tests/files/rgba_16_should_be_palette_1.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -243,9 +249,9 @@ fn rgba_8_should_be_palette_1() {
     test_it_converts(
         "tests/files/rgba_8_should_be_palette_1.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -255,9 +261,9 @@ fn rgba_16_should_be_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/rgba_16_should_be_grayscale_alpha_16.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -267,9 +273,9 @@ fn rgba_16_should_be_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/rgba_16_should_be_grayscale_alpha_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -279,9 +285,9 @@ fn rgba_8_should_be_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_grayscale_alpha_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -291,9 +297,9 @@ fn rgba_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/rgba_16_should_be_grayscale_16.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -303,9 +309,9 @@ fn rgba_16_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/rgba_16_should_be_grayscale_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -315,9 +321,9 @@ fn rgba_8_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/rgba_8_should_be_grayscale_8.png",
         false,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -327,9 +333,9 @@ fn rgb_16_should_be_rgb_16() {
     test_it_converts(
         "tests/files/rgb_16_should_be_rgb_16.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -339,9 +345,9 @@ fn rgb_16_should_be_rgb_8() {
     test_it_converts(
         "tests/files/rgb_16_should_be_rgb_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -351,9 +357,9 @@ fn rgb_8_should_be_rgb_8() {
     test_it_converts(
         "tests/files/rgb_8_should_be_rgb_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -363,9 +369,9 @@ fn rgb_16_should_be_palette_8() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -375,9 +381,9 @@ fn rgb_8_should_be_palette_8() {
     test_it_converts(
         "tests/files/rgb_8_should_be_palette_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -387,9 +393,9 @@ fn rgb_16_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_4.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -399,9 +405,9 @@ fn rgb_8_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgb_8_should_be_palette_4.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -411,9 +417,9 @@ fn rgb_16_should_be_palette_2() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_2.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -423,9 +429,9 @@ fn rgb_8_should_be_palette_2() {
     test_it_converts(
         "tests/files/rgb_8_should_be_palette_2.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -435,9 +441,9 @@ fn rgb_16_should_be_palette_1() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_1.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -447,9 +453,9 @@ fn rgb_8_should_be_palette_1() {
     test_it_converts(
         "tests/files/rgb_8_should_be_palette_1.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -459,9 +465,9 @@ fn rgb_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/rgb_16_should_be_grayscale_16.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -471,9 +477,9 @@ fn rgb_16_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/rgb_16_should_be_grayscale_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -483,9 +489,9 @@ fn rgb_8_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/rgb_8_should_be_grayscale_8.png",
         false,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -495,9 +501,9 @@ fn palette_8_should_be_palette_8() {
     test_it_converts(
         "tests/files/palette_8_should_be_palette_8.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -507,9 +513,9 @@ fn palette_8_should_be_palette_4() {
     test_it_converts(
         "tests/files/palette_8_should_be_palette_4.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -519,9 +525,9 @@ fn palette_4_should_be_palette_4() {
     test_it_converts(
         "tests/files/palette_4_should_be_palette_4.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -531,9 +537,9 @@ fn palette_8_should_be_palette_2() {
     test_it_converts(
         "tests/files/palette_8_should_be_palette_2.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -543,9 +549,9 @@ fn palette_4_should_be_palette_2() {
     test_it_converts(
         "tests/files/palette_4_should_be_palette_2.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -555,9 +561,9 @@ fn palette_2_should_be_palette_2() {
     test_it_converts(
         "tests/files/palette_2_should_be_palette_2.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -567,9 +573,9 @@ fn palette_8_should_be_palette_1() {
     test_it_converts(
         "tests/files/palette_8_should_be_palette_1.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -579,9 +585,9 @@ fn palette_4_should_be_palette_1() {
     test_it_converts(
         "tests/files/palette_4_should_be_palette_1.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -591,9 +597,9 @@ fn palette_2_should_be_palette_1() {
     test_it_converts(
         "tests/files/palette_2_should_be_palette_1.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -603,9 +609,9 @@ fn palette_1_should_be_palette_1() {
     test_it_converts(
         "tests/files/palette_1_should_be_palette_1.png",
         false,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -615,9 +621,9 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_16.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -627,9 +633,9 @@ fn grayscale_alpha_16_should_be_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_alpha_8.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -639,9 +645,9 @@ fn grayscale_alpha_8_should_be_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/grayscale_alpha_8_should_be_grayscale_alpha_8.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -651,9 +657,9 @@ fn grayscale_alpha_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_16.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -663,9 +669,9 @@ fn grayscale_alpha_16_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_8.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -675,9 +681,9 @@ fn grayscale_alpha_8_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/grayscale_alpha_8_should_be_grayscale_8.png",
         false,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -687,9 +693,9 @@ fn grayscale_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/grayscale_16_should_be_grayscale_16.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -699,9 +705,9 @@ fn grayscale_16_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/grayscale_16_should_be_grayscale_8.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -711,9 +717,9 @@ fn grayscale_8_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_8.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -723,9 +729,9 @@ fn grayscale_8_should_be_grayscale_4() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_4.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Four,
     );
 }
@@ -735,9 +741,9 @@ fn grayscale_8_should_be_grayscale_2() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_2.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Two,
     );
 }
@@ -747,9 +753,9 @@ fn grayscale_4_should_be_grayscale_2() {
     test_it_converts(
         "tests/files/grayscale_4_should_be_grayscale_2.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Four,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Two,
     );
 }
@@ -759,9 +765,9 @@ fn grayscale_8_should_be_grayscale_1() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_1.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::One,
     );
 }
@@ -771,9 +777,9 @@ fn grayscale_4_should_be_grayscale_1() {
     test_it_converts(
         "tests/files/grayscale_4_should_be_grayscale_1.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Four,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::One,
     );
 }
@@ -783,9 +789,9 @@ fn grayscale_2_should_be_grayscale_1() {
     test_it_converts(
         "tests/files/grayscale_2_should_be_grayscale_1.png",
         false,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Two,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::One,
     );
 }
@@ -795,9 +801,9 @@ fn grayscale_alpha_16_should_be_grayscale_trns_16() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_trns_16.png",
         true,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -807,9 +813,9 @@ fn grayscale_alpha_8_should_be_grayscale_trns_8() {
     test_it_converts(
         "tests/files/grayscale_alpha_8_should_be_grayscale_trns_8.png",
         true,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -821,7 +827,7 @@ fn small_files() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -839,7 +845,7 @@ fn small_files() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     // depth varies depending on zlib implementation used
 
     remove_file(output).ok();
@@ -852,9 +858,11 @@ fn palette_should_be_reduced_with_dupes() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 43);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 43);
+    }
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -871,9 +879,11 @@ fn palette_should_be_reduced_with_dupes() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 35);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 35);
+    }
 
     remove_file(output).ok();
 }
@@ -885,9 +895,11 @@ fn palette_should_be_reduced_with_unused() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 35);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 35);
+    }
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -904,9 +916,11 @@ fn palette_should_be_reduced_with_unused() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 33);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 33);
+    }
 
     remove_file(output).ok();
 }
@@ -918,9 +932,11 @@ fn palette_should_be_reduced_with_both() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 43);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 43);
+    }
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -937,9 +953,11 @@ fn palette_should_be_reduced_with_both() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-    assert_eq!(png.raw.palette.as_ref().unwrap().len(), 33);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 33);
+    }
 
     remove_file(output).ok();
 }
@@ -949,9 +967,9 @@ fn rgba_16_reduce_alpha() {
     test_it_converts(
         "tests/files/rgba_16_reduce_alpha.png",
         true,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -961,9 +979,9 @@ fn rgba_8_reduce_alpha() {
     test_it_converts(
         "tests/files/rgba_8_reduce_alpha.png",
         true,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -973,9 +991,9 @@ fn grayscale_alpha_16_reduce_alpha() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_reduce_alpha.png",
         true,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -985,9 +1003,9 @@ fn grayscale_alpha_8_reduce_alpha() {
     test_it_converts(
         "tests/files/grayscale_alpha_8_reduce_alpha.png",
         true,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }

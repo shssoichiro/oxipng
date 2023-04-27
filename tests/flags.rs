@@ -11,6 +11,11 @@ use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
 
+const GRAYSCALE: u8 = 0;
+const RGB: u8 = 2;
+const INDEXED: u8 = 3;
+const RGBA: u8 = 6;
+
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
         force: true,
@@ -32,9 +37,9 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     input: PathBuf,
     output: &OutFile,
     opts: &oxipng::Options,
-    color_type_in: ColorType,
+    color_type_in: u8,
     bit_depth_in: BitDepth,
-    color_type_out: ColorType,
+    color_type_out: u8,
     bit_depth_out: BitDepth,
     mut callback_pre: CBPRE,
     mut callback_post: CBPOST,
@@ -44,7 +49,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
 {
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
     callback_pre(&input);
@@ -66,7 +71,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
 
     remove_file(output).ok();
@@ -77,9 +82,9 @@ fn test_it_converts(
     input: PathBuf,
     output: &OutFile,
     opts: &oxipng::Options,
-    color_type_in: ColorType,
+    color_type_in: u8,
     bit_depth_in: BitDepth,
-    color_type_out: ColorType,
+    color_type_out: u8,
     bit_depth_out: BitDepth,
 ) {
     test_it_converts_callbacks(
@@ -153,9 +158,9 @@ fn verbose_mode() {
             input,
             &output,
             &opts,
-            ColorType::RGB,
+            RGB,
             BitDepth::Eight,
-            ColorType::RGB,
+            RGB,
             BitDepth::Eight,
         );
     };
@@ -411,7 +416,7 @@ fn interlacing_0_to_1_small_files() {
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -430,7 +435,7 @@ fn interlacing_0_to_1_small_files() {
     };
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
 
     remove_file(output).ok();
@@ -445,7 +450,7 @@ fn interlacing_1_to_0_small_files() {
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -464,7 +469,7 @@ fn interlacing_1_to_0_small_files() {
     };
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Indexed);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     // the depth can't be asserted reliably, because on such small file different zlib implementations pick different depth as the best
 
     remove_file(output).ok();
@@ -556,9 +561,9 @@ fn preserve_attrs() {
         input,
         &output,
         &opts,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
         callback_pre,
         callback_post,
@@ -575,7 +580,7 @@ fn fix_errors() {
 
     let png = PngData::new(&input, opts.fix_errors).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::RGBA);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGBA);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -593,7 +598,7 @@ fn fix_errors() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, ColorType::Grayscale);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), GRAYSCALE);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
@@ -613,9 +618,9 @@ fn zopfli_mode() {
         input,
         &output,
         &opts,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }

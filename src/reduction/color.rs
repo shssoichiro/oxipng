@@ -2,7 +2,7 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexMap;
-use rgb::{FromSlice, RGB8, RGBA, RGBA8};
+use rgb::{ComponentMap, FromSlice, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
@@ -41,12 +41,9 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
     let mut raw_data = Vec::with_capacity(png.data.len());
     let mut palette = FxIndexMap::default();
     palette.reserve(257);
-    let transparency_pixel = png
-        .transparency_pixel
-        .as_ref()
-        .filter(|t| png.ihdr.color_type == ColorType::RGB && t.len() >= 6)
-        .map(|t| RGB8::new(t[1], t[3], t[5]));
-    let ok = if png.ihdr.color_type == ColorType::RGB {
+    let ok = if let ColorType::RGB { transparent_color } = png.ihdr.color_type {
+        // Convert the RGB16 transparency to RGB8
+        let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
         reduce_scanline_to_palette(
             png.data.as_rgb().iter().cloned().map(|px| {
                 px.alpha(if Some(px) != transparency_pixel {
@@ -132,20 +129,20 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
     Some(PngImage {
         data: raw_data,
         ihdr: IhdrData {
-            color_type: ColorType::Indexed,
+            color_type: ColorType::Indexed {
+                palette: palette_vec,
+            },
             ..png.ihdr
         },
         aux_headers,
-        transparency_pixel: None,
-        palette: Some(palette_vec),
     })
 }
 
 #[must_use]
 pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     let mut reduced = Vec::with_capacity(png.data.len());
-    let byte_depth = png.ihdr.bit_depth.as_u8() as usize >> 3;
-    let bpp = png.channels_per_pixel() as usize * byte_depth;
+    let byte_depth = png.bytes_per_channel();
+    let bpp = png.channels_per_pixel() * byte_depth;
     let last_color = 2 * byte_depth;
     for pixel in png.data.chunks(bpp) {
         if byte_depth == 1 {
@@ -157,16 +154,6 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
         }
         reduced.extend_from_slice(&pixel[last_color..]);
     }
-
-    let transparency_pixel = if let Some(ref trns) = png.transparency_pixel {
-        if trns.len() != 6 || trns[0..2] != trns[2..4] || trns[2..4] != trns[4..6] {
-            None
-        } else {
-            Some(trns[0..2].to_owned())
-        }
-    } else {
-        png.transparency_pixel.clone()
-    };
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
@@ -180,17 +167,22 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
         }
     }
 
+    let color_type = match png.ihdr.color_type {
+        ColorType::RGB { transparent_color } => ColorType::Grayscale {
+            // Copy the transparent component if it is also gray
+            transparent_shade: transparent_color
+                .filter(|t| t.r == t.g && t.g == t.b)
+                .map(|t| t.r),
+        },
+        _ => ColorType::GrayscaleAlpha,
+    };
+
     Some(PngImage {
         data: reduced,
         ihdr: IhdrData {
-            color_type: match png.ihdr.color_type {
-                ColorType::RGBA => ColorType::GrayscaleAlpha,
-                _ => ColorType::Grayscale,
-            },
+            color_type,
             ..png.ihdr
         },
         aux_headers,
-        palette: None,
-        transparency_pixel,
     })
 }

@@ -5,6 +5,12 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
+const GRAYSCALE: u8 = 0;
+const RGB: u8 = 2;
+const INDEXED: u8 = 3;
+const GRAYSCALE_ALPHA: u8 = 4;
+const RGBA: u8 = 6;
+
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
         force: true,
@@ -23,9 +29,9 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 fn test_it_converts(
     input: &str,
     filter: RowFilter,
-    color_type_in: ColorType,
+    color_type_in: u8,
     bit_depth_in: BitDepth,
-    color_type_out: ColorType,
+    color_type_out: u8,
     bit_depth_out: BitDepth,
 ) {
     let input = PathBuf::from(input);
@@ -34,7 +40,7 @@ fn test_it_converts(
     let png = PngData::new(&input, opts.fix_errors).unwrap();
     opts.filter = IndexSet::new();
     opts.filter.insert(filter);
-    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -52,12 +58,10 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
-    if let Some(palette) = png.raw.palette.as_ref() {
-        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
-    } else {
-        assert_ne!(png.raw.ihdr.color_type, ColorType::Indexed);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth as u8));
     }
 
     remove_file(output).ok();
@@ -68,9 +72,9 @@ fn filter_0_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_0_for_rgba_16.png",
         RowFilter::None,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -80,9 +84,9 @@ fn filter_1_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_1_for_rgba_16.png",
         RowFilter::Sub,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -92,9 +96,9 @@ fn filter_2_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_2_for_rgba_16.png",
         RowFilter::Up,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -104,9 +108,9 @@ fn filter_3_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_3_for_rgba_16.png",
         RowFilter::Average,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -116,9 +120,9 @@ fn filter_4_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_4_for_rgba_16.png",
         RowFilter::Paeth,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -128,9 +132,9 @@ fn filter_5_for_rgba_16() {
     test_it_converts(
         "tests/files/filter_5_for_rgba_16.png",
         RowFilter::MinSum,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Sixteen,
     );
 }
@@ -140,9 +144,9 @@ fn filter_0_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_0_for_rgba_8.png",
         RowFilter::None,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -152,9 +156,9 @@ fn filter_1_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_1_for_rgba_8.png",
         RowFilter::Sub,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -164,9 +168,9 @@ fn filter_2_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_2_for_rgba_8.png",
         RowFilter::Up,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -176,9 +180,9 @@ fn filter_3_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_3_for_rgba_8.png",
         RowFilter::Average,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -188,9 +192,9 @@ fn filter_4_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_4_for_rgba_8.png",
         RowFilter::Paeth,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -200,9 +204,9 @@ fn filter_5_for_rgba_8() {
     test_it_converts(
         "tests/files/filter_5_for_rgba_8.png",
         RowFilter::MinSum,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -212,9 +216,9 @@ fn filter_0_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_0_for_rgb_16.png",
         RowFilter::None,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -224,9 +228,9 @@ fn filter_1_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_1_for_rgb_16.png",
         RowFilter::Sub,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -236,9 +240,9 @@ fn filter_2_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_2_for_rgb_16.png",
         RowFilter::Up,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -248,9 +252,9 @@ fn filter_3_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_3_for_rgb_16.png",
         RowFilter::Average,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -260,9 +264,9 @@ fn filter_4_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_4_for_rgb_16.png",
         RowFilter::Paeth,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -272,9 +276,9 @@ fn filter_5_for_rgb_16() {
     test_it_converts(
         "tests/files/filter_5_for_rgb_16.png",
         RowFilter::MinSum,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -284,9 +288,9 @@ fn filter_0_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_0_for_rgb_8.png",
         RowFilter::None,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -296,9 +300,9 @@ fn filter_1_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_1_for_rgb_8.png",
         RowFilter::Sub,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -308,9 +312,9 @@ fn filter_2_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_2_for_rgb_8.png",
         RowFilter::Up,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -320,9 +324,9 @@ fn filter_3_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_3_for_rgb_8.png",
         RowFilter::Average,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -332,9 +336,9 @@ fn filter_4_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_4_for_rgb_8.png",
         RowFilter::Paeth,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -344,9 +348,9 @@ fn filter_5_for_rgb_8() {
     test_it_converts(
         "tests/files/filter_5_for_rgb_8.png",
         RowFilter::MinSum,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -356,9 +360,9 @@ fn filter_0_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_0_for_grayscale_alpha_16.png",
         RowFilter::None,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -368,9 +372,9 @@ fn filter_1_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_1_for_grayscale_alpha_16.png",
         RowFilter::Sub,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -380,9 +384,9 @@ fn filter_2_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_2_for_grayscale_alpha_16.png",
         RowFilter::Up,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -392,9 +396,9 @@ fn filter_3_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_3_for_grayscale_alpha_16.png",
         RowFilter::Average,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -404,9 +408,9 @@ fn filter_4_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_4_for_grayscale_alpha_16.png",
         RowFilter::Paeth,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -416,9 +420,9 @@ fn filter_5_for_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/filter_5_for_grayscale_alpha_16.png",
         RowFilter::MinSum,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Sixteen,
     );
 }
@@ -428,9 +432,9 @@ fn filter_0_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_0_for_grayscale_alpha_8.png",
         RowFilter::None,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -440,9 +444,9 @@ fn filter_1_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_1_for_grayscale_alpha_8.png",
         RowFilter::Sub,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -452,9 +456,9 @@ fn filter_2_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_2_for_grayscale_alpha_8.png",
         RowFilter::Up,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -464,9 +468,9 @@ fn filter_3_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_3_for_grayscale_alpha_8.png",
         RowFilter::Average,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -476,9 +480,9 @@ fn filter_4_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_4_for_grayscale_alpha_8.png",
         RowFilter::Paeth,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -488,9 +492,9 @@ fn filter_5_for_grayscale_alpha_8() {
     test_it_converts(
         "tests/files/filter_5_for_grayscale_alpha_8.png",
         RowFilter::MinSum,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
-        ColorType::GrayscaleAlpha,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
@@ -500,9 +504,9 @@ fn filter_0_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_0_for_grayscale_16.png",
         RowFilter::None,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -512,9 +516,9 @@ fn filter_1_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_1_for_grayscale_16.png",
         RowFilter::Sub,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -524,9 +528,9 @@ fn filter_2_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_2_for_grayscale_16.png",
         RowFilter::Up,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -536,9 +540,9 @@ fn filter_3_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_3_for_grayscale_16.png",
         RowFilter::Average,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -548,9 +552,9 @@ fn filter_4_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_4_for_grayscale_16.png",
         RowFilter::Paeth,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -560,9 +564,9 @@ fn filter_5_for_grayscale_16() {
     test_it_converts(
         "tests/files/filter_5_for_grayscale_16.png",
         RowFilter::MinSum,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Sixteen,
     );
 }
@@ -572,9 +576,9 @@ fn filter_0_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_0_for_grayscale_8.png",
         RowFilter::None,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -584,9 +588,9 @@ fn filter_1_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_1_for_grayscale_8.png",
         RowFilter::Sub,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -596,9 +600,9 @@ fn filter_2_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_2_for_grayscale_8.png",
         RowFilter::Up,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -608,9 +612,9 @@ fn filter_3_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_3_for_grayscale_8.png",
         RowFilter::Average,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -620,9 +624,9 @@ fn filter_4_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_4_for_grayscale_8.png",
         RowFilter::Paeth,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -632,9 +636,9 @@ fn filter_5_for_grayscale_8() {
     test_it_converts(
         "tests/files/filter_5_for_grayscale_8.png",
         RowFilter::MinSum,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -644,9 +648,9 @@ fn filter_0_for_palette_4() {
     test_it_converts(
         "tests/files/filter_0_for_palette_4.png",
         RowFilter::None,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -656,9 +660,9 @@ fn filter_1_for_palette_4() {
     test_it_converts(
         "tests/files/filter_1_for_palette_4.png",
         RowFilter::Sub,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -668,9 +672,9 @@ fn filter_2_for_palette_4() {
     test_it_converts(
         "tests/files/filter_2_for_palette_4.png",
         RowFilter::Up,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -680,9 +684,9 @@ fn filter_3_for_palette_4() {
     test_it_converts(
         "tests/files/filter_3_for_palette_4.png",
         RowFilter::Average,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -692,9 +696,9 @@ fn filter_4_for_palette_4() {
     test_it_converts(
         "tests/files/filter_4_for_palette_4.png",
         RowFilter::Paeth,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -704,9 +708,9 @@ fn filter_5_for_palette_4() {
     test_it_converts(
         "tests/files/filter_5_for_palette_4.png",
         RowFilter::MinSum,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Four,
     );
 }
@@ -716,9 +720,9 @@ fn filter_0_for_palette_2() {
     test_it_converts(
         "tests/files/filter_0_for_palette_2.png",
         RowFilter::None,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -728,9 +732,9 @@ fn filter_1_for_palette_2() {
     test_it_converts(
         "tests/files/filter_1_for_palette_2.png",
         RowFilter::Sub,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -740,9 +744,9 @@ fn filter_2_for_palette_2() {
     test_it_converts(
         "tests/files/filter_2_for_palette_2.png",
         RowFilter::Up,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -752,9 +756,9 @@ fn filter_3_for_palette_2() {
     test_it_converts(
         "tests/files/filter_3_for_palette_2.png",
         RowFilter::Average,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -764,9 +768,9 @@ fn filter_4_for_palette_2() {
     test_it_converts(
         "tests/files/filter_4_for_palette_2.png",
         RowFilter::Paeth,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -776,9 +780,9 @@ fn filter_5_for_palette_2() {
     test_it_converts(
         "tests/files/filter_5_for_palette_2.png",
         RowFilter::MinSum,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Two,
     );
 }
@@ -788,9 +792,9 @@ fn filter_0_for_palette_1() {
     test_it_converts(
         "tests/files/filter_0_for_palette_1.png",
         RowFilter::None,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -800,9 +804,9 @@ fn filter_1_for_palette_1() {
     test_it_converts(
         "tests/files/filter_1_for_palette_1.png",
         RowFilter::Sub,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -812,9 +816,9 @@ fn filter_2_for_palette_1() {
     test_it_converts(
         "tests/files/filter_2_for_palette_1.png",
         RowFilter::Up,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -824,9 +828,9 @@ fn filter_3_for_palette_1() {
     test_it_converts(
         "tests/files/filter_3_for_palette_1.png",
         RowFilter::Average,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -836,9 +840,9 @@ fn filter_4_for_palette_1() {
     test_it_converts(
         "tests/files/filter_4_for_palette_1.png",
         RowFilter::Paeth,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }
@@ -848,9 +852,9 @@ fn filter_5_for_palette_1() {
     test_it_converts(
         "tests/files/filter_5_for_palette_1.png",
         RowFilter::MinSum,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::One,
     );
 }

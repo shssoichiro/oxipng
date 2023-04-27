@@ -45,11 +45,11 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
         let bit_vec = line.data.view_bits::<Msb0>();
         for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             // Avoid moving padded 0's into new image
-            if i >= (png.ihdr.width * u32::from(bits_per_pixel)) as usize {
+            if i >= (png.ihdr.width as usize * bits_per_pixel) {
                 break;
             }
             // Copy pixels into interlaced passes
-            let pix_modulo = (i / bits_per_pixel as usize) % 8;
+            let pix_modulo = (i / bits_per_pixel) % 8;
             match index % 8 {
                 0 => match pix_modulo {
                     0 => passes[0].push(bit),
@@ -87,12 +87,11 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
     PngImage {
         data: output,
         ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
             interlaced: Interlacing::Adam7,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
-        palette: png.palette.clone(),
-        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 
@@ -103,19 +102,18 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
             _ => deinterlace_bits(png),
         },
         ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
             interlaced: Interlacing::None,
             ..png.ihdr
         },
         aux_headers: png.aux_headers.clone(),
-        palette: png.palette.clone(),
-        transparency_pixel: png.transparency_pixel.clone(),
     }
 }
 
 /// Deinterlace by bits, for images with less than 8bpp
 fn deinterlace_bits(png: &PngImage) -> Vec<u8> {
     let bits_per_pixel = png.ihdr.bpp();
-    let bits_per_line = bits_per_pixel as usize * png.ihdr.width as usize;
+    let bits_per_line = bits_per_pixel * png.ihdr.width as usize;
     // Initialize each output line with blank data
     let mut lines: Vec<BitVec<u8, Msb0>> =
         vec![bitvec![u8, Msb0; 0; bits_per_line]; png.ihdr.height as usize];
@@ -128,22 +126,22 @@ fn deinterlace_bits(png: &PngImage) -> Vec<u8> {
             + u32::from(pass_constants.x_step)
             - 1)
             / u32::from(pass_constants.x_step)) as usize
-            * bits_per_pixel as usize;
+            * bits_per_pixel;
         for (i, bit) in bit_vec.iter().by_vals().enumerate() {
             // Avoid moving padded 0's into new image
             if i >= bits_in_line {
                 break;
             }
             let current_x: usize = pass_constants.x_shift as usize
-                + (i / bits_per_pixel as usize) * pass_constants.x_step as usize;
+                + (i / bits_per_pixel) * pass_constants.x_step as usize;
             // Copy this bit into the output line
-            let index = (i % bits_per_pixel as usize) + current_x * bits_per_pixel as usize;
+            let index = (i % bits_per_pixel) + current_x * bits_per_pixel;
             lines[current_y].set(index, bit);
         }
         // Calculate the next line and move to next pass if necessary
         current_y += pass_constants.y_step as usize;
         if current_y >= png.ihdr.height as usize {
-            if !increment_pass(&mut current_pass, png.ihdr) {
+            if !increment_pass(&mut current_pass, &png.ihdr) {
                 break;
             }
             pass_constants = interlaced_constants(current_pass);
@@ -163,7 +161,7 @@ fn deinterlace_bits(png: &PngImage) -> Vec<u8> {
 /// Deinterlace by bytes, for images with at least 8bpp
 fn deinterlace_bytes(png: &PngImage) -> Vec<u8> {
     let bytes_per_pixel = png.ihdr.bpp() / 8;
-    let bytes_per_line = bytes_per_pixel as usize * png.ihdr.width as usize;
+    let bytes_per_line = bytes_per_pixel * png.ihdr.width as usize;
     // Initialize each output line with some blank data
     let mut lines: Vec<Vec<u8>> = vec![vec![0; bytes_per_line]; png.ihdr.height as usize];
     let mut current_pass = 1;
@@ -172,15 +170,15 @@ fn deinterlace_bytes(png: &PngImage) -> Vec<u8> {
     for line in png.scan_lines(false) {
         for (i, byte) in line.data.iter().enumerate() {
             let current_x: usize = pass_constants.x_shift as usize
-                + (i / bytes_per_pixel as usize) * pass_constants.x_step as usize;
+                + (i / bytes_per_pixel) * pass_constants.x_step as usize;
             // Copy this byte into the output line
-            let index = (i % bytes_per_pixel as usize) + current_x * bytes_per_pixel as usize;
+            let index = (i % bytes_per_pixel) + current_x * bytes_per_pixel;
             lines[current_y][index] = *byte;
         }
         // Calculate the next line and move to next pass if necessary
         current_y += pass_constants.y_step as usize;
         if current_y >= png.ihdr.height as usize {
-            if !increment_pass(&mut current_pass, png.ihdr) {
+            if !increment_pass(&mut current_pass, &png.ihdr) {
                 break;
             }
             pass_constants = interlaced_constants(current_pass);
@@ -190,7 +188,7 @@ fn deinterlace_bytes(png: &PngImage) -> Vec<u8> {
     lines.concat()
 }
 
-fn increment_pass(current_pass: &mut u8, ihdr: IhdrData) -> bool {
+fn increment_pass(current_pass: &mut u8, ihdr: &IhdrData) -> bool {
     if *current_pass == 7 {
         return false;
     }

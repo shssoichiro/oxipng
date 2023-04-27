@@ -5,6 +5,11 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
 
+const GRAYSCALE: u8 = 0;
+const RGB: u8 = 2;
+const INDEXED: u8 = 3;
+const RGBA: u8 = 6;
+
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
         force: true,
@@ -23,9 +28,9 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
 fn test_it_converts(
     input: &str,
     filter: RowFilter,
-    color_type_in: ColorType,
+    color_type_in: u8,
     bit_depth_in: BitDepth,
-    color_type_out: ColorType,
+    color_type_out: u8,
     bit_depth_out: BitDepth,
 ) {
     let input = PathBuf::from(input);
@@ -34,7 +39,7 @@ fn test_it_converts(
     let png = PngData::new(&input, opts.fix_errors).unwrap();
     opts.filter = IndexSet::new();
     opts.filter.insert(filter);
-    assert_eq!(png.raw.ihdr.color_type, color_type_in);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -52,12 +57,10 @@ fn test_it_converts(
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type, color_type_out);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
-    if let Some(palette) = png.raw.palette.as_ref() {
-        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth.as_u8() as usize));
-    } else {
-        assert_ne!(png.raw.ihdr.color_type, ColorType::Indexed);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth as u8));
     }
 
     remove_file(output).ok();
@@ -68,9 +71,9 @@ fn filter_minsum() {
     test_it_converts(
         "tests/files/rgb_16_should_be_rgb_16.png",
         RowFilter::MinSum,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
-        ColorType::RGB,
+        RGB,
         BitDepth::Sixteen,
     );
 }
@@ -80,9 +83,9 @@ fn filter_entropy() {
     test_it_converts(
         "tests/files/rgb_8_should_be_rgb_8.png",
         RowFilter::Entropy,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
-        ColorType::RGB,
+        RGB,
         BitDepth::Eight,
     );
 }
@@ -92,9 +95,9 @@ fn filter_bigrams() {
     test_it_converts(
         "tests/files/rgba_8_should_be_rgba_8.png",
         RowFilter::Bigrams,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
-        ColorType::RGBA,
+        RGBA,
         BitDepth::Eight,
     );
 }
@@ -104,9 +107,9 @@ fn filter_bigent() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_8.png",
         RowFilter::BigEnt,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
-        ColorType::Grayscale,
+        GRAYSCALE,
         BitDepth::Eight,
     );
 }
@@ -116,9 +119,9 @@ fn filter_brute() {
     test_it_converts(
         "tests/files/palette_8_should_be_palette_8.png",
         RowFilter::Brute,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
-        ColorType::Indexed,
+        INDEXED,
         BitDepth::Eight,
     );
 }
