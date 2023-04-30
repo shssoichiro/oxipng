@@ -27,6 +27,7 @@ mod rayon;
 use crate::atomicmin::AtomicMin;
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
+use crate::headers::IhdrData;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
@@ -40,12 +41,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+pub use crate::colors::{BitDepth, ColorType};
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
 pub use crate::headers::Headers;
 pub use crate::interlace::Interlacing;
 pub use indexmap::{indexset, IndexMap, IndexSet};
+pub use rgb::{RGB16, RGBA8};
 
 mod atomicmin;
 mod colors;
@@ -307,6 +310,58 @@ impl Default for Options {
     }
 }
 
+#[derive(Debug)]
+/// A raw image definition which can be used to create an optimized png
+pub struct RawImage {
+    png: Arc<PngImage>,
+}
+
+impl RawImage {
+    /// Construct a new raw image definition
+    ///
+    /// * `width` - The width of the image in pixels
+    /// * `height` - The height of the image in pixels
+    /// * `color_type` - The color type of the image
+    /// * `bit_depth` - The bit depth of the image
+    /// * `data` - The raw pixel data of the image
+    pub fn new(
+        width: u32,
+        height: u32,
+        color_type: ColorType,
+        bit_depth: BitDepth,
+        data: Vec<u8>,
+    ) -> Result<Self, PngError> {
+        Ok(Self {
+            png: Arc::new(PngImage {
+                ihdr: IhdrData {
+                    width,
+                    height,
+                    color_type,
+                    bit_depth,
+                    interlaced: Interlacing::None,
+                },
+                data,
+                aux_headers: IndexMap::new(),
+            }),
+        })
+    }
+
+    /// Add a png header chunk, such as "iTXt", to be included in the output
+    pub fn add_png_header(&mut self, chunk_type: [u8; 4], data: Vec<u8>) {
+        // We can guarantee this will succeed - failure indicates a bug
+        let png = Arc::get_mut(&mut self.png).unwrap();
+        png.aux_headers.insert(chunk_type, data);
+    }
+
+    /// Create an optimized png from the raw image data using the options provided
+    pub fn create_optimized_png(&self, opts: &Options) -> PngResult<Vec<u8>> {
+        let deadline = Arc::new(Deadline::new(opts.timeout));
+        let png = optimize_raw(Arc::clone(&self.png), opts, deadline, None)
+            .ok_or_else(|| PngError::new("Failed to optimize input data"))?;
+        Ok(png.output())
+    }
+}
+
 /// Perform optimization on the input file using the options provided
 pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
     // Read in the file and try to decode as PNG.
@@ -444,19 +499,6 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     } else {
         Ok(optimized_output)
     }
-}
-
-/// Perform optimization on the raw image data using the options provided
-pub fn optimize_from_raw(raw: PngImage, opts: &Options) -> PngResult<Vec<u8>> {
-    info!("Processing from raw image data");
-
-    let deadline = Arc::new(Deadline::new(opts.timeout));
-
-    if let Some(png) = optimize_raw(Arc::new(raw), opts, deadline, None) {
-        return Ok(png.output());
-    }
-
-    Err(PngError::new("Failed to optimize input data"))
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
