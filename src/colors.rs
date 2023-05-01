@@ -56,7 +56,7 @@ impl ColorType {
     }
 
     #[inline]
-    pub fn channels_per_pixel(&self) -> u8 {
+    pub(crate) fn channels_per_pixel(&self) -> u8 {
         match self {
             ColorType::Grayscale { .. } | ColorType::Indexed { .. } => 1,
             ColorType::GrayscaleAlpha => 2,
@@ -66,12 +66,12 @@ impl ColorType {
     }
 
     #[inline]
-    pub fn is_rgb(&self) -> bool {
+    pub(crate) fn is_rgb(&self) -> bool {
         matches!(self, ColorType::RGB { .. } | ColorType::RGBA)
     }
 
     #[inline]
-    pub fn has_alpha(&self) -> bool {
+    pub(crate) fn has_alpha(&self) -> bool {
         matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
     }
 
