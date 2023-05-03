@@ -243,7 +243,7 @@ fn issue_60() {
         None,
         RGBA,
         BitDepth::Eight,
-        GRAYSCALE_ALPHA,
+        RGBA,
         BitDepth::Eight,
     );
 }

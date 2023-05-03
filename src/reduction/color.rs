@@ -98,22 +98,36 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
 
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
-        if bkgd_header.len() != 6 {
-            // malformed chunk?
-            return None;
-        }
-        // In bKGD 16-bit values are used even for 8-bit images
-        let bg = RGBA8::new(bkgd_header[1], bkgd_header[3], bkgd_header[5], 255);
-        let entry = if let Some(&entry) = palette.get(&bg) {
-            entry
-        } else if palette.len() < 256 {
-            let entry = palette.len() as u8;
-            palette.insert(bg, entry);
-            entry
+        let bg = if png.ihdr.color_type.is_rgb() && bkgd_header.len() == 6 {
+            // In bKGD 16-bit values are used even for 8-bit images
+            Some(RGBA8::new(
+                bkgd_header[1],
+                bkgd_header[3],
+                bkgd_header[5],
+                255,
+            ))
+        } else if png.ihdr.color_type == ColorType::GrayscaleAlpha && bkgd_header.len() == 2 {
+            Some(RGBA8::new(
+                bkgd_header[1],
+                bkgd_header[1],
+                bkgd_header[1],
+                255,
+            ))
         } else {
-            return None; // No space in palette to store the bg as an index
+            None
         };
-        aux_headers.insert(*b"bKGD", vec![entry]);
+        if let Some(bg) = bg {
+            let entry = if let Some(&entry) = palette.get(&bg) {
+                entry
+            } else if palette.len() < 256 {
+                let entry = palette.len() as u8;
+                palette.insert(bg, entry);
+                entry
+            } else {
+                return None; // No space in palette to store the bg as an index
+            };
+            aux_headers.insert(*b"bKGD", vec![entry]);
+        }
     }
 
     if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
