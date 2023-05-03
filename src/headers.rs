@@ -69,12 +69,17 @@ pub enum Headers {
     None,
     /// Remove specific chunks
     Strip(Vec<String>),
-    /// Headers that won't affect rendering (all but cICP, iCCP, sBIT, sRGB, pHYs)
+    /// Remove all chunks that won't affect rendering
     Safe,
     /// Remove all non-critical chunks except these
     Keep(IndexSet<String>),
     /// All non-critical headers
     All,
+}
+
+impl Headers {
+    /// List of chunks that will be kept when using the `Safe` option
+    pub const KEEP_SAFE: [[u8; 4]; 4] = [*b"cICP", *b"iCCP", *b"sRGB", *b"pHYs"];
 }
 
 #[inline]

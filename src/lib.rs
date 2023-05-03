@@ -881,16 +881,9 @@ fn perform_strip(png: &mut PngData, opts: &Options) {
                 raw.aux_headers.remove(hdr.as_bytes());
             }
         }
-        Headers::Safe => {
-            const PRESERVED_HEADERS: [[u8; 4]; 5] =
-                [*b"cICP", *b"iCCP", *b"sBIT", *b"sRGB", *b"pHYs"];
-            let keys: Vec<[u8; 4]> = raw.aux_headers.keys().cloned().collect();
-            for hdr in &keys {
-                if !PRESERVED_HEADERS.contains(hdr) {
-                    raw.aux_headers.remove(hdr);
-                }
-            }
-        }
+        Headers::Safe => raw
+            .aux_headers
+            .retain(|hdr, _| Headers::KEEP_SAFE.contains(hdr)),
         Headers::All => {
             raw.aux_headers = IndexMap::new();
         }
