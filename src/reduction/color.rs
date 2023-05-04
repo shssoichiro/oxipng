@@ -35,7 +35,7 @@ where
 
 #[must_use]
 pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
-    if png.ihdr.bit_depth != BitDepth::Eight {
+    if png.ihdr.bit_depth != BitDepth::Eight || png.channels_per_pixel() == 1 {
         return None;
     }
     let mut raw_data = Vec::with_capacity(png.data.len());
@@ -154,6 +154,10 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
 
 #[must_use]
 pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
+    if !png.ihdr.color_type.is_rgb() {
+        return None;
+    }
+
     let mut reduced = Vec::with_capacity(png.data.len());
     let byte_depth = png.bytes_per_channel();
     let bpp = png.channels_per_pixel() * byte_depth;

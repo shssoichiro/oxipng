@@ -171,8 +171,8 @@ fn issue_52_04() {
         None,
         RGBA,
         BitDepth::Eight,
-        INDEXED,
-        BitDepth::One,
+        RGB,
+        BitDepth::Eight,
     );
 }
 
@@ -243,7 +243,7 @@ fn issue_60() {
         None,
         RGBA,
         BitDepth::Eight,
-        RGBA,
+        GRAYSCALE_ALPHA,
         BitDepth::Eight,
     );
 }
