@@ -371,6 +371,18 @@ impl RawImage {
         png.aux_headers.insert(chunk_type, data);
     }
 
+    /// Add an ICC profile for the image
+    pub fn add_icc_profile(&mut self, data: Vec<u8>) {
+        // Compress with default compression level
+        if let Ok(mut compressed) = deflate::deflate(&data, 11, &AtomicMin::new(None)) {
+            let mut iccp = Vec::with_capacity(compressed.len() + 13);
+            iccp.extend(b"icc"); // Profile name - generally unused, can be anything
+            iccp.extend([0, 0]); // Null separator, zlib compression method
+            iccp.append(&mut compressed);
+            self.add_png_header(*b"iCCP", iccp);
+        }
+    }
+
     /// Create an optimized png from the raw image data using the options provided
     pub fn create_optimized_png(&self, opts: &Options) -> PngResult<Vec<u8>> {
         let deadline = Arc::new(Deadline::new(opts.timeout));
