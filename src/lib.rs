@@ -686,19 +686,9 @@ fn perform_reductions(
     }
 
     if opts.bit_depth_reduction {
-        if let Some(reduced) = reduce_bit_depth(&png, 1) {
-            let previous = png.clone();
-            let bits = reduced.ihdr.bit_depth;
+        if let Some(reduced) = reduced_bit_depth_16_to_8(&png) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
-            if (bits == BitDepth::One || bits == BitDepth::Two)
-                && previous.ihdr.bit_depth != BitDepth::Four
-            {
-                // Also try 16-color mode for all lower bits images, since that may compress better
-                if let Some(reduced) = reduce_bit_depth(&previous, 4) {
-                    eval.try_image(Arc::new(reduced));
-                }
-            }
             reduction_occurred = true;
         }
         if deadline.passed() {
@@ -712,6 +702,24 @@ fn perform_reductions(
         {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
+            reduction_occurred = true;
+        }
+        if deadline.passed() {
+            return;
+        }
+    }
+
+    if opts.bit_depth_reduction {
+        if let Some(reduced) = reduced_bit_depth_8_or_less(&png, 1) {
+            let previous = png;
+            png = Arc::new(reduced);
+            eval.try_image(png.clone());
+            if png.ihdr.bit_depth < BitDepth::Four && previous.ihdr.bit_depth == BitDepth::Eight {
+                // Also try 16-color mode for all lower bits images, since that may compress better
+                if let Some(reduced) = reduced_bit_depth_8_or_less(&previous, 4) {
+                    eval.try_image(Arc::new(reduced));
+                }
+            }
             reduction_occurred = true;
         }
         if deadline.passed() {

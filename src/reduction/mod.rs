@@ -8,12 +8,12 @@ use std::borrow::Cow;
 pub mod alpha;
 use crate::alpha::reduced_alpha_channel;
 pub mod bit_depth;
-use crate::bit_depth::reduce_bit_depth_8_or_less;
 pub mod color;
 use crate::color::*;
 
 pub(crate) use crate::alpha::cleaned_alpha_channel;
-pub(crate) use crate::bit_depth::reduce_bit_depth;
+pub(crate) use crate::bit_depth::reduced_bit_depth_16_to_8;
+pub(crate) use crate::bit_depth::reduced_bit_depth_8_or_less;
 
 /// Attempt to reduce the number of colors in the palette
 /// Returns `None` if palette hasn't changed
@@ -196,7 +196,6 @@ pub fn reduce_color_type(
     grayscale_reduction: bool,
     optimize_alpha: bool,
 ) -> Option<PngImage> {
-    let was_single_channel = png.channels_per_pixel() == 1;
     let mut reduced = Cow::Borrowed(png);
 
     // Go down one step at a time - maybe not the most efficient, but it's safe
@@ -229,13 +228,6 @@ pub fn reduce_color_type(
     // Attempt RGBA alpha reduction after palette, so it can be skipped if palette was successful
     if reduced.ihdr.color_type == ColorType::RGBA {
         if let Some(r) = reduced_alpha_channel(&reduced, optimize_alpha) {
-            reduced = Cow::Owned(r);
-        }
-    }
-
-    // Some conversions will allow us to perform bit depth reduction that wasn't possible before
-    if !was_single_channel && reduced.channels_per_pixel() == 1 {
-        if let Some(r) = reduce_bit_depth_8_or_less(&reduced, 1) {
             reduced = Cow::Owned(r);
         }
     }

@@ -12,7 +12,7 @@ fn reductions_16_to_8_bits(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_16_should_be_rgb_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_16_to_8(&png.raw));
 }
 
 #[bench]
@@ -22,7 +22,7 @@ fn reductions_8_to_4_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -32,7 +32,7 @@ fn reductions_8_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -42,7 +42,7 @@ fn reductions_8_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -52,7 +52,7 @@ fn reductions_4_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -62,7 +62,7 @@ fn reductions_4_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -72,7 +72,7 @@ fn reductions_2_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -82,7 +82,7 @@ fn reductions_grayscale_8_to_4_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -92,7 +92,7 @@ fn reductions_grayscale_8_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -102,7 +102,7 @@ fn reductions_grayscale_8_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -112,7 +112,7 @@ fn reductions_grayscale_4_to_2_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -122,7 +122,7 @@ fn reductions_grayscale_4_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
@@ -132,7 +132,7 @@ fn reductions_grayscale_2_to_1_bits(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| bit_depth::reduce_bit_depth(&png.raw, 1));
+    b.iter(|| bit_depth::reduced_bit_depth_8_or_less(&png.raw, 1));
 }
 
 #[bench]
