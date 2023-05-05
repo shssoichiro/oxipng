@@ -1,4 +1,5 @@
-use std::{fmt::Display, mem::transmute};
+use std::mem::transmute;
+use std::{fmt, fmt::Display};
 
 use crate::error::PngError;
 
@@ -31,11 +32,9 @@ impl TryFrom<u8> for RowFilter {
 }
 
 impl Display for RowFilter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:8}",
-            match *self {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(
+            match self {
                 Self::None => "None",
                 Self::Sub => "Sub",
                 Self::Up => "Up",
@@ -46,7 +45,8 @@ impl Display for RowFilter {
                 Self::Bigrams => "Bigrams",
                 Self::BigEnt => "BigEnt",
                 Self::Brute => "Brute",
-            }
+            },
+            f,
         )
     }
 }

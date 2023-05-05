@@ -182,7 +182,7 @@ fn verbose_mode() {
     let logs: Vec<_> = receiver.into_iter().collect();
     let expected_prefixes = [
         "    500x400 pixels, PNG format",
-        "    3x8 bits/pixel, RGB (non-interlaced)",
+        "    8-bit RGB, non-interlaced",
         "    IDAT size = 113794 bytes",
         "    File size = 114708 bytes",
         "Trying: 1 filters",

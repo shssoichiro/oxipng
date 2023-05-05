@@ -1,5 +1,5 @@
 use rgb::{RGB16, RGBA8};
-use std::fmt;
+use std::{fmt, fmt::Display};
 
 use crate::PngError;
 
@@ -27,20 +27,18 @@ pub enum ColorType {
     RGBA,
 }
 
-impl fmt::Display for ColorType {
+impl Display for ColorType {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match *self {
-                ColorType::Grayscale { .. } => "Grayscale",
-                ColorType::RGB { .. } => "RGB",
-                ColorType::Indexed { .. } => "Indexed",
-                ColorType::GrayscaleAlpha => "Grayscale + Alpha",
-                ColorType::RGBA => "RGB + Alpha",
+        match self {
+            ColorType::Grayscale { .. } => Display::fmt("Grayscale", f),
+            ColorType::RGB { .. } => Display::fmt("RGB", f),
+            ColorType::Indexed { palette } => {
+                Display::fmt(&format!("Indexed ({} colors)", palette.len()), f)
             }
-        )
+            ColorType::GrayscaleAlpha => Display::fmt("Grayscale + Alpha", f),
+            ColorType::RGBA => Display::fmt("RGB + Alpha", f),
+        }
     }
 }
 
@@ -109,9 +107,9 @@ impl TryFrom<u8> for BitDepth {
     }
 }
 
-impl fmt::Display for BitDepth {
+impl Display for BitDepth {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", *self as u8)
+        Display::fmt(&(*self as u8).to_string(), f)
     }
 }

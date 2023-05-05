@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt, fmt::Display};
 
 use crate::headers::IhdrData;
 use crate::png::PngImage;
@@ -25,14 +25,13 @@ impl TryFrom<u8> for Interlacing {
 }
 
 impl Display for Interlacing {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match *self {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(
+            match self {
                 Self::None => "non-interlaced",
                 Self::Adam7 => "interlaced",
-            }
+            },
+            f,
         )
     }
 }

@@ -25,7 +25,7 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::colors::{BitDepth, ColorType};
+use crate::colors::BitDepth;
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
@@ -615,7 +615,7 @@ fn optimize_png(
             png.idat_data = idat_data;
             debug!("Found better combination:");
             debug!(
-                "    zc = {}  f = {}  {} bytes",
+                "    zc = {}  f = {:8}  {} bytes",
                 opts.compression,
                 opts.filter,
                 png.idat_data.len()
@@ -747,7 +747,7 @@ fn perform_trial(
         Ok(n) => {
             let bytes = n.len();
             trace!(
-                "    zc = {}  f = {}  {} bytes",
+                "    zc = {}  f = {:8}  {} bytes",
                 trial.compression,
                 trial.filter,
                 bytes
@@ -756,7 +756,7 @@ fn perform_trial(
         }
         Err(PngError::DeflatedDataTooLong(bytes)) => {
             trace!(
-                "    zc = {}  f = {} >{} bytes",
+                "    zc = {}  f = {:8} >{} bytes",
                 trial.compression,
                 trial.filter,
                 bytes,
@@ -818,24 +818,10 @@ impl Deadline {
 
 /// Display the format of the image data
 fn report_format(prefix: &str, png: &PngImage) {
-    if let ColorType::Indexed { palette } = &png.ihdr.color_type {
-        debug!(
-            "{}{} bits/pixel, {} colors in palette ({})",
-            prefix,
-            png.ihdr.bit_depth,
-            palette.len(),
-            png.ihdr.interlaced
-        );
-    } else {
-        debug!(
-            "{}{}x{} bits/pixel, {} ({})",
-            prefix,
-            png.channels_per_pixel(),
-            png.ihdr.bit_depth,
-            png.ihdr.color_type,
-            png.ihdr.interlaced
-        );
-    }
+    debug!(
+        "{}{}-bit {}, {}",
+        prefix, png.ihdr.bit_depth, png.ihdr.color_type, png.ihdr.interlaced
+    );
 }
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
