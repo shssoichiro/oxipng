@@ -238,7 +238,7 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw, false));
+    b.iter(|| palette::optimized_palette(&png.raw, false));
 }
 
 #[bench]
@@ -248,7 +248,7 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw, false));
+    b.iter(|| palette::optimized_palette(&png.raw, false));
 }
 
 #[bench]
@@ -258,7 +258,7 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| reduced_palette(&png.raw, false));
+    b.iter(|| palette::optimized_palette(&png.raw, false));
 }
 
 #[bench]
