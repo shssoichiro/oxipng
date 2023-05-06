@@ -25,13 +25,13 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::colors::{BitDepth, ColorType};
+use crate::colors::BitDepth;
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
@@ -330,7 +330,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                         ))
                     })
                     .map(Some)?;
-                debug!("preserving metadata: {:?}", opt_metadata_preserved);
+                trace!("preserving metadata: {:?}", opt_metadata_preserved);
             } else {
                 opt_metadata_preserved = None;
             }
@@ -532,7 +532,7 @@ fn optimize_png(
             }
 
             if !filters.is_empty() {
-                debug!("Evaluating: {} filters", filters.len());
+                trace!("Evaluating: {} filters", filters.len());
                 let eval = Evaluator::new(deadline, filters, eval_compression, opts.optimize_alpha);
                 if eval_filter.is_some() {
                     eval.set_best_size(png.idat_data.len());
@@ -615,7 +615,7 @@ fn optimize_png(
             png.idat_data = idat_data;
             debug!("Found better combination:");
             debug!(
-                "    zc = {}  f = {}  {} bytes",
+                "    zc = {}  f = {:8}  {} bytes",
                 opts.compression,
                 opts.filter,
                 png.idat_data.len()
@@ -746,16 +746,20 @@ fn perform_trial(
     match new_idat {
         Ok(n) => {
             let bytes = n.len();
-            debug!(
-                "    zc = {}  f = {}  {} bytes",
-                trial.compression, trial.filter, bytes
+            trace!(
+                "    zc = {}  f = {:8}  {} bytes",
+                trial.compression,
+                trial.filter,
+                bytes
             );
             Some((trial, n))
         }
         Err(PngError::DeflatedDataTooLong(bytes)) => {
-            debug!(
-                "    zc = {}  f = {} >{} bytes",
-                trial.compression, trial.filter, bytes,
+            trace!(
+                "    zc = {}  f = {:8} >{} bytes",
+                trial.compression,
+                trial.filter,
+                bytes,
             );
             None
         }
@@ -814,24 +818,10 @@ impl Deadline {
 
 /// Display the format of the image data
 fn report_format(prefix: &str, png: &PngImage) {
-    if let ColorType::Indexed { palette } = &png.ihdr.color_type {
-        debug!(
-            "{}{} bits/pixel, {} colors in palette ({})",
-            prefix,
-            png.ihdr.bit_depth,
-            palette.len(),
-            png.ihdr.interlaced
-        );
-    } else {
-        debug!(
-            "{}{}x{} bits/pixel, {} ({})",
-            prefix,
-            png.channels_per_pixel(),
-            png.ihdr.bit_depth,
-            png.ihdr.color_type,
-            png.ihdr.interlaced
-        );
-    }
+    debug!(
+        "{}{}-bit {}, {}",
+        prefix, png.ihdr.bit_depth, png.ihdr.color_type, png.ihdr.interlaced
+    );
 }
 
 /// Strip headers from the `PngData` object, as requested by the passed `Options`
@@ -1032,9 +1022,10 @@ fn copy_times(_: &Metadata, _: &Path) -> PngResult<()> {
 fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
     let atime = filetime::FileTime::from_last_access_time(input_path_meta);
     let mtime = filetime::FileTime::from_last_modification_time(input_path_meta);
-    debug!(
+    trace!(
         "attempting to set file times: atime: {:?}, mtime: {:?}",
-        atime, mtime
+        atime,
+        mtime
     );
     filetime::set_file_times(out_path, atime, mtime).map_err(|err_io| {
         PngError::new(&format!(

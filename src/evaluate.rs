@@ -9,9 +9,11 @@ use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
 use crate::Deadline;
+use crate::PngError;
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use indexmap::IndexSet;
+use log::trace;
 use rayon::prelude::*;
 #[cfg(not(feature = "parallel"))]
 use std::cell::RefCell;
@@ -131,9 +133,8 @@ impl Evaluator {
                     return;
                 }
                 let filtered = image.filter_image(filter, optimize_alpha);
-                if let Ok(idat_data) =
-                    deflate::deflate(&filtered, compression, &best_candidate_size)
-                {
+                let idat_data = deflate::deflate(&filtered, compression, &best_candidate_size);
+                if let Ok(idat_data) = idat_data {
                     let new = Candidate {
                         image: PngData {
                             idat_data,
@@ -144,7 +145,15 @@ impl Evaluator {
                         is_reduction,
                         nth,
                     };
-                    best_candidate_size.set_min(new.image.estimated_output_size());
+                    let size = new.image.estimated_output_size();
+                    best_candidate_size.set_min(size);
+                    trace!(
+                        "Eval: {}-bit {:20}  {:8}   {} bytes",
+                        image.ihdr.bit_depth,
+                        image.ihdr.color_type,
+                        filter,
+                        size
+                    );
 
                     #[cfg(feature = "parallel")]
                     {
@@ -158,6 +167,14 @@ impl Evaluator {
                             best => *best = Some(new),
                         }
                     }
+                } else if let Err(PngError::DeflatedDataTooLong(size)) = idat_data {
+                    trace!(
+                        "Eval: {}-bit {:20}  {:8}  >{} bytes",
+                        image.ihdr.bit_depth,
+                        image.ihdr.color_type,
+                        filter,
+                        size
+                    );
                 }
             });
         });

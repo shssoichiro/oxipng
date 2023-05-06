@@ -13,7 +13,7 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
-use clap::{AppSettings, Arg, ArgMatches, Command};
+use clap::{AppSettings, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::Deflaters;
@@ -154,9 +154,10 @@ fn main() {
         )
         .arg(
             Arg::new("verbose")
-                .help("Run in verbose mode")
+                .help("Run in verbose mode (use multiple times to increase verbosity)")
                 .short('v')
                 .long("verbose")
+                .action(ArgAction::Count)
                 .conflicts_with("quiet"),
         )
         .arg(
@@ -381,7 +382,7 @@ fn parse_opts_into_struct(
     stderrlog::new()
         .module(module_path!())
         .quiet(matches.is_present("quiet"))
-        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
+        .verbosity(matches.get_count("verbose") as usize + 2)
         .show_level(false)
         .init()
         .unwrap();
