@@ -51,7 +51,7 @@ pub(crate) fn perform_reductions(
     // Attempt to reduce RGB to grayscale
     // This is just removal of bytes and does not need to be evaluated
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = reduce_rgb_to_grayscale(&png) {
+        if let Some(reduced) = reduced_rgb_to_grayscale(&png) {
             png = Arc::new(reduced);
             reduction_occurred = true;
         }
@@ -74,9 +74,9 @@ pub(crate) fn perform_reductions(
     if opts.color_type_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_alpha_channel(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
-            // If the reduction requires a tRNS chunk, enter this into the evaluator
-            // Otherwise it is just removal of bytes and should become the baseline
-            if png.ihdr.color_type.has_trns() {
+            // For small differences, if a tRNS chunk is required then enter this into the evaluator
+            // Otherwise it is mostly just removal of bytes and should become the baseline
+            if png.ihdr.color_type.has_trns() && baseline.data.len() - png.data.len() <= 1000 {
                 eval.try_image(png.clone());
                 evaluation_added = true;
             } else {
@@ -95,9 +95,19 @@ pub(crate) fn perform_reductions(
         }
     }
 
-    // Attempt to reduce to palette
+    // Attempt to convert from indexed to channels
+    // This may give a better result due to dropping the PLTE chunk
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = reduce_to_palette(&png) {
+        if let Some(reduced) = indexed_to_channels(&png) {
+            // This result should not be passed on to subsequent reductions
+            eval.try_image(Arc::new(reduced));
+            evaluation_added = true;
+        }
+    }
+
+    // Attempt to reduce to indexed
+    if opts.color_type_reduction && !deadline.passed() {
+        if let Some(reduced) = reduced_to_indexed(&png) {
             png = Arc::new(reduced);
             // Make sure the palette gets sorted (but don't bother evaluating both results)
             if let Some(reduced) = sorted_palette(&png) {

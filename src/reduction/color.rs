@@ -2,7 +2,7 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexMap;
-use rgb::{ComponentMap, FromSlice, RGBA, RGBA8};
+use rgb::{ComponentMap, ComponentSlice, FromSlice, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
@@ -34,7 +34,7 @@ where
 }
 
 #[must_use]
-pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
+pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight || png.channels_per_pixel() == 1 {
         return None;
     }
@@ -153,7 +153,7 @@ pub fn reduce_to_palette(png: &PngImage) -> Option<PngImage> {
 }
 
 #[must_use]
-pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
+pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     if !png.ihdr.color_type.is_rgb() {
         return None;
     }
@@ -201,6 +201,70 @@ pub fn reduce_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
             color_type,
             ..png.ihdr
         },
+        aux_headers,
+    })
+}
+
+/// Attempt to convert indexed to a different color type, returning the resulting image if successful
+#[must_use]
+pub fn indexed_to_channels(png: &PngImage) -> Option<PngImage> {
+    if png.ihdr.bit_depth != BitDepth::Eight {
+        return None;
+    }
+    let palette = match &png.ihdr.color_type {
+        ColorType::Indexed { palette } => palette,
+        _ => return None,
+    };
+
+    // Determine which channels are required
+    let is_gray = palette.iter().all(|c| c.r == c.g && c.g == c.b);
+    let has_alpha = palette.iter().any(|c| c.a != 255);
+    let color_type = match (is_gray, has_alpha) {
+        (false, true) => ColorType::RGBA,
+        (false, false) => ColorType::RGB {
+            transparent_color: None,
+        },
+        (true, true) => ColorType::GrayscaleAlpha,
+        (true, false) => ColorType::Grayscale {
+            transparent_shade: None,
+        },
+    };
+
+    // Don't proceed if output would be too much larger
+    let out_size = color_type.channels_per_pixel() as usize * png.data.len();
+    if out_size - png.data.len() > 10000 {
+        return None;
+    }
+
+    // Construct the new data
+    let black = RGBA::new(0, 0, 0, 255);
+    let ch_start = if is_gray { 2 } else { 0 };
+    let ch_end = if has_alpha { 3 } else { 2 };
+    let mut data = Vec::with_capacity(out_size);
+    for b in &png.data {
+        let color = palette.get(*b as usize).unwrap_or(&black);
+        data.extend_from_slice(&color.as_slice()[ch_start..=ch_end]);
+    }
+
+    // Update bKGD if it exists
+    let mut aux_headers = png.aux_headers.clone();
+    if let Some(idx) = aux_headers.remove(b"bKGD").and_then(|b| b.first().cloned()) {
+        if let Some(color) = palette.get(idx as usize) {
+            let bkgd = if is_gray {
+                vec![0, color.r]
+            } else {
+                vec![0, color.r, 0, color.g, 0, color.b]
+            };
+            aux_headers.insert(*b"bKGD", bkgd);
+        }
+    }
+
+    Some(PngImage {
+        ihdr: IhdrData {
+            color_type,
+            ..png.ihdr
+        },
+        data,
         aux_headers,
     })
 }
