@@ -57,6 +57,15 @@ pub(crate) fn perform_reductions(
         }
     }
 
+    // Attempt to reduce the palette
+    // This may change bytes but should always be beneficial
+    if opts.palette_reduction && !deadline.passed() {
+        if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
+            png = Arc::new(reduced);
+            reduction_occurred = true;
+        }
+    }
+
     // Now retain the current png for the evaluator baseline
     // It will only be entered into the evaluator if there are also others to evaluate
     let mut baseline = png.clone();
@@ -77,9 +86,9 @@ pub(crate) fn perform_reductions(
         }
     }
 
-    // Attempt to reduce the palette size
+    // Attempt to sort the palette
     if opts.palette_reduction && !deadline.passed() {
-        if let Some(reduced) = optimized_palette(&png, opts.optimize_alpha) {
+        if let Some(reduced) = sorted_palette(&png) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             evaluation_added = true;
@@ -90,8 +99,8 @@ pub(crate) fn perform_reductions(
     if opts.color_type_reduction && !deadline.passed() {
         if let Some(reduced) = reduce_to_palette(&png) {
             png = Arc::new(reduced);
-            // Make sure the palette gets sorted (ideally, this should be done within reduce_to_palette)
-            if let Some(reduced) = optimized_palette(&png, opts.optimize_alpha) {
+            // Make sure the palette gets sorted (but don't bother evaluating both results)
+            if let Some(reduced) = sorted_palette(&png) {
                 png = Arc::new(reduced);
             }
             eval.try_image(png.clone());

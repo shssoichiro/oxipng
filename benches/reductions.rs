@@ -238,7 +238,7 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -248,7 +248,7 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -258,7 +258,17 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
+}
+
+#[bench]
+fn reductions_palette_sort(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/palette_8_should_be_palette_8.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| palette::sorted_palette(&png.raw));
 }
 
 #[bench]
