@@ -847,7 +847,7 @@ fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
 
 /// Check if an image was already optimized prior to oxipng's operations
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
-    original_size <= optimized_size && !opts.force && opts.interlace.is_none()
+    original_size <= optimized_size && !opts.force
 }
 
 fn perform_backup(input_path: &Path) -> PngResult<()> {
