@@ -74,6 +74,15 @@ impl ColorType {
     pub fn has_alpha(&self) -> bool {
         matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
     }
+
+    #[inline]
+    pub fn has_trns(&self) -> bool {
+        match self {
+            ColorType::Grayscale { transparent_shade } => transparent_shade.is_some(),
+            ColorType::RGB { transparent_color } => transparent_color.is_some(),
+            _ => false,
+        }
+    }
 }
 
 #[repr(u8)]

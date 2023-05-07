@@ -713,6 +713,18 @@ fn grayscale_16_should_be_grayscale_8() {
 }
 
 #[test]
+fn grayscale_16_should_be_grayscale_1() {
+    test_it_converts(
+        "tests/files/grayscale_16_should_be_grayscale_1.png",
+        false,
+        GRAYSCALE,
+        BitDepth::Sixteen,
+        GRAYSCALE,
+        BitDepth::One,
+    );
+}
+
+#[test]
 fn grayscale_8_should_be_grayscale_8() {
     test_it_converts(
         "tests/files/grayscale_8_should_be_grayscale_8.png",

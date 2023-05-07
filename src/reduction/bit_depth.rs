@@ -2,13 +2,10 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 
-/// Attempt to reduce the bit depth of the image, returning the reduced image if successful
+/// Attempt to reduce a 16-bit image to 8-bit, returning the reduced image if successful
 #[must_use]
-pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage> {
+pub fn reduced_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
-        if png.channels_per_pixel() == 1 {
-            return reduce_bit_depth_8_or_less(png, minimum_bits);
-        }
         return None;
     }
 
@@ -29,11 +26,12 @@ pub fn reduce_bit_depth(png: &PngImage, minimum_bits: usize) -> Option<PngImage>
     })
 }
 
+/// Attempt to reduce an 8/4/2-bit image to a lower bit depth, returning the reduced image if successful
 #[must_use]
-pub fn reduce_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
+pub fn reduced_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> Option<PngImage> {
     assert!((1..8).contains(&minimum_bits));
     let bit_depth = png.ihdr.bit_depth as usize;
-    if minimum_bits >= bit_depth || bit_depth > 8 {
+    if minimum_bits >= bit_depth || bit_depth > 8 || png.channels_per_pixel() != 1 {
         return None;
     }
     // Calculate the current number of pixels per byte

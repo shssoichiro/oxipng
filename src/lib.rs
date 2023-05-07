@@ -25,7 +25,6 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::colors::BitDepth;
 use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
 use crate::png::PngData;
@@ -477,23 +476,6 @@ fn optimize_png(
     perform_strip(png, opts);
     let stripped_png = png.clone();
 
-    // Interlacing is not part of the evaluator trials but must be done first to evaluate the rest correctly
-    let mut reduction_occurred = false;
-    if let Some(interlacing) = opts.interlace {
-        if let Some(reduced) = png.raw.change_interlacing(interlacing) {
-            png.raw = Arc::new(reduced);
-            reduction_occurred = true;
-        }
-    }
-
-    // If alpha optimization is enabled, perform a black alpha reduction before evaluating reductions
-    // This can allow reductions from alpha to indexed which may not have been possible otherwise
-    if opts.optimize_alpha {
-        if let Some(reduced) = cleaned_alpha_channel(&png.raw) {
-            png.raw = Arc::new(reduced);
-        }
-    }
-
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
     let eval_compression = 5;
     // None and Bigrams work well together, especially for alpha reductions
@@ -505,7 +487,9 @@ fn optimize_png(
         eval_compression,
         false,
     );
-    perform_reductions(png.raw.clone(), opts, &deadline, &eval);
+    let (baseline, mut reduction_occurred) =
+        perform_reductions(png.raw.clone(), opts, &deadline, &eval);
+    png.raw = baseline;
     let mut eval_filter = if let Some(result) = eval.get_best_candidate() {
         *png = result.image;
         if result.is_reduction {
@@ -662,66 +646,6 @@ fn optimize_png(
     debug_assert!(sanity_checks::validate_output(&output, original_data));
 
     Ok(output)
-}
-
-fn perform_reductions(
-    mut png: Arc<PngImage>,
-    opts: &Options,
-    deadline: &Deadline,
-    eval: &Evaluator,
-) {
-    // The eval baseline will be set from the original png only if we attempt any reductions
-    let baseline = png.clone();
-    let mut reduction_occurred = false;
-
-    if opts.palette_reduction {
-        if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
-            png = Arc::new(reduced);
-            eval.try_image(png.clone());
-            reduction_occurred = true;
-        }
-        if deadline.passed() {
-            return;
-        }
-    }
-
-    if opts.bit_depth_reduction {
-        if let Some(reduced) = reduce_bit_depth(&png, 1) {
-            let previous = png.clone();
-            let bits = reduced.ihdr.bit_depth;
-            png = Arc::new(reduced);
-            eval.try_image(png.clone());
-            if (bits == BitDepth::One || bits == BitDepth::Two)
-                && previous.ihdr.bit_depth != BitDepth::Four
-            {
-                // Also try 16-color mode for all lower bits images, since that may compress better
-                if let Some(reduced) = reduce_bit_depth(&previous, 4) {
-                    eval.try_image(Arc::new(reduced));
-                }
-            }
-            reduction_occurred = true;
-        }
-        if deadline.passed() {
-            return;
-        }
-    }
-
-    if opts.color_type_reduction {
-        if let Some(reduced) =
-            reduce_color_type(&png, opts.grayscale_reduction, opts.optimize_alpha)
-        {
-            png = Arc::new(reduced);
-            eval.try_image(png.clone());
-            reduction_occurred = true;
-        }
-        if deadline.passed() {
-            return;
-        }
-    }
-
-    if reduction_occurred {
-        eval.set_baseline(baseline);
-    }
 }
 
 /// Execute a compression trial
