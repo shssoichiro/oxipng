@@ -177,3 +177,67 @@ pub fn reduced_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> O
         },
     })
 }
+
+/// Expand a 1/2/4-bit image to 8-bit, returning the expanded image if successful
+#[must_use]
+pub fn expanded_bit_depth_to_8(png: &PngImage) -> Option<PngImage> {
+    let bit_depth = png.ihdr.bit_depth as u32;
+    if bit_depth >= 8 {
+        return None;
+    }
+    // Calculate the current number of pixels per byte
+    let ppb = 8 / bit_depth;
+    let is_gray = matches!(png.ihdr.color_type, ColorType::Grayscale { .. });
+
+    let mut reduced = Vec::with_capacity((png.ihdr.width * png.ihdr.height) as usize);
+    let mut length = 0;
+    let mask = (1 << bit_depth) - 1;
+    for line in png.scan_lines(false) {
+        for &(mut byte) in line.data {
+            // Loop over each pixel in the byte
+            for _ in 0..ppb {
+                // Align the current pixel with the mask
+                byte = byte.rotate_left(bit_depth);
+                let mut val = byte & mask;
+                if is_gray {
+                    // Expand gray by repeating the bits
+                    let mut bits = bit_depth;
+                    while bits < 8 {
+                        val = val << bits | val;
+                        bits <<= 1;
+                    }
+                }
+                reduced.push(val);
+            }
+        }
+        // Trim any overflow
+        length += line.num_pixels;
+        reduced.truncate(length);
+    }
+
+    // If the image is grayscale we also need to expand the transparency pixel
+    let color_type = if let ColorType::Grayscale {
+        transparent_shade: Some(mut trans),
+    } = png.ihdr.color_type
+    {
+        let mut bits = bit_depth;
+        while bits < 8 {
+            trans = trans << bits | trans;
+            bits <<= 1;
+        }
+        ColorType::Grayscale {
+            transparent_shade: Some(trans),
+        }
+    } else {
+        png.ihdr.color_type.clone()
+    };
+
+    Some(PngImage {
+        data: reduced,
+        ihdr: IhdrData {
+            color_type,
+            bit_depth: BitDepth::Eight,
+            ..png.ihdr
+        },
+    })
+}
