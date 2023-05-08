@@ -547,6 +547,17 @@ fn interlaced_palette_1_should_be_palette_1() {
 }
 
 #[test]
+fn interlaced_palette_8_should_be_grayscale_8() {
+    test_it_converts(
+        "tests/files/interlaced_palette_8_should_be_grayscale_8.png",
+        INDEXED,
+        BitDepth::Eight,
+        GRAYSCALE,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn interlaced_grayscale_alpha_16_should_be_grayscale_alpha_16() {
     test_it_converts(
         "tests/files/interlaced_grayscale_alpha_16_should_be_grayscale_alpha_16.png",
@@ -651,8 +662,8 @@ fn interlaced_small_files() {
         "tests/files/interlaced_small_files.png",
         INDEXED,
         BitDepth::Eight,
-        INDEXED,
-        BitDepth::One,
+        RGB,
+        BitDepth::Eight,
     );
 }
 
