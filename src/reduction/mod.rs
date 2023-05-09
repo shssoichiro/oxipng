@@ -57,6 +57,15 @@ pub(crate) fn perform_reductions(
         }
     }
 
+    // Attempt to expand the bit depth to 8
+    // This does need to be evaluated but will be done so later when it gets reduced again
+    if opts.bit_depth_reduction && !deadline.passed() {
+        if let Some(reduced) = expanded_bit_depth_to_8(&png) {
+            png = Arc::new(reduced);
+            reduction_occurred = true;
+        }
+    }
+
     // Attempt to reduce the palette
     // This may change bytes but should always be beneficial
     if opts.palette_reduction && !deadline.passed() {
