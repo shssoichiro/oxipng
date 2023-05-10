@@ -1,40 +1,34 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
-use indexmap::IndexMap;
+use indexmap::IndexSet;
 use rgb::alt::Gray;
 use rgb::{ComponentMap, ComponentSlice, FromSlice, RGB, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
-type FxIndexMap<K, V> = IndexMap<K, V, BuildHasherDefault<FxHasher>>;
+type FxIndexSet<V> = IndexSet<V, BuildHasherDefault<FxHasher>>;
 
 /// Maximum size difference between indexed and channels to consider a candidate for evaluation
 pub const INDEXED_MAX_DIFF: usize = 20000;
 
-fn reduce_scanline_to_palette<T>(
+fn build_palette<T>(
     iter: impl IntoIterator<Item = T>,
-    palette: &mut FxIndexMap<T, u8>,
     reduced: &mut Vec<u8>,
-) -> bool
+) -> Option<FxIndexSet<T>>
 where
     T: Eq + Hash,
 {
+    let mut palette = FxIndexSet::default();
+    palette.reserve(257);
     for pixel in iter {
-        let idx = if let Some(&idx) = palette.get(&pixel) {
-            idx
-        } else {
-            let len = palette.len();
-            if len == 256 {
-                return false;
-            }
-            let idx = len as u8;
-            palette.insert(pixel, idx);
-            idx
-        };
-        reduced.push(idx);
+        let (idx, _) = palette.insert_full(pixel);
+        if idx == 256 {
+            return None;
+        }
+        reduced.push(idx as u8);
     }
-    true
+    Some(palette)
 }
 
 #[must_use]
@@ -46,57 +40,49 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
         return None;
     }
 
-    let mut raw_data = Vec::with_capacity(png.data.len());
-    let mut palette = FxIndexMap::default();
-    palette.reserve(257);
-    let ok = if let ColorType::Grayscale { transparent_shade } = png.ihdr.color_type {
-        // Convert the Gray16 transparency to Gray8
-        let transparency_pixel = transparent_shade.map(|t| Gray::from(t as u8));
-        reduce_scanline_to_palette(
-            png.data.as_gray().iter().cloned().map(|px| {
-                RGB::from(px).alpha(if Some(px) != transparency_pixel {
-                    255
-                } else {
-                    0
+    let mut raw_data = Vec::with_capacity(png.data.len() / png.channels_per_pixel());
+    let mut palette: Vec<_> = match png.ihdr.color_type {
+        ColorType::Grayscale { transparent_shade } => {
+            let pmap = build_palette(png.data.as_gray().iter().cloned(), &mut raw_data)?;
+            // Convert the Gray16 transparency to Gray8
+            let transparency_pixel = transparent_shade.map(|t| Gray::from(t as u8));
+            pmap.into_iter()
+                .map(|px| {
+                    RGB::from(px).alpha(if Some(px) != transparency_pixel {
+                        255
+                    } else {
+                        0
+                    })
                 })
-            }),
-            &mut palette,
-            &mut raw_data,
-        )
-    } else if let ColorType::RGB { transparent_color } = png.ihdr.color_type {
-        // Convert the RGB16 transparency to RGB8
-        let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
-        reduce_scanline_to_palette(
-            png.data.as_rgb().iter().cloned().map(|px| {
-                px.alpha(if Some(px) != transparency_pixel {
-                    255
-                } else {
-                    0
+                .collect()
+        }
+        ColorType::RGB { transparent_color } => {
+            let pmap = build_palette(png.data.as_rgb().iter().cloned(), &mut raw_data)?;
+            // Convert the RGB16 transparency to RGB8
+            let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
+            pmap.into_iter()
+                .map(|px| {
+                    px.alpha(if Some(px) != transparency_pixel {
+                        255
+                    } else {
+                        0
+                    })
                 })
-            }),
-            &mut palette,
-            &mut raw_data,
-        )
-    } else if png.ihdr.color_type == ColorType::GrayscaleAlpha {
-        reduce_scanline_to_palette(
-            png.data.as_gray_alpha().iter().cloned().map(RGBA::from),
-            &mut palette,
-            &mut raw_data,
-        )
-    } else {
-        debug_assert_eq!(png.ihdr.color_type, ColorType::RGBA);
-        reduce_scanline_to_palette(
-            png.data.as_rgba().iter().cloned(),
-            &mut palette,
-            &mut raw_data,
-        )
+                .collect()
+        }
+        ColorType::GrayscaleAlpha => {
+            let pmap = build_palette(png.data.as_gray_alpha().iter().cloned(), &mut raw_data)?;
+            pmap.into_iter().map(RGBA::from).collect()
+        }
+        ColorType::RGBA => {
+            let pmap = build_palette(png.data.as_rgba().iter().cloned(), &mut raw_data)?;
+            pmap.into_iter().collect()
+        }
+        _ => return None,
     };
-    if !ok {
-        return None;
-    }
 
     let mut aux_headers = png.aux_headers.clone();
-    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
+    if let Some(bkgd_header) = aux_headers.remove(b"bKGD") {
         let bg = if png.ihdr.color_type.is_rgb() && bkgd_header.len() == 6 {
             // In bKGD 16-bit values are used even for 8-bit images
             Some(RGBA8::new(
@@ -116,16 +102,15 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
             None
         };
         if let Some(bg) = bg {
-            let entry = if let Some(&entry) = palette.get(&bg) {
-                entry
-            } else if palette.len() < 256 {
-                let entry = palette.len() as u8;
-                palette.insert(bg, entry);
-                entry
-            } else {
-                return None; // No space in palette to store the bg as an index
-            };
-            aux_headers.insert(*b"bKGD", vec![entry]);
+            let idx = palette.iter().position(|&px| px == bg).or_else(|| {
+                if palette.len() < 256 {
+                    palette.push(bg);
+                    Some(palette.len() - 1)
+                } else {
+                    None // No space in palette to store the bg as an index
+                }
+            })?;
+            aux_headers.insert(*b"bKGD", vec![idx as u8]);
         }
     }
 
@@ -134,17 +119,10 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
         aux_headers.insert(*b"sBIT", sbit_header.iter().cloned().take(3).collect());
     }
 
-    let mut palette_vec = vec![RGBA8::new(0, 0, 0, 0); palette.len()];
-    for (color, idx) in palette {
-        palette_vec[idx as usize] = color;
-    }
-
     Some(PngImage {
         data: raw_data,
         ihdr: IhdrData {
-            color_type: ColorType::Indexed {
-                palette: palette_vec,
-            },
+            color_type: ColorType::Indexed { palette },
             ..png.ihdr
         },
         aux_headers,
