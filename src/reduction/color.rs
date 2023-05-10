@@ -2,11 +2,15 @@ use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexMap;
-use rgb::{ComponentMap, ComponentSlice, FromSlice, RGBA, RGBA8};
+use rgb::alt::Gray;
+use rgb::{ComponentMap, ComponentSlice, FromSlice, RGB, RGBA, RGBA8};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
 type FxIndexMap<K, V> = IndexMap<K, V, BuildHasherDefault<FxHasher>>;
+
+/// Maximum size difference between indexed and channels to consider a candidate for evaluation
+pub const INDEXED_MAX_DIFF: usize = 20000;
 
 fn reduce_scanline_to_palette<T>(
     iter: impl IntoIterator<Item = T>,
@@ -35,13 +39,31 @@ where
 
 #[must_use]
 pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
-    if png.ihdr.bit_depth != BitDepth::Eight || png.channels_per_pixel() == 1 {
+    if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
+    if matches!(png.ihdr.color_type, ColorType::Indexed { .. }) {
+        return None;
+    }
+
     let mut raw_data = Vec::with_capacity(png.data.len());
     let mut palette = FxIndexMap::default();
     palette.reserve(257);
-    let ok = if let ColorType::RGB { transparent_color } = png.ihdr.color_type {
+    let ok = if let ColorType::Grayscale { transparent_shade } = png.ihdr.color_type {
+        // Convert the Gray16 transparency to Gray8
+        let transparency_pixel = transparent_shade.map(|t| Gray::from(t as u8));
+        reduce_scanline_to_palette(
+            png.data.as_gray().iter().cloned().map(|px| {
+                RGB::from(px).alpha(if Some(px) != transparency_pixel {
+                    255
+                } else {
+                    0
+                })
+            }),
+            &mut palette,
+            &mut raw_data,
+        )
+    } else if let ColorType::RGB { transparent_color } = png.ihdr.color_type {
         // Convert the RGB16 transparency to RGB8
         let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
         reduce_scanline_to_palette(
@@ -57,12 +79,7 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
         )
     } else if png.ihdr.color_type == ColorType::GrayscaleAlpha {
         reduce_scanline_to_palette(
-            png.data.as_gray_alpha().iter().cloned().map(|px| RGBA {
-                r: px.0,
-                g: px.0,
-                b: px.0,
-                a: px.1,
-            }),
+            png.data.as_gray_alpha().iter().cloned().map(RGBA::from),
             &mut palette,
             &mut raw_data,
         )
@@ -78,24 +95,6 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
         return None;
     }
 
-    let num_transparent = palette
-        .iter()
-        .filter_map(|(px, &idx)| {
-            if px.a != 255 {
-                Some(idx as usize + 1)
-            } else {
-                None
-            }
-        })
-        .max();
-    let trns_size = num_transparent.map_or(0, |n| n + 8);
-
-    let headers_size = palette.len() * 3 + 8 + trns_size;
-    if raw_data.len() + headers_size > png.data.len() {
-        // Reduction would result in a larger image
-        return None;
-    }
-
     let mut aux_headers = png.aux_headers.clone();
     if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
         let bg = if png.ihdr.color_type.is_rgb() && bkgd_header.len() == 6 {
@@ -106,7 +105,7 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
                 bkgd_header[5],
                 255,
             ))
-        } else if png.ihdr.color_type == ColorType::GrayscaleAlpha && bkgd_header.len() == 2 {
+        } else if png.ihdr.color_type.is_grayscale() && bkgd_header.len() == 2 {
             Some(RGBA8::new(
                 bkgd_header[1],
                 bkgd_header[1],
@@ -232,7 +231,7 @@ pub fn indexed_to_channels(png: &PngImage) -> Option<PngImage> {
 
     // Don't proceed if output would be too much larger
     let out_size = color_type.channels_per_pixel() as usize * png.data.len();
-    if out_size - png.data.len() > 10000 {
+    if out_size - png.data.len() > INDEXED_MAX_DIFF {
         return None;
     }
 
