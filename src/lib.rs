@@ -368,8 +368,8 @@ impl RawImage {
         })
     }
 
-    /// Add a png header chunk, such as "iTXt", to be included in the output
-    pub fn add_png_header(&mut self, chunk_type: [u8; 4], data: Vec<u8>) {
+    /// Add a png chunk, such as "iTXt", to be included in the output
+    pub fn add_png_chunk(&mut self, chunk_type: [u8; 4], data: Vec<u8>) {
         // We can guarantee this will succeed - failure indicates a bug
         let png = Arc::get_mut(&mut self.png).unwrap();
         png.aux_headers.insert(chunk_type, data);
@@ -383,7 +383,7 @@ impl RawImage {
             iccp.extend(b"icc"); // Profile name - generally unused, can be anything
             iccp.extend([0, 0]); // Null separator, zlib compression method
             iccp.append(&mut compressed);
-            self.add_png_header(*b"iCCP", iccp);
+            self.add_png_chunk(*b"iCCP", iccp);
         }
     }
 

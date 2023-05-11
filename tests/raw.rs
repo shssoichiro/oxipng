@@ -32,7 +32,7 @@ fn test_it_converts(input: &str) {
     .unwrap();
 
     for (chunk_type, data) in png.aux_headers {
-        raw.add_png_header(chunk_type, data);
+        raw.add_png_chunk(chunk_type, data);
     }
 
     let output = raw.create_optimized_png(&opts).unwrap();
