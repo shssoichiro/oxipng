@@ -376,9 +376,9 @@ impl RawImage {
     }
 
     /// Add an ICC profile for the image
-    pub fn add_icc_profile(&mut self, data: Vec<u8>) {
+    pub fn add_icc_profile(&mut self, data: &[u8]) {
         // Compress with default compression level
-        if let Ok(mut compressed) = deflate::deflate(&data, 11, &AtomicMin::new(None)) {
+        if let Ok(mut compressed) = deflate::deflate(data, 11, &AtomicMin::new(None)) {
             let mut iccp = Vec::with_capacity(compressed.len() + 13);
             iccp.extend(b"icc"); // Profile name - generally unused, can be anything
             iccp.extend([0, 0]); // Null separator, zlib compression method
