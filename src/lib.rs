@@ -620,8 +620,18 @@ fn optimize_raw(
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
 ) -> Option<PngData> {
-    // Must use normal (lazy) compression, as faster ones (greedy) are not representative
-    let eval_compression = 5;
+    // Libdeflate has four algorithms: 1-4 = 'greedy', 5-7 = 'lazy', 8-9 = 'lazy2', 10-12 = 'near-optimal'
+    // 5 is the minimumm required for a decent evaluation result
+    // 7 is not noticeably slower than 5 and improves evaluation of filters in 'fast' mode (o2 and lower)
+    // 8 is a little slower but not noticeably when used only for reductions (o3 and higher)
+    // 9 is not appreciably better than 8
+    // 10 and higher are quite slow - good for filters but only good for reductions if matching the main zc level
+    let eval_compression = match opts.deflate {
+        Deflaters::Libdeflater { compression } => {
+            if opts.fast_evaluation { 7 } else { 8 }.min(compression)
+        }
+        _ => 8,
+    };
     // None and Bigrams work well together, especially for alpha reductions
     let eval_filters = indexset! {RowFilter::None, RowFilter::Bigrams};
     // This will collect all versions of images and pick one that compresses best
