@@ -53,10 +53,11 @@ impl Display for RowFilter {
 
 impl RowFilter {
     pub const LAST: u8 = Self::Brute as u8;
-    pub const STANDARD: [Self; 5] = [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
-    pub const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
+    pub(crate) const STANDARD: [Self; 5] =
+        [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
+    pub(crate) const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
 
-    pub fn filter_line(
+    pub(crate) fn filter_line(
         self,
         bpp: usize,
         data: &mut [u8],
@@ -176,7 +177,7 @@ impl RowFilter {
         }
     }
 
-    pub fn unfilter_line(
+    pub(crate) fn unfilter_line(
         self,
         bpp: usize,
         data: &[u8],

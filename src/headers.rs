@@ -19,10 +19,6 @@ pub struct IhdrData {
     pub color_type: ColorType,
     /// The bit depth of the image
     pub bit_depth: BitDepth,
-    /// The compression method used for this image (0 for DEFLATE)
-    pub compression: u8,
-    /// The filter mode used for this image (currently only 0 is valid)
-    pub filter: u8,
     /// The interlacing mode of the image
     pub interlaced: Interlacing,
 }
@@ -176,8 +172,6 @@ pub fn parse_ihdr_header(
         bit_depth: byte_data[8].try_into()?,
         width: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
         height: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
-        compression: byte_data[10],
-        filter: byte_data[11],
         interlaced: interlaced.try_into()?,
     })
 }
