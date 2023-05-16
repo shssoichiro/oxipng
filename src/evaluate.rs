@@ -140,6 +140,7 @@ impl Evaluator {
                             idat_data,
                             filtered,
                             raw: Arc::clone(&image),
+                            aux_chunks: Vec::new(),
                         },
                         filter,
                         is_reduction,

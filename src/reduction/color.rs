@@ -3,7 +3,7 @@ use crate::headers::IhdrData;
 use crate::png::PngImage;
 use indexmap::IndexSet;
 use rgb::alt::Gray;
-use rgb::{ComponentMap, ComponentSlice, FromSlice, RGB, RGBA, RGBA8};
+use rgb::{ComponentMap, ComponentSlice, FromSlice, RGB, RGBA};
 use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
 
@@ -41,7 +41,7 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
     }
 
     let mut raw_data = Vec::with_capacity(png.data.len() / png.channels_per_pixel());
-    let mut palette: Vec<_> = match png.ihdr.color_type {
+    let palette: Vec<_> = match png.ihdr.color_type {
         ColorType::Grayscale { transparent_shade } => {
             let pmap = build_palette(png.data.as_gray().iter().cloned(), &mut raw_data)?;
             // Convert the Gray16 transparency to Gray8
@@ -81,51 +81,12 @@ pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
         _ => return None,
     };
 
-    let mut aux_headers = png.aux_headers.clone();
-    if let Some(bkgd_header) = aux_headers.remove(b"bKGD") {
-        let bg = if png.ihdr.color_type.is_rgb() && bkgd_header.len() == 6 {
-            // In bKGD 16-bit values are used even for 8-bit images
-            Some(RGBA8::new(
-                bkgd_header[1],
-                bkgd_header[3],
-                bkgd_header[5],
-                255,
-            ))
-        } else if png.ihdr.color_type.is_grayscale() && bkgd_header.len() == 2 {
-            Some(RGBA8::new(
-                bkgd_header[1],
-                bkgd_header[1],
-                bkgd_header[1],
-                255,
-            ))
-        } else {
-            None
-        };
-        if let Some(bg) = bg {
-            let idx = palette.iter().position(|&px| px == bg).or_else(|| {
-                if palette.len() < 256 {
-                    palette.push(bg);
-                    Some(palette.len() - 1)
-                } else {
-                    None // No space in palette to store the bg as an index
-                }
-            })?;
-            aux_headers.insert(*b"bKGD", vec![idx as u8]);
-        }
-    }
-
-    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        // Some programs save the sBIT header as RGB even if the image is RGBA.
-        aux_headers.insert(*b"sBIT", sbit_header.iter().cloned().take(3).collect());
-    }
-
     Some(PngImage {
         data: raw_data,
         ihdr: IhdrData {
             color_type: ColorType::Indexed { palette },
             ..png.ihdr
         },
-        aux_headers,
     })
 }
 
@@ -150,18 +111,6 @@ pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
         reduced.extend_from_slice(&pixel[last_color..]);
     }
 
-    let mut aux_headers = png.aux_headers.clone();
-    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        if let Some(&byte) = sbit_header.first() {
-            aux_headers.insert(*b"sBIT", vec![byte]);
-        }
-    }
-    if let Some(bkgd_header) = png.aux_headers.get(b"bKGD") {
-        if let Some(b) = bkgd_header.get(0..2) {
-            aux_headers.insert(*b"bKGD", b.to_owned());
-        }
-    }
-
     let color_type = match png.ihdr.color_type {
         ColorType::RGB { transparent_color } => ColorType::Grayscale {
             // Copy the transparent component if it is also gray
@@ -178,7 +127,6 @@ pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
             color_type,
             ..png.ihdr
         },
-        aux_headers,
     })
 }
 
@@ -223,25 +171,11 @@ pub fn indexed_to_channels(png: &PngImage) -> Option<PngImage> {
         data.extend_from_slice(&color.as_slice()[ch_start..=ch_end]);
     }
 
-    // Update bKGD if it exists
-    let mut aux_headers = png.aux_headers.clone();
-    if let Some(idx) = aux_headers.remove(b"bKGD").and_then(|b| b.first().cloned()) {
-        if let Some(color) = palette.get(idx as usize) {
-            let bkgd = if is_gray {
-                vec![0, color.r]
-            } else {
-                vec![0, color.r, 0, color.g, 0, color.b]
-            };
-            aux_headers.insert(*b"bKGD", bkgd);
-        }
-    }
-
     Some(PngImage {
         ihdr: IhdrData {
             color_type,
             ..png.ihdr
         },
         data,
-        aux_headers,
     })
 }

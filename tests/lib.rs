@@ -1,6 +1,4 @@
-use oxipng::Headers;
-use oxipng::OutFile;
-use std::default::Default;
+use oxipng::*;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -11,9 +9,7 @@ fn optimize_from_memory() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let opts: oxipng::Options = Default::default();
-
-    let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
+    let result = oxipng::optimize_from_memory(&in_file_buf, &Options::default());
     assert!(result.is_ok());
 }
 
@@ -23,9 +19,7 @@ fn optimize_from_memory_corrupted() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let opts: oxipng::Options = Default::default();
-
-    let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
+    let result = oxipng::optimize_from_memory(&in_file_buf, &Options::default());
     assert!(result.is_err());
 }
 
@@ -35,44 +29,36 @@ fn optimize_from_memory_apng() {
     let mut in_file_buf: Vec<u8> = Vec::new();
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
-    let opts: oxipng::Options = Default::default();
-
-    let result = oxipng::optimize_from_memory(&in_file_buf, &opts);
+    let result = oxipng::optimize_from_memory(&in_file_buf, &Options::default());
     assert!(result.is_err());
 }
 
 #[test]
 fn optimize() {
-    let opts: oxipng::Options = Default::default();
-
     let result = oxipng::optimize(
         &"tests/files/fully_optimized.png".into(),
         &OutFile::Path(None),
-        &opts,
+        &Options::default(),
     );
     assert!(result.is_ok());
 }
 
 #[test]
 fn optimize_corrupted() {
-    let opts: oxipng::Options = Default::default();
-
     let result = oxipng::optimize(
         &"tests/files/corrupted_header.png".into(),
         &OutFile::Path(None),
-        &opts,
+        &Options::default(),
     );
     assert!(result.is_err());
 }
 
 #[test]
 fn optimize_apng() {
-    let opts: oxipng::Options = Default::default();
-
     let result = oxipng::optimize(
         &"tests/files/apng_file.png".into(),
         &OutFile::Path(None),
-        &opts,
+        &Options::default(),
     );
     assert!(result.is_err());
 }
@@ -80,12 +66,12 @@ fn optimize_apng() {
 #[test]
 fn optimize_srgb_icc() {
     let file = fs::read("tests/files/badsrgb.png").unwrap();
-    let mut opts: oxipng::Options = Default::default();
+    let mut opts = Options::default();
 
     let result = oxipng::optimize_from_memory(&file, &opts);
     assert!(result.unwrap().len() > 1000);
 
-    opts.strip = Headers::Safe;
+    opts.strip = StripChunks::Safe;
     let result = oxipng::optimize_from_memory(&file, &opts);
     assert!(result.unwrap().len() < 1000);
 }

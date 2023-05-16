@@ -25,7 +25,6 @@ pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {
     Some(PngImage {
         data: reduced,
         ihdr: png.ihdr.clone(),
-        aux_headers: png.aux_headers.clone(),
     })
 }
 
@@ -88,20 +87,11 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
         },
     };
 
-    let mut aux_headers = png.aux_headers.clone();
-    // sBIT contains information about alpha channel's original depth,
-    // and alpha has just been removed
-    if let Some(sbit_header) = png.aux_headers.get(b"sBIT") {
-        // Some programs save the sBIT header as RGB even if the image is RGBA.
-        aux_headers.insert(*b"sBIT", sbit_header.iter().cloned().take(3).collect());
-    }
-
     Some(PngImage {
         data: raw_data,
         ihdr: IhdrData {
             color_type: target_color_type,
             ..png.ihdr
         },
-        aux_headers,
     })
 }

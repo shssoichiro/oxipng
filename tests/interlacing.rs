@@ -1,6 +1,6 @@
 use indexmap::IndexSet;
-use oxipng::{internal_tests::*, Interlacing, RowFilter};
-use oxipng::{InFile, OutFile};
+use oxipng::internal_tests::*;
+use oxipng::*;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -33,7 +33,7 @@ fn test_it_converts(
 ) {
     let input = PathBuf::from(input);
     let (output, mut opts) = get_opts(&input);
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
     opts.interlace = Some(interlace);
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
@@ -53,7 +53,7 @@ fn test_it_converts(
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();

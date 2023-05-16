@@ -22,7 +22,6 @@ pub fn reduced_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
             bit_depth: BitDepth::Eight,
             ..png.ihdr
         },
-        aux_headers: png.aux_headers.clone(),
     })
 }
 
@@ -155,6 +154,5 @@ pub fn reduced_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> O
             bit_depth: (minimum_bits as u8).try_into().unwrap(),
             ..png.ihdr
         },
-        aux_headers: png.aux_headers.clone(),
     })
 }

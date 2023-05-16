@@ -5,8 +5,6 @@ use crate::interlace::Interlacing;
 use crate::PngResult;
 use indexmap::IndexSet;
 use rgb::{RGB16, RGBA8};
-use std::io;
-use std::io::{Cursor, Read};
 
 #[derive(Debug, Clone)]
 /// Headers from the IHDR chunk of the image
@@ -62,24 +60,40 @@ impl IhdrData {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Chunk {
+    pub name: [u8; 4],
+    pub data: Vec<u8>,
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
-/// Options to use for performing operations on headers (such as stripping)
-pub enum Headers {
+/// Options to use when stripping chunks
+pub enum StripChunks {
     /// None
     None,
     /// Remove specific chunks
-    Strip(Vec<String>),
+    Strip(IndexSet<[u8; 4]>),
     /// Remove all chunks that won't affect rendering
     Safe,
     /// Remove all non-critical chunks except these
-    Keep(IndexSet<String>),
-    /// All non-critical headers
+    Keep(IndexSet<[u8; 4]>),
+    /// All non-critical chunks
     All,
 }
 
-impl Headers {
+impl StripChunks {
     /// List of chunks that will be kept when using the `Safe` option
     pub const KEEP_SAFE: [[u8; 4]; 4] = [*b"cICP", *b"iCCP", *b"sRGB", *b"pHYs"];
+
+    pub(crate) fn keep(&self, name: &[u8; 4]) -> bool {
+        match &self {
+            StripChunks::None => true,
+            StripChunks::Keep(names) => names.contains(name),
+            StripChunks::Strip(names) => !names.contains(name),
+            StripChunks::Safe => Self::KEEP_SAFE.contains(name),
+            StripChunks::All => false,
+        }
+    }
 }
 
 #[inline]
@@ -90,27 +104,26 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct RawHeader<'a> {
+pub struct RawChunk<'a> {
     pub name: [u8; 4],
     pub data: &'a [u8],
 }
 
-pub fn parse_next_header<'a>(
+pub fn parse_next_chunk<'a>(
     byte_data: &'a [u8],
     byte_offset: &mut usize,
     fix_errors: bool,
-) -> PngResult<Option<RawHeader<'a>>> {
-    let mut rdr = Cursor::new(
+) -> PngResult<Option<RawChunk<'a>>> {
+    let length = read_be_u32(
         byte_data
             .get(*byte_offset..*byte_offset + 4)
             .ok_or(PngError::TruncatedData)?,
     );
-    let length = read_be_u32(&mut rdr).unwrap();
     *byte_offset += 4;
 
-    let header_start = *byte_offset;
+    let chunk_start = *byte_offset;
     let chunk_name = byte_data
-        .get(header_start..header_start + 4)
+        .get(chunk_start..chunk_start + 4)
         .ok_or(PngError::TruncatedData)?;
     if chunk_name == b"IEND" {
         // End of data
@@ -122,37 +135,34 @@ pub fn parse_next_header<'a>(
         .get(*byte_offset..*byte_offset + length as usize)
         .ok_or(PngError::TruncatedData)?;
     *byte_offset += length as usize;
-    let mut rdr = Cursor::new(
+    let crc = read_be_u32(
         byte_data
             .get(*byte_offset..*byte_offset + 4)
             .ok_or(PngError::TruncatedData)?,
     );
-    let crc = read_be_u32(&mut rdr).unwrap();
     *byte_offset += 4;
 
-    let header_bytes = byte_data
-        .get(header_start..header_start + 4 + length as usize)
+    let chunk_bytes = byte_data
+        .get(chunk_start..chunk_start + 4 + length as usize)
         .ok_or(PngError::TruncatedData)?;
-    if !fix_errors && crc32(header_bytes) != crc {
+    if !fix_errors && crc32(chunk_bytes) != crc {
         return Err(PngError::new(&format!(
-            "CRC Mismatch in {} header; May be recoverable by using --fix",
+            "CRC Mismatch in {} chunk; May be recoverable by using --fix",
             String::from_utf8_lossy(chunk_name)
         )));
     }
 
-    let mut name = [0_u8; 4];
-    name.copy_from_slice(chunk_name);
-    Ok(Some(RawHeader { name, data }))
+    let name: [u8; 4] = chunk_name.try_into().unwrap();
+    Ok(Some(RawChunk { name, data }))
 }
 
-pub fn parse_ihdr_header(
+pub fn parse_ihdr_chunk(
     byte_data: &[u8],
     palette_data: Option<Vec<u8>>,
     trns_data: Option<Vec<u8>>,
 ) -> PngResult<IhdrData> {
     // This eliminates bounds checks for the rest of the function
     let interlaced = byte_data.get(12).copied().ok_or(PngError::TruncatedData)?;
-    let mut rdr = Cursor::new(&byte_data[0..8]);
     Ok(IhdrData {
         color_type: match byte_data[9] {
             0 => ColorType::Grayscale {
@@ -175,8 +185,8 @@ pub fn parse_ihdr_header(
             _ => return Err(PngError::new("Unexpected color type in header")),
         },
         bit_depth: byte_data[8].try_into()?,
-        width: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
-        height: read_be_u32(&mut rdr).map_err(|_| PngError::TruncatedData)?,
+        width: read_be_u32(&byte_data[0..4]),
+        height: read_be_u32(&byte_data[4..8]),
         interlaced: interlaced.try_into()?,
     })
 }
@@ -201,8 +211,6 @@ fn palette_to_rgba(
 }
 
 #[inline]
-fn read_be_u32<T: AsRef<[u8]>>(rdr: &mut Cursor<T>) -> Result<u32, io::Error> {
-    let mut int_buf = [0; 4];
-    rdr.read_exact(&mut int_buf)?;
-    Ok(u32::from_be_bytes(int_buf))
+fn read_be_u32(bytes: &[u8]) -> u32 {
+    u32::from_be_bytes(bytes.try_into().unwrap())
 }

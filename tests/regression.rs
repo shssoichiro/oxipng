@@ -1,6 +1,6 @@
 use indexmap::IndexSet;
-use oxipng::{internal_tests::*, Interlacing, RowFilter};
-use oxipng::{InFile, OutFile};
+use oxipng::internal_tests::*;
+use oxipng::*;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
@@ -36,7 +36,7 @@ fn test_it_converts(
 ) {
     let input = PathBuf::from(input);
     let (output, opts) = custom.unwrap_or_else(|| get_opts(&input));
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(
         png.raw.ihdr.color_type.png_header_code(),
@@ -52,7 +52,7 @@ fn test_it_converts(
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -70,13 +70,7 @@ fn test_it_converts(
         "optimized to wrong bit depth"
     );
     if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
-        let mut max_palette_size = 1 << (png.raw.ihdr.bit_depth as u8);
-        // Ensure bKGD color is valid
-        if let Some(&idx) = png.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
-            assert!(palette.len() > idx as usize);
-            max_palette_size = max_palette_size.max(idx as usize + 1);
-        }
-        assert!(palette.len() <= max_palette_size);
+        assert!(palette.len() <= 1 << (png.raw.ihdr.bit_depth as u8));
     }
 
     remove_file(output).ok();
@@ -100,7 +94,7 @@ fn issue_42() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(Interlacing::Adam7);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
     assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
@@ -113,7 +107,7 @@ fn issue_42() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -231,7 +225,7 @@ fn issue_59() {
         None,
         RGBA,
         BitDepth::Eight,
-        RGBA,
+        INDEXED,
         BitDepth::Eight,
     );
 }
