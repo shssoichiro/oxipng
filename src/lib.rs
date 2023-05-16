@@ -542,13 +542,7 @@ pub fn optimize_from_memory(data: &[u8], opts: &Options) -> PngResult<Vec<u8>> {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
-/// Defines options to be used for a single compression trial
-struct TrialOptions {
-    pub filter: RowFilter,
-    pub compression: u8,
-}
-type TrialWithData = (TrialOptions, Vec<u8>);
+type TrialResult = (RowFilter, Vec<u8>);
 
 /// Perform optimization on the input PNG object using the options provided
 fn optimize_png(
@@ -654,7 +648,7 @@ fn optimize_raw(
     if opts.idat_recoding || reduction_occurred {
         let mut filters = opts.filter.clone();
         let fast_eval = opts.fast_evaluation && (filters.len() > 1 || eval_result.is_some());
-        let best: Option<TrialWithData> = if fast_eval {
+        let best: Option<TrialResult> = if fast_eval {
             // Perform a fast evaluation of selected filters followed by a single main compression trial
 
             if eval_result.is_some() {
@@ -674,22 +668,18 @@ fn optimize_raw(
                 }
             }
             // We should have a result here - fail if not (e.g. deadline passed)
-            let eval_result = eval_result?;
+            let result = eval_result?;
 
-            let trial = TrialOptions {
-                filter: eval_result.filter,
-                compression: match opts.deflate {
-                    Deflaters::Libdeflater { compression } => compression,
-                    _ => 0,
-                },
-            };
-            if trial.compression > 0 && trial.compression <= eval_compression {
-                // No further compression required
-                Some((trial, eval_result.image.idat_data))
-            } else {
-                debug!("Trying: {}", trial.filter);
-                let best_size = AtomicMin::new(max_size);
-                perform_trial(&eval_result.image.filtered, opts, trial, &best_size)
+            match opts.deflate {
+                Deflaters::Libdeflater { compression } if compression <= eval_compression => {
+                    // No further compression required
+                    Some((result.filter, result.image.idat_data))
+                }
+                _ => {
+                    debug!("Trying: {}", result.filter);
+                    let best_size = AtomicMin::new(max_size);
+                    perform_trial(&result.image.filtered, opts, result.filter, &best_size)
+                }
             }
         } else {
             // Perform full compression trials of selected filters and determine the best
@@ -705,28 +695,16 @@ fn optimize_raw(
                 }
             }
 
-            let mut results: Vec<TrialOptions> = Vec::with_capacity(filters.len());
-
-            for f in &filters {
-                results.push(TrialOptions {
-                    filter: *f,
-                    compression: match opts.deflate {
-                        Deflaters::Libdeflater { compression } => compression,
-                        _ => 0,
-                    },
-                });
-            }
-
-            debug!("Trying: {} filters", results.len());
+            debug!("Trying: {} filters", filters.len());
 
             let best_size = AtomicMin::new(max_size);
-            let results_iter = results.into_par_iter().with_max_len(1);
-            let best = results_iter.filter_map(|trial| {
+            let results_iter = filters.into_par_iter().with_max_len(1);
+            let best = results_iter.filter_map(|filter| {
                 if deadline.passed() {
                     return None;
                 }
-                let filtered = &png.filter_image(trial.filter, opts.optimize_alpha);
-                perform_trial(filtered, opts, trial, &best_size)
+                let filtered = &png.filter_image(filter, opts.optimize_alpha);
+                perform_trial(filtered, opts, filter, &best_size)
             });
             best.reduce_with(|i, j| {
                 if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
@@ -737,7 +715,7 @@ fn optimize_raw(
             })
         };
 
-        if let Some((trial, idat_data)) = best {
+        if let Some((filter, idat_data)) = best {
             let image = PngData {
                 raw: png,
                 // The filtered data has not been retained here, but we don't need to return it
@@ -749,8 +727,8 @@ fn optimize_raw(
                 debug!("Found better combination:");
                 debug!(
                     "    zc = {}  f = {:8}  {} bytes",
-                    trial.compression,
-                    trial.filter,
+                    opts.deflate,
+                    filter,
                     image.idat_data.len()
                 );
                 return Some(image);
@@ -779,37 +757,26 @@ fn optimize_raw(
 fn perform_trial(
     filtered: &[u8],
     opts: &Options,
-    trial: TrialOptions,
+    filter: RowFilter,
     best_size: &AtomicMin,
-) -> Option<TrialWithData> {
-    let new_idat = match opts.deflate {
-        Deflaters::Libdeflater { .. } => deflate::deflate(filtered, trial.compression, best_size),
-        #[cfg(feature = "zopfli")]
-        Deflaters::Zopfli { iterations } => deflate::zopfli_deflate(filtered, iterations),
-    };
-
-    // update best size or convert to error if not smaller
-    let new_idat = match new_idat {
-        Ok(n) if !best_size.set_min(n.len()) => Err(PngError::DeflatedDataTooLong(n.len())),
-        _ => new_idat,
-    };
-
-    match new_idat {
-        Ok(n) => {
-            let bytes = n.len();
+) -> Option<TrialResult> {
+    match opts.deflate.deflate(filtered, best_size) {
+        Ok(new_idat) => {
+            let bytes = new_idat.len();
+            best_size.set_min(bytes);
             trace!(
                 "    zc = {}  f = {:8}  {} bytes",
-                trial.compression,
-                trial.filter,
+                opts.deflate,
+                filter,
                 bytes
             );
-            Some((trial, n))
+            Some((filter, new_idat))
         }
         Err(PngError::DeflatedDataTooLong(bytes)) => {
             trace!(
                 "    zc = {}  f = {:8} >{} bytes",
-                trial.compression,
-                trial.filter,
+                opts.deflate,
+                filter,
                 bytes,
             );
             None
