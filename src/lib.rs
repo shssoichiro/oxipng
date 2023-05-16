@@ -25,9 +25,8 @@ extern crate rayon;
 mod rayon;
 
 use crate::atomicmin::AtomicMin;
-use crate::deflate::{crc32, inflate};
 use crate::evaluate::Evaluator;
-use crate::headers::{Chunk, IhdrData};
+use crate::headers::*;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
@@ -374,13 +373,10 @@ impl RawImage {
 
     /// Add an ICC profile for the image
     pub fn add_icc_profile(&mut self, data: &[u8]) {
-        // Compress with default compression level
-        if let Ok(mut compressed) = deflate::deflate(data, 11, &AtomicMin::new(None)) {
-            let mut iccp = Vec::with_capacity(compressed.len() + 13);
-            iccp.extend(b"icc"); // Profile name - generally unused, can be anything
-            iccp.extend([0, 0]); // Null separator, zlib compression method
-            iccp.append(&mut compressed);
-            self.add_png_chunk(*b"iCCP", iccp);
+        // Compress with fastest compression level - will be recompressed during optimization
+        let deflater = Deflaters::Libdeflater { compression: 1 };
+        if let Ok(iccp) = construct_iccp(data, deflater) {
+            self.aux_chunks.push(iccp);
         }
     }
 
@@ -844,21 +840,38 @@ fn report_format(prefix: &str, png: &PngImage) {
 
 /// Perform cleanup of certain chunks from the `PngData` object, after optimization has been completed
 fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
-    // See if we can replace an iCCP chunk with an sRGB chunk
-    if opts.strip != StripChunks::None && opts.strip.keep(b"sRGB") {
-        if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
-            if png.aux_chunks.iter().any(|c| &c.name == b"sRGB") {
-                // Files aren't supposed to have both chunks, so we chose to honor sRGB
-                trace!("Removing iCCP chunk due to conflict with sRGB chunk");
-                png.aux_chunks.remove(iccp_idx);
-            } else if let Some(intent) = srgb_rendering_intent(&png.aux_chunks[iccp_idx].data) {
-                // sRGB-like profile can be safely replaced with
-                // an sRGB chunk with the same rendering intent
+    if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
+        // See if we can replace an iCCP chunk with an sRGB chunk
+        let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
+        if may_replace_iccp && png.aux_chunks.iter().any(|c| &c.name == b"sRGB") {
+            // Files aren't supposed to have both chunks, so we chose to honor sRGB
+            trace!("Removing iCCP chunk due to conflict with sRGB chunk");
+            png.aux_chunks.remove(iccp_idx);
+        } else if let Some(icc) = extract_icc(&png.aux_chunks[iccp_idx]) {
+            let intent = if may_replace_iccp {
+                srgb_rendering_intent(&icc)
+            } else {
+                None
+            };
+            // sRGB-like profile can be replaced with an sRGB chunk with the same rendering intent
+            // Otherwise try recompressing the profile
+            if let Some(intent) = intent {
                 trace!("Replacing iCCP chunk with equivalent sRGB chunk");
                 png.aux_chunks[iccp_idx] = Chunk {
                     name: *b"sRGB",
                     data: vec![intent],
                 };
+            } else if let Ok(iccp) = construct_iccp(&icc, opts.deflate) {
+                let cur_len = png.aux_chunks[iccp_idx].data.len();
+                let new_len = iccp.data.len();
+                if new_len < cur_len {
+                    debug!(
+                        "Recompressed iCCP chunk: {} ({} bytes decrease)",
+                        new_len,
+                        cur_len - new_len
+                    );
+                    png.aux_chunks[iccp_idx] = iccp;
+                }
             }
         }
     }
@@ -877,50 +890,6 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
             }
             !invalid
         });
-    }
-}
-
-/// If the profile is sRGB, extracts the rendering intent value from it
-fn srgb_rendering_intent(mut iccp: &[u8]) -> Option<u8> {
-    // Skip (useless) profile name
-    loop {
-        let (&n, rest) = iccp.split_first()?;
-        iccp = rest;
-        if n == 0 {
-            break;
-        }
-    }
-
-    let (&compression_method, compressed_data) = iccp.split_first()?;
-    if compression_method != 0 {
-        return None; // The profile is supposed to be compressed (method 0)
-    }
-    // The decompressed size is unknown so we have to guess the required buffer size
-    let max_size = (compressed_data.len() * 2).max(1000);
-    let icc_data = inflate(compressed_data, max_size).ok()?;
-
-    let rendering_intent = *icc_data.get(67)?;
-
-    // The known profiles are the same as in libpng's `png_sRGB_checks`.
-    // The Profile ID header of ICC has a fixed layout,
-    // and is supposed to contain MD5 of profile data at this offset
-    match icc_data.get(84..100)? {
-        b"\x29\xf8\x3d\xde\xaf\xf2\x55\xae\x78\x42\xfa\xe4\xca\x83\x39\x0d"
-        | b"\xc9\x5b\xd6\x37\xe9\x5d\x8a\x3b\x0d\xf3\x8f\x99\xc1\x32\x03\x89"
-        | b"\xfc\x66\x33\x78\x37\xe2\x88\x6b\xfd\x72\xe9\x83\x82\x28\xf1\xb8"
-        | b"\x34\x56\x2a\xbf\x99\x4c\xcd\x06\x6d\x2c\x57\x21\xd0\xd6\x8c\x5d" => {
-            Some(rendering_intent)
-        }
-        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" => {
-            // Known-bad profiles are identified by their CRC
-            match (crc32(&icc_data), icc_data.len()) {
-                (0x5d51_29ce, 3024) | (0x182e_a552, 3144) | (0xf29e_526d, 3144) => {
-                    Some(rendering_intent)
-                }
-                _ => None,
-            }
-        }
-        _ => None,
     }
 }
 

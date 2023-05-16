@@ -1,9 +1,12 @@
 use crate::colors::{BitDepth, ColorType};
-use crate::deflate::crc32;
+use crate::deflate::{crc32, inflate};
 use crate::error::PngError;
 use crate::interlace::Interlacing;
+use crate::AtomicMin;
+use crate::Deflaters;
 use crate::PngResult;
 use indexmap::IndexSet;
+use log::warn;
 use rgb::{RGB16, RGBA8};
 
 #[derive(Debug, Clone)]
@@ -213,4 +216,72 @@ fn palette_to_rgba(
 #[inline]
 fn read_be_u32(bytes: &[u8]) -> u32 {
     u32::from_be_bytes(bytes.try_into().unwrap())
+}
+
+/// Extract and decompress the ICC profile from an iCCP chunk
+pub fn extract_icc(iccp: &Chunk) -> Option<Vec<u8>> {
+    // Skip (useless) profile name
+    let mut data = iccp.data.as_slice();
+    loop {
+        let (&n, rest) = data.split_first()?;
+        data = rest;
+        if n == 0 {
+            break;
+        }
+    }
+
+    let (&compression_method, compressed_data) = data.split_first()?;
+    if compression_method != 0 {
+        return None; // The profile is supposed to be compressed (method 0)
+    }
+    // The decompressed size is unknown so we have to guess the required buffer size
+    let max_size = compressed_data.len() * 2 + 1000;
+    match inflate(compressed_data, max_size) {
+        Ok(icc) => Some(icc),
+        Err(e) => {
+            // Log the error so we can know if the buffer size needs to be adjusted
+            warn!("Failed to decompress icc: {}", e);
+            None
+        }
+    }
+}
+
+/// Construct an iCCP chunk by compressing the ICC profile
+pub fn construct_iccp(icc: &[u8], deflater: Deflaters) -> PngResult<Chunk> {
+    let mut compressed = deflater.deflate(icc, &AtomicMin::new(None))?;
+    let mut data = Vec::with_capacity(compressed.len() + 5);
+    data.extend(b"icc"); // Profile name - generally unused, can be anything
+    data.extend([0, 0]); // Null separator, zlib compression method
+    data.append(&mut compressed);
+    Ok(Chunk {
+        name: *b"iCCP",
+        data,
+    })
+}
+
+/// If the profile is sRGB, extracts the rendering intent value from it
+pub fn srgb_rendering_intent(icc_data: &[u8]) -> Option<u8> {
+    let rendering_intent = *icc_data.get(67)?;
+
+    // The known profiles are the same as in libpng's `png_sRGB_checks`.
+    // The Profile ID header of ICC has a fixed layout,
+    // and is supposed to contain MD5 of profile data at this offset
+    match icc_data.get(84..100)? {
+        b"\x29\xf8\x3d\xde\xaf\xf2\x55\xae\x78\x42\xfa\xe4\xca\x83\x39\x0d"
+        | b"\xc9\x5b\xd6\x37\xe9\x5d\x8a\x3b\x0d\xf3\x8f\x99\xc1\x32\x03\x89"
+        | b"\xfc\x66\x33\x78\x37\xe2\x88\x6b\xfd\x72\xe9\x83\x82\x28\xf1\xb8"
+        | b"\x34\x56\x2a\xbf\x99\x4c\xcd\x06\x6d\x2c\x57\x21\xd0\xd6\x8c\x5d" => {
+            Some(rendering_intent)
+        }
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" => {
+            // Known-bad profiles are identified by their CRC
+            match (crc32(icc_data), icc_data.len()) {
+                (0x5d51_29ce, 3024) | (0x182e_a552, 3144) | (0xf29e_526d, 3144) => {
+                    Some(rendering_intent)
+                }
+                _ => None,
+            }
+        }
+        _ => None,
+    }
 }
