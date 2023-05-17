@@ -6,7 +6,6 @@ use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image, Interlacing};
 use crate::Options;
 use bitvec::bitarr;
-use indexmap::IndexMap;
 use libdeflater::{CompressionLvl, Compressor};
 use rgb::ComponentSlice;
 use rustc_hash::FxHashMap;
@@ -92,7 +91,7 @@ impl PngData {
 
         // Read the data chunks
         let mut idat_data: Vec<u8> = Vec::new();
-        let mut key_chunks: IndexMap<[u8; 4], Vec<u8>> = IndexMap::new();
+        let mut key_chunks: FxHashMap<[u8; 4], Vec<u8>> = FxHashMap::default();
         let mut aux_chunks: Vec<Chunk> = Vec::new();
         while let Some(chunk) = parse_next_chunk(byte_data, &mut byte_offset, opts.fix_errors)? {
             match &chunk.name {

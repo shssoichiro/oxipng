@@ -46,7 +46,7 @@ pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
 pub use crate::headers::StripChunks;
 pub use crate::interlace::Interlacing;
-pub use indexmap::{indexset, IndexMap, IndexSet};
+pub use indexmap::{indexset, IndexSet};
 pub use rgb::{RGB16, RGBA8};
 
 mod atomicmin;
