@@ -158,7 +158,7 @@ fn reductions_rgba_to_grayscale_alpha_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_rgb_to_grayscale(&png.raw));
+    b.iter(|| color::reduced_rgb_to_grayscale(&png.raw));
 }
 
 #[bench]
@@ -168,7 +168,7 @@ fn reductions_rgba_to_grayscale_alpha_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_rgb_to_grayscale(&png.raw));
+    b.iter(|| color::reduced_rgb_to_grayscale(&png.raw));
 }
 
 #[bench]
@@ -179,7 +179,7 @@ fn reductions_rgba_to_grayscale_16(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        color::reduce_rgb_to_grayscale(&png.raw)
+        color::reduced_rgb_to_grayscale(&png.raw)
             .and_then(|r| alpha::reduced_alpha_channel(&r, false))
     });
 }
@@ -192,7 +192,7 @@ fn reductions_rgba_to_grayscale_8(b: &mut Bencher) {
     let png = PngData::new(&input, false).unwrap();
 
     b.iter(|| {
-        color::reduce_rgb_to_grayscale(&png.raw)
+        color::reduced_rgb_to_grayscale(&png.raw)
             .and_then(|r| alpha::reduced_alpha_channel(&r, false))
     });
 }
@@ -204,7 +204,7 @@ fn reductions_rgb_to_grayscale_16(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_rgb_to_grayscale(&png.raw));
+    b.iter(|| color::reduced_rgb_to_grayscale(&png.raw));
 }
 
 #[bench]
@@ -212,7 +212,7 @@ fn reductions_rgb_to_grayscale_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_rgb_to_grayscale(&png.raw));
+    b.iter(|| color::reduced_rgb_to_grayscale(&png.raw));
 }
 
 #[bench]
@@ -220,7 +220,7 @@ fn reductions_rgba_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgba_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_to_palette(&png.raw));
+    b.iter(|| color::reduced_to_indexed(&png.raw));
 }
 
 #[bench]
@@ -228,7 +228,27 @@ fn reductions_rgb_to_palette_8(b: &mut Bencher) {
     let input = test::black_box(PathBuf::from("tests/files/rgb_8_should_be_palette_8.png"));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| color::reduce_to_palette(&png.raw));
+    b.iter(|| color::reduced_to_indexed(&png.raw));
+}
+
+#[bench]
+fn reductions_grayscale_8_to_palette_8(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/grayscale_8_should_be_palette_8.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| color::reduced_to_indexed(&png.raw));
+}
+
+#[bench]
+fn reductions_palette_8_to_grayscale_8(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/palette_8_should_be_grayscale_8.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| color::indexed_to_channels(&png.raw));
 }
 
 #[bench]
@@ -238,7 +258,7 @@ fn reductions_palette_duplicate_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -248,7 +268,7 @@ fn reductions_palette_unused_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
 }
 
 #[bench]
@@ -258,7 +278,17 @@ fn reductions_palette_full_reduction(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, false).unwrap();
 
-    b.iter(|| palette::optimized_palette(&png.raw, false));
+    b.iter(|| palette::reduced_palette(&png.raw, false));
+}
+
+#[bench]
+fn reductions_palette_sort(b: &mut Bencher) {
+    let input = test::black_box(PathBuf::from(
+        "tests/files/palette_8_should_be_palette_8.png",
+    ));
+    let png = PngData::new(&input, false).unwrap();
+
+    b.iter(|| palette::sorted_palette(&png.raw));
 }
 
 #[bench]

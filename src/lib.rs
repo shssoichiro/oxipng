@@ -564,7 +564,12 @@ fn optimize_png(
     // Do this first so that reductions can ignore certain chunks such as bKGD
     perform_strip(png, opts);
 
-    if let Some(new_png) = optimize_raw(png.raw.clone(), opts, deadline, Some(idat_original_size)) {
+    let max_size = if opts.force {
+        None
+    } else {
+        Some(png.estimated_output_size())
+    };
+    if let Some(new_png) = optimize_raw(png.raw.clone(), opts, deadline, max_size) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
@@ -611,7 +616,7 @@ fn optimize_raw(
     mut png: Arc<PngImage>,
     opts: &Options,
     deadline: Arc<Deadline>,
-    max_idat_size: Option<usize>,
+    max_size: Option<usize>,
 ) -> Option<PngData> {
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
     let eval_compression = 5;
@@ -673,15 +678,10 @@ fn optimize_raw(
             };
             if trial.compression > 0 && trial.compression <= eval_compression {
                 // No further compression required
-                let idat_data = eval_result.image.idat_data;
-                if opts.force || idat_data.len() < max_idat_size.unwrap_or(usize::MAX) {
-                    Some((trial, idat_data))
-                } else {
-                    None
-                }
+                Some((trial, eval_result.image.idat_data))
             } else {
                 debug!("Trying: {}", trial.filter);
-                let best_size = AtomicMin::new(if opts.force { None } else { max_idat_size });
+                let best_size = AtomicMin::new(max_size);
                 perform_trial(&eval_result.image.filtered, opts, trial, &best_size)
             }
         } else {
@@ -712,7 +712,7 @@ fn optimize_raw(
 
             debug!("Trying: {} filters", results.len());
 
-            let best_size = AtomicMin::new(if opts.force { None } else { max_idat_size });
+            let best_size = AtomicMin::new(max_size);
             let results_iter = results.into_par_iter().with_max_len(1);
             let best = results_iter.filter_map(|trial| {
                 if deadline.passed() {
@@ -730,34 +730,37 @@ fn optimize_raw(
             })
         };
 
-        if let Some((opts, idat_data)) = best {
-            debug!("Found better combination:");
-            debug!(
-                "    zc = {}  f = {:8}  {} bytes",
-                opts.compression,
-                opts.filter,
-                idat_data.len()
-            );
-            return Some(PngData {
+        if let Some((trial, idat_data)) = best {
+            let image = PngData {
                 raw: png,
                 // The filtered data has not been retained here, but we don't need to return it
                 filtered: vec![],
                 idat_data,
-            });
+            };
+            if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
+                debug!("Found better combination:");
+                debug!(
+                    "    zc = {}  f = {:8}  {} bytes",
+                    trial.compression,
+                    trial.filter,
+                    image.idat_data.len()
+                );
+                return Some(image);
+            }
         }
     } else if let Some(result) = eval_result {
         // If idat_recoding is off and reductions were attempted but ended up choosing the baseline,
         // we should still check if the evaluator compressed the baseline smaller than the original.
-        let idat_data = &result.image.idat_data;
-        if idat_data.len() < max_idat_size.unwrap_or(usize::MAX) {
+        let image = result.image;
+        if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
             debug!("Found better combination:");
             debug!(
                 "    zc = {}  f = {:8}  {} bytes",
                 eval_compression,
                 result.filter,
-                idat_data.len()
+                image.idat_data.len()
             );
-            return Some(result.image);
+            return Some(image);
         }
     }
 

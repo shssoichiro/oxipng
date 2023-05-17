@@ -186,28 +186,12 @@ impl PngData {
         match &self.raw.ihdr.color_type {
             ColorType::Indexed { palette } => {
                 let mut palette_data = Vec::with_capacity(palette.len() * 3);
-                let mut max_palette_size = 1 << (self.raw.ihdr.bit_depth as u8);
-                // Ensure bKGD color doesn't get truncated from palette
-                if let Some(&idx) = self.raw.aux_headers.get(b"bKGD").and_then(|b| b.first()) {
-                    max_palette_size = max_palette_size.max(idx as usize + 1);
-                }
-                for px in palette.iter().take(max_palette_size) {
+                for px in palette {
                     palette_data.extend_from_slice(px.rgb().as_slice());
                 }
                 write_png_block(b"PLTE", &palette_data, &mut output);
-                let num_transparent = palette.iter().take(max_palette_size).enumerate().fold(
-                    0,
-                    |prev, (index, px)| {
-                        if px.a == 255 {
-                            prev
-                        } else {
-                            index + 1
-                        }
-                    },
-                );
-                if num_transparent > 0 {
-                    let trns_data: Vec<_> =
-                        palette[0..num_transparent].iter().map(|px| px.a).collect();
+                if let Some(last_trns) = palette.iter().rposition(|px| px.a != 255) {
+                    let trns_data: Vec<_> = palette[0..=last_trns].iter().map(|px| px.a).collect();
                     write_png_block(b"tRNS", &trns_data, &mut output);
                 }
             }

@@ -427,8 +427,8 @@ fn interlacing_0_to_1_small_files() {
     };
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGB);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     remove_file(output).ok();
 }
@@ -461,8 +461,8 @@ fn interlacing_1_to_0_small_files() {
     };
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    // the depth can't be asserted reliably, because on such small file different zlib implementations pick different depth as the best
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGB);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     remove_file(output).ok();
 }

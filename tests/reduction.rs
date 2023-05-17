@@ -557,6 +557,42 @@ fn palette_4_should_be_palette_2() {
 }
 
 #[test]
+fn palette_8_should_be_grayscale_8() {
+    test_it_converts(
+        "tests/files/palette_8_should_be_grayscale_8.png",
+        false,
+        INDEXED,
+        BitDepth::Eight,
+        GRAYSCALE,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn palette_8_should_be_rgb() {
+    test_it_converts(
+        "tests/files/palette_8_should_be_rgb.png",
+        false,
+        INDEXED,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn palette_8_should_be_rgba() {
+    test_it_converts(
+        "tests/files/palette_8_should_be_rgba.png",
+        false,
+        INDEXED,
+        BitDepth::Eight,
+        RGBA,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn palette_2_should_be_palette_2() {
     test_it_converts(
         "tests/files/palette_2_should_be_palette_2.png",
@@ -809,6 +845,54 @@ fn grayscale_2_should_be_grayscale_1() {
 }
 
 #[test]
+fn grayscale_8_should_be_palette_8() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_palette_8.png",
+        false,
+        GRAYSCALE,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn grayscale_8_should_be_palette_4() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_palette_4.png",
+        false,
+        GRAYSCALE,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Four,
+    );
+}
+
+#[test]
+fn grayscale_8_should_be_palette_2() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_palette_2.png",
+        false,
+        GRAYSCALE,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Two,
+    );
+}
+
+#[test]
+fn grayscale_8_should_be_palette_1() {
+    test_it_converts(
+        "tests/files/grayscale_8_should_be_palette_1.png",
+        false,
+        GRAYSCALE,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::One,
+    );
+}
+
+#[test]
 fn grayscale_alpha_16_should_be_grayscale_trns_16() {
     test_it_converts(
         "tests/files/grayscale_alpha_16_should_be_grayscale_trns_16.png",
@@ -834,33 +918,14 @@ fn grayscale_alpha_8_should_be_grayscale_trns_8() {
 
 #[test]
 fn small_files() {
-    let input = PathBuf::from("tests/files/small_files.png");
-    let (output, opts) = get_opts(&input);
-
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
-
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, opts.fix_errors) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    // depth varies depending on zlib implementation used
-
-    remove_file(output).ok();
+    test_it_converts(
+        "tests/files/small_files.png",
+        false,
+        INDEXED,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+    );
 }
 
 #[test]

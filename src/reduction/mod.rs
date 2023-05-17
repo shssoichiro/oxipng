@@ -51,7 +51,16 @@ pub(crate) fn perform_reductions(
     // Attempt to reduce RGB to grayscale
     // This is just removal of bytes and does not need to be evaluated
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = reduce_rgb_to_grayscale(&png) {
+        if let Some(reduced) = reduced_rgb_to_grayscale(&png) {
+            png = Arc::new(reduced);
+            reduction_occurred = true;
+        }
+    }
+
+    // Attempt to reduce the palette
+    // This may change bytes but should always be beneficial
+    if opts.palette_reduction && !deadline.passed() {
+        if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
             reduction_occurred = true;
         }
@@ -65,9 +74,9 @@ pub(crate) fn perform_reductions(
     if opts.color_type_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_alpha_channel(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
-            // If the reduction requires a tRNS chunk, enter this into the evaluator
-            // Otherwise it is just removal of bytes and should become the baseline
-            if png.ihdr.color_type.has_trns() {
+            // For small differences, if a tRNS chunk is required then enter this into the evaluator
+            // Otherwise it is mostly just removal of bytes and should become the baseline
+            if png.ihdr.color_type.has_trns() && baseline.data.len() - png.data.len() <= 1000 {
                 eval.try_image(png.clone());
                 evaluation_added = true;
             } else {
@@ -77,33 +86,52 @@ pub(crate) fn perform_reductions(
         }
     }
 
-    // Attempt to reduce the palette size
+    // Attempt to sort the palette
     if opts.palette_reduction && !deadline.passed() {
-        if let Some(reduced) = optimized_palette(&png, opts.optimize_alpha) {
+        if let Some(reduced) = sorted_palette(&png) {
             png = Arc::new(reduced);
             eval.try_image(png.clone());
             evaluation_added = true;
         }
     }
 
-    // Attempt to reduce to palette
+    // Attempt to convert from indexed to channels
+    // This may give a better result due to dropping the PLTE chunk
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = reduce_to_palette(&png) {
-            png = Arc::new(reduced);
-            // Make sure the palette gets sorted (ideally, this should be done within reduce_to_palette)
-            if let Some(reduced) = optimized_palette(&png, opts.optimize_alpha) {
-                png = Arc::new(reduced);
-            }
-            eval.try_image(png.clone());
+        if let Some(reduced) = indexed_to_channels(&png) {
+            // This result should not be passed on to subsequent reductions
+            eval.try_image(Arc::new(reduced));
             evaluation_added = true;
+        }
+    }
+
+    // Attempt to reduce to indexed
+    let mut indexed = None;
+    if opts.color_type_reduction && !deadline.passed() {
+        if let Some(reduced) = reduced_to_indexed(&png) {
+            // Make sure the palette gets sorted (but don't bother evaluating both results)
+            let new = Arc::new(sorted_palette(&reduced).unwrap_or(reduced));
+            // For relatively small differences, enter this into the evaluator
+            // Otherwise we're confident enough for it to become the baseline
+            if png.data.len() - new.data.len() <= INDEXED_MAX_DIFF {
+                eval.try_image(new.clone());
+                evaluation_added = true;
+            } else {
+                baseline = new.clone();
+                reduction_occurred = true;
+            }
+            indexed = Some(new);
         }
     }
 
     // Attempt to reduce to a lower bit depth
     if opts.bit_depth_reduction && !deadline.passed() {
-        if let Some(reduced) = reduced_bit_depth_8_or_less(&png, 1) {
-            png = Arc::new(reduced);
-            eval.try_image(png.clone());
+        // Try reducing the previous png, falling back to the indexed one if it exists
+        // This allows a grayscale depth reduction to be preferred over an indexed depth reduction
+        let reduced = reduced_bit_depth_8_or_less(&png, 1)
+            .or_else(|| indexed.and_then(|png| reduced_bit_depth_8_or_less(&png, 1)));
+        if let Some(reduced) = reduced {
+            eval.try_image(Arc::new(reduced));
             evaluation_added = true;
         }
     }
