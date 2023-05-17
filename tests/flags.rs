@@ -218,7 +218,7 @@ fn strip_headers_list() {
 
     let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert_eq!(count_chunk(&png, b"tEXt"), 1);
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
     assert_eq!(count_chunk(&png, b"iTXt"), 1);
     assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
@@ -252,7 +252,7 @@ fn strip_headers_safe() {
 
     let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert_eq!(count_chunk(&png, b"tEXt"), 1);
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
     assert_eq!(count_chunk(&png, b"iTXt"), 1);
     assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
@@ -286,7 +286,7 @@ fn strip_headers_all() {
 
     let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert_eq!(count_chunk(&png, b"tEXt"), 1);
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
     assert_eq!(count_chunk(&png, b"iTXt"), 1);
     assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
@@ -320,7 +320,7 @@ fn strip_headers_none() {
 
     let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert_eq!(count_chunk(&png, b"tEXt"), 1);
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
     assert_eq!(count_chunk(&png, b"iTXt"), 1);
     assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
@@ -339,7 +339,7 @@ fn strip_headers_none() {
         }
     };
 
-    assert_eq!(count_chunk(&png, b"tEXt"), 1);
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
     assert_eq!(count_chunk(&png, b"iTXt"), 1);
     assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
