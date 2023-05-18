@@ -36,37 +36,22 @@ pub fn reduced_bit_depth_8_or_less(png: &PngImage, mut minimum_bits: usize) -> O
     // Calculate the current number of pixels per byte
     let ppb = 8 / bit_depth;
 
-    if let ColorType::Indexed { .. } = png.ihdr.color_type {
-        for line in png.scan_lines(false) {
-            let line_max = line
-                .data
-                .iter()
-                .map(|&byte| match png.ihdr.bit_depth {
-                    BitDepth::Two => (byte & 0x3)
-                        .max((byte >> 2) & 0x3)
-                        .max((byte >> 4) & 0x3)
-                        .max(byte >> 6),
-                    BitDepth::Four => (byte & 0xF).max(byte >> 4),
-                    _ => byte,
-                })
-                .max()
-                .unwrap_or(0);
-            let required_bits = match line_max {
-                x if x > 0x0F => 8,
-                x if x > 0x03 => 4,
-                x if x > 0x01 => 2,
-                _ => 1,
-            };
-            if required_bits > minimum_bits {
-                minimum_bits = required_bits;
-                if minimum_bits >= bit_depth {
-                    // Not reducable
-                    return None;
-                }
-            }
+    if let ColorType::Indexed { palette } = &png.ihdr.color_type {
+        // We can easily determine minimum depth by the palette size
+        let required_bits = match palette.len() {
+            0..=2 => 1,
+            3..=4 => 2,
+            5..=16 => 4,
+            _ => 8,
+        };
+        if required_bits >= bit_depth {
+            // Not reducable
+            return None;
+        } else if required_bits > minimum_bits {
+            minimum_bits = required_bits;
         }
     } else {
-        // Checking for grayscale depth reduction is quite different than for indexed
+        // Finding minimum depth for grayscale is much more complicated
         let mut mask = (1 << minimum_bits) - 1;
         let mut divisions = 1..(bit_depth / minimum_bits);
         for &b in &png.data {
