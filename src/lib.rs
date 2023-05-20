@@ -632,7 +632,7 @@ fn optimize_raw(
     let mut eval_result = eval.get_best_candidate();
     if let Some(ref result) = eval_result {
         if result.is_reduction {
-            png = Arc::clone(&result.image.raw);
+            png = result.image.clone();
             reduction_occurred = true;
         }
     }
@@ -656,7 +656,7 @@ fn optimize_raw(
                 trace!("Evaluating: {} filters", filters.len());
                 let eval = Evaluator::new(deadline, filters, eval_compression, opts.optimize_alpha);
                 if let Some(ref result) = eval_result {
-                    eval.set_best_size(result.image.idat_data.len());
+                    eval.set_best_size(result.idat_data.len());
                 }
                 eval.try_image(png.clone());
                 if let Some(result) = eval.get_best_candidate() {
@@ -669,12 +669,12 @@ fn optimize_raw(
             match opts.deflate {
                 Deflaters::Libdeflater { compression } if compression <= eval_compression => {
                     // No further compression required
-                    Some((result.filter, result.image.idat_data))
+                    Some((result.filter, result.idat_data))
                 }
                 _ => {
                     debug!("Trying: {}", result.filter);
                     let best_size = AtomicMin::new(max_size);
-                    perform_trial(&result.image.filtered, opts, result.filter, &best_size)
+                    perform_trial(&result.filtered, opts, result.filter, &best_size)
                 }
             }
         } else {
@@ -714,8 +714,6 @@ fn optimize_raw(
         if let Some((filter, idat_data)) = best {
             let image = PngData {
                 raw: png,
-                // The filtered data has not been retained here, but we don't need to return it
-                filtered: Vec::new(),
                 idat_data,
                 aux_chunks: Vec::new(),
             };
@@ -733,7 +731,11 @@ fn optimize_raw(
     } else if let Some(result) = eval_result {
         // If idat_recoding is off and reductions were attempted but ended up choosing the baseline,
         // we should still check if the evaluator compressed the baseline smaller than the original.
-        let image = result.image;
+        let image = PngData {
+            raw: result.image,
+            idat_data: result.idat_data,
+            aux_chunks: Vec::new(),
+        };
         if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
             debug!("Found better combination:");
             debug!(

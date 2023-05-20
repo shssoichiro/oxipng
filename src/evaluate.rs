@@ -4,7 +4,6 @@
 use crate::atomicmin::AtomicMin;
 use crate::deflate;
 use crate::filters::RowFilter;
-use crate::png::PngData;
 use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
@@ -22,7 +21,9 @@ use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
 
 pub struct Candidate {
-    pub image: PngData,
+    pub image: Arc<PngImage>,
+    pub idat_data: Vec<u8>,
+    pub filtered: Vec<u8>,
     pub filter: RowFilter,
     pub is_reduction: bool,
     // first wins tie-breaker
@@ -32,9 +33,9 @@ pub struct Candidate {
 impl Candidate {
     fn cmp_key(&self) -> impl Ord {
         (
-            self.image.estimated_output_size(),
-            self.image.raw.data.len(),
-            self.image.raw.ihdr.bit_depth,
+            self.idat_data.len() + self.image.key_chunks_size(),
+            self.image.data.len(),
+            self.image.ihdr.bit_depth,
             self.filter,
             self.nth,
         )
@@ -135,18 +136,7 @@ impl Evaluator {
                 let filtered = image.filter_image(filter, optimize_alpha);
                 let idat_data = deflate::deflate(&filtered, compression, &best_candidate_size);
                 if let Ok(idat_data) = idat_data {
-                    let new = Candidate {
-                        image: PngData {
-                            idat_data,
-                            filtered,
-                            raw: Arc::clone(&image),
-                            aux_chunks: Vec::new(),
-                        },
-                        filter,
-                        is_reduction,
-                        nth,
-                    };
-                    let size = new.image.estimated_output_size();
+                    let size = idat_data.len() + image.key_chunks_size();
                     best_candidate_size.set_min(size);
                     trace!(
                         "Eval: {}-bit {:20}  {:8}   {} bytes",
@@ -155,6 +145,14 @@ impl Evaluator {
                         filter,
                         size
                     );
+                    let new = Candidate {
+                        image: image.clone(),
+                        idat_data,
+                        filtered,
+                        filter,
+                        is_reduction,
+                        nth,
+                    };
 
                     #[cfg(feature = "parallel")]
                     {

@@ -39,8 +39,6 @@ pub struct PngData {
     pub raw: Arc<PngImage>,
     /// The filtered and compressed data of the IDAT chunk
     pub idat_data: Vec<u8>,
-    /// The filtered, uncompressed data of the IDAT chunk
-    pub filtered: Vec<u8>,
     /// All non-critical chunks from the PNG are stored here
     pub aux_chunks: Vec<Chunk>,
 }
@@ -135,35 +133,18 @@ impl PngData {
             ihdr,
             data: raw_data,
         };
-        let unfiltered = raw.unfilter_image()?;
+        raw.data = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
             idat_data,
-            filtered: std::mem::replace(&mut raw.data, unfiltered),
             raw: Arc::new(raw),
             aux_chunks,
         })
     }
 
-    /// Return an estimate of the output size
+    /// Return an estimate of the output size which can help with evaluation of very small data
     pub fn estimated_output_size(&self) -> usize {
-        // Add the size of the PLTE and tRNS chunks to the compressed idat size
-        // This can help with evaluation of very small data
-        let size = self.idat_data.len();
-        size + match &self.raw.ihdr.color_type {
-            ColorType::Indexed { palette } => {
-                let plte = 12 + palette.len() * 3;
-                let trns = palette.iter().filter(|p| p.a != 255).count();
-                if trns != 0 {
-                    plte + 12 + trns
-                } else {
-                    plte
-                }
-            }
-            ColorType::Grayscale { transparent_shade } if transparent_shade.is_some() => 12 + 2,
-            ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
-            _ => 0,
-        }
+        self.idat_data.len() + self.raw.key_chunks_size()
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream
@@ -271,6 +252,24 @@ impl PngImage {
             BitDepth::Sixteen => 2,
             // Depths lower than 8 will round up to 1 byte
             _ => 1,
+        }
+    }
+
+    /// Calculate the size of the PLTE and tRNS chunks
+    pub fn key_chunks_size(&self) -> usize {
+        match &self.ihdr.color_type {
+            ColorType::Indexed { palette } => {
+                let plte = 12 + palette.len() * 3;
+                let trns = palette.iter().filter(|p| p.a != 255).count();
+                if trns != 0 {
+                    plte + 12 + trns
+                } else {
+                    plte
+                }
+            }
+            ColorType::Grayscale { transparent_shade } if transparent_shade.is_some() => 12 + 2,
+            ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
+            _ => 0,
         }
     }
 
