@@ -42,7 +42,7 @@ pub(crate) fn perform_reductions(
     // Attempt to reduce 16-bit to 8-bit
     // This is just removal of bytes and does not need to be evaluated
     if opts.bit_depth_reduction && !deadline.passed() {
-        if let Some(reduced) = reduced_bit_depth_16_to_8(&png) {
+        if let Some(reduced) = reduced_bit_depth_16_to_8(&png, opts.scale_16) {
             png = Arc::new(reduced);
             reduction_occurred = true;
         }

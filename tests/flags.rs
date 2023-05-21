@@ -605,6 +605,23 @@ fn fix_errors() {
 }
 
 #[test]
+fn scale_16() {
+    let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.scale_16 = true;
+
+    test_it_converts(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Sixteen,
+        RGB,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 #[cfg(feature = "zopfli")]
 fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");

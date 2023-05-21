@@ -186,6 +186,10 @@ pub struct Options {
     ///
     /// Default: `true`
     pub idat_recoding: bool,
+    /// Whether to forcibly reduce 16-bit to 8-bit by scaling
+    ///
+    /// Default: `false`
+    pub scale_16: bool,
     /// Which chunks to strip from the PNG file, if any
     ///
     /// Default: `None`
@@ -303,6 +307,7 @@ impl Default for Options {
             palette_reduction: true,
             grayscale_reduction: true,
             idat_recoding: true,
+            scale_16: false,
             strip: StripChunks::None,
             deflate: Deflaters::Libdeflater { compression: 11 },
             fast_evaluation: true,

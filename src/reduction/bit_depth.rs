@@ -4,9 +4,13 @@ use crate::png::PngImage;
 
 /// Attempt to reduce a 16-bit image to 8-bit, returning the reduced image if successful
 #[must_use]
-pub fn reduced_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
+pub fn reduced_bit_depth_16_to_8(png: &PngImage, force_scale: bool) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Sixteen {
         return None;
+    }
+
+    if force_scale {
+        return scaled_bit_depth_16_to_8(png);
     }
 
     // Reduce from 16 to 8 bits per channel per pixel
@@ -17,6 +21,38 @@ pub fn reduced_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
 
     Some(PngImage {
         data: png.data.iter().step_by(2).cloned().collect(),
+        ihdr: IhdrData {
+            color_type: png.ihdr.color_type.clone(),
+            bit_depth: BitDepth::Eight,
+            ..png.ihdr
+        },
+    })
+}
+
+/// Forcibly reduce a 16-bit image to 8-bit by scaling, returning the reduced image if successful
+#[must_use]
+pub fn scaled_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
+    if png.ihdr.bit_depth != BitDepth::Sixteen {
+        return None;
+    }
+
+    // Reduce from 16 to 8 bits per channel per pixel by scaling when necessary
+    let data = png
+        .data
+        .chunks(2)
+        .map(|pair| {
+            if pair[0] == pair[1] {
+                return pair[0];
+            }
+            // See: http://www.libpng.org/pub/png/spec/1.2/PNG-Decoders.html#D.Sample-depth-rescaling
+            // This allows values such as 0x00FF to be rounded to 0x01 rather than truncated to 0x00
+            let val = u16::from_be_bytes([pair[0], pair[1]]) as f64;
+            (val * 255.0 / 65535.0).round() as u8
+        })
+        .collect();
+
+    Some(PngImage {
+        data,
         ihdr: IhdrData {
             color_type: png.ihdr.color_type.clone(),
             bit_depth: BitDepth::Eight,

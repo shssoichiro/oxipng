@@ -154,6 +154,11 @@ fn main() {
                 .possible_value("keep"),
         )
         .arg(
+            Arg::new("scale16")
+                .help("Forcibly reduce 16-bit images to 8-bit")
+                .long("scale16"),
+        )
+        .arg(
             Arg::new("verbose")
                 .help("Run in verbose mode (use multiple times to increase verbosity)")
                 .short('v')
@@ -444,6 +449,10 @@ fn parse_opts_into_struct(
 
     if matches.is_present("alpha") {
         opts.optimize_alpha = true;
+    }
+
+    if matches.is_present("scale16") {
+        opts.scale_16 = true;
     }
 
     if matches.is_present("fast") {
