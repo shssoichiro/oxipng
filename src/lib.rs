@@ -878,10 +878,11 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
         }
     }
 
-    // If the color type has changed, some chunks may be invalid and should be dropped
-    // While these could potentially be converted, they have no known use case today and
-    // are generally more trouble than they're worth
-    if orig_ihdr.color_type != png.raw.ihdr.color_type {
+    // If the depth/color type has changed, some chunks may be invalid and should be dropped
+    // While these could potentially be converted, they have no known use case today and are
+    // generally more trouble than they're worth
+    let ihdr = &png.raw.ihdr;
+    if orig_ihdr.bit_depth != ihdr.bit_depth || orig_ihdr.color_type != ihdr.color_type {
         png.aux_chunks.retain(|c| {
             let invalid = &c.name == b"bKGD" || &c.name == b"sBIT" || &c.name == b"hIST";
             if invalid {
