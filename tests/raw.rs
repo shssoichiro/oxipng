@@ -16,11 +16,11 @@ fn test_it_converts(input: &str) {
     let opts = get_opts();
 
     let original_data = PngData::read_file(&PathBuf::from(input)).unwrap();
-    let png = PngData::from_slice(&original_data, opts.fix_errors).unwrap();
-    let png = Arc::try_unwrap(png.raw).unwrap();
+    let image = PngData::from_slice(&original_data, &opts).unwrap();
+    let png = Arc::try_unwrap(image.raw).unwrap();
 
-    let num_headers = png.aux_headers.len();
-    assert!(num_headers > 0);
+    let num_chunks = image.aux_chunks.len();
+    assert!(num_chunks > 0);
 
     let mut raw = RawImage::new(
         png.ihdr.width,
@@ -31,14 +31,14 @@ fn test_it_converts(input: &str) {
     )
     .unwrap();
 
-    for (chunk_type, data) in png.aux_headers {
-        raw.add_png_chunk(chunk_type, data);
+    for chunk in image.aux_chunks {
+        raw.add_png_chunk(chunk.name, chunk.data);
     }
 
     let output = raw.create_optimized_png(&opts).unwrap();
 
-    let new = PngData::from_slice(&output, opts.fix_errors).unwrap();
-    assert!(new.raw.aux_headers.len() == num_headers);
+    let new = PngData::from_slice(&output, &opts).unwrap();
+    assert!(new.aux_chunks.len() == num_chunks);
 
     #[cfg(feature = "sanity-checks")]
     assert!(validate_output(&output, &original_data));

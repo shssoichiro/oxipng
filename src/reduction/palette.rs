@@ -30,15 +30,6 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
         }
     }
 
-    // Update bKGD if it exists, ensuring it comes last in the palette if otherwise unused
-    let mut aux_headers = png.aux_headers.clone();
-    if let Some(idx) = aux_headers.remove(b"bKGD").and_then(|b| b.first().cloned()) {
-        if let Some(&color) = palette.get(idx as usize) {
-            let idx = add_color_to_set(color, &mut condensed, optimize_alpha);
-            aux_headers.insert(*b"bKGD", vec![idx]);
-        }
-    }
-
     let data = if did_change {
         // Reassign data bytes to new indices
         let byte_map = palette_map_to_byte_map(png.ihdr.bit_depth, &palette_map);
@@ -59,7 +50,6 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
             ..png.ihdr
         },
         data,
-        aux_headers,
     })
 }
 
@@ -145,15 +135,6 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
 
     let mut enumerated: Vec<_> = palette.iter().enumerate().collect();
 
-    // If the background is the last entry in the palette we should make sure it stays last
-    // Otherwise an entry that's unused by the idat could prevent reduction to a lower depth
-    let mut aux_headers = png.aux_headers.clone();
-    let bkgd_idx = aux_headers.remove(b"bKGD").and_then(|b| b.first().cloned());
-    let bkgd_last = match bkgd_idx {
-        Some(idx) if idx as usize + 1 == palette.len() => enumerated.pop(),
-        _ => None,
-    };
-
     // Sort the palette
     enumerated.sort_by(|a, b| {
         // Sort by ascending alpha and descending luma
@@ -166,10 +147,6 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
         };
         color_val(a.1).cmp(&color_val(b.1))
     });
-
-    if let Some(bkgd) = bkgd_last {
-        enumerated.push(bkgd);
-    }
 
     // Extract the new palette and determine if anything changed
     let (old_map, palette): (Vec<_>, Vec<RGBA8>) = enumerated.into_iter().unzip();
@@ -185,17 +162,11 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     let byte_map = palette_map_to_byte_map(png.ihdr.bit_depth, &new_map);
     let data = png.data.iter().map(|&b| byte_map[b as usize]).collect();
 
-    // Update bKGD if it exists
-    if let Some(idx) = bkgd_idx.map(|idx| new_map[idx as usize]) {
-        aux_headers.insert(*b"bKGD", vec![idx]);
-    }
-
     Some(PngImage {
         ihdr: IhdrData {
             color_type: ColorType::Indexed { palette },
             ..png.ihdr
         },
         data,
-        aux_headers,
     })
 }

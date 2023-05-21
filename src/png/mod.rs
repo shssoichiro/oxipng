@@ -4,8 +4,8 @@ use crate::error::PngError;
 use crate::filters::*;
 use crate::headers::*;
 use crate::interlace::{deinterlace_image, interlace_image, Interlacing};
+use crate::Options;
 use bitvec::bitarr;
-use indexmap::IndexMap;
 use libdeflater::{CompressionLvl, Compressor};
 use rgb::ComponentSlice;
 use rustc_hash::FxHashMap;
@@ -30,8 +30,6 @@ pub struct PngImage {
     pub ihdr: IhdrData,
     /// The uncompressed, unfiltered data from the IDAT chunk
     pub data: Vec<u8>,
-    /// All non-critical headers from the PNG are stored here
-    pub aux_headers: IndexMap<[u8; 4], Vec<u8>>,
 }
 
 /// Contains all data relevant to a PNG image
@@ -41,17 +39,17 @@ pub struct PngData {
     pub raw: Arc<PngImage>,
     /// The filtered and compressed data of the IDAT chunk
     pub idat_data: Vec<u8>,
-    /// The filtered, uncompressed data of the IDAT chunk
-    pub filtered: Vec<u8>,
+    /// All non-critical chunks from the PNG are stored here
+    pub aux_chunks: Vec<Chunk>,
 }
 
 impl PngData {
     /// Create a new `PngData` struct by opening a file
     #[inline]
-    pub fn new(filepath: &Path, fix_errors: bool) -> Result<Self, PngError> {
+    pub fn new(filepath: &Path, opts: &Options) -> Result<Self, PngError> {
         let byte_data = Self::read_file(filepath)?;
 
-        Self::from_slice(&byte_data, fix_errors)
+        Self::from_slice(&byte_data, opts)
     }
 
     pub fn read_file(filepath: &Path) -> Result<Vec<u8>, PngError> {
@@ -80,7 +78,7 @@ impl PngData {
     }
 
     /// Create a new `PngData` struct by reading a slice
-    pub fn from_slice(byte_data: &[u8], fix_errors: bool) -> Result<Self, PngError> {
+    pub fn from_slice(byte_data: &[u8], opts: &Options) -> Result<Self, PngError> {
         let mut byte_offset: usize = 0;
         // Test that png header is valid
         let header = byte_data.get(0..8).ok_or(PngError::TruncatedData)?;
@@ -88,71 +86,65 @@ impl PngData {
             return Err(PngError::NotPNG);
         }
         byte_offset += 8;
-        // Read the data headers
-        let mut aux_headers: IndexMap<[u8; 4], Vec<u8>> = IndexMap::new();
-        let mut idat_headers: Vec<u8> = Vec::new();
-        while let Some(header) = parse_next_header(byte_data, &mut byte_offset, fix_errors)? {
-            match &header.name {
-                b"IDAT" => idat_headers.extend_from_slice(header.data),
+
+        // Read the data chunks
+        let mut idat_data: Vec<u8> = Vec::new();
+        let mut key_chunks: FxHashMap<[u8; 4], Vec<u8>> = FxHashMap::default();
+        let mut aux_chunks: Vec<Chunk> = Vec::new();
+        while let Some(chunk) = parse_next_chunk(byte_data, &mut byte_offset, opts.fix_errors)? {
+            match &chunk.name {
+                b"IDAT" => idat_data.extend_from_slice(chunk.data),
                 b"acTL" => return Err(PngError::APNGNotSupported),
+                b"IHDR" | b"PLTE" | b"tRNS" => {
+                    key_chunks.insert(chunk.name, chunk.data.to_owned());
+                }
                 _ => {
-                    aux_headers.insert(header.name, header.data.to_owned());
+                    if opts.strip.keep(&chunk.name) {
+                        aux_chunks.push(Chunk {
+                            name: chunk.name,
+                            data: chunk.data.to_owned(),
+                        })
+                    }
                 }
             }
         }
-        // Parse the headers into our PngData
-        if idat_headers.is_empty() {
+
+        // Parse the chunks into our PngData
+        if idat_data.is_empty() {
             return Err(PngError::ChunkMissing("IDAT"));
         }
-        let ihdr = match aux_headers.remove(b"IHDR") {
+        let ihdr_chunk = match key_chunks.remove(b"IHDR") {
             Some(ihdr) => ihdr,
             None => return Err(PngError::ChunkMissing("IHDR")),
         };
-        let ihdr_header = parse_ihdr_header(
-            &ihdr,
-            aux_headers.remove(b"PLTE"),
-            aux_headers.remove(b"tRNS"),
+        let ihdr = parse_ihdr_chunk(
+            &ihdr_chunk,
+            key_chunks.remove(b"PLTE"),
+            key_chunks.remove(b"tRNS"),
         )?;
-        let raw_data = deflate::inflate(idat_headers.as_ref(), ihdr_header.raw_data_size())?;
+        let raw_data = deflate::inflate(idat_data.as_ref(), ihdr.raw_data_size())?;
 
         // Reject files with incorrect width/height or truncated data
-        if raw_data.len() != ihdr_header.raw_data_size() {
+        if raw_data.len() != ihdr.raw_data_size() {
             return Err(PngError::TruncatedData);
         }
 
         let mut raw = PngImage {
-            ihdr: ihdr_header,
+            ihdr,
             data: raw_data,
-            aux_headers,
         };
-        let unfiltered = raw.unfilter_image()?;
+        raw.data = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
-            idat_data: idat_headers,
-            filtered: std::mem::replace(&mut raw.data, unfiltered),
+            idat_data,
             raw: Arc::new(raw),
+            aux_chunks,
         })
     }
 
-    /// Return an estimate of the output size
+    /// Return an estimate of the output size which can help with evaluation of very small data
     pub fn estimated_output_size(&self) -> usize {
-        // Add the size of the PLTE and tRNS chunks to the compressed idat size
-        // This can help with evaluation of very small data
-        let size = self.idat_data.len();
-        size + match &self.raw.ihdr.color_type {
-            ColorType::Indexed { palette } => {
-                let plte = 12 + palette.len() * 3;
-                let trns = palette.iter().filter(|p| p.a != 255).count();
-                if trns != 0 {
-                    plte + 12 + trns
-                } else {
-                    plte
-                }
-            }
-            ColorType::Grayscale { transparent_shade } if transparent_shade.is_some() => 12 + 2,
-            ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
-            _ => 0,
-        }
+        self.idat_data.len() + self.raw.key_chunks_size()
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream
@@ -173,14 +165,13 @@ impl PngData {
         ihdr_data.write_all(&[0]).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_all(&[self.raw.ihdr.interlaced as u8]).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
-        // Ancillary headers
-        for (key, header) in self
-            .raw
-            .aux_headers
+        // Ancillary chunks
+        for chunk in self
+            .aux_chunks
             .iter()
-            .filter(|&(key, _)| !(key == b"bKGD" || key == b"hIST" || key == b"tRNS"))
+            .filter(|c| !(&c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS"))
         {
-            write_png_block(key, header, &mut output);
+            write_png_block(&chunk.name, &chunk.data, &mut output);
         }
         // Palette and transparency
         match &self.raw.ihdr.color_type {
@@ -210,14 +201,13 @@ impl PngData {
             }
             _ => {}
         }
-        // Special ancillary headers that need to come after PLTE but before IDAT
-        for (key, header) in self
-            .raw
-            .aux_headers
+        // Special ancillary chunks that need to come after PLTE but before IDAT
+        for chunk in self
+            .aux_chunks
             .iter()
-            .filter(|&(key, _)| key == b"bKGD" || key == b"hIST" || key == b"tRNS")
+            .filter(|c| &c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS")
         {
-            write_png_block(key, header, &mut output);
+            write_png_block(&chunk.name, &chunk.data, &mut output);
         }
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);
@@ -262,6 +252,24 @@ impl PngImage {
             BitDepth::Sixteen => 2,
             // Depths lower than 8 will round up to 1 byte
             _ => 1,
+        }
+    }
+
+    /// Calculate the size of the PLTE and tRNS chunks
+    pub fn key_chunks_size(&self) -> usize {
+        match &self.ihdr.color_type {
+            ColorType::Indexed { palette } => {
+                let plte = 12 + palette.len() * 3;
+                let trns = palette.iter().filter(|p| p.a != 255).count();
+                if trns != 0 {
+                    plte + 12 + trns
+                } else {
+                    plte
+                }
+            }
+            ColorType::Grayscale { transparent_shade } if transparent_shade.is_some() => 12 + 2,
+            ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
+            _ => 0,
         }
     }
 
@@ -451,14 +459,15 @@ impl PngImage {
         filtered
     }
 }
-fn write_png_block(key: &[u8], header: &[u8], output: &mut Vec<u8>) {
-    let mut header_data = Vec::with_capacity(header.len() + 4);
-    header_data.extend_from_slice(key);
-    header_data.extend_from_slice(header);
-    output.reserve(header_data.len() + 8);
-    output.extend_from_slice(&(header_data.len() as u32 - 4).to_be_bytes());
-    let crc = deflate::crc32(&header_data);
-    output.append(&mut header_data);
+
+fn write_png_block(key: &[u8], chunk: &[u8], output: &mut Vec<u8>) {
+    let mut chunk_data = Vec::with_capacity(chunk.len() + 4);
+    chunk_data.extend_from_slice(key);
+    chunk_data.extend_from_slice(chunk);
+    output.reserve(chunk_data.len() + 8);
+    output.extend_from_slice(&(chunk_data.len() as u32 - 4).to_be_bytes());
+    let crc = deflate::crc32(&chunk_data);
+    output.append(&mut chunk_data);
     output.extend_from_slice(&crc.to_be_bytes());
 }
 

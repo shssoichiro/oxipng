@@ -90,7 +90,6 @@ pub fn interlace_image(png: &PngImage) -> PngImage {
             interlaced: Interlacing::Adam7,
             ..png.ihdr
         },
-        aux_headers: png.aux_headers.clone(),
     }
 }
 
@@ -105,7 +104,6 @@ pub fn deinterlace_image(png: &PngImage) -> PngImage {
             interlaced: Interlacing::None,
             ..png.ihdr
         },
-        aux_headers: png.aux_headers.clone(),
     }
 }
 

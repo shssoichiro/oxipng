@@ -1,6 +1,6 @@
-use indexmap::IndexSet;
-use oxipng::{internal_tests::*, Interlacing, RowFilter};
-use oxipng::{InFile, OutFile};
+use indexmap::{indexset, IndexSet};
+use oxipng::internal_tests::*;
+use oxipng::*;
 #[cfg(feature = "filetime")]
 use std::cell::RefCell;
 use std::fs::remove_file;
@@ -47,7 +47,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     CBPOST: FnMut(&Path),
     CBPRE: FnMut(&Path),
 {
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
@@ -63,7 +63,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
 
     callback_post(output);
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -203,17 +203,24 @@ fn verbose_mode() {
     }
 }
 
+fn count_chunk(png: &PngData, name: &[u8; 4]) -> usize {
+    png.aux_chunks
+        .iter()
+        .filter(|chunk| &chunk.name == name)
+        .count()
+}
+
 #[test]
 fn strip_headers_list() {
     let input = PathBuf::from("tests/files/strip_headers_list.png");
     let (output, mut opts) = get_opts(&input);
-    opts.strip = Headers::Strip(vec!["iCCP".to_owned(), "tEXt".to_owned()]);
+    opts.strip = StripChunks::Strip(indexset![*b"iCCP", *b"tEXt"]);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -222,7 +229,7 @@ fn strip_headers_list() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -230,9 +237,9 @@ fn strip_headers_list() {
         }
     };
 
-    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(!png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 0);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 0);
 
     remove_file(output).ok();
 }
@@ -241,13 +248,13 @@ fn strip_headers_list() {
 fn strip_headers_safe() {
     let input = PathBuf::from("tests/files/strip_headers_safe.png");
     let (output, mut opts) = get_opts(&input);
-    opts.strip = Headers::Safe;
+    opts.strip = StripChunks::Safe;
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -256,7 +263,7 @@ fn strip_headers_safe() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -264,9 +271,9 @@ fn strip_headers_safe() {
         }
     };
 
-    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(!png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"sRGB"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 0);
+    assert_eq!(count_chunk(&png, b"iTXt"), 0);
+    assert_eq!(count_chunk(&png, b"sRGB"), 1);
 
     remove_file(output).ok();
 }
@@ -275,13 +282,13 @@ fn strip_headers_safe() {
 fn strip_headers_all() {
     let input = PathBuf::from("tests/files/strip_headers_all.png");
     let (output, mut opts) = get_opts(&input);
-    opts.strip = Headers::All;
+    opts.strip = StripChunks::All;
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -290,7 +297,7 @@ fn strip_headers_all() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -298,9 +305,9 @@ fn strip_headers_all() {
         }
     };
 
-    assert!(!png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(!png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(!png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 0);
+    assert_eq!(count_chunk(&png, b"iTXt"), 0);
+    assert_eq!(count_chunk(&png, b"iCCP"), 0);
 
     remove_file(output).ok();
 }
@@ -309,13 +316,13 @@ fn strip_headers_all() {
 fn strip_headers_none() {
     let input = PathBuf::from("tests/files/strip_headers_none.png");
     let (output, mut opts) = get_opts(&input);
-    opts.strip = Headers::None;
+    opts.strip = StripChunks::None;
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &Options::default()).unwrap();
 
-    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
         Ok(_) => (),
@@ -324,7 +331,7 @@ fn strip_headers_none() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -332,9 +339,9 @@ fn strip_headers_none() {
         }
     };
 
-    assert!(png.raw.aux_headers.contains_key(b"tEXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iTXt"));
-    assert!(png.raw.aux_headers.contains_key(b"iCCP"));
+    assert_eq!(count_chunk(&png, b"tEXt"), 3);
+    assert_eq!(count_chunk(&png, b"iTXt"), 1);
+    assert_eq!(count_chunk(&png, b"iCCP"), 1);
 
     remove_file(output).ok();
 }
@@ -345,7 +352,7 @@ fn interlacing_0_to_1() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(Interlacing::Adam7);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
 
@@ -356,7 +363,7 @@ fn interlacing_0_to_1() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -375,7 +382,7 @@ fn interlacing_1_to_0() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(Interlacing::None);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
 
@@ -386,7 +393,7 @@ fn interlacing_1_to_0() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -405,7 +412,7 @@ fn interlacing_0_to_1_small_files() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(Interlacing::Adam7);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
@@ -418,7 +425,7 @@ fn interlacing_0_to_1_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -439,7 +446,7 @@ fn interlacing_1_to_0_small_files() {
     let (output, mut opts) = get_opts(&input);
     opts.interlace = Some(Interlacing::None);
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
@@ -452,7 +459,7 @@ fn interlacing_1_to_0_small_files() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -476,7 +483,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     filter.insert(RowFilter::Paeth);
     opts.filter = filter;
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
 
@@ -487,7 +494,7 @@ fn interlaced_0_to_1_other_filter_mode() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, opts.fix_errors) {
+    let png = match PngData::new(output, &opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -570,7 +577,7 @@ fn fix_errors() {
     let (output, mut opts) = get_opts(&input);
     opts.fix_errors = true;
 
-    let png = PngData::new(&input, opts.fix_errors).unwrap();
+    let png = PngData::new(&input, &opts).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGBA);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
@@ -582,7 +589,7 @@ fn fix_errors() {
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    let png = match PngData::new(output, false) {
+    let png = match PngData::new(output, &Options::default()) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
