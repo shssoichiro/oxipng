@@ -144,13 +144,14 @@ fn main() {
         )
         .arg(
             Arg::new("interlace")
-                .help("PNG interlace type")
+                .help("PNG interlace type - Default: 0")
                 .short('i')
                 .long("interlace")
                 .takes_value(true)
-                .value_name("0/1")
+                .value_name("type")
                 .possible_value("0")
-                .possible_value("1"),
+                .possible_value("1")
+                .possible_value("keep"),
         )
         .arg(
             Arg::new("verbose")
@@ -394,7 +395,11 @@ fn parse_opts_into_struct(
     };
 
     if let Some(x) = matches.value_of("interlace") {
-        opts.interlace = x.parse::<u8>().unwrap().try_into().ok();
+        opts.interlace = if x == "keep" {
+            None
+        } else {
+            x.parse::<u8>().unwrap().try_into().ok()
+        };
     }
 
     if let Some(x) = matches.value_of("filters") {

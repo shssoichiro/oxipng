@@ -159,7 +159,7 @@ pub struct Options {
     ///
     /// `Some(x)` will change the file to interlacing mode `x`.
     ///
-    /// Default: `None`
+    /// Default: `Some(None)`
     pub interlace: Option<Interlacing>,
     /// Whether to allow transparent pixels to be altered to improve compression.
     pub optimize_alpha: bool,
@@ -296,7 +296,7 @@ impl Default for Options {
             force: false,
             preserve_attrs: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
-            interlace: None,
+            interlace: Some(Interlacing::None),
             optimize_alpha: false,
             bit_depth_reduction: true,
             color_type_reduction: true,
