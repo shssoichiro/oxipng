@@ -32,6 +32,7 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use log::{debug, info, trace, warn};
 use rayon::prelude::*;
+use std::borrow::Cow;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
@@ -564,17 +565,30 @@ fn optimize_png(
     debug!("    IDAT size = {} bytes", idat_original_size);
     debug!("    File size = {} bytes", file_original_size);
 
+    // Check for APNG by presence of acTL chunk
+    let opts = if png.aux_chunks.iter().any(|c| &c.name == b"acTL") {
+        warn!("APNG detected, disabling all reductions");
+        let mut opts = opts.to_owned();
+        opts.interlace = None;
+        opts.bit_depth_reduction = false;
+        opts.color_type_reduction = false;
+        opts.palette_reduction = false;
+        opts.grayscale_reduction = false;
+        Cow::Owned(opts)
+    } else {
+        Cow::Borrowed(opts)
+    };
     let max_size = if opts.force {
         None
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size) {
+    if let Some(new_png) = optimize_raw(raw.clone(), &opts, deadline, max_size) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
 
-    postprocess_chunks(png, opts, &raw.ihdr);
+    postprocess_chunks(png, &opts, &raw.ihdr);
 
     let output = png.output();
 

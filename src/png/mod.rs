@@ -93,8 +93,16 @@ impl PngData {
         let mut aux_chunks: Vec<Chunk> = Vec::new();
         while let Some(chunk) = parse_next_chunk(byte_data, &mut byte_offset, opts.fix_errors)? {
             match &chunk.name {
-                b"IDAT" => idat_data.extend_from_slice(chunk.data),
-                b"acTL" => return Err(PngError::APNGNotSupported),
+                b"IDAT" => {
+                    if idat_data.is_empty() {
+                        // Keep track of where the first IDAT sits relative to other chunks
+                        aux_chunks.push(Chunk {
+                            name: chunk.name,
+                            data: Vec::new(),
+                        })
+                    }
+                    idat_data.extend_from_slice(chunk.data);
+                }
                 b"IHDR" | b"PLTE" | b"tRNS" => {
                     key_chunks.insert(chunk.name, chunk.data.to_owned());
                 }
@@ -165,9 +173,10 @@ impl PngData {
         ihdr_data.write_all(&[0]).ok(); // Filter method -- 5-way adaptive filtering
         ihdr_data.write_all(&[self.raw.ihdr.interlaced as u8]).ok();
         write_png_block(b"IHDR", &ihdr_data, &mut output);
-        // Ancillary chunks
-        for chunk in self
-            .aux_chunks
+        // Ancillary chunks - split into those that come before IDAT and those that come after
+        let mut aux_split = self.aux_chunks.split(|c| &c.name == b"IDAT");
+        let aux_pre = aux_split.next().unwrap();
+        for chunk in aux_pre
             .iter()
             .filter(|c| !(&c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS"))
         {
@@ -202,8 +211,7 @@ impl PngData {
             _ => {}
         }
         // Special ancillary chunks that need to come after PLTE but before IDAT
-        for chunk in self
-            .aux_chunks
+        for chunk in aux_pre
             .iter()
             .filter(|c| &c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS")
         {
@@ -211,6 +219,12 @@ impl PngData {
         }
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);
+        // Ancillary chunks that come after IDAT
+        for aux_post in aux_split {
+            for chunk in aux_post {
+                write_png_block(&chunk.name, &chunk.data, &mut output);
+            }
+        }
         // Stream end
         write_png_block(b"IEND", &[], &mut output);
 
