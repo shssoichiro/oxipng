@@ -50,7 +50,7 @@ pub(crate) fn perform_reductions(
 
     // Attempt to reduce RGB to grayscale
     // This is just removal of bytes and does not need to be evaluated
-    if opts.color_type_reduction && !deadline.passed() {
+    if opts.color_type_reduction && opts.grayscale_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_rgb_to_grayscale(&png) {
             png = Arc::new(reduced);
             reduction_occurred = true;
@@ -98,7 +98,7 @@ pub(crate) fn perform_reductions(
     // Attempt to convert from indexed to channels
     // This may give a better result due to dropping the PLTE chunk
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = indexed_to_channels(&png) {
+        if let Some(reduced) = indexed_to_channels(&png, opts.grayscale_reduction) {
             // This result should not be passed on to subsequent reductions
             eval.try_image(Arc::new(reduced));
             evaluation_added = true;
