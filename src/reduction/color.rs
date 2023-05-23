@@ -132,7 +132,7 @@ pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
 
 /// Attempt to convert indexed to a different color type, returning the resulting image if successful
 #[must_use]
-pub fn indexed_to_channels(png: &PngImage) -> Option<PngImage> {
+pub fn indexed_to_channels(png: &PngImage, allow_grayscale: bool) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
@@ -142,7 +142,11 @@ pub fn indexed_to_channels(png: &PngImage) -> Option<PngImage> {
     };
 
     // Determine which channels are required
-    let is_gray = palette.iter().all(|c| c.r == c.g && c.g == c.b);
+    let is_gray = if allow_grayscale {
+        palette.iter().all(|c| c.r == c.g && c.g == c.b)
+    } else {
+        false
+    };
     let has_alpha = palette.iter().any(|c| c.a != 255);
     let color_type = match (is_gray, has_alpha) {
         (false, true) => ColorType::RGBA,
