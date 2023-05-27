@@ -1,6 +1,8 @@
 use crate::colors::{BitDepth, ColorType};
 use crate::headers::IhdrData;
+use crate::png::scan_lines::ScanLine;
 use crate::png::PngImage;
+use crate::Interlacing;
 use indexmap::IndexSet;
 use rgb::RGBA8;
 
@@ -69,7 +71,7 @@ fn add_color_to_set(mut color: RGBA8, set: &mut IndexSet<RGBA8>, optimize_alpha:
     idx as u8
 }
 
-/// Attempt to sort the colors in the palette, returning the sorted image if successful
+/// Attempt to sort the colors in the palette by luma, returning the sorted image if successful
 #[must_use]
 pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight {
@@ -115,4 +117,163 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
         },
         data,
     })
+}
+
+/// Sort the colors in the palette by minimizing entropy, returning the sorted image if successful
+#[must_use]
+pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
+    // Interlacing not currently supported
+    if png.ihdr.bit_depth != BitDepth::Eight || png.ihdr.interlaced != Interlacing::None {
+        return None;
+    }
+    let palette = match &png.ihdr.color_type {
+        ColorType::Indexed { palette } if palette.len() > 2 => palette,
+        _ => return None,
+    };
+
+    let matrix = co_occurrence_matrix(palette.len(), png);
+    let edges = weighted_edges(&matrix);
+    let mut old_map = battiato_tsp(palette.len(), edges);
+    // Keep the same first element
+    // This is safe to do if the palette is full since the delta filters are wrapping operations
+    if palette.len() == 256 {
+        let first = old_map.iter().position(|&i| i == 0).unwrap();
+        old_map.rotate_left(first);
+    }
+
+    // Check if anything changed
+    if old_map.iter().enumerate().all(|(a, b)| a == *b) {
+        return None;
+    }
+
+    // Construct the palette and byte maps and convert the data
+    let mut new_palette = Vec::new();
+    let mut byte_map = [0; 256];
+    for (i, &v) in old_map.iter().enumerate() {
+        new_palette.push(palette[v]);
+        byte_map[v] = i as u8;
+    }
+    let data = png.data.iter().map(|&b| byte_map[b as usize]).collect();
+
+    Some(PngImage {
+        ihdr: IhdrData {
+            color_type: ColorType::Indexed {
+                palette: new_palette,
+            },
+            ..png.ihdr
+        },
+        data,
+    })
+}
+
+// Calculate co-occurences matrix
+fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<usize>> {
+    let mut matrix = vec![vec![0; num_colors]; num_colors];
+    let mut prev: Option<ScanLine> = None;
+    for line in png.scan_lines(false) {
+        for i in 0..line.data.len() {
+            let val = line.data[i] as usize;
+            if i > 0 {
+                matrix[line.data[i - 1] as usize][val] += 1;
+            }
+            if let Some(prev) = &prev {
+                matrix[prev.data[i] as usize][val] += 1;
+            }
+        }
+        prev = Some(line)
+    }
+    matrix
+}
+
+// Calculate edge list sorted by weight
+fn weighted_edges(matrix: &[Vec<usize>]) -> Vec<(usize, usize)> {
+    let mut edges = Vec::new();
+    for i in 0..matrix.len() {
+        for j in 0..i {
+            edges.push(((j, i), matrix[i][j] + matrix[j][i]));
+        }
+    }
+    edges.sort_by(|(_, w1), (_, w2)| w2.cmp(w1));
+    edges.into_iter().map(|(e, _)| e).collect()
+}
+
+// Calculate an approximate solution of the Traveling Salesman Problem using the algorithm
+// from "An efficient Re-indexing algorithm for color-mapped images" by Battiato et al
+// https://ieeexplore.ieee.org/document/1344033
+fn battiato_tsp(num_colors: usize, edges: Vec<(usize, usize)>) -> Vec<usize> {
+    let mut chains = Vec::new();
+    // Keep track of the state of each vertex (.0) and it's chain number (.1)
+    // 0 = an unvisited vertex (White)
+    // 1 = an endpoint of a chain (Red)
+    // 2 = part of the middle of a chain (Black)
+    let mut vx = vec![(0, 0); num_colors];
+
+    // Iterate the edges and assemble them into a chain
+    for (i, j) in edges {
+        let vi = vx[i];
+        let vj = vx[j];
+        if vi.0 == 0 && vj.0 == 0 {
+            // Two unvisited vertices - create a new chain
+            vx[i].0 = 1;
+            vx[i].1 = chains.len();
+            vx[j].0 = 1;
+            vx[j].1 = chains.len();
+            chains.push(vec![i, j]);
+        } else if vi.0 == 0 && vj.0 == 1 {
+            // An unvisited vertex connects with an endpoint of an existing chain
+            vx[i].0 = 1;
+            vx[i].1 = vj.1;
+            vx[j].0 = 2;
+            let chain = &mut chains[vj.1];
+            if chain[0] == j {
+                chain.insert(0, i);
+            } else {
+                chain.push(i);
+            }
+        } else if vi.0 == 1 && vj.0 == 0 {
+            // An unvisited vertex connects with an endpoint of an existing chain
+            vx[j].0 = 1;
+            vx[j].1 = vi.1;
+            vx[i].0 = 2;
+            let chain = &mut chains[vi.1];
+            if chain[0] == i {
+                chain.insert(0, j);
+            } else {
+                chain.push(j);
+            }
+        } else if vi.0 == 1 && vj.0 == 1 && vi.1 != vj.1 {
+            // Two endpoints of different chains are connected together
+            vx[i].0 = 2;
+            vx[j].0 = 2;
+            let (a, b) = if vi.1 < vj.1 { (i, j) } else { (j, i) };
+            let ca = vx[a].1;
+            let cb = vx[b].1;
+            let chainb = std::mem::take(&mut chains[cb]);
+            for &v in &chainb {
+                vx[v].1 = ca;
+            }
+            let chaina = &mut chains[ca];
+            if chaina[0] == a && chainb[0] == b {
+                for v in chainb {
+                    chaina.insert(0, v);
+                }
+            } else if chaina[0] == a {
+                chaina.splice(0..0, chainb);
+            } else if chainb[0] == b {
+                chaina.extend(chainb);
+            } else {
+                let pos = chaina.len();
+                for v in chainb {
+                    chaina.insert(pos, v);
+                }
+            }
+        }
+
+        if chains[0].len() == num_colors {
+            break;
+        }
+    }
+
+    // Return the completed chain
+    chains.swap_remove(0)
 }

@@ -124,6 +124,14 @@ pub(crate) fn perform_reductions(
         }
     }
 
+    // Attempt to sort the palette using an alternative method
+    if opts.palette_reduction && !deadline.passed() {
+        if let Some(reduced) = sorted_palette_battiato(&png) {
+            eval.try_image(Arc::new(reduced));
+            evaluation_added = true;
+        }
+    }
+
     // Attempt to reduce to a lower bit depth
     if opts.bit_depth_reduction && !deadline.passed() {
         // Try reducing the previous png, falling back to the indexed one if it exists
