@@ -636,9 +636,9 @@ dependencies = [
 
 [[package]]
 name = "zopfli"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d23feb17659a96f728aa359297bbd2800ddd59720e1b50aa1196b7fb4027fdb2"
+checksum = "4e0650ae6a051326d798eb099b632f1afb0d323d25ee4ec82ffb0779512084d5"
 dependencies = [
  "crc32fast",
  "log",
