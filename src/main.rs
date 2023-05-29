@@ -13,13 +13,13 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
-use clap::{AppSettings, Arg, ArgMatches, Command};
+use clap::{AppSettings, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::Deflaters;
-use oxipng::Headers;
 use oxipng::Options;
 use oxipng::RowFilter;
+use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
 #[cfg(feature = "zopfli")]
@@ -144,19 +144,26 @@ fn main() {
         )
         .arg(
             Arg::new("interlace")
-                .help("PNG interlace type")
+                .help("PNG interlace type - Default: 0")
                 .short('i')
                 .long("interlace")
                 .takes_value(true)
-                .value_name("0/1")
+                .value_name("type")
                 .possible_value("0")
-                .possible_value("1"),
+                .possible_value("1")
+                .possible_value("keep"),
+        )
+        .arg(
+            Arg::new("scale16")
+                .help("Forcibly reduce 16-bit images to 8-bit")
+                .long("scale16"),
         )
         .arg(
             Arg::new("verbose")
-                .help("Run in verbose mode")
+                .help("Run in verbose mode (use multiple times to increase verbosity)")
                 .short('v')
                 .long("verbose")
+                .action(ArgAction::Count)
                 .conflicts_with("quiet"),
         )
         .arg(
@@ -381,7 +388,7 @@ fn parse_opts_into_struct(
     stderrlog::new()
         .module(module_path!())
         .quiet(matches.is_present("quiet"))
-        .verbosity(if matches.is_present("verbose") { 3 } else { 2 })
+        .verbosity(matches.get_count("verbose") as usize + 2)
         .show_level(false)
         .init()
         .unwrap();
@@ -393,7 +400,11 @@ fn parse_opts_into_struct(
     };
 
     if let Some(x) = matches.value_of("interlace") {
-        opts.interlace = x.parse::<u8>().unwrap().try_into().ok();
+        opts.interlace = if x == "keep" {
+            None
+        } else {
+            x.parse::<u8>().unwrap().try_into().ok()
+        };
     }
 
     if let Some(x) = matches.value_of("filters") {
@@ -438,6 +449,10 @@ fn parse_opts_into_struct(
 
     if matches.is_present("alpha") {
         opts.optimize_alpha = true;
+    }
+
+    if matches.is_present("scale16") {
+        opts.scale_16 = true;
     }
 
     if matches.is_present("fast") {
@@ -495,40 +510,44 @@ fn parse_opts_into_struct(
         opts.idat_recoding = false;
     }
 
-    if let Some(hdrs) = matches.value_of("keep") {
-        opts.strip = Headers::Keep(hdrs.split(',').map(|x| x.trim().to_owned()).collect())
+    if let Some(keep) = matches.value_of("keep") {
+        let names = keep
+            .split(',')
+            .map(parse_chunk_name)
+            .collect::<Result<_, _>>()?;
+        opts.strip = StripChunks::Keep(names)
     }
 
-    if let Some(hdrs) = matches.value_of("strip") {
-        let hdrs = hdrs
-            .split(',')
-            .map(|x| x.trim().to_owned())
-            .collect::<Vec<String>>();
-        if hdrs.contains(&"safe".to_owned()) || hdrs.contains(&"all".to_owned()) {
-            if hdrs.len() > 1 {
-                return Err(
-                    "'safe' or 'all' presets for --strip should be used by themselves".to_owned(),
-                );
-            }
-            if hdrs[0] == "safe" {
-                opts.strip = Headers::Safe;
-            } else {
-                opts.strip = Headers::All;
-            }
+    if let Some(strip) = matches.value_of("strip") {
+        if strip == "safe" {
+            opts.strip = StripChunks::Safe;
+        } else if strip == "all" {
+            opts.strip = StripChunks::All;
         } else {
             const FORBIDDEN_CHUNKS: [[u8; 4]; 5] =
                 [*b"IHDR", *b"IDAT", *b"tRNS", *b"PLTE", *b"IEND"];
-            for i in &hdrs {
-                if FORBIDDEN_CHUNKS.iter().any(|chunk| chunk == i.as_bytes()) {
-                    return Err(format!("{} chunk is not allowed to be stripped", i));
-                }
-            }
-            opts.strip = Headers::Strip(hdrs);
+            let names = strip
+                .split(',')
+                .map(|x| {
+                    if x == "safe" || x == "all" {
+                        return Err(
+                            "'safe' or 'all' presets for --strip should be used by themselves"
+                                .to_owned(),
+                        );
+                    }
+                    let name = parse_chunk_name(x)?;
+                    if FORBIDDEN_CHUNKS.contains(&name) {
+                        return Err(format!("{} chunk is not allowed to be stripped", x));
+                    }
+                    Ok(name)
+                })
+                .collect::<Result<_, _>>()?;
+            opts.strip = StripChunks::Strip(names);
         }
     }
 
     if matches.is_present("strip-safe") {
-        opts.strip = Headers::Safe;
+        opts.strip = StripChunks::Safe;
     }
 
     if matches.is_present("zopfli") {
@@ -553,6 +572,13 @@ fn parse_opts_into_struct(
     }
 
     Ok((out_file, out_dir, opts))
+}
+
+fn parse_chunk_name(name: &str) -> Result<[u8; 4], String> {
+    name.trim()
+        .as_bytes()
+        .try_into()
+        .map_err(|_| format!("Invalid chunk name {}", name))
 }
 
 fn parse_numeric_range_opts(

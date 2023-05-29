@@ -13,13 +13,8 @@ pub fn deflate(data: &[u8], level: u8, max_size: &AtomicMin) -> PngResult<Vec<u8
     let len = compressor
         .zlib_compress(data, &mut dest)
         .map_err(|err| match err {
-            CompressionError::InsufficientSpace => PngError::DeflatedDataTooLong(capacity),
+            CompressionError::InsufficientSpace => PngError::DeflatedDataTooLong(capacity - 9),
         })?;
-    if let Some(max) = max_size.get() {
-        if len > max {
-            return Err(PngError::DeflatedDataTooLong(max));
-        }
-    }
     dest.truncate(len);
     Ok(dest)
 }

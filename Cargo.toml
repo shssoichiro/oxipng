@@ -22,40 +22,44 @@ name = "oxipng"
 path = "src/main.rs"
 required-features = ["binary"]
 
+[[bench]]
+name = "zopfli"
+required-features = ["zopfli"]
+
 [dependencies]
-zopfli = { version = "0.7.2", optional = true }
-rgb = "0.8.33"
-indexmap = "1.9.1"
-libdeflater = "0.13.0"
+zopfli = { version = "0.7.4", optional = true, default-features = false, features = ["std", "zlib"] }
+rgb = "0.8.36"
+indexmap = "1.9.3"
+libdeflater = "0.11.0"
 log = "0.4.17"
-stderrlog = { version = "0.5.3", optional = true, default-features = false }
+stderrlog = { version = "0.5.4", optional = true, default-features = false }
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
 
 [dependencies.crossbeam-channel]
 optional = true
-version = "0.5.6"
+version = "0.5.8"
 
 [dependencies.filetime]
 optional = true
-version = "0.2.17"
+version = "0.2.21"
 
 [dependencies.rayon]
 optional = true
-version = "1.5.3"
+version = "1.7.0"
 
 [dependencies.clap]
-optional = true
-version = "3.2.23"
+version = "3.2.25"
 
 [dependencies.wild]
 optional = true
 version = "2.1.0"
 
 [dependencies.image]
+optional = true
 default-features = false
 features = ["png"]
-version = "0.24.3"
+version = "0.24.6"
 
 [build-dependencies]
 rustc_version = "0.4.0"
@@ -65,6 +69,7 @@ binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
+sanity-checks = ["image"]
 
 [lib]
 name = "oxipng"

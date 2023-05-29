@@ -4,14 +4,15 @@
 use crate::atomicmin::AtomicMin;
 use crate::deflate;
 use crate::filters::RowFilter;
-use crate::png::PngData;
 use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
 use crate::Deadline;
+use crate::PngError;
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use indexmap::IndexSet;
+use log::trace;
 use rayon::prelude::*;
 #[cfg(not(feature = "parallel"))]
 use std::cell::RefCell;
@@ -20,7 +21,9 @@ use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
 
 pub struct Candidate {
-    pub image: PngData,
+    pub image: Arc<PngImage>,
+    pub idat_data: Vec<u8>,
+    pub filtered: Vec<u8>,
     pub filter: RowFilter,
     pub is_reduction: bool,
     // first wins tie-breaker
@@ -30,9 +33,9 @@ pub struct Candidate {
 impl Candidate {
     fn cmp_key(&self) -> impl Ord {
         (
-            self.image.idat_data.len(),
-            self.image.raw.data.len(),
-            self.image.raw.ihdr.bit_depth,
+            self.idat_data.len() + self.image.key_chunks_size(),
+            self.image.data.len(),
+            self.image.ihdr.bit_depth,
             self.filter,
             self.nth,
         )
@@ -79,7 +82,7 @@ impl Evaluator {
     }
 
     /// Wait for all evaluations to finish and return smallest reduction
-    /// Or `None` if all reductions were worse than baseline.
+    /// Or `None` if the queue is empty.
     #[cfg(feature = "parallel")]
     pub fn get_best_candidate(self) -> Option<Candidate> {
         let (eval_send, eval_recv) = self.eval_channel;
@@ -131,16 +134,21 @@ impl Evaluator {
                     return;
                 }
                 let filtered = image.filter_image(filter, optimize_alpha);
-                if let Ok(idat_data) =
-                    deflate::deflate(&filtered, compression, &best_candidate_size)
-                {
-                    best_candidate_size.set_min(idat_data.len());
+                let idat_data = deflate::deflate(&filtered, compression, &best_candidate_size);
+                if let Ok(idat_data) = idat_data {
+                    let size = idat_data.len() + image.key_chunks_size();
+                    best_candidate_size.set_min(size);
+                    trace!(
+                        "Eval: {}-bit {:20}  {:8}   {} bytes",
+                        image.ihdr.bit_depth,
+                        image.ihdr.color_type,
+                        filter,
+                        size
+                    );
                     let new = Candidate {
-                        image: PngData {
-                            idat_data,
-                            filtered,
-                            raw: Arc::clone(&image),
-                        },
+                        image: image.clone(),
+                        idat_data,
+                        filtered,
                         filter,
                         is_reduction,
                         nth,
@@ -158,6 +166,14 @@ impl Evaluator {
                             best => *best = Some(new),
                         }
                     }
+                } else if let Err(PngError::DeflatedDataTooLong(size)) = idat_data {
+                    trace!(
+                        "Eval: {}-bit {:20}  {:8}  >{} bytes",
+                        image.ihdr.bit_depth,
+                        image.ihdr.color_type,
+                        filter,
+                        size
+                    );
                 }
             });
         });

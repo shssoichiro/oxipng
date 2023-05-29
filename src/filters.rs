@@ -1,4 +1,5 @@
-use std::{fmt::Display, mem::transmute};
+use std::mem::transmute;
+use std::{fmt, fmt::Display};
 
 use crate::error::PngError;
 
@@ -31,11 +32,9 @@ impl TryFrom<u8> for RowFilter {
 }
 
 impl Display for RowFilter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:8}",
-            match *self {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(
+            match self {
                 Self::None => "None",
                 Self::Sub => "Sub",
                 Self::Up => "Up",
@@ -46,17 +45,19 @@ impl Display for RowFilter {
                 Self::Bigrams => "Bigrams",
                 Self::BigEnt => "BigEnt",
                 Self::Brute => "Brute",
-            }
+            },
+            f,
         )
     }
 }
 
 impl RowFilter {
     pub const LAST: u8 = Self::Brute as u8;
-    pub const STANDARD: [Self; 5] = [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
-    pub const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
+    pub(crate) const STANDARD: [Self; 5] =
+        [Self::None, Self::Sub, Self::Up, Self::Average, Self::Paeth];
+    pub(crate) const SINGLE_LINE: [Self; 2] = [Self::None, Self::Sub];
 
-    pub fn filter_line(
+    pub(crate) fn filter_line(
         self,
         bpp: usize,
         data: &mut [u8],
@@ -176,7 +177,7 @@ impl RowFilter {
         }
     }
 
-    pub fn unfilter_line(
+    pub(crate) fn unfilter_line(
         self,
         bpp: usize,
         data: &[u8],
