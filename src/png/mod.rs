@@ -7,6 +7,7 @@ use crate::interlace::{deinterlace_image, interlace_image, Interlacing};
 use crate::Options;
 use bitvec::bitarr;
 use libdeflater::{CompressionLvl, Compressor};
+use log::warn;
 use rgb::ComponentSlice;
 use rustc_hash::FxHashMap;
 use std::fs::File;
@@ -112,6 +113,10 @@ impl PngData {
                             name: chunk.name,
                             data: chunk.data.to_owned(),
                         })
+                    } else if chunk.name == *b"acTL" {
+                        warn!(
+                            "Stripping animation data from APNG - image will become standard PNG"
+                        );
                     }
                 }
             }
