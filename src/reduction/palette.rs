@@ -88,7 +88,10 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     enumerated.sort_by(|a, b| {
         // Sort by ascending alpha and descending luma
         let color_val = |color: &RGBA8| {
-            ((color.a as i32) << 18)
+            let a = i32::from(color.a);
+            // Put 7 high bits of alpha first, then luma, then low bit of alpha
+            // This provides notable improvement in images with a lot of alpha
+            ((a & 0xFE) << 18) + (a & 0x01)
             // These are coefficients for standard sRGB to luma conversion
             - i32::from(color.r) * 299
             - i32::from(color.g) * 587
