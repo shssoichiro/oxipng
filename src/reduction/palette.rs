@@ -78,11 +78,14 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
         return None;
     }
     let palette = match &png.ihdr.color_type {
-        ColorType::Indexed { palette } => palette,
+        ColorType::Indexed { palette } if palette.len() > 1 => palette,
         _ => return None,
     };
 
     let mut enumerated: Vec<_> = palette.iter().enumerate().collect();
+    // Put the most popular edge color first, which can help slightly if the filter bytes are 0
+    let keep_first = most_popular_edge_color(palette.len(), png);
+    let first = enumerated.remove(keep_first);
 
     // Sort the palette
     enumerated.sort_by(|a, b| {
@@ -99,6 +102,7 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
         };
         color_val(a.1).cmp(&color_val(b.1))
     });
+    enumerated.insert(0, first);
 
     // Extract the new palette and determine if anything changed
     let (old_map, palette): (Vec<_>, Vec<RGBA8>) = enumerated.into_iter().unzip();
@@ -130,6 +134,7 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
         return None;
     }
     let palette = match &png.ihdr.color_type {
+        // Images with only two colors will remain unchanged from previous luma sort
         ColorType::Indexed { palette } if palette.len() > 2 => palette,
         _ => return None,
     };
@@ -137,11 +142,16 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
     let matrix = co_occurrence_matrix(palette.len(), png);
     let edges = weighted_edges(&matrix);
     let mut old_map = battiato_tsp(palette.len(), edges);
-    // Keep the same first element
-    // This is safe to do if the palette is full since the delta filters are wrapping operations
-    if palette.len() == 256 {
-        let first = old_map.iter().position(|&i| i == 0).unwrap();
-        old_map.rotate_left(first);
+
+    // Put the most popular edge color first, which can help slightly if the filter bytes are 0
+    let keep_first = most_popular_edge_color(palette.len(), png);
+    let first_idx = old_map.iter().position(|&i| i == keep_first).unwrap();
+    // If the index is past halfway, reverse the order so as to minimize the change
+    if first_idx >= old_map.len() / 2 {
+        old_map.reverse();
+        old_map.rotate_right(first_idx + 1);
+    } else {
+        old_map.rotate_left(first_idx);
     }
 
     // Check if anything changed
@@ -167,6 +177,16 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
         },
         data,
     })
+}
+
+// Find the most popular color on the image edges (the pixels neighboring the filter bytes)
+fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
+    let mut counts = vec![0; num_colors];
+    for line in png.scan_lines(false) {
+        counts[line.data[0] as usize] += 1;
+        counts[line.data[line.data.len() - 1] as usize] += 1;
+    }
+    counts.iter().enumerate().max_by_key(|(_, &v)| v).unwrap().0
 }
 
 // Calculate co-occurences matrix
