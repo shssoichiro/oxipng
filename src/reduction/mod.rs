@@ -18,15 +18,13 @@ pub(crate) fn perform_reductions(
     opts: &Options,
     deadline: &Deadline,
     eval: &Evaluator,
-) -> (Arc<PngImage>, bool) {
-    let mut reduction_occurred = false;
+) -> Arc<PngImage> {
     let mut evaluation_added = false;
 
     // Interlacing must be processed first in order to evaluate the rest correctly
     if let Some(interlacing) = opts.interlace {
         if let Some(reduced) = png.change_interlacing(interlacing) {
             png = Arc::new(reduced);
-            reduction_occurred = true;
         }
     }
 
@@ -35,7 +33,6 @@ pub(crate) fn perform_reductions(
     if opts.optimize_alpha && !deadline.passed() {
         if let Some(reduced) = cleaned_alpha_channel(&png) {
             png = Arc::new(reduced);
-            // This does not count as a reduction
         }
     }
 
@@ -44,7 +41,6 @@ pub(crate) fn perform_reductions(
     if opts.bit_depth_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_bit_depth_16_to_8(&png, opts.scale_16) {
             png = Arc::new(reduced);
-            reduction_occurred = true;
         }
     }
 
@@ -53,7 +49,6 @@ pub(crate) fn perform_reductions(
     if opts.color_type_reduction && opts.grayscale_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_rgb_to_grayscale(&png) {
             png = Arc::new(reduced);
-            reduction_occurred = true;
         }
     }
 
@@ -62,7 +57,6 @@ pub(crate) fn perform_reductions(
     if opts.bit_depth_reduction && !deadline.passed() {
         if let Some(reduced) = expanded_bit_depth_to_8(&png) {
             png = Arc::new(reduced);
-            reduction_occurred = true;
         }
     }
 
@@ -71,7 +65,6 @@ pub(crate) fn perform_reductions(
     if opts.palette_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_palette(&png, opts.optimize_alpha) {
             png = Arc::new(reduced);
-            reduction_occurred = true;
         }
     }
 
@@ -90,7 +83,6 @@ pub(crate) fn perform_reductions(
                 evaluation_added = true;
             } else {
                 baseline = png.clone();
-                reduction_occurred = true;
             }
         }
     }
@@ -127,7 +119,6 @@ pub(crate) fn perform_reductions(
                 evaluation_added = true;
             } else {
                 baseline = new.clone();
-                reduction_occurred = true;
             }
             indexed = Some(new);
         }
@@ -146,7 +137,7 @@ pub(crate) fn perform_reductions(
     }
 
     if evaluation_added {
-        eval.set_baseline(baseline.clone());
+        eval.try_image(baseline.clone());
     }
-    (baseline, reduction_occurred)
+    baseline
 }
