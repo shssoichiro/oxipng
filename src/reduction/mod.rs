@@ -128,8 +128,8 @@ pub(crate) fn perform_reductions(
     if opts.bit_depth_reduction && !deadline.passed() {
         // Try reducing the previous png, falling back to the indexed one if it exists
         // This allows a grayscale depth reduction to be preferred over an indexed depth reduction
-        let reduced = reduced_bit_depth_8_or_less(&png, 1)
-            .or_else(|| indexed.and_then(|png| reduced_bit_depth_8_or_less(&png, 1)));
+        let reduced = reduced_bit_depth_8_or_less(&png)
+            .or_else(|| indexed.and_then(|png| reduced_bit_depth_8_or_less(&png)));
         if let Some(reduced) = reduced {
             eval.try_image(Arc::new(reduced));
             evaluation_added = true;
