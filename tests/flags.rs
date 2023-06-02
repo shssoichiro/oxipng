@@ -605,6 +605,57 @@ fn fix_errors() {
 }
 
 #[test]
+fn no_color_type_change() {
+    let input = PathBuf::from("tests/files/palette_8_should_be_rgb.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.color_type_reduction = false;
+
+    test_it_converts(
+        input,
+        &output,
+        &opts,
+        INDEXED,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::One,
+    );
+}
+
+#[test]
+fn no_grayscale_change() {
+    let input = PathBuf::from("tests/files/rgb_8_should_be_grayscale_8.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.grayscale_reduction = false;
+
+    test_it_converts(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
+fn no_bit_depth_change() {
+    let input = PathBuf::from("tests/files/palette_4_should_be_palette_2.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.bit_depth_reduction = false;
+
+    test_it_converts(
+        input,
+        &output,
+        &opts,
+        INDEXED,
+        BitDepth::Four,
+        INDEXED,
+        BitDepth::Four,
+    );
+}
+
+#[test]
 fn scale_16() {
     let input = PathBuf::from("tests/files/rgb_16_should_be_rgb_16.png");
     let (output, mut opts) = get_opts(&input);
