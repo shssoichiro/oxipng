@@ -107,14 +107,14 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     enumerated.insert(0, first);
 
     // Extract the new palette and determine if anything changed
-    let (old_map, palette): (Vec<_>, Vec<RGBA8>) = enumerated.into_iter().unzip();
-    if old_map.iter().enumerate().all(|(a, b)| a == *b) {
+    let (remapping, palette): (Vec<_>, Vec<RGBA8>) = enumerated.into_iter().unzip();
+    if remapping.iter().enumerate().all(|(a, b)| a == *b) {
         return None;
     }
 
     // Construct the new mapping and convert the data
     let mut byte_map = [0; 256];
-    for (i, &v) in old_map.iter().enumerate() {
+    for (i, &v) in remapping.iter().enumerate() {
         byte_map[v] = i as u8;
     }
     let data = png.data.iter().map(|&b| byte_map[b as usize]).collect();
@@ -128,7 +128,7 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     })
 }
 
-/// Sort the colors in the palette by minimizing entropy, returning the sorted image if successful
+/// Sort the colors in the palette using the battiato technique, returning the sorted image if successful
 #[must_use]
 pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
     // Interlacing not currently supported
@@ -143,28 +143,28 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
 
     let matrix = co_occurrence_matrix(palette.len(), png);
     let edges = weighted_edges(&matrix);
-    let mut old_map = battiato_tsp(palette.len(), edges);
+    let mut remapping = battiato_reindex(palette.len(), edges);
 
-    // Put the most popular edge color first, which can help slightly if the filter bytes are 0
-    let keep_first = most_popular_edge_color(palette.len(), png);
-    let first_idx = old_map.iter().position(|&i| i == keep_first).unwrap();
-    // If the index is past halfway, reverse the order so as to minimize the change
-    if first_idx >= old_map.len() / 2 {
-        old_map.reverse();
-        old_map.rotate_right(first_idx + 1);
-    } else {
-        old_map.rotate_left(first_idx);
-    }
+    apply_most_popular_edge_color(png, &mut remapping);
+
+    apply_palette_reorder(png, &remapping)
+}
+
+// Apply the palette reordering to the image data
+fn apply_palette_reorder(png: &PngImage, remapping: &[usize]) -> Option<PngImage> {
+    let ColorType::Indexed { palette } = &png.ihdr.color_type else {
+        return None;
+    };
 
     // Check if anything changed
-    if old_map.iter().enumerate().all(|(a, b)| a == *b) {
+    if remapping.iter().enumerate().all(|(a, b)| a == *b) {
         return None;
     }
 
     // Construct the palette and byte maps and convert the data
     let mut new_palette = Vec::new();
     let mut byte_map = [0; 256];
-    for (i, &v) in old_map.iter().enumerate() {
+    for (i, &v) in remapping.iter().enumerate() {
         new_palette.push(palette[v]);
         byte_map[v] = i as u8;
     }
@@ -200,6 +200,19 @@ fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
         .0
 }
 
+// Put the most popular edge color first, which can help slightly if the filter bytes are 0
+fn apply_most_popular_edge_color(png: &PngImage, remapping: &mut [usize]) {
+    let keep_first = most_popular_edge_color(remapping.len(), png);
+    let first_idx = remapping.iter().position(|&i| i == keep_first).unwrap();
+    // If the index is past halfway, reverse the order so as to minimize the change
+    if first_idx >= remapping.len() / 2 {
+        remapping.reverse();
+        remapping.rotate_right(first_idx + 1);
+    } else {
+        remapping.rotate_left(first_idx);
+    }
+}
+
 // Calculate co-occurences matrix
 fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
     let mut matrix = vec![vec![0u32; num_colors]; num_colors];
@@ -213,9 +226,15 @@ fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
             }
             if let Some(prev_val) = prev_val.replace(val) {
                 matrix[prev_val][val] += 1;
+                matrix[val][prev_val] += 1;
             }
             if let Some(prev) = &prev {
-                matrix[prev.data[i] as usize][val] += 1;
+                let prev_val = prev.data[i] as usize;
+                if prev_val > num_colors {
+                    continue;
+                }
+                matrix[prev_val][val] += 1;
+                matrix[val][prev_val] += 1;
             }
         }
         prev = Some(line)
@@ -226,9 +245,9 @@ fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
 // Calculate edge list sorted by weight
 fn weighted_edges(matrix: &[Vec<u32>]) -> Vec<(usize, usize)> {
     let mut edges = Vec::new();
-    for i in 0..matrix.len() {
-        for j in 0..i {
-            edges.push(((j, i), matrix[i][j] + matrix[j][i]));
+    for (i, m_row) in matrix.iter().enumerate() {
+        for (j, val) in m_row.iter().enumerate().take(i) {
+            edges.push(((j, i), val));
         }
     }
     edges.sort_by(|(_, w1), (_, w2)| w2.cmp(w1));
@@ -238,7 +257,7 @@ fn weighted_edges(matrix: &[Vec<u32>]) -> Vec<(usize, usize)> {
 // Calculate an approximate solution of the Traveling Salesman Problem using the algorithm
 // from "An efficient Re-indexing algorithm for color-mapped images" by Battiato et al
 // https://ieeexplore.ieee.org/document/1344033
-fn battiato_tsp(num_colors: usize, edges: Vec<(usize, usize)>) -> Vec<usize> {
+fn battiato_reindex(num_colors: usize, edges: Vec<(usize, usize)>) -> Vec<usize> {
     let mut chains = Vec::new();
     // Keep track of the state of each vertex (.0) and it's chain number (.1)
     // 0 = an unvisited vertex (White)
