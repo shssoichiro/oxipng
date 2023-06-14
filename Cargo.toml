@@ -31,7 +31,7 @@ zopfli = { version = "0.7.4", optional = true, default-features = false, feature
 rgb = "0.8.36"
 indexmap = "1.9.3"
 libdeflater = "0.14.0"
-log = "0.4.18"
+log = "0.4.19"
 stderrlog = { version = "0.5.4", optional = true, default-features = false }
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
