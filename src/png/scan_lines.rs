@@ -25,7 +25,7 @@ impl<'a> Iterator for ScanLines<'a> {
     type Item = ScanLine<'a>;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(len, pass)| {
+        self.iter.next().map(|(len, pass, num_pixels)| {
             let (data, rest) = self.raw_data.split_at(len);
             self.raw_data = rest;
             let (&filter, data) = if self.has_filter {
@@ -33,7 +33,12 @@ impl<'a> Iterator for ScanLines<'a> {
             } else {
                 (&0, data)
             };
-            ScanLine { filter, data, pass }
+            ScanLine {
+                filter,
+                data,
+                pass,
+                num_pixels,
+            }
         })
     }
 }
@@ -68,7 +73,7 @@ impl ScanLineRanges {
 }
 
 impl Iterator for ScanLineRanges {
-    type Item = (usize, Option<u8>);
+    type Item = (usize, Option<u8>, usize);
     fn next(&mut self) -> Option<Self::Item> {
         if self.left == 0 {
             return None;
@@ -149,7 +154,7 @@ impl Iterator for ScanLineRanges {
             len += 1;
         }
         self.left = self.left.checked_sub(len)?;
-        Some((len, current_pass))
+        Some((len, current_pass, pixels_per_line as usize))
     }
 }
 
@@ -162,4 +167,6 @@ pub struct ScanLine<'a> {
     pub data: &'a [u8],
     /// The current pass if the image is interlaced
     pub pass: Option<u8>,
+    /// The number of pixels in the current scan line
+    pub num_pixels: usize,
 }

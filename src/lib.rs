@@ -615,7 +615,7 @@ fn optimize_png(
 
 /// Perform optimization on the input image data using the options provided
 fn optimize_raw(
-    mut png: Arc<PngImage>,
+    image: Arc<PngImage>,
     opts: &Options,
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
@@ -631,16 +631,14 @@ fn optimize_raw(
         eval_compression,
         false,
     );
-    let (baseline, mut reduction_occurred) =
-        perform_reductions(png.clone(), opts, &deadline, &eval);
-    png = baseline;
+    let mut png = perform_reductions(image.clone(), opts, &deadline, &eval);
     let mut eval_result = eval.get_best_candidate();
     if let Some(ref result) = eval_result {
-        if result.is_reduction {
-            png = result.image.clone();
-            reduction_occurred = true;
-        }
+        png = result.image.clone();
     }
+    let reduction_occurred = png.ihdr.color_type != image.ihdr.color_type
+        || png.ihdr.bit_depth != image.ihdr.bit_depth
+        || png.ihdr.interlaced != image.ihdr.interlaced;
 
     if reduction_occurred {
         report_format("Reducing image to ", &png);
