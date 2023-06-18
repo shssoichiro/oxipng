@@ -60,14 +60,16 @@ impl Deflater for Deflaters {
 pub struct BufferedZopfliDeflater {
     iterations: NonZeroU8,
     input_buffer_size: usize,
-    output_buffer_size: usize
+    output_buffer_size: usize,
+    max_block_splits: u16
 }
 
 impl BufferedZopfliDeflater {
     pub const fn new(iterations: NonZeroU8,
                  input_buffer_size: usize,
-                 output_buffer_size: usize) -> Self {
-        BufferedZopfliDeflater {iterations, input_buffer_size, output_buffer_size }
+                 output_buffer_size: usize,
+                 max_block_splits: u16) -> Self {
+        BufferedZopfliDeflater {iterations, input_buffer_size, output_buffer_size, max_block_splits }
     }
 }
 
@@ -76,6 +78,7 @@ impl Deflater for BufferedZopfliDeflater {
     fn deflate(&self, data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
         let options = Options {
             iteration_count: self.iterations,
+            maximum_block_splits: self.max_block_splits,
             ..Default::default()
         };
         let mut buffer = BufWriter::with_capacity(self.input_buffer_size,
