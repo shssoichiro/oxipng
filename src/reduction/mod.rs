@@ -109,7 +109,7 @@ pub(crate) fn perform_reductions(
     // Attempt to reduce to indexed
     let mut indexed = None;
     if opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = reduced_to_indexed(&png) {
+        if let Some(reduced) = reduced_to_indexed(&png, opts.grayscale_reduction) {
             // Make sure the palette gets sorted (but don't bother evaluating both results)
             let new = Arc::new(sorted_palette(&reduced).unwrap_or(reduced));
             // For relatively small differences, enter this into the evaluator

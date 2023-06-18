@@ -32,11 +32,14 @@ where
 }
 
 #[must_use]
-pub fn reduced_to_indexed(png: &PngImage) -> Option<PngImage> {
+pub fn reduced_to_indexed(png: &PngImage, allow_grayscale: bool) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
     if matches!(png.ihdr.color_type, ColorType::Indexed { .. }) {
+        return None;
+    }
+    if !allow_grayscale && png.ihdr.color_type.is_gray() {
         return None;
     }
 
