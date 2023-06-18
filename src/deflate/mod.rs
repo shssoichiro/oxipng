@@ -59,13 +59,15 @@ impl Deflater for Deflaters {
 #[derive(Copy, Clone, Debug)]
 pub struct BufferedZopfliDeflater {
     iterations: NonZeroU8,
-    buffer_size: usize
+    input_buffer_size: usize,
+    output_buffer_size: usize
 }
 
 impl BufferedZopfliDeflater {
     pub const fn new(iterations: NonZeroU8,
-                 buffer_size: usize) -> Self {
-        BufferedZopfliDeflater {iterations, buffer_size}
+                 input_buffer_size: usize,
+                 output_buffer_size: usize) -> Self {
+        BufferedZopfliDeflater {iterations, input_buffer_size, output_buffer_size }
     }
 }
 
@@ -76,7 +78,7 @@ impl Deflater for BufferedZopfliDeflater {
             iteration_count: self.iterations,
             ..Default::default()
         };
-        let mut buffer = BufWriter::with_capacity(self.buffer_size,
+        let mut buffer = BufWriter::with_capacity(self.input_buffer_size,
                                                   DeflateEncoder::new(
             options, Default::default(), Cursor::new(Vec::new())));
         let result = (|| -> io::Result<Vec<u8>> {
