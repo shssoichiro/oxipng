@@ -30,7 +30,7 @@ use crate::headers::*;
 use crate::png::PngData;
 use crate::png::PngImage;
 use crate::reduction::*;
-use log::{debug, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use rayon::prelude::*;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
@@ -48,6 +48,7 @@ pub use crate::headers::StripChunks;
 pub use crate::interlace::Interlacing;
 pub use indexmap::{indexset, IndexSet};
 pub use rgb::{RGB16, RGBA8};
+use crate::deflate::Deflater;
 
 mod atomicmin;
 mod colors;
@@ -380,15 +381,17 @@ impl RawImage {
     pub fn add_icc_profile(&mut self, data: &[u8]) {
         // Compress with fastest compression level - will be recompressed during optimization
         let deflater = Deflaters::Libdeflater { compression: 1 };
-        if let Ok(iccp) = construct_iccp(data, deflater) {
+        if let Ok(iccp) = construct_iccp(data, &deflater) {
             self.aux_chunks.push(iccp);
         }
     }
 
     /// Create an optimized png from the raw image data using the options provided
-    pub fn create_optimized_png(&self, opts: &Options) -> PngResult<Vec<u8>> {
+    pub fn create_optimized_png<T: Deflater>
+            (&self, opts: &Options, deflater: &T) -> PngResult<Vec<u8>> {
         let deadline = Arc::new(Deadline::new(opts.timeout));
-        let mut png = optimize_raw(self.png.clone(), opts, deadline, None)
+        let mut png = optimize_raw(self.png.clone(),
+                                   opts, deadline, None, deflater)
             .ok_or_else(|| PngError::new("Failed to optimize input data"))?;
 
         // Process aux chunks
@@ -511,7 +514,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                     ))
                 })?;
             // force drop and thereby closing of file handle before modifying any timestamp
-            std::mem::drop(buffer);
+            drop(buffer);
             if let Some(metadata_input) = &opt_metadata_preserved {
                 copy_times(metadata_input, output_path)?;
             }
@@ -569,7 +572,8 @@ fn optimize_png(
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size) {
+    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size,
+            &opts.deflate) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
@@ -614,11 +618,12 @@ fn optimize_png(
 }
 
 /// Perform optimization on the input image data using the options provided
-fn optimize_raw(
+fn optimize_raw<T: Deflater>(
     image: Arc<PngImage>,
     opts: &Options,
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
+    deflater: &T
 ) -> Option<PngData> {
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
     let eval_compression = 5;
@@ -677,7 +682,7 @@ fn optimize_raw(
                 _ => {
                     debug!("Trying: {}", result.filter);
                     let best_size = AtomicMin::new(max_size);
-                    perform_trial(&result.filtered, opts, result.filter, &best_size)
+                    perform_trial(&result.filtered, opts, result.filter, &best_size, deflater)
                 }
             }
         } else {
@@ -703,7 +708,7 @@ fn optimize_raw(
                     return None;
                 }
                 let filtered = &png.filter_image(filter, opts.optimize_alpha);
-                perform_trial(filtered, opts, filter, &best_size)
+                perform_trial(filtered, opts, filter, &best_size, deflater)
             });
             best.reduce_with(|i, j| {
                 if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
@@ -755,13 +760,15 @@ fn optimize_raw(
 }
 
 /// Execute a compression trial
-fn perform_trial(
+fn perform_trial<T: Deflater>(
     filtered: &[u8],
     opts: &Options,
     filter: RowFilter,
     best_size: &AtomicMin,
+    deflater: &T
 ) -> Option<TrialResult> {
-    match opts.deflate.deflate(filtered, best_size) {
+    let result = deflater.deflate(filtered, best_size);
+    match result {
         Ok(new_idat) => {
             let bytes = new_idat.len();
             best_size.set_min(bytes);
@@ -775,14 +782,17 @@ fn perform_trial(
         }
         Err(PngError::DeflatedDataTooLong(bytes)) => {
             trace!(
-                "    zc = {}  f = {:8} >{} bytes",
-                opts.deflate,
-                filter,
-                bytes,
-            );
+                    "    zc = {}  f = {:8} >{} bytes",
+                    opts.deflate,
+                    filter,
+                    bytes,
+                );
             None
         }
-        Err(_) => None,
+        Err(e) => {
+            error!("I/O error: {}", e);
+            None
+        }
     }
 }
 
@@ -866,7 +876,7 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
                     name: *b"sRGB",
                     data: vec![intent],
                 };
-            } else if let Ok(iccp) = construct_iccp(&icc, opts.deflate) {
+            } else if let Ok(iccp) = construct_iccp(&icc, &opts.deflate) {
                 let cur_len = png.aux_chunks[iccp_idx].data.len();
                 let new_len = iccp.data.len();
                 if new_len < cur_len {
