@@ -85,7 +85,10 @@ impl Evaluator {
     #[cfg(feature = "parallel")]
     pub fn get_best_candidate(self) -> Option<Candidate> {
         let (eval_send, eval_recv) = self.eval_channel;
-        drop(eval_send); // disconnect the sender, breaking the loop in the thread
+        // Disconnect the sender, breaking the loop in the thread
+        drop(eval_send);
+        // Yield to ensure evaluations are finished - this can prevent deadlocks when run within an existing thread pool
+        while let Some(rayon::Yield::Executed) = rayon::yield_local() {}
         eval_recv.into_iter().min_by_key(Candidate::cmp_key)
     }
 
