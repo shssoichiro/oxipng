@@ -41,6 +41,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 pub use crate::colors::{BitDepth, ColorType};
+use crate::deflate::Deflater;
 pub use crate::deflate::Deflaters;
 pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
@@ -48,7 +49,6 @@ pub use crate::headers::StripChunks;
 pub use crate::interlace::Interlacing;
 pub use indexmap::{indexset, IndexSet};
 pub use rgb::{RGB16, RGBA8};
-use crate::deflate::Deflater;
 
 mod atomicmin;
 mod colors;
@@ -387,11 +387,13 @@ impl RawImage {
     }
 
     /// Create an optimized png from the raw image data using the options provided
-    pub fn create_optimized_png<T: Deflater>
-            (&self, opts: &Options, deflater: &T) -> PngResult<Vec<u8>> {
+    pub fn create_optimized_png<T: Deflater>(
+        &self,
+        opts: &Options,
+        deflater: &T,
+    ) -> PngResult<Vec<u8>> {
         let deadline = Arc::new(Deadline::new(opts.timeout));
-        let mut png = optimize_raw(self.png.clone(),
-                                   opts, deadline, None, deflater)
+        let mut png = optimize_raw(self.png.clone(), opts, deadline, None, deflater)
             .ok_or_else(|| PngError::new("Failed to optimize input data"))?;
 
         // Process aux chunks
@@ -572,8 +574,7 @@ fn optimize_png(
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size,
-            &opts.deflate) {
+    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size, &opts.deflate) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
@@ -623,7 +624,7 @@ fn optimize_raw<T: Deflater>(
     opts: &Options,
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
-    deflater: &T
+    deflater: &T,
 ) -> Option<PngData> {
     // Must use normal (lazy) compression, as faster ones (greedy) are not representative
     let eval_compression = 5;
@@ -765,7 +766,7 @@ fn perform_trial<T: Deflater>(
     opts: &Options,
     filter: RowFilter,
     best_size: &AtomicMin,
-    deflater: &T
+    deflater: &T,
 ) -> Option<TrialResult> {
     let result = deflater.deflate(filtered, best_size);
     match result {
@@ -782,11 +783,11 @@ fn perform_trial<T: Deflater>(
         }
         Err(PngError::DeflatedDataTooLong(bytes)) => {
             trace!(
-                    "    zc = {}  f = {:8} >{} bytes",
-                    opts.deflate,
-                    filter,
-                    bytes,
-                );
+                "    zc = {}  f = {:8} >{} bytes",
+                opts.deflate,
+                filter,
+                bytes,
+            );
             None
         }
         Err(e) => {

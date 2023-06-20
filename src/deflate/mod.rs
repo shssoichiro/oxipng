@@ -4,8 +4,8 @@ use crate::{PngError, PngResult};
 pub use deflater::crc32;
 pub use deflater::deflate;
 pub use deflater::inflate;
-use std::{fmt, fmt::Display, io};
 use std::io::{BufWriter, Cursor, Write};
+use std::{fmt, fmt::Display, io};
 
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
@@ -61,29 +61,60 @@ pub struct BufferedZopfliDeflater {
     iterations: NonZeroU8,
     input_buffer_size: usize,
     output_buffer_size: usize,
-    max_block_splits: u16
+    max_block_splits: u16,
 }
 
+#[cfg(feature = "zopfli")]
 impl BufferedZopfliDeflater {
-    pub const fn new(iterations: NonZeroU8,
-                 input_buffer_size: usize,
-                 output_buffer_size: usize,
-                 max_block_splits: u16) -> Self {
-        BufferedZopfliDeflater {iterations, input_buffer_size, output_buffer_size, max_block_splits }
+    pub const fn new(
+        iterations: NonZeroU8,
+        input_buffer_size: usize,
+        output_buffer_size: usize,
+        max_block_splits: u16,
+    ) -> Self {
+        BufferedZopfliDeflater {
+            iterations,
+            input_buffer_size,
+            output_buffer_size,
+            max_block_splits,
+        }
+    }
+
+    pub const fn const_default() -> Self {
+        BufferedZopfliDeflater {
+            // SAFETY: trivially safe. Stopgap solution until const unwrap is stabilized.
+            iterations: unsafe { NonZeroU8::new_unchecked(15) },
+            input_buffer_size: 1024 * 1024,
+            output_buffer_size: 64 * 1024,
+            max_block_splits: 15,
+        }
+    }
+}
+
+#[cfg(feature = "zopfli")]
+impl Default for BufferedZopfliDeflater {
+    fn default() -> Self {
+        Self::const_default()
     }
 }
 
 #[cfg(feature = "zopfli")]
 impl Deflater for BufferedZopfliDeflater {
     fn deflate(&self, data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
+        #[allow(clippy::needless_update)]
         let options = Options {
             iteration_count: self.iterations,
             maximum_block_splits: self.max_block_splits,
-            ..Default::default()
+            ..Default::default() // for forward compatibility
         };
-        let mut buffer = BufWriter::with_capacity(self.input_buffer_size,
-                                                  DeflateEncoder::new(
-            options, Default::default(), Cursor::new(Vec::new())));
+        let mut buffer = BufWriter::with_capacity(
+            self.input_buffer_size,
+            DeflateEncoder::new(
+                options,
+                Default::default(),
+                Cursor::new(Vec::with_capacity(self.output_buffer_size)),
+            ),
+        );
         let result = (|| -> io::Result<Vec<u8>> {
             buffer.write_all(data)?;
             Ok(buffer.into_inner()?.finish()?.into_inner())

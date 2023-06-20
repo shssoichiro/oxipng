@@ -1,5 +1,5 @@
 use crate::colors::{BitDepth, ColorType};
-use crate::deflate::{crc32, Deflater, inflate};
+use crate::deflate::{crc32, inflate, Deflater};
 use crate::error::PngError;
 use crate::interlace::Interlacing;
 use crate::AtomicMin;

@@ -9,12 +9,7 @@ use std::num::NonZeroU8;
 use std::path::PathBuf;
 use test::Bencher;
 
-
-const DEFAULT_DEFLATER: BufferedZopfliDeflater = BufferedZopfliDeflater::new(
-    // SAFETY: trivially safe. Stopgap solution until const unwrap is stabilized.
-    unsafe { NonZeroU8::new_unchecked(15) },
-    4 * 1024 * 1024
-);
+const DEFAULT_DEFLATER: BufferedZopfliDeflater = BufferedZopfliDeflater::const_default();
 
 #[bench]
 fn zopfli_16_bits_strategy_0(b: &mut Bencher) {
@@ -23,7 +18,9 @@ fn zopfli_16_bits_strategy_0(b: &mut Bencher) {
     let max_size = AtomicMin::new(Some(png.idat_data.len()));
 
     b.iter(|| {
-        DEFAULT_DEFLATER.deflate(png.raw.data.as_ref(), &max_size).ok();
+        DEFAULT_DEFLATER
+            .deflate(png.raw.data.as_ref(), &max_size)
+            .ok();
     });
 }
 
@@ -34,7 +31,9 @@ fn zopfli_8_bits_strategy_0(b: &mut Bencher) {
     let max_size = AtomicMin::new(Some(png.idat_data.len()));
 
     b.iter(|| {
-        DEFAULT_DEFLATER.deflate(png.raw.data.as_ref(), &max_size).ok();
+        DEFAULT_DEFLATER
+            .deflate(png.raw.data.as_ref(), &max_size)
+            .ok();
     });
 }
 
@@ -47,7 +46,9 @@ fn zopfli_4_bits_strategy_0(b: &mut Bencher) {
     let max_size = AtomicMin::new(Some(png.idat_data.len()));
 
     b.iter(|| {
-        DEFAULT_DEFLATER.deflate(png.raw.data.as_ref(), &max_size).ok();
+        DEFAULT_DEFLATER
+            .deflate(png.raw.data.as_ref(), &max_size)
+            .ok();
     });
 }
 
@@ -60,7 +61,9 @@ fn zopfli_2_bits_strategy_0(b: &mut Bencher) {
     let max_size = AtomicMin::new(Some(png.idat_data.len()));
 
     b.iter(|| {
-        DEFAULT_DEFLATER.deflate(png.raw.data.as_ref(), &max_size).ok();
+        DEFAULT_DEFLATER
+            .deflate(png.raw.data.as_ref(), &max_size)
+            .ok();
     });
 }
 
@@ -73,6 +76,8 @@ fn zopfli_1_bits_strategy_0(b: &mut Bencher) {
     let max_size = AtomicMin::new(Some(png.idat_data.len()));
 
     b.iter(|| {
-        DEFAULT_DEFLATER.deflate(png.raw.data.as_ref(), &max_size).ok();
+        DEFAULT_DEFLATER
+            .deflate(png.raw.data.as_ref(), &max_size)
+            .ok();
     });
 }
