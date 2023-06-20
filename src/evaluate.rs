@@ -25,7 +25,6 @@ pub struct Candidate {
     pub idat_data: Vec<u8>,
     pub filtered: Vec<u8>,
     pub filter: RowFilter,
-    pub is_reduction: bool,
     // first wins tie-breaker
     nth: usize,
 }
@@ -95,11 +94,6 @@ impl Evaluator {
         self.eval_best_candidate.into_inner()
     }
 
-    /// Set baseline image. It will be used only to measure minimum compression level required
-    pub fn set_baseline(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, false)
-    }
-
     /// Set best size, if known in advance
     pub fn set_best_size(&self, size: usize) {
         self.best_candidate_size.set_min(size);
@@ -107,10 +101,6 @@ impl Evaluator {
 
     /// Check if the image is smaller than others
     pub fn try_image(&self, image: Arc<PngImage>) {
-        self.try_image_inner(image, true)
-    }
-
-    fn try_image_inner(&self, image: Arc<PngImage>, is_reduction: bool) {
         let nth = self.nth.fetch_add(1, SeqCst);
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
@@ -150,7 +140,6 @@ impl Evaluator {
                         idat_data,
                         filtered,
                         filter,
-                        is_reduction,
                         nth,
                     };
 

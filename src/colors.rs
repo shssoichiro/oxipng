@@ -71,6 +71,14 @@ impl ColorType {
     }
 
     #[inline]
+    pub(crate) fn is_gray(&self) -> bool {
+        matches!(
+            self,
+            ColorType::Grayscale { .. } | ColorType::GrayscaleAlpha
+        )
+    }
+
+    #[inline]
     pub(crate) fn has_alpha(&self) -> bool {
         matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
     }

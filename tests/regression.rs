@@ -262,7 +262,7 @@ fn issue_82() {
         INDEXED,
         BitDepth::Four,
         INDEXED,
-        BitDepth::Four,
+        BitDepth::Eight,
     );
 }
 
