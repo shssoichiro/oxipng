@@ -27,7 +27,7 @@ impl IhdrData {
     /// Bits per pixel
     #[must_use]
     #[inline]
-    pub fn bpp(&self) -> usize {
+    pub const fn bpp(&self) -> usize {
         self.bit_depth as usize * self.color_type.channels_per_pixel() as usize
     }
 
@@ -38,7 +38,7 @@ impl IhdrData {
         let h = self.height as usize;
         let bpp = self.bpp();
 
-        fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
+        const fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
             ((w * bpp + 7) / 8) * h
         }
 

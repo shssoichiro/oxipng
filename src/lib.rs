@@ -249,7 +249,7 @@ impl Options {
         self
     }
 
-    fn apply_preset_2(self) -> Self {
+    const fn apply_preset_2(self) -> Self {
         self
     }
 
@@ -904,7 +904,7 @@ fn postprocess_chunks<T>(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData
 }
 
 /// Check if an image was already optimized prior to oxipng's operations
-fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
+const fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
     original_size <= optimized_size && !opts.force
 }
 
