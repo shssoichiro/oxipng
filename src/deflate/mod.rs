@@ -59,35 +59,22 @@ impl Deflater for Deflaters {
 #[cfg(feature = "zopfli")]
 #[derive(Copy, Clone, Debug)]
 pub struct BufferedZopfliDeflater {
-    iterations: NonZeroU8,
     input_buffer_size: usize,
     output_buffer_size: usize,
-    max_block_splits: u16,
+    options: Options
 }
 
 #[cfg(feature = "zopfli")]
 impl BufferedZopfliDeflater {
     pub const fn new(
-        iterations: NonZeroU8,
         input_buffer_size: usize,
         output_buffer_size: usize,
-        max_block_splits: u16,
+        options: Options,
     ) -> Self {
         BufferedZopfliDeflater {
-            iterations,
             input_buffer_size,
             output_buffer_size,
-            max_block_splits,
-        }
-    }
-
-    pub const fn const_default() -> Self {
-        BufferedZopfliDeflater {
-            // SAFETY: trivially safe. Stopgap solution until const unwrap is stabilized.
-            iterations: unsafe { NonZeroU8::new_unchecked(15) },
-            input_buffer_size: 1024 * 1024,
-            output_buffer_size: 64 * 1024,
-            max_block_splits: 15,
+            options,
         }
     }
 }
@@ -95,7 +82,11 @@ impl BufferedZopfliDeflater {
 #[cfg(feature = "zopfli")]
 impl Default for BufferedZopfliDeflater {
     fn default() -> Self {
-        Self::const_default()
+        BufferedZopfliDeflater {
+            input_buffer_size: 1024 * 1024,
+            output_buffer_size: 64 * 1024,
+            options: Options::default()
+        }
     }
 }
 
@@ -104,12 +95,6 @@ impl Deflater for BufferedZopfliDeflater {
 
     /// Fork of the zlib_compress function in Zopfli.
     fn deflate(&self, data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
-        #[allow(clippy::needless_update)]
-        let options = Options {
-            iteration_count: self.iterations,
-            maximum_block_splits: self.max_block_splits,
-            ..Default::default() // for forward compatibility
-        };
         let mut out = Cursor::new(Vec::with_capacity(self.output_buffer_size));
         let cmf = 120; /* CM 8, CINFO 7. See zlib spec.*/
         let flevel = 3;
@@ -125,7 +110,7 @@ impl Deflater for BufferedZopfliDeflater {
             let mut buffer = BufWriter::with_capacity(
                 self.input_buffer_size,
                 DeflateEncoder::new(
-                    options,
+                    self.options,
                     Default::default(),
                     &mut out,
                 ),
