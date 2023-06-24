@@ -22,8 +22,6 @@ use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use std::fs::DirBuilder;
-#[cfg(feature = "zopfli")]
-use std::num::NonZeroU8;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::Duration;
@@ -552,9 +550,8 @@ fn parse_opts_into_struct(
 
     if matches.is_present("zopfli") {
         #[cfg(feature = "zopfli")]
-        if let Some(iterations) = NonZeroU8::new(15) {
-            opts.deflate = Deflaters::Zopfli { iterations };
-        }
+        let zopfli_opts = zopfli::Options::default();
+        opts.deflate = Deflaters::Zopfli { options: zopfli_opts };
     } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
         if let Some(x) = matches.get_one::<i64>("compression") {
             *compression = *x as u8;

@@ -8,8 +8,6 @@ use std::io::{BufWriter, copy, Cursor, Write};
 use std::{fmt, fmt::Display, io};
 
 #[cfg(feature = "zopfli")]
-use std::num::NonZeroU8;
-#[cfg(feature = "zopfli")]
 use zopfli::{DeflateEncoder, Options};
 #[cfg(feature = "zopfli")]
 mod zopfli_oxipng;
@@ -29,10 +27,8 @@ pub enum Deflaters {
     #[cfg(feature = "zopfli")]
     /// Use the better but slower Zopfli implementation
     Zopfli {
-        /// The number of compression iterations to do. 15 iterations are fine
-        /// for small files, but bigger files will need to be compressed with
-        /// less iterations, or else they will be too slow.
-        iterations: NonZeroU8,
+        /// Zopfli compression options
+        options: Options,
     },
 }
 
@@ -45,7 +41,7 @@ impl Deflater for Deflaters {
         let compressed = match self {
             Self::Libdeflater { compression } => deflate(data, *compression, max_size)?,
             #[cfg(feature = "zopfli")]
-            Self::Zopfli { iterations } => zopfli_deflate(data, *iterations)?,
+            Self::Zopfli { options } => zopfli_deflate(data, options)?,
         };
         if let Some(max) = max_size.get() {
             if compressed.len() > max {
