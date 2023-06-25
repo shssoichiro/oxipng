@@ -50,7 +50,7 @@ version = "1.7.0"
 
 [dependencies.clap]
 optional = true
-version = "3.2.25"
+version = "4.3.8"
 
 [dependencies.wild]
 optional = true

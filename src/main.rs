@@ -13,7 +13,7 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
-use clap::{AppSettings, Arg, ArgAction, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
 use oxipng::Deflaters;
@@ -33,49 +33,43 @@ fn main() {
         .version(env!("CARGO_PKG_VERSION"))
         .author("Joshua Holmer <jholmer.in@gmail.com>")
         .about("Losslessly improves compression of PNG files")
-        .setting(AppSettings::DeriveDisplayOrder)
         .arg(
             Arg::new("files")
                 .help("File(s) to compress (use \"-\" for stdin)")
                 .index(1)
-                .multiple_values(true)
+                .num_args(1..)
                 .use_value_delimiter(false)
-                .required(true),
+                .required(true)
+                .value_parser(value_parser!(PathBuf)),
         )
         .arg(
             Arg::new("optimization")
                 .help("Optimization level - Default: 2")
                 .short('o')
                 .long("opt")
-                .takes_value(true)
                 .value_name("level")
-                .possible_value("0")
-                .possible_value("1")
-                .possible_value("2")
-                .possible_value("3")
-                .possible_value("4")
-                .possible_value("5")
-                .possible_value("6")
-                .possible_value("max"),
+                .value_parser(["0", "1", "2", "3", "4", "5", "6", "max"]),
         )
         .arg(
             Arg::new("backup")
                 .help("Back up modified files")
                 .short('b')
-                .long("backup"),
+                .long("backup")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("recursive")
                 .help("Recurse into subdirectories")
                 .short('r')
-                .long("recursive"),
+                .long("recursive")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("output_dir")
                 .help("Write output file(s) to <directory>")
                 .long("dir")
-                .takes_value(true)
                 .value_name("directory")
+                .value_parser(value_parser!(PathBuf))
                 .conflicts_with("output_file")
                 .conflicts_with("stdout"),
         )
@@ -83,8 +77,8 @@ fn main() {
             Arg::new("output_file")
                 .help("Write output file to <file>")
                 .long("out")
-                .takes_value(true)
                 .value_name("file")
+                .value_parser(value_parser!(PathBuf))
                 .conflicts_with("output_dir")
                 .conflicts_with("stdout"),
         )
@@ -92,6 +86,7 @@ fn main() {
             Arg::new("stdout")
                 .help("Write output to stdout")
                 .long("stdout")
+                .action(ArgAction::SetTrue)
                 .conflicts_with("output_dir")
                 .conflicts_with("output_file"),
         )
@@ -99,31 +94,34 @@ fn main() {
             Arg::new("preserve")
                 .help("Preserve file attributes if possible")
                 .short('p')
-                .long("preserve"),
+                .long("preserve")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("check")
                 .help("Do not run any optimization passes")
                 .short('c')
-                .long("check"),
+                .long("check")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("pretend")
                 .help("Do not write any files, only calculate compression gains")
                 .short('P')
-                .long("pretend"),
+                .long("pretend")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("strip-safe")
                 .help("Strip safely-removable metadata objects")
                 .short('s')
+                .action(ArgAction::SetTrue)
                 .conflicts_with("strip"),
         )
         .arg(
             Arg::new("strip")
                 .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
                 .long("strip")
-                .takes_value(true)
                 .value_name("mode")
                 .conflicts_with("strip-safe"),
         )
@@ -131,7 +129,6 @@ fn main() {
             Arg::new("keep")
                 .help("Strip all optional metadata except objects in the comma-separated list")
                 .long("keep")
-                .takes_value(true)
                 .value_name("list")
                 .conflicts_with("strip")
                 .conflicts_with("strip-safe"),
@@ -140,23 +137,22 @@ fn main() {
             Arg::new("alpha")
                 .help("Perform additional alpha optimizations")
                 .short('a')
-                .long("alpha"),
+                .long("alpha")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("interlace")
                 .help("PNG interlace type - Default: 0")
                 .short('i')
                 .long("interlace")
-                .takes_value(true)
                 .value_name("type")
-                .possible_value("0")
-                .possible_value("1")
-                .possible_value("keep"),
+                .value_parser(["0", "1", "keep"]),
         )
         .arg(
             Arg::new("scale16")
                 .help("Forcibly reduce 16-bit images to 8-bit")
-                .long("scale16"),
+                .long("scale16")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("verbose")
@@ -171,33 +167,29 @@ fn main() {
                 .help("Run in quiet mode")
                 .short('q')
                 .long("quiet")
+                .action(ArgAction::SetTrue)
                 .conflicts_with("verbose"),
         )
         .arg(
             Arg::new("filters")
-                .help(&*format!(
-                    "PNG delta filters (0-{}) - Default: 0,{}",
-                    RowFilter::LAST,
-                    RowFilter::MinSum as u8
-                ))
+                .help(format!("PNG delta filters (0-{})", RowFilter::LAST))
                 .short('f')
                 .long("filters")
-                .takes_value(true)
-                .validator(|x| match parse_numeric_range_opts(x, 0, RowFilter::LAST) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err("Invalid option for filters".to_owned()),
+                .value_parser(|x: &str| {
+                    parse_numeric_range_opts(x, 0, RowFilter::LAST)
+                        .map_err(|_| "Invalid option for filters")
                 }),
         )
         .arg(
             Arg::new("fast")
                 .help("Use fast filter evaluation")
-                .long("fast"),
+                .long("fast")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("compression")
-                .help("zlib compression level (1-12) - Default: 11")
+                .help("zlib compression level (1-12)")
                 .long("zc")
-                .takes_value(true)
                 .value_name("level")
                 .value_parser(1..=12)
                 .conflicts_with("zopfli"),
@@ -205,65 +197,72 @@ fn main() {
         .arg(
             Arg::new("no-bit-reduction")
                 .help("No bit depth reduction")
-                .long("nb"),
+                .long("nb")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-color-reduction")
                 .help("No color type reduction")
-                .long("nc"),
+                .long("nc")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-palette-reduction")
                 .help("No palette reduction")
-                .long("np"),
+                .long("np")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-grayscale-reduction")
                 .help("No grayscale reduction")
-                .long("ng"),
+                .long("ng")
+                .action(ArgAction::SetTrue),
         )
-        .arg(Arg::new("no-reductions").help("No reductions").long("nx"))
+        .arg(
+            Arg::new("no-reductions")
+                .help("No reductions")
+                .long("nx")
+                .action(ArgAction::SetTrue),
+        )
         .arg(
             Arg::new("no-recoding")
                 .help("No IDAT recoding unless necessary")
-                .long("nz"),
+                .long("nz")
+                .action(ArgAction::SetTrue),
         )
-        .arg(Arg::new("fix").help("Enable error recovery").long("fix"))
+        .arg(
+            Arg::new("fix")
+                .help("Enable error recovery")
+                .long("fix")
+                .action(ArgAction::SetTrue),
+        )
         .arg(
             Arg::new("force")
                 .help("Write the output even if it is larger than the input")
-                .long("force"),
+                .long("force")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("zopfli")
                 .help("Use the slower but better compressing Zopfli algorithm")
                 .short('Z')
-                .long("zopfli"),
+                .long("zopfli")
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("timeout")
                 .help("Maximum amount of time, in seconds, to spend on optimizations")
-                .takes_value(true)
                 .value_name("secs")
-                .long("timeout"),
+                .long("timeout")
+                .value_parser(value_parser!(u64)),
         )
         .arg(
             Arg::new("threads")
-                .help("Set number of threads to use - default 1.5x CPU cores")
+                .help("Set number of threads to use - Default: num CPU cores")
                 .long("threads")
                 .short('t')
-                .takes_value(true)
                 .value_name("num")
-                .validator(|x| match x.parse::<usize>() {
-                    Ok(val) => {
-                        if val > 0 {
-                            Ok(())
-                        } else {
-                            Err("Thread count must be >= 1".to_owned())
-                        }
-                    }
-                    Err(_) => Err("Thread count must be >= 1".to_owned()),
-                }),
+                .value_parser(value_parser!(usize)),
         )
         .after_help(
             "Optimization levels:
@@ -304,13 +303,13 @@ Heuristic filter selection strategies:
 
     let files = collect_files(
         matches
-            .values_of("files")
+            .get_many::<PathBuf>("files")
             .unwrap()
-            .map(PathBuf::from)
+            .cloned()
             .collect(),
         &out_dir,
         &out_file,
-        matches.is_present("recursive"),
+        matches.get_flag("recursive"),
         true,
     );
 
@@ -387,19 +386,19 @@ fn parse_opts_into_struct(
 ) -> Result<(OutFile, Option<PathBuf>, Options), String> {
     stderrlog::new()
         .module(module_path!())
-        .quiet(matches.is_present("quiet"))
+        .quiet(matches.get_flag("quiet"))
         .verbosity(matches.get_count("verbose") as usize + 2)
         .show_level(false)
         .init()
         .unwrap();
 
-    let mut opts = match matches.value_of("optimization") {
+    let mut opts = match matches.get_one::<String>("optimization") {
         None => Options::default(),
-        Some("max") => Options::max_compression(),
+        Some(x) if x == "max" => Options::max_compression(),
         Some(level) => Options::from_preset(level.parse::<u8>().unwrap()),
     };
 
-    if let Some(x) = matches.value_of("interlace") {
+    if let Some(x) = matches.get_one::<String>("interlace") {
         opts.interlace = if x == "keep" {
             None
         } else {
@@ -407,110 +406,76 @@ fn parse_opts_into_struct(
         };
     }
 
-    if let Some(x) = matches.value_of("filters") {
+    if let Some(x) = matches.get_one::<IndexSet<u8>>("filters") {
         opts.filter.clear();
-        for f in parse_numeric_range_opts(x, 0, RowFilter::LAST).unwrap() {
+        for &f in x {
             opts.filter.insert(f.try_into().unwrap());
         }
     }
 
-    if let Some(x) = matches.value_of("timeout") {
-        let num = x
-            .parse()
-            .map_err(|_| "Timeout must be a number".to_owned())?;
+    if let Some(&num) = matches.get_one::<u64>("timeout") {
         opts.timeout = Some(Duration::from_secs(num));
     }
 
-    let out_dir = if let Some(x) = matches.value_of("output_dir") {
-        let path = PathBuf::from(x);
+    let out_dir = if let Some(path) = matches.get_one::<PathBuf>("output_dir") {
         if !path.exists() {
-            match DirBuilder::new().recursive(true).create(&path) {
+            match DirBuilder::new().recursive(true).create(path) {
                 Ok(_) => (),
                 Err(x) => return Err(format!("Could not create output directory {}", x)),
             };
         } else if !path.is_dir() {
             return Err(format!(
                 "{} is an existing file (not a directory), cannot create directory",
-                x
+                path.display()
             ));
         }
-        Some(path)
+        Some(path.to_owned())
     } else {
         None
     };
 
-    let out_file = if matches.is_present("stdout") {
+    let out_file = if matches.get_flag("stdout") {
         OutFile::StdOut
-    } else if let Some(x) = matches.value_of("output_file") {
-        OutFile::Path(Some(PathBuf::from(x)))
     } else {
-        OutFile::Path(None)
+        OutFile::Path(matches.get_one::<PathBuf>("output_file").cloned())
     };
 
-    if matches.is_present("alpha") {
-        opts.optimize_alpha = true;
-    }
+    opts.optimize_alpha = matches.get_flag("alpha");
 
-    if matches.is_present("scale16") {
-        opts.scale_16 = true;
-    }
+    opts.scale_16 = matches.get_flag("scale16");
 
-    if matches.is_present("fast") {
-        opts.fast_evaluation = true;
-    }
+    opts.fast_evaluation = matches.get_flag("fast");
 
-    if matches.is_present("backup") {
-        opts.backup = true;
-    }
+    opts.backup = matches.get_flag("backup");
 
-    if matches.is_present("force") {
-        opts.force = true;
-    }
+    opts.force = matches.get_flag("force");
 
-    if matches.is_present("fix") {
-        opts.fix_errors = true;
-    }
+    opts.fix_errors = matches.get_flag("fix");
 
-    if matches.is_present("check") {
-        opts.check = true;
-    }
+    opts.check = matches.get_flag("check");
 
-    if matches.is_present("pretend") {
-        opts.pretend = true;
-    }
+    opts.pretend = matches.get_flag("pretend");
 
-    if matches.is_present("preserve") {
-        opts.preserve_attrs = true;
-    }
+    opts.preserve_attrs = matches.get_flag("preserve");
 
-    if matches.is_present("no-bit-reduction") {
-        opts.bit_depth_reduction = false;
-    }
+    opts.bit_depth_reduction = !matches.get_flag("no-bit-reduction");
 
-    if matches.is_present("no-color-reduction") {
-        opts.color_type_reduction = false;
-    }
+    opts.color_type_reduction = !matches.get_flag("no-color-reduction");
 
-    if matches.is_present("no-palette-reduction") {
-        opts.palette_reduction = false;
-    }
+    opts.palette_reduction = !matches.get_flag("no-palette-reduction");
 
-    if matches.is_present("no-grayscale-reduction") {
-        opts.grayscale_reduction = false;
-    }
+    opts.grayscale_reduction = !matches.get_flag("no-grayscale-reduction");
 
-    if matches.is_present("no-reductions") {
+    if matches.get_flag("no-reductions") {
         opts.bit_depth_reduction = false;
         opts.color_type_reduction = false;
         opts.palette_reduction = false;
         opts.grayscale_reduction = false;
     }
 
-    if matches.is_present("no-recoding") {
-        opts.idat_recoding = false;
-    }
+    opts.idat_recoding = !matches.get_flag("no-recoding");
 
-    if let Some(keep) = matches.value_of("keep") {
+    if let Some(keep) = matches.get_one::<String>("keep") {
         let names = keep
             .split(',')
             .map(parse_chunk_name)
@@ -518,7 +483,7 @@ fn parse_opts_into_struct(
         opts.strip = StripChunks::Keep(names)
     }
 
-    if let Some(strip) = matches.value_of("strip") {
+    if let Some(strip) = matches.get_one::<String>("strip") {
         if strip == "safe" {
             opts.strip = StripChunks::Safe;
         } else if strip == "all" {
@@ -546,11 +511,11 @@ fn parse_opts_into_struct(
         }
     }
 
-    if matches.is_present("strip-safe") {
+    if matches.get_flag("strip-safe") {
         opts.strip = StripChunks::Safe;
     }
 
-    if matches.is_present("zopfli") {
+    if matches.get_flag("zopfli") {
         #[cfg(feature = "zopfli")]
         if let Some(iterations) = NonZeroU8::new(15) {
             opts.deflate = Deflaters::Zopfli { iterations };
@@ -562,9 +527,7 @@ fn parse_opts_into_struct(
     }
 
     #[cfg(feature = "parallel")]
-    if let Some(x) = matches.value_of("threads") {
-        let threads = x.parse::<usize>().unwrap();
-
+    if let Some(&threads) = matches.get_one::<usize>("threads") {
         rayon::ThreadPoolBuilder::new()
             .num_threads(threads)
             .build_global()
