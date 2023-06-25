@@ -32,7 +32,7 @@ cargo build --release
 cp target/release/oxipng /usr/local/bin
 ```
 
-The current minimum supported Rust version is **1.61.0**.
+The current minimum supported Rust version is **1.65.0**.
 
 Oxipng follows Semantic Versioning.
 

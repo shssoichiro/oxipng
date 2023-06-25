@@ -10,7 +10,7 @@ license = "MIT"
 name = "oxipng"
 repository = "https://github.com/shssoichiro/oxipng"
 version = "8.0.0"
-rust-version = "1.61.0"
+rust-version = "1.65.0"
 
 [badges]
 travis-ci = { repository = "shssoichiro/oxipng", branch = "master" }
@@ -29,9 +29,9 @@ required-features = ["zopfli"]
 [dependencies]
 zopfli = { version = "0.7.4", optional = true, default-features = false, features = ["std", "zlib"] }
 rgb = "0.8.36"
-indexmap = "1.9.3"
-libdeflater = "0.11.0"
-log = "0.4.17"
+indexmap = "2.0.0"
+libdeflater = "0.14.0"
+log = "0.4.19"
 stderrlog = { version = "0.5.4", optional = true, default-features = false }
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
@@ -50,7 +50,7 @@ version = "1.7.0"
 
 [dependencies.clap]
 optional = true
-version = "3.2.25"
+version = "4.3.8"
 
 [dependencies.wild]
 optional = true
