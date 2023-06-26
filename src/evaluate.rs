@@ -17,7 +17,7 @@ use rayon::prelude::*;
 #[cfg(not(feature = "parallel"))]
 use std::cell::RefCell;
 use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::SeqCst;
+use std::sync::atomic::Ordering::*;
 use std::sync::Arc;
 
 pub struct Candidate {
@@ -48,6 +48,7 @@ pub(crate) struct Evaluator {
     compression: u8,
     optimize_alpha: bool,
     nth: AtomicUsize,
+    executed: Arc<AtomicUsize>,
     best_candidate_size: Arc<AtomicMin>,
     /// images are sent to the caller thread for evaluation
     #[cfg(feature = "parallel")]
@@ -71,8 +72,9 @@ impl Evaluator {
             filters,
             compression,
             optimize_alpha,
-            best_candidate_size: Arc::new(AtomicMin::new(None)),
             nth: AtomicUsize::new(0),
+            executed: Arc::new(AtomicUsize::new(0)),
+            best_candidate_size: Arc::new(AtomicMin::new(None)),
             #[cfg(feature = "parallel")]
             eval_channel,
             #[cfg(not(feature = "parallel"))]
@@ -87,8 +89,12 @@ impl Evaluator {
         let (eval_send, eval_recv) = self.eval_channel;
         // Disconnect the sender, breaking the loop in the thread
         drop(eval_send);
-        // Yield to ensure evaluations are finished - this can prevent deadlocks when run within an existing thread pool
-        while let Some(rayon::Yield::Executed) = rayon::yield_local() {}
+        let nth = self.nth.load(SeqCst);
+        // Yield to ensure all evaluations are executed
+        // This can prevent deadlocks when run within an existing rayon thread pool
+        while self.executed.load(Relaxed) < nth {
+            rayon::yield_local();
+        }
         eval_recv.into_iter().min_by_key(Candidate::cmp_key)
     }
 
@@ -110,12 +116,14 @@ impl Evaluator {
         let filters = self.filters.clone();
         let compression = self.compression;
         let optimize_alpha = self.optimize_alpha;
+        let executed = self.executed.clone();
         let best_candidate_size = self.best_candidate_size.clone();
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
         #[cfg(feature = "parallel")]
         let eval_send = self.eval_channel.0.clone();
         rayon::spawn(move || {
+            executed.fetch_add(1, Relaxed);
             let filters_iter = filters.par_iter().with_max_len(1);
 
             // Updating of best result inside the parallel loop would require locks,
