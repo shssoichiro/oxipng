@@ -13,6 +13,9 @@
 #![warn(clippy::range_plus_one)]
 #![allow(clippy::cognitive_complexity)]
 
+#[cfg(not(feature = "parallel"))]
+mod rayon;
+
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn};
@@ -21,6 +24,7 @@ use oxipng::Options;
 use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
+use rayon::prelude::*;
 use std::fs::DirBuilder;
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
@@ -313,9 +317,8 @@ Heuristic filter selection strategies:
         true,
     );
 
-    let mut success = false;
-    for (input, output) in files {
-        match oxipng::optimize(&input, &output, &opts) {
+    let success = files.into_par_iter().filter(|(input, output)| {
+        match oxipng::optimize(input, output, &opts) {
             // For optimizing single files, this will return the correct exit code always.
             // For recursive optimization, the correct choice is a bit subjective.
             // We're choosing to return a 0 exit code if ANY file in the set
@@ -323,16 +326,15 @@ Heuristic filter selection strategies:
             // The reason for this is that recursion may pick up files that are not
             // PNG files, and return an error for them.
             // We don't really want to return an error code for those files.
-            Ok(_) => {
-                success = true;
-            }
+            Ok(_) => true,
             Err(e) => {
                 error!("{}", e);
+                false
             }
-        };
-    }
+        }
+    });
 
-    if !success {
+    if success.count() == 0 {
         exit(1);
     }
 }
