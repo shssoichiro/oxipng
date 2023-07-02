@@ -328,7 +328,7 @@ Heuristic filter selection strategies:
             // We don't really want to return an error code for those files.
             Ok(_) => true,
             Err(e) => {
-                error!("{}", e);
+                error!("{}: {}", input, e);
                 false
             }
         }
