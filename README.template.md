@@ -75,6 +75,11 @@ method of usage involves creating an
 passing it, along with an input filename, into the
 [optimize function](https://docs.rs/oxipng/3.0.1/oxipng/fn.optimize.html).
 
+It is recommended to disable the "binary" feature when including oxipng as a library. Currently, there is
+no simple way to just disable one feature in Cargo, it has to be done by disabling default features
+and specifying the desired ones, for example:
+`oxipng = { version = "8.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
+
 ## History
 
 Oxipng began as a complete rewrite of the OptiPNG project,
