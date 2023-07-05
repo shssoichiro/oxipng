@@ -120,7 +120,7 @@ fn main() {
         )
         .arg(
             Arg::new("strip")
-                .help("Strip metadata objects ['safe', 'all', or comma-separated list]")
+                .help("Strip metadata objects ['safe', 'all', or comma-separated list]\nCAUTION: stripping 'all' will convert APNGs to standard PNGs")
                 .long("strip")
                 .value_name("mode")
                 .conflicts_with("strip-safe"),

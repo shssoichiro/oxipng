@@ -86,7 +86,9 @@ pub enum StripChunks {
 
 impl StripChunks {
     /// List of chunks that will be kept when using the `Safe` option
-    pub const KEEP_SAFE: [[u8; 4]; 4] = [*b"cICP", *b"iCCP", *b"sRGB", *b"pHYs"];
+    pub const KEEP_SAFE: [[u8; 4]; 7] = [
+        *b"cICP", *b"iCCP", *b"sRGB", *b"pHYs", *b"acTL", *b"fcTL", *b"fdAT",
+    ];
 
     pub(crate) fn keep(&self, name: &[u8; 4]) -> bool {
         match &self {
