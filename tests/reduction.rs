@@ -917,6 +917,18 @@ fn grayscale_alpha_8_should_be_grayscale_trns_8() {
 }
 
 #[test]
+fn grayscale_alpha_8_should_be_grayscale_trns_1() {
+    test_it_converts(
+        "tests/files/grayscale_alpha_8_should_be_grayscale_trns_1.png",
+        true,
+        GRAYSCALE_ALPHA,
+        BitDepth::Eight,
+        GRAYSCALE,
+        BitDepth::One,
+    );
+}
+
+#[test]
 fn small_files() {
     test_it_converts(
         "tests/files/small_files.png",

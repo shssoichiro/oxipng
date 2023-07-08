@@ -32,6 +32,7 @@ use crate::png::PngImage;
 use crate::reduction::*;
 use log::{debug, error, info, trace, warn};
 use rayon::prelude::*;
+use std::borrow::Cow;
 use std::fmt;
 use std::fs::{copy, File, Metadata};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
@@ -393,7 +394,7 @@ impl RawImage {
         deflater: &T,
     ) -> PngResult<Vec<u8>> {
         let deadline = Arc::new(Deadline::new(opts.timeout));
-        let mut png = optimize_raw(self.png.clone(), opts, deadline, None, deflater)
+        let mut png = optimize_raw(self.png.clone(), opts, deadline.clone(), None, deflater)
             .ok_or_else(|| PngError::new("Failed to optimize input data"))?;
 
         // Process aux chunks
@@ -403,7 +404,7 @@ impl RawImage {
             .filter(|c| opts.strip.keep(&c.name))
             .cloned()
             .collect();
-        postprocess_chunks(&mut png, opts, &self.png.ihdr, deflater);
+        postprocess_chunks(&mut png, opts, deadline, &self.png.ihdr, deflater);
 
         Ok(png.output())
     }
@@ -569,17 +570,30 @@ fn optimize_png(
     debug!("    IDAT size = {} bytes", idat_original_size);
     debug!("    File size = {} bytes", file_original_size);
 
+    // Check for APNG by presence of acTL chunk
+    let opts = if png.aux_chunks.iter().any(|c| &c.name == b"acTL") {
+        warn!("APNG detected, disabling all reductions");
+        let mut opts = opts.to_owned();
+        opts.interlace = None;
+        opts.bit_depth_reduction = false;
+        opts.color_type_reduction = false;
+        opts.palette_reduction = false;
+        opts.grayscale_reduction = false;
+        Cow::Owned(opts)
+    } else {
+        Cow::Borrowed(opts)
+    };
     let max_size = if opts.force {
         None
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), opts, deadline, max_size, &opts.deflate) {
+    if let Some(new_png) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_siz, &opts.deflatee) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
 
-    postprocess_chunks(png, opts, &raw.ihdr, &opts.deflate);
+    postprocess_chunks(png, &opts, deadline, &raw.ihdr, &opts.deflate);
 
     let output = png.output();
 
@@ -847,8 +861,13 @@ fn report_format(prefix: &str, png: &PngImage) {
 }
 
 /// Perform cleanup of certain chunks from the `PngData` object, after optimization has been completed
-fn postprocess_chunks<T>(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData, deflater: &T)
-        where T: Deflater {
+fn postprocess_chunks(
+    png: &mut PngData,
+    opts: &Options,
+    deadline: Arc<Deadline>,
+    orig_ihdr: &IhdrData,
+    deflater: &T,
+) where T: Deflater {
     if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
         // See if we can replace an iCCP chunk with an sRGB chunk
         let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
@@ -900,6 +919,38 @@ fn postprocess_chunks<T>(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData
             }
             !invalid
         });
+    }
+
+    // Find fdAT chunks and attempt to recompress them
+    // Note if there are multiple fdATs per frame then decompression will fail and nothing will change
+    let mut fdat: Vec<_> = png
+        .aux_chunks
+        .iter_mut()
+        .filter(|c| &c.name == b"fdAT")
+        .collect();
+    if !fdat.is_empty() {
+        let buffer_size = orig_ihdr.raw_data_size();
+        fdat.par_iter_mut()
+            .with_max_len(1)
+            .enumerate()
+            .for_each(|(i, c)| {
+                if deadline.passed() || c.data.len() <= 4 {
+                    return;
+                }
+                if let Ok(mut data) = deflate::inflate(&c.data[4..], buffer_size).and_then(|data| {
+                    let max_size = AtomicMin::new(Some(c.data.len() - 5));
+                    opts.deflate.deflate(&data, &max_size)
+                }) {
+                    debug!(
+                        "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
+                        i,
+                        c.data.len(),
+                        c.data.len() - 4 - data.len()
+                    );
+                    c.data.truncate(4);
+                    c.data.append(&mut data);
+                }
+            })
     }
 }
 

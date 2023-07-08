@@ -30,7 +30,7 @@ fn optimize_from_memory_apng() {
     in_file.read_to_end(&mut in_file_buf).unwrap();
 
     let result = oxipng::optimize_from_memory(&in_file_buf, &Options::default());
-    assert!(result.is_err());
+    assert!(result.is_ok());
 }
 
 #[test]
@@ -58,9 +58,9 @@ fn optimize_apng() {
     let result = oxipng::optimize(
         &"tests/files/apng_file.png".into(),
         &OutFile::Path(None),
-        &Options::default(),
+        &Options::from_preset(0),
     );
-    assert!(result.is_err());
+    assert!(result.is_ok());
 }
 
 #[test]

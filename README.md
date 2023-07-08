@@ -32,7 +32,7 @@ cargo build --release
 cp target/release/oxipng /usr/local/bin
 ```
 
-The current minimum supported Rust version is **1.61.0**.
+The current minimum supported Rust version is **1.65.0**.
 
 Oxipng follows Semantic Versioning.
 
@@ -114,6 +114,11 @@ method of usage involves creating an
 [Options struct](https://docs.rs/oxipng/3.0.1/oxipng/struct.Options.html) and
 passing it, along with an input filename, into the
 [optimize function](https://docs.rs/oxipng/3.0.1/oxipng/fn.optimize.html).
+
+It is recommended to disable the "binary" feature when including oxipng as a library. Currently, there is
+no simple way to just disable one feature in Cargo, it has to be done by disabling default features
+and specifying the desired ones, for example:
+`oxipng = { version = "8.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
 
 ## History
 

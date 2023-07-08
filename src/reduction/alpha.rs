@@ -57,8 +57,16 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
     }
 
     let transparency_pixel = if has_transparency {
+        // For grayscale, start by checking 4 specific values in the hope that we may reduce depth
+        let unused = match png.ihdr.color_type {
+            ColorType::GrayscaleAlpha => [0x00, 0xFF, 0x55, 0xAA]
+                .into_iter()
+                .find(|&v| !used_colors[v as usize]),
+            _ => None,
+        }
+        .or_else(|| used_colors.iter().position(|&u| !u).map(|v| v as u8));
         // If no unused color was found we will have to fail here
-        Some(used_colors.iter().position(|b| !*b)? as u8)
+        Some(unused?)
     } else {
         None
     };

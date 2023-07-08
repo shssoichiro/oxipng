@@ -26,6 +26,12 @@ pub trait IntoParallelRefIterator<'data> {
     fn par_iter(&'data self) -> Self::Iter;
 }
 
+pub trait IntoParallelRefMutIterator<'data> {
+    type Iter: ParallelIterator<Item = Self::Item>;
+    type Item: Send + 'data;
+    fn par_iter_mut(&'data mut self) -> Self::Iter;
+}
+
 impl<I: IntoIterator> IntoParallelIterator for I
 where
     I::Item: Send,
@@ -46,6 +52,18 @@ where
     type Item = <&'data I as IntoParallelIterator>::Item;
 
     fn par_iter(&'data self) -> Self::Iter {
+        self.into_par_iter()
+    }
+}
+
+impl<'data, I: 'data + ?Sized> IntoParallelRefMutIterator<'data> for I
+where
+    &'data mut I: IntoParallelIterator,
+{
+    type Iter = <&'data mut I as IntoParallelIterator>::Iter;
+    type Item = <&'data mut I as IntoParallelIterator>::Item;
+
+    fn par_iter_mut(&'data mut self) -> Self::Iter {
         self.into_par_iter()
     }
 }
