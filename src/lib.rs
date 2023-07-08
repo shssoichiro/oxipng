@@ -592,8 +592,8 @@ fn optimize_png(
         raw.clone(),
         &opts,
         deadline.clone(),
-        max_siz,
-        &opts.deflatee,
+        max_size,
+        &opts.deflate,
     ) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
@@ -867,7 +867,7 @@ fn report_format(prefix: &str, png: &PngImage) {
 }
 
 /// Perform cleanup of certain chunks from the `PngData` object, after optimization has been completed
-fn postprocess_chunks(
+fn postprocess_chunks<T>(
     png: &mut PngData,
     opts: &Options,
     deadline: Arc<Deadline>,

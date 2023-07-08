@@ -113,7 +113,7 @@ impl Deflater for BufferedZopfliDeflater {
             Ok(out.into_inner())
         })();
         let out = out.map_err(|e| PngError::new(&e.to_string()))?;
-        if max_size.get().is_some_and(|max| max < out.len()) {
+        if max_size.get().map(|max| max < out.len()).unwrap_or(false) {
             Err(PngError::DeflatedDataTooLong(out.len()))
         } else {
             Ok(out)
