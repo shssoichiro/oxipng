@@ -4,8 +4,10 @@ use crate::{PngError, PngResult};
 pub use deflater::crc32;
 pub use deflater::deflate;
 pub use deflater::inflate;
-use std::io::{copy, BufWriter, Cursor, Write};
-use std::{fmt, fmt::Display, io};
+use std::{fmt, fmt::Display};
+
+#[cfg(feature = "zopfli")]
+use std::io::{self, copy, BufWriter, Cursor, Write};
 
 #[cfg(feature = "zopfli")]
 use zopfli::{DeflateEncoder, Options};
