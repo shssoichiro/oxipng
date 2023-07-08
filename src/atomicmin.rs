@@ -23,7 +23,7 @@ impl AtomicMin {
     }
 
     /// Unset value is usize_max
-    pub fn as_atomic_usize(&self) -> &AtomicUsize {
+    pub const fn as_atomic_usize(&self) -> &AtomicUsize {
         &self.val
     }
 

@@ -260,13 +260,13 @@ impl PngImage {
 
     /// Return the number of channels in the image, based on color type
     #[inline]
-    pub fn channels_per_pixel(&self) -> usize {
+    pub const fn channels_per_pixel(&self) -> usize {
         self.ihdr.color_type.channels_per_pixel() as usize
     }
 
     /// Return the number of bytes per channel in the image
     #[inline]
-    pub fn bytes_per_channel(&self) -> usize {
+    pub const fn bytes_per_channel(&self) -> usize {
         match self.ihdr.bit_depth {
             BitDepth::Sixteen => 2,
             // Depths lower than 8 will round up to 1 byte
@@ -491,7 +491,7 @@ fn write_png_block(key: &[u8], chunk: &[u8], output: &mut Vec<u8>) {
 }
 
 // Integer approximation for i * log2(i) - much faster than float calculations
-fn ilog2i(i: u32) -> u32 {
+const fn ilog2i(i: u32) -> u32 {
     let log = 32 - i.leading_zeros() - 1;
     i * log + ((i - (1 << log)) << 1)
 }

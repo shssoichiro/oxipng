@@ -14,6 +14,7 @@ fn get_opts() -> Options {
 fn test_it_converts(input: &str) {
     let input = PathBuf::from(input);
     let opts = get_opts();
+    let deflater = BufferedZopfliDeflater::default();
 
     let original_data = PngData::read_file(&PathBuf::from(input)).unwrap();
     let image = PngData::from_slice(&original_data, &opts).unwrap();
@@ -35,7 +36,7 @@ fn test_it_converts(input: &str) {
         raw.add_png_chunk(chunk.name, chunk.data);
     }
 
-    let output = raw.create_optimized_png(&opts).unwrap();
+    let output = raw.create_optimized_png(&opts, &deflater).unwrap();
 
     let new = PngData::from_slice(&output, &opts).unwrap();
     assert!(new.aux_chunks.len() == num_chunks);
@@ -52,6 +53,7 @@ fn from_file() {
 #[test]
 fn custom_indexed() {
     let opts = get_opts();
+    let deflater = BufferedZopfliDeflater::default();
 
     let raw = RawImage::new(
         4,
@@ -69,7 +71,7 @@ fn custom_indexed() {
     )
     .unwrap();
 
-    raw.create_optimized_png(&opts).unwrap();
+    raw.create_optimized_png(&opts, &deflater).unwrap();
 }
 
 #[test]

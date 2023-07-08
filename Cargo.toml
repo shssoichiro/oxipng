@@ -28,6 +28,7 @@ required-features = ["zopfli"]
 
 [dependencies]
 zopfli = { version = "0.7.4", optional = true, default-features = false, features = ["std", "zlib"] }
+simd-adler32 = { version = "0.3.5", optional = true, default-features = false }
 rgb = "0.8.36"
 indexmap = "2.0.0"
 libdeflater = "0.14.0"
@@ -66,6 +67,7 @@ version = "0.24.6"
 rustc_version = "0.4.0"
 
 [features]
+zopfli = ["zopfli/std", "zopfli/zlib", "simd-adler32"]
 binary = ["clap", "wild", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
