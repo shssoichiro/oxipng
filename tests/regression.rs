@@ -177,8 +177,8 @@ fn issue_52_05() {
         None,
         RGBA,
         BitDepth::Eight,
-        INDEXED,
-        BitDepth::One,
+        RGB,
+        BitDepth::Eight,
     );
 }
 

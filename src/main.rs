@@ -180,7 +180,7 @@ fn main() {
         )
         .arg(
             Arg::new("fast")
-                .help("Use fast filter evaluation")
+                .help("Use fast filter evaluation (helpful when you have more filters enabled than CPU cores)")
                 .long("fast")
                 .action(ArgAction::SetTrue),
         )
@@ -242,7 +242,7 @@ fn main() {
         )
         .arg(
             Arg::new("zopfli")
-                .help("Use the slower but better compressing Zopfli algorithm")
+                .help("Use the slow but stronger Zopfli compressor (recommended use is with all filters and `--fast` enabled)")
                 .short('Z')
                 .long("zopfli")
                 .action(ArgAction::SetTrue),
