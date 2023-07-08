@@ -1,6 +1,6 @@
-use std::io::{Error, ErrorKind, Read};
 use crate::{PngError, PngResult};
 use simd_adler32::Adler32;
+use std::io::{Error, ErrorKind, Read};
 
 pub fn deflate(data: &[u8], options: &zopfli::Options) -> PngResult<Vec<u8>> {
     use std::cmp::max;

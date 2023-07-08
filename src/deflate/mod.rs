@@ -4,7 +4,7 @@ use crate::{PngError, PngResult};
 pub use deflater::crc32;
 pub use deflater::deflate;
 pub use deflater::inflate;
-use std::io::{BufWriter, copy, Cursor, Write};
+use std::io::{copy, BufWriter, Cursor, Write};
 use std::{fmt, fmt::Display, io};
 
 #[cfg(feature = "zopfli")]
@@ -12,9 +12,9 @@ use zopfli::{DeflateEncoder, Options};
 #[cfg(feature = "zopfli")]
 mod zopfli_oxipng;
 #[cfg(feature = "zopfli")]
-pub use zopfli_oxipng::deflate as zopfli_deflate;
-#[cfg(feature = "zopfli")]
 use simd_adler32::Adler32;
+#[cfg(feature = "zopfli")]
+pub use zopfli_oxipng::deflate as zopfli_deflate;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 /// DEFLATE algorithms supported by oxipng
@@ -57,7 +57,7 @@ impl Deflater for Deflaters {
 pub struct BufferedZopfliDeflater {
     input_buffer_size: usize,
     output_buffer_size: usize,
-    options: Options
+    options: Options,
 }
 
 #[cfg(feature = "zopfli")]
@@ -81,14 +81,13 @@ impl Default for BufferedZopfliDeflater {
         BufferedZopfliDeflater {
             input_buffer_size: 1024 * 1024,
             output_buffer_size: 64 * 1024,
-            options: Options::default()
+            options: Options::default(),
         }
     }
 }
 
 #[cfg(feature = "zopfli")]
 impl Deflater for BufferedZopfliDeflater {
-
     /// Fork of the zlib_compress function in Zopfli.
     fn deflate(&self, data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
         let mut out = Cursor::new(Vec::with_capacity(self.output_buffer_size));
@@ -101,15 +100,12 @@ impl Deflater for BufferedZopfliDeflater {
 
         let out = (|| -> io::Result<Vec<u8>> {
             let mut rolling_adler = Adler32::new();
-            let mut in_data = zopfli_oxipng::HashingAndCountingRead::new(data, &mut rolling_adler, None);
+            let mut in_data =
+                zopfli_oxipng::HashingAndCountingRead::new(data, &mut rolling_adler, None);
             out.write_all(&cmfflg.to_be_bytes())?;
             let mut buffer = BufWriter::with_capacity(
                 self.input_buffer_size,
-                DeflateEncoder::new(
-                    self.options,
-                    Default::default(),
-                    &mut out,
-                ),
+                DeflateEncoder::new(self.options, Default::default(), &mut out),
             );
             copy(&mut in_data, &mut buffer)?;
             buffer.into_inner()?.finish()?;

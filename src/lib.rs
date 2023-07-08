@@ -588,7 +588,13 @@ fn optimize_png(
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_siz, &opts.deflatee) {
+    if let Some(new_png) = optimize_raw(
+        raw.clone(),
+        &opts,
+        deadline.clone(),
+        max_siz,
+        &opts.deflatee,
+    ) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
     }
@@ -867,7 +873,9 @@ fn postprocess_chunks(
     deadline: Arc<Deadline>,
     orig_ihdr: &IhdrData,
     deflater: &T,
-) where T: Deflater {
+) where
+    T: Deflater,
+{
     if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
         // See if we can replace an iCCP chunk with an sRGB chunk
         let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
