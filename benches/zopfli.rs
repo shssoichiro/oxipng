@@ -5,11 +5,10 @@ extern crate test;
 
 use oxipng::internal_tests::*;
 use oxipng::*;
-use std::num::NonZeroU8;
 use std::path::PathBuf;
 use test::Bencher;
 
-const DEFAULT_DEFLATER: BufferedZopfliDeflater = BufferedZopfliDeflater::const_default();
+const DEFAULT_DEFLATER: BufferedZopfliDeflater = BufferedZopfliDeflater::default();
 
 #[bench]
 fn zopfli_16_bits_strategy_0(b: &mut Bencher) {
