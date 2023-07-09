@@ -1,8 +1,9 @@
 use crate::colors::{BitDepth, ColorType};
-use crate::deflate::{crc32, inflate, Deflater};
+use crate::deflate::{crc32, inflate};
 use crate::error::PngError;
 use crate::interlace::Interlacing;
 use crate::AtomicMin;
+use crate::Deflaters;
 use crate::PngResult;
 use indexmap::IndexSet;
 use log::warn;
@@ -27,7 +28,7 @@ impl IhdrData {
     /// Bits per pixel
     #[must_use]
     #[inline]
-    pub const fn bpp(&self) -> usize {
+    pub fn bpp(&self) -> usize {
         self.bit_depth as usize * self.color_type.channels_per_pixel() as usize
     }
 
@@ -38,7 +39,7 @@ impl IhdrData {
         let h = self.height as usize;
         let bpp = self.bpp();
 
-        const fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
+        fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
             ((w * bpp + 7) / 8) * h
         }
 
@@ -248,7 +249,7 @@ pub fn extract_icc(iccp: &Chunk) -> Option<Vec<u8>> {
 }
 
 /// Construct an iCCP chunk by compressing the ICC profile
-pub fn construct_iccp<T: Deflater>(icc: &[u8], deflater: &T) -> PngResult<Chunk> {
+pub fn construct_iccp(icc: &[u8], deflater: Deflaters) -> PngResult<Chunk> {
     let mut compressed = deflater.deflate(icc, &AtomicMin::new(None))?;
     let mut data = Vec::with_capacity(compressed.len() + 5);
     data.extend(b"icc"); // Profile name - generally unused, can be anything

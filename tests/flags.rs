@@ -677,10 +677,7 @@ fn zopfli_mode() {
     let input = PathBuf::from("tests/files/zopfli_mode.png");
     let (output, mut opts) = get_opts(&input);
     opts.deflate = Deflaters::Zopfli {
-        options: zopfli::Options {
-            iteration_count: NonZeroU8::new(15).unwrap(),
-            maximum_block_splits: 15,
-        },
+        iterations: NonZeroU8::new(15).unwrap(),
     };
 
     test_it_converts(

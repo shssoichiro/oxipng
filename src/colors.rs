@@ -45,7 +45,7 @@ impl Display for ColorType {
 impl ColorType {
     /// Get the code used by the PNG specification to denote this color type
     #[inline]
-    pub const fn png_header_code(&self) -> u8 {
+    pub fn png_header_code(&self) -> u8 {
         match self {
             ColorType::Grayscale { .. } => 0,
             ColorType::RGB { .. } => 2,
@@ -56,7 +56,7 @@ impl ColorType {
     }
 
     #[inline]
-    pub(crate) const fn channels_per_pixel(&self) -> u8 {
+    pub(crate) fn channels_per_pixel(&self) -> u8 {
         match self {
             ColorType::Grayscale { .. } | ColorType::Indexed { .. } => 1,
             ColorType::GrayscaleAlpha => 2,
@@ -66,12 +66,12 @@ impl ColorType {
     }
 
     #[inline]
-    pub(crate) const fn is_rgb(&self) -> bool {
+    pub(crate) fn is_rgb(&self) -> bool {
         matches!(self, ColorType::RGB { .. } | ColorType::RGBA)
     }
 
     #[inline]
-    pub(crate) const fn is_gray(&self) -> bool {
+    pub(crate) fn is_gray(&self) -> bool {
         matches!(
             self,
             ColorType::Grayscale { .. } | ColorType::GrayscaleAlpha
@@ -79,12 +79,12 @@ impl ColorType {
     }
 
     #[inline]
-    pub(crate) const fn has_alpha(&self) -> bool {
+    pub(crate) fn has_alpha(&self) -> bool {
         matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
     }
 
     #[inline]
-    pub(crate) const fn has_trns(&self) -> bool {
+    pub(crate) fn has_trns(&self) -> bool {
         match self {
             ColorType::Grayscale { transparent_shade } => transparent_shade.is_some(),
             ColorType::RGB { transparent_color } => transparent_color.is_some(),
