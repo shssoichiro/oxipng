@@ -69,7 +69,7 @@ jobs:
         if: endsWith(matrix.target, '-musl')
         run: |
           sudo apt-get -yq update
-          sudo apt-get -yq install musl-dev:${{ matrix.target-apt-arch }}
+          sudo apt-get -yq install musl-tools musl-dev:${{ matrix.target-apt-arch }}
 
       - name: Install QEMU and AArch64 cross compiler
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
@@ -82,7 +82,7 @@ jobs:
       - name: Cache Cargo artifacts
         uses: Swatinem/rust-cache@v2
 
-      - name: Install Rust toolchain (${{ matrix.toolchain }})
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: nightly
