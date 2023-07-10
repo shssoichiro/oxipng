@@ -27,16 +27,16 @@ jobs:
 
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target-apt-arch: amd64
           - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target-apt-arch: amd64
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target-apt-arch: arm64
           - target: aarch64-unknown-linux-musl
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target-apt-arch: arm64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -57,12 +57,11 @@ jobs:
       - name: Set up Ubuntu multiarch
         if: startsWith(matrix.os, 'ubuntu') && matrix.target-apt-arch != 'amd64'
         run: |
-          . /etc/os-release
-
+          readonly DISTRO_CODENAME=jammy
           sudo dpkg --add-architecture "${{ matrix.target-apt-arch }}"
           sudo sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
           for suite in '' '-updates' '-backports' '-security'; do
-            echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRIB_CODENAME$suite main universe multiverse" | \
+            echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRO_CODENAME$suite main universe multiverse" | \
             sudo tee -a /etc/apt/sources.list >/dev/null
           done
 
