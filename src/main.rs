@@ -446,7 +446,10 @@ fn parse_opts_into_struct(
 
     opts.scale_16 = matches.get_flag("scale16");
 
-    opts.fast_evaluation = matches.get_flag("fast");
+    // The default value for fast depends on the preset - make sure we don't change when not provided
+    if matches.get_flag("fast") {
+        opts.fast_evaluation = matches.get_flag("fast");
+    }
 
     opts.backup = matches.get_flag("backup");
 

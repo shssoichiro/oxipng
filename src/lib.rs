@@ -160,7 +160,7 @@ pub struct Options {
     ///
     /// `Some(x)` will change the file to interlacing mode `x`.
     ///
-    /// Default: `Some(None)`
+    /// Default: `Some(Interlacing::None)`
     pub interlace: Option<Interlacing>,
     /// Whether to allow transparent pixels to be altered to improve compression.
     pub optimize_alpha: bool,
