@@ -48,7 +48,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     CBPOST: FnMut(&Path),
     CBPRE: FnMut(&Path),
 {
-    let png = PngData::new(&input, &opts).unwrap();
+    let png = PngData::new(&input, opts).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
@@ -64,7 +64,7 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
 
     callback_post(output);
 
-    let png = match PngData::new(output, &opts) {
+    let png = match PngData::new(output, opts) {
         Ok(x) => x,
         Err(x) => {
             remove_file(output).ok();
@@ -196,7 +196,7 @@ fn verbose_mode() {
     for (i, log) in logs.into_iter().enumerate() {
         let expected_prefix = expected_prefixes[i];
         assert!(
-            log.starts_with(&expected_prefix),
+            log.starts_with(expected_prefix),
             "logs[{}] = {:?} doesn't start with {:?}",
             i,
             log,
