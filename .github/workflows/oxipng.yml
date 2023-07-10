@@ -55,29 +55,30 @@ jobs:
           persist-credentials: false
 
       - name: Set up Ubuntu multiarch
-        if: matrix.target-apt-arch != 'amd64'
+        if: startsWith(matrix.os, 'ubuntu') && matrix.target-apt-arch != 'amd64'
         run: |
           . /etc/os-release
 
-          dpkg --add-architecture "${{ matrix.target-apt-arch }}"
-          sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
+          sudo dpkg --add-architecture "${{ matrix.target-apt-arch }}"
+          sudo sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
           for suite in '' '-updates' '-backports' '-security'; do
-            echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRIB_CODENAME$suite main universe multiverse" >> /etc/apt/sources.list
+            echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRIB_CODENAME$suite main universe multiverse" | \
+            sudo tee -a /etc/apt/sources.list >/dev/null
           done
 
       - name: Install musl development files
         if: endsWith(matrix.target, '-musl')
         run: |
-          apt-get -yq update
-          apt-get -yq install musl-dev:${{ matrix.target-apt-arch }}
+          sudo apt-get -yq update
+          sudo apt-get -yq install musl-dev:${{ matrix.target-apt-arch }}
 
       - name: Install QEMU and AArch64 cross compiler
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
         run: |
-          apt-get -yq update
+          sudo apt-get -yq update
           # libc6 must be present to run executables dynamically linked
           # against glibc for the target architecture
-          apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
+          sudo apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
 
       - name: Cache Cargo artifacts
         uses: Swatinem/rust-cache@v2
