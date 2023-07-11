@@ -32,9 +32,14 @@ rgb = "0.8.36"
 indexmap = "2.0.0"
 libdeflater = "0.14.0"
 log = "0.4.19"
-stderrlog = { version = "0.5.4", optional = true, default-features = false }
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
+
+[dependencies.env_logger]
+optional = true
+default-features = false
+features = ["auto-color"]
+version = "0.10.0"
 
 [dependencies.crossbeam-channel]
 optional = true
@@ -66,7 +71,7 @@ version = "0.24.6"
 rustc_version = "0.4.0"
 
 [features]
-binary = ["clap", "wild", "stderrlog"]
+binary = ["clap", "wild", "env_logger"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
