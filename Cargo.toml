@@ -56,6 +56,10 @@ version = "4.3.8"
 optional = true
 version = "2.1.0"
 
+[dependencies.glob]
+optional = true
+version = "0.3.1"
+
 [dependencies.image]
 optional = true
 default-features = false
@@ -66,7 +70,7 @@ version = "0.24.6"
 rustc_version = "0.4.0"
 
 [features]
-binary = ["clap", "wild", "stderrlog"]
+binary = ["clap", "wild", "glob", "stderrlog"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
