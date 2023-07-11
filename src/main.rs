@@ -391,18 +391,14 @@ fn collect_files(
     in_out_pairs
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
-    let mut paths = vec![];
     let input_path = path.to_str().unwrap();
+
     glob::glob(input_path)
         .expect("Failed to read glob pattern")
-        .for_each(|path| {
-            let path = path.unwrap();
-            paths.push(path)
-        });
-
-    paths
+        .map(|path| path.unwrap())
+        .collect()
 }
 
 fn parse_opts_into_struct(
