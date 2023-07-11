@@ -75,6 +75,7 @@ pub fn join<A, B>(a: impl FnOnce() -> A, b: impl FnOnce() -> B) -> (A, B) {
     (a(), b())
 }
 
+#[allow(dead_code)]
 pub fn spawn<A>(a: impl FnOnce() -> A) -> A {
     a()
 }

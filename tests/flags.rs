@@ -188,6 +188,7 @@ fn verbose_mode() {
         "Found better combination:",
         "    zc = 11  f = None ",
         "    IDAT size = ",
+        "    file size = ",
     ];
     assert_eq!(logs.len(), expected_prefixes.len());
     for (i, log) in logs.into_iter().enumerate() {

@@ -453,13 +453,15 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     // Run the optimizer on the decoded PNG.
     let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;
 
+    let in_length = in_data.len();
+
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
-        info!("File already optimized");
         match (output, input) {
             // if p is None, it also means same as the input path
             (OutFile::Path(ref p), InFile::Path(ref input_path))
                 if p.as_ref().map_or(true, |p| p == input_path) =>
             {
+                info!("{}: Could not optimize further, no change written", input);
                 return Ok(());
             }
             _ => {
@@ -468,8 +470,22 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
         }
     }
 
+    let savings = if in_length >= optimized_output.len() {
+        format!(
+            "{} bytes ({:.2}% smaller)",
+            optimized_output.len(),
+            (in_length - optimized_output.len()) as f64 / in_length as f64 * 100_f64
+        )
+    } else {
+        format!(
+            "{} bytes ({:.2}% larger)",
+            optimized_output.len(),
+            (optimized_output.len() - in_length) as f64 / in_length as f64 * 100_f64
+        )
+    };
+
     if opts.pretend {
-        info!("Running in pretend mode, no output");
+        info!("{}: Running in pretend mode, no output", savings);
         return Ok(());
     }
 
@@ -516,7 +532,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             if let Some(metadata_input) = &opt_metadata_preserved {
                 copy_times(metadata_input, output_path)?;
             }
-            info!("Output: {}", output_path.display());
+            info!("{}: {}", savings, output_path.display());
         }
     }
     Ok(())
@@ -606,14 +622,14 @@ fn optimize_png(
         );
     }
     if file_original_size >= output.len() {
-        info!(
+        debug!(
             "    file size = {} bytes ({} bytes = {:.2}% decrease)",
             output.len(),
             file_original_size - output.len(),
             (file_original_size - output.len()) as f64 / file_original_size as f64 * 100_f64
         );
     } else {
-        info!(
+        debug!(
             "    file size = {} bytes ({} bytes = {:.2}% increase)",
             output.len(),
             output.len() - file_original_size,
