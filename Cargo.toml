@@ -52,7 +52,7 @@ version = "1.7.0"
 optional = true
 version = "4.3.8"
 
-[dependencies.glob]
+[target.'cfg(windows)'.dependencies.glob]
 optional = true
 version = "0.3.1"
 
