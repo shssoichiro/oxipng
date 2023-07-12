@@ -310,8 +310,12 @@ Heuristic filter selection strategies:
         matches
             .get_many::<PathBuf>("files")
             .unwrap()
-            .cloned()
-            .flat_map(apply_glob_pattern)
+            .flat_map(|path| {
+                apply_glob_pattern(path).unwrap_or_else(|e| {
+                    warn!("{path:?}: {e}");
+                    vec![]
+                })
+            })
             .collect(),
         #[cfg(not(windows))]
         matches
@@ -392,13 +396,13 @@ fn collect_files(
 }
 
 #[cfg(windows)]
-fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
-    let input_path = path.to_str().unwrap();
+fn apply_glob_pattern(path: &std::path::Path) -> Result<Vec<PathBuf>, String> {
+    let input_path = path.to_str().ok_or("Failed to read path.".to_string())?;
 
-    glob::glob(input_path)
-        .expect("Failed to read glob pattern")
-        .map(|path| path.unwrap())
-        .collect()
+    Ok(glob::glob(input_path)
+        .map_err(|e| e.to_string())?
+        .flatten()
+        .collect())
 }
 
 fn parse_opts_into_struct(
