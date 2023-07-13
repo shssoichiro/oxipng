@@ -295,7 +295,7 @@ Heuristic filter selection strategies:
     8  =>  BigEnt    Highest Shannon entropy of bigrams
     9  =>  Brute     Smallest compressed size (slow)",
         )
-        .get_matches();
+        .get_matches_from(std::env::args());
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
@@ -310,12 +310,8 @@ Heuristic filter selection strategies:
         matches
             .get_many::<PathBuf>("files")
             .unwrap()
-            .flat_map(|path| {
-                apply_glob_pattern(path).unwrap_or_else(|e| {
-                    warn!("{path:?}: {e}");
-                    vec![]
-                })
-            })
+            .cloned()
+            .flat_map(apply_glob_pattern)
             .collect(),
         #[cfg(not(windows))]
         matches
@@ -396,13 +392,16 @@ fn collect_files(
 }
 
 #[cfg(windows)]
-fn apply_glob_pattern(path: &std::path::Path) -> Result<Vec<PathBuf>, String> {
-    let input_path = path.to_str().ok_or("Failed to read path.".to_string())?;
+fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
+    let matches = path
+        .to_str()
+        .and_then(|pattern| glob::glob(pattern).ok())
+        .map(|paths| paths.flatten().collect::<Vec<_>>());
 
-    Ok(glob::glob(input_path)
-        .map_err(|e| e.to_string())?
-        .flatten()
-        .collect())
+    match matches {
+        Some(paths) if !paths.is_empty() => paths,
+        _ => vec![path],
+    }
 }
 
 fn parse_opts_into_struct(
