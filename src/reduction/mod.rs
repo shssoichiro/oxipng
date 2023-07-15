@@ -1,6 +1,7 @@
 use crate::evaluate::Evaluator;
 use crate::png::PngImage;
 use crate::Deadline;
+use crate::Deflaters;
 use crate::Options;
 use std::sync::Arc;
 
@@ -20,6 +21,13 @@ pub(crate) fn perform_reductions(
     eval: &Evaluator,
 ) -> Arc<PngImage> {
     let mut evaluation_added = false;
+
+    // At low compression levels, skip some transformations which are less likely to be effective
+    // This currently affects optimization presets 0-2
+    let cheap = match opts.deflate {
+        Deflaters::Libdeflater { compression } => compression < 12 && opts.fast_evaluation,
+        _ => false,
+    };
 
     // Interlacing must be processed first in order to evaluate the rest correctly
     if let Some(interlacing) = opts.interlace {
@@ -98,7 +106,7 @@ pub(crate) fn perform_reductions(
 
     // Attempt to convert from indexed to channels
     // This may give a better result due to dropping the PLTE chunk
-    if opts.color_type_reduction && !deadline.passed() {
+    if !cheap && opts.color_type_reduction && !deadline.passed() {
         if let Some(reduced) = indexed_to_channels(&png, opts.grayscale_reduction) {
             // This result should not be passed on to subsequent reductions
             eval.try_image(Arc::new(reduced));
@@ -121,6 +129,14 @@ pub(crate) fn perform_reductions(
                 baseline = new.clone();
             }
             indexed = Some(new);
+        }
+    }
+
+    // Attempt to sort the palette using an alternative method
+    if !cheap && opts.palette_reduction && !deadline.passed() {
+        if let Some(reduced) = sorted_palette_battiato(&png) {
+            eval.try_image(Arc::new(reduced));
+            evaluation_added = true;
         }
     }
 

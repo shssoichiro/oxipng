@@ -18,7 +18,7 @@ mod rayon;
 
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
-use log::{error, warn};
+use log::{error, warn, Level, LevelFilter};
 use oxipng::Deflaters;
 use oxipng::Options;
 use oxipng::RowFilter;
@@ -26,6 +26,7 @@ use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
 use std::fs::DirBuilder;
+use std::io::Write;
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 use std::path::PathBuf;
@@ -407,13 +408,22 @@ fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
 fn parse_opts_into_struct(
     matches: &ArgMatches,
 ) -> Result<(OutFile, Option<PathBuf>, Options), String> {
-    stderrlog::new()
-        .module(module_path!())
-        .quiet(matches.get_flag("quiet"))
-        .verbosity(matches.get_count("verbose") as usize + 2)
-        .show_level(false)
-        .init()
-        .unwrap();
+    let log_level = match matches.get_count("verbose") {
+        _ if matches.get_flag("quiet") => LevelFilter::Off,
+        0 => LevelFilter::Info,
+        1 => LevelFilter::Debug,
+        _ => LevelFilter::Trace,
+    };
+    env_logger::builder()
+        .filter_module(module_path!(), log_level)
+        .format(|buf, record| {
+            let style = match record.level() {
+                Level::Info => buf.style(),
+                _ => buf.default_level_style(record.level()),
+            };
+            writeln!(buf, "{}", style.value(record.args()))
+        })
+        .init();
 
     let mut opts = match matches.get_one::<String>("optimization") {
         None => Options::default(),
@@ -467,7 +477,10 @@ fn parse_opts_into_struct(
 
     opts.scale_16 = matches.get_flag("scale16");
 
-    opts.fast_evaluation = matches.get_flag("fast");
+    // The default value for fast depends on the preset - make sure we don't change when not provided
+    if matches.get_flag("fast") {
+        opts.fast_evaluation = matches.get_flag("fast");
+    }
 
     opts.backup = matches.get_flag("backup");
 

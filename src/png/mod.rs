@@ -279,9 +279,8 @@ impl PngImage {
         match &self.ihdr.color_type {
             ColorType::Indexed { palette } => {
                 let plte = 12 + palette.len() * 3;
-                let trns = palette.iter().filter(|p| p.a != 255).count();
-                if trns != 0 {
-                    plte + 12 + trns
+                if let Some(trns) = palette.iter().rposition(|p| p.a != 255) {
+                    plte + 12 + trns + 1
                 } else {
                     plte
                 }

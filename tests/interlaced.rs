@@ -14,6 +14,8 @@ const RGBA: u8 = 6;
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
         force: true,
+        fast_evaluation: false,
+        interlace: None,
         ..Default::default()
     };
     let mut filter = IndexSet::new();
