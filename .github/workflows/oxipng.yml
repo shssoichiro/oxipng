@@ -10,6 +10,8 @@ on:
 
 jobs:
   ci:
+    name: CI
+
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
 
@@ -144,6 +146,8 @@ jobs:
             target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng.exe
 
   msrv-check:
+    name: MSRV check
+
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
