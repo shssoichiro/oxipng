@@ -139,7 +139,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Oxipng binary (${{ matrix.target }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng
+          path: |
+            target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng
+            target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng.exe
 
   msrv-check:
     runs-on: ubuntu-latest
