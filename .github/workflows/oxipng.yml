@@ -15,8 +15,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
 
-    # Prevent in-repo PRs from running the same jobs twice
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
+    # Prevent tags and in-repo PRs from triggering this workflow more than once for a commit
+    if: github.ref_type != 'tag' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork)
 
     strategy:
       fail-fast: false
@@ -157,8 +157,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
-    # Prevent in-repo PRs from running the same jobs twice
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
+    # Prevent tags and in-repo PRs from triggering this workflow more than once for a commit
+    if: github.ref_type != 'tag' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork)
 
     steps:
       - name: Checkout source
