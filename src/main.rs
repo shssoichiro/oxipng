@@ -418,8 +418,8 @@ fn parse_opts_into_struct(
         .filter_module(module_path!(), log_level)
         .format(|buf, record| {
             let style = match record.level() {
-                Level::Info => buf.style(),
-                _ => buf.default_level_style(record.level()),
+                Level::Error | Level::Warn => buf.default_level_style(record.level()),
+                _ => buf.style(), // Leave info, debug and trace unstyled
             };
             writeln!(buf, "{}", style.value(record.args()))
         })
