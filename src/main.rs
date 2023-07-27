@@ -376,12 +376,16 @@ fn collect_files(
             }
             continue;
         };
-        let out_file = if let Some(ref out_dir) = *out_dir {
-            let out_path = Some(out_dir.join(input.file_name().unwrap()));
-            OutFile::Path(out_path)
-        } else {
-            (*out_file).clone()
-        };
+        let out_file =
+            if let (Some(out_dir), &OutFile::Path { preserve_attrs, .. }) = (out_dir, out_file) {
+                let path = Some(out_dir.join(input.file_name().unwrap()));
+                OutFile::Path {
+                    path,
+                    preserve_attrs,
+                }
+            } else {
+                (*out_file).clone()
+            };
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
@@ -459,10 +463,15 @@ fn parse_opts_into_struct(
         None
     };
 
-    let out_file = if matches.get_flag("stdout") {
+    let out_file = if matches.get_flag("pretend") {
+        OutFile::None
+    } else if matches.get_flag("stdout") {
         OutFile::StdOut
     } else {
-        OutFile::Path(matches.get_one::<PathBuf>("output_file").cloned())
+        OutFile::Path {
+            path: matches.get_one::<PathBuf>("output_file").cloned(),
+            preserve_attrs: matches.get_flag("preserve"),
+        }
     };
 
     opts.optimize_alpha = matches.get_flag("alpha");
@@ -481,10 +490,6 @@ fn parse_opts_into_struct(
     opts.fix_errors = matches.get_flag("fix");
 
     opts.check = matches.get_flag("check");
-
-    opts.pretend = matches.get_flag("pretend");
-
-    opts.preserve_attrs = matches.get_flag("preserve");
 
     opts.bit_depth_reduction = !matches.get_flag("no-bit-reduction");
 

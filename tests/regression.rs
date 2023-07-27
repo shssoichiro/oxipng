@@ -20,10 +20,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(RowFilter::None);
     options.filter = filter;
 
-    (
-        OutFile::Path(Some(input.with_extension("out.png"))),
-        options,
-    )
+    (OutFile::from_path(input.with_extension("out.png")), options)
 }
 
 fn test_it_converts(
@@ -295,7 +292,7 @@ fn issue_92_filter_5() {
     let input = "tests/files/issue-92.png";
     let (_, mut opts) = get_opts(Path::new(input));
     opts.filter = [RowFilter::MinSum].iter().cloned().collect();
-    let output = OutFile::Path(Some(Path::new(input).with_extension("-f5-out.png")));
+    let output = OutFile::from_path(Path::new(input).with_extension("-f5-out.png"));
 
     test_it_converts(
         input,
