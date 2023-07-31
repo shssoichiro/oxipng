@@ -367,8 +367,8 @@ fn collect_files(
                         in_out_pairs
                             .extend(collect_files(files, out_dir, out_file, recursive, false));
                     }
-                    Err(_) => {
-                        return Vec::new();
+                    Err(e) => {
+                        warn!("{}: {}", input.display(), e);
                     }
                 }
             } else {
