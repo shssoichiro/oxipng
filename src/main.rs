@@ -296,7 +296,7 @@ Heuristic filter selection strategies:
     8  =>  BigEnt    Highest Shannon entropy of bigrams
     9  =>  Brute     Smallest compressed size (slow)",
         )
-        .get_matches_from(wild::args());
+        .get_matches_from(std::env::args());
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
@@ -307,6 +307,14 @@ Heuristic filter selection strategies:
     };
 
     let files = collect_files(
+        #[cfg(windows)]
+        matches
+            .get_many::<PathBuf>("files")
+            .unwrap()
+            .cloned()
+            .flat_map(apply_glob_pattern)
+            .collect(),
+        #[cfg(not(windows))]
         matches
             .get_many::<PathBuf>("files")
             .unwrap()
@@ -382,6 +390,19 @@ fn collect_files(
         in_out_pairs.push((in_file, out_file));
     }
     in_out_pairs
+}
+
+#[cfg(windows)]
+fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
+    let matches = path
+        .to_str()
+        .and_then(|pattern| glob::glob(pattern).ok())
+        .map(|paths| paths.flatten().collect::<Vec<_>>());
+
+    match matches {
+        Some(paths) if !paths.is_empty() => paths,
+        _ => vec![path],
+    }
 }
 
 fn parse_opts_into_struct(

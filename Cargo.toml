@@ -57,9 +57,9 @@ version = "1.7.0"
 optional = true
 version = "4.3.8"
 
-[dependencies.wild]
+[target.'cfg(windows)'.dependencies.glob]
 optional = true
-version = "2.1.0"
+version = "0.3.1"
 
 [dependencies.image]
 optional = true
@@ -71,7 +71,7 @@ version = "0.24.6"
 rustc_version = "0.4.0"
 
 [features]
-binary = ["clap", "wild", "env_logger"]
+binary = ["clap", "glob", "env_logger"]
 default = ["binary", "filetime", "parallel", "zopfli"]
 parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
