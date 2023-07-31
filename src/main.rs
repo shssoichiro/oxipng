@@ -231,7 +231,7 @@ fn main() {
         )
         .arg(
             Arg::new("no-recoding")
-                .help("No IDAT recoding unless necessary")
+                .help("No recoding of IDAT or other compressed chunks unless necessary")
                 .long("nz")
                 .action(ArgAction::SetTrue),
         )
