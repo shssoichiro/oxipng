@@ -34,7 +34,7 @@ use log::{debug, info, trace, warn};
 use rayon::prelude::*;
 use std::borrow::Cow;
 use std::fmt;
-use std::fs::{copy, File, Metadata};
+use std::fs::{File, Metadata};
 use std::io::{stdin, stdout, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -147,10 +147,6 @@ pub type PngResult<T> = Result<T, PngError>;
 #[derive(Clone, Debug)]
 /// Options controlling the output of the `optimize` function
 pub struct Options {
-    /// Whether the input file should be backed up before writing the output.
-    ///
-    /// Default: `false`
-    pub backup: bool,
     /// Attempt to fix errors when decoding the input file rather than returning an `Err`.
     ///
     /// Default: `false`
@@ -303,7 +299,6 @@ impl Default for Options {
     fn default() -> Options {
         // Default settings based on -o 2 from the CLI interface
         Options {
-            backup: false,
             fix_errors: false,
             force: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
@@ -506,9 +501,6 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                 .as_ref()
                 .map(|p| p.as_path())
                 .unwrap_or_else(|| input.path().unwrap());
-            if opts.backup {
-                perform_backup(output_path)?;
-            }
             let out_file = File::create(output_path).map_err(|err| {
                 PngError::new(&format!(
                     "Unable to write to file {}: {}",
@@ -986,19 +978,6 @@ fn postprocess_chunks(
 /// Check if an image was already optimized prior to oxipng's operations
 fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Options) -> bool {
     original_size <= optimized_size && !opts.force
-}
-
-fn perform_backup(input_path: &Path) -> PngResult<()> {
-    let backup_file = input_path.with_extension(format!(
-        "bak.{}",
-        input_path.extension().unwrap().to_str().unwrap()
-    ));
-    copy(input_path, &backup_file).map(|_| ()).map_err(|_| {
-        PngError::new(&format!(
-            "Unable to write to backup file at {}",
-            backup_file.display()
-        ))
-    })
 }
 
 #[cfg(not(unix))]

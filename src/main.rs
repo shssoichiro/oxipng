@@ -57,13 +57,6 @@ fn main() {
                 .value_parser(["0", "1", "2", "3", "4", "5", "6", "max"]),
         )
         .arg(
-            Arg::new("backup")
-                .help("Back up modified files")
-                .short('b')
-                .long("backup")
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
             Arg::new("recursive")
                 .help("Recurse into subdirectories and optimize all *.png/*.apng files")
                 .short('r')
@@ -484,8 +477,6 @@ fn parse_opts_into_struct(
     if matches.get_flag("fast") {
         opts.fast_evaluation = matches.get_flag("fast");
     }
-
-    opts.backup = matches.get_flag("backup");
 
     opts.force = matches.get_flag("force");
 
