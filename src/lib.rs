@@ -155,10 +155,6 @@ pub struct Options {
     ///
     /// Default: `false`
     pub fix_errors: bool,
-    /// Don't actually run any optimizations, just parse the PNG file.
-    ///
-    /// Default: `false`
-    pub check: bool,
     /// Write to output even if there was no improvement in compression.
     ///
     /// Default: `false`
@@ -308,7 +304,6 @@ impl Default for Options {
         // Default settings based on -o 2 from the CLI interface
         Options {
             backup: false,
-            check: false,
             fix_errors: false,
             force: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
@@ -461,11 +456,6 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     };
 
     let mut png = PngData::from_slice(&in_data, opts)?;
-
-    if opts.check {
-        info!("Running in check mode, not optimizing");
-        return Ok(());
-    }
 
     // Run the optimizer on the decoded PNG.
     let mut optimized_output = optimize_png(&mut png, &in_data, opts, deadline)?;

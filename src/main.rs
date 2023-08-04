@@ -104,13 +104,6 @@ fn main() {
                 .action(ArgAction::SetTrue),
         )
         .arg(
-            Arg::new("check")
-                .help("Do not run any optimization passes")
-                .short('c')
-                .long("check")
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
             Arg::new("pretend")
                 .help("Do not write any files, only calculate compression gains")
                 .short('P')
@@ -497,8 +490,6 @@ fn parse_opts_into_struct(
     opts.force = matches.get_flag("force");
 
     opts.fix_errors = matches.get_flag("fix");
-
-    opts.check = matches.get_flag("check");
 
     opts.bit_depth_reduction = !matches.get_flag("no-bit-reduction");
 
