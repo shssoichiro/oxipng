@@ -328,7 +328,6 @@ Heuristic filter selection strategies:
     );
 
     let success = files.into_par_iter().filter(|(input, output)| {
-        
         match oxipng::optimize(input, output, &opts) {
             // For optimizing single files, this will return the correct exit code always.
             // For recursive optimization, the correct choice is a bit subjective.
