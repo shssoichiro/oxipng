@@ -25,6 +25,7 @@ use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
+use std::ffi::OsStr;
 use std::fs::DirBuilder;
 use std::io::Write;
 #[cfg(feature = "zopfli")]
@@ -327,6 +328,7 @@ Heuristic filter selection strategies:
     );
 
     let success = files.into_par_iter().filter(|(input, output)| {
+        
         match oxipng::optimize(input, output, &opts) {
             // For optimizing single files, this will return the correct exit code always.
             // For recursive optimization, the correct choice is a bit subjective.
@@ -385,6 +387,11 @@ fn collect_files(
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
+            //skip non png files if recusive flag is used.
+            //(still allow the user to convert a non png file if recusive flag is not used)
+            if Some(OsStr::new("png")) != input.extension() && recursive {
+                continue;
+            }
             InFile::Path(input)
         };
         in_out_pairs.push((in_file, out_file));
