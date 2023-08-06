@@ -71,6 +71,12 @@ fn main() {
                 .action(ArgAction::SetTrue),
         )
         .arg(
+            Arg::new("include-non-png")
+                .help("compress also files with non png extensions if --recursive flag is used")
+                .long("include-non-png")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
             Arg::new("output_dir")
                 .help("Write output file(s) to <directory>")
                 .long("dir")
@@ -324,6 +330,7 @@ Heuristic filter selection strategies:
         &out_dir,
         &out_file,
         matches.get_flag("recursive"),
+        matches.get_flag("include-non-png"),
         true,
     );
 
@@ -354,6 +361,7 @@ fn collect_files(
     out_dir: &Option<PathBuf>,
     out_file: &OutFile,
     recursive: bool,
+    include_non_png: bool,
     allow_stdin: bool,
 ) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
@@ -365,8 +373,14 @@ fn collect_files(
                 match input.read_dir() {
                     Ok(dir) => {
                         let files = dir.filter_map(|x| x.ok().map(|x| x.path())).collect();
-                        in_out_pairs
-                            .extend(collect_files(files, out_dir, out_file, recursive, false));
+                        in_out_pairs.extend(collect_files(
+                            files,
+                            out_dir,
+                            out_file,
+                            recursive,
+                            include_non_png,
+                            false,
+                        ));
                     }
                     Err(e) => {
                         warn!("{}: {}", input.display(), e);
@@ -388,7 +402,7 @@ fn collect_files(
         } else {
             //skip non png files if recusive flag is used.
             //(still allow the user to convert a non png file if recusive flag is not used)
-            if Some(OsStr::new("png")) != input.extension() && recursive {
+            if Some(OsStr::new("png")) != input.extension() && recursive && !include_non_png {
                 continue;
             }
             InFile::Path(input)
