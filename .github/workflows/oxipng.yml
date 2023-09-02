@@ -68,6 +68,7 @@ jobs:
           readonly DISTRO_CODENAME=jammy
           sudo dpkg --add-architecture "${{ matrix.target-apt-arch }}"
           sudo sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
+          sudo sed -i "s/^deb mirror/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] mirror/" /etc/apt/sources.list
           for suite in '' '-updates' '-backports' '-security'; do
             echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRO_CODENAME$suite main universe multiverse" | \
             sudo tee -a /etc/apt/sources.list >/dev/null
