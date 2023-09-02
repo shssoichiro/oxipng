@@ -15,7 +15,7 @@ fn test_it_converts(input: &str) {
     let input = PathBuf::from(input);
     let opts = get_opts();
 
-    let original_data = PngData::read_file(&PathBuf::from(input)).unwrap();
+    let original_data = PngData::read_file(&input).unwrap();
     let image = PngData::from_slice(&original_data, &opts).unwrap();
     let png = Arc::try_unwrap(image.raw).unwrap();
 

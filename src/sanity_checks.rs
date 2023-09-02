@@ -23,7 +23,7 @@ pub fn validate_output(output: &[u8], original_data: &[u8]) -> bool {
         (Ok(new_frames), Ok(old_frames)) if new_frames.len() != old_frames.len() => false,
         (Ok(new_frames), Ok(old_frames)) => {
             for (a, b) in old_frames.iter().zip(new_frames) {
-                if !images_equal(&a, &b) {
+                if !images_equal(a, &b) {
                     return false;
                 }
             }
