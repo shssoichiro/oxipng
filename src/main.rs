@@ -225,13 +225,13 @@ fn main() {
         )
         .arg(
             Arg::new("no-reductions")
-                .help("No reductions")
+                .help("No reductions or deinterlacing")
                 .long("nx")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-recoding")
-                .help("No IDAT recoding unless necessary")
+                .help("No recoding of IDAT or other compressed chunks unless necessary")
                 .long("nz")
                 .action(ArgAction::SetTrue),
         )
@@ -431,14 +431,6 @@ fn parse_opts_into_struct(
         Some(level) => Options::from_preset(level.parse::<u8>().unwrap()),
     };
 
-    if let Some(x) = matches.get_one::<String>("interlace") {
-        opts.interlace = if x == "keep" {
-            None
-        } else {
-            x.parse::<u8>().unwrap().try_into().ok()
-        };
-    }
-
     if let Some(x) = matches.get_one::<IndexSet<u8>>("filters") {
         opts.filter.clear();
         for &f in x {
@@ -507,9 +499,18 @@ fn parse_opts_into_struct(
         opts.color_type_reduction = false;
         opts.palette_reduction = false;
         opts.grayscale_reduction = false;
+        opts.interlace = None;
     }
 
     opts.idat_recoding = !matches.get_flag("no-recoding");
+
+    if let Some(x) = matches.get_one::<String>("interlace") {
+        opts.interlace = if x == "keep" {
+            None
+        } else {
+            x.parse::<u8>().unwrap().try_into().ok()
+        };
+    }
 
     if let Some(keep) = matches.get_one::<String>("keep") {
         let names = keep
