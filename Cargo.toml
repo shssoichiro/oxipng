@@ -30,7 +30,7 @@ required-features = ["zopfli"]
 zopfli = { version = "0.7.4", optional = true, default-features = false, features = ["std", "zlib"] }
 rgb = "0.8.36"
 indexmap = "2.0.0"
-libdeflater = "0.14.0"
+libdeflater = "1.19.0"
 log = "0.4.19"
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
