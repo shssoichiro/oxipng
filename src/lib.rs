@@ -91,6 +91,9 @@ pub enum OutFile {
 }
 
 impl OutFile {
+    /// Construct a new `OutFile` with the given path.
+    ///
+    /// This is a convenience method for `OutFile::Path { path: Some(path), preserve_attrs: false }`.
     pub fn from_path(path: PathBuf) -> Self {
         OutFile::Path {
             path: Some(path),
