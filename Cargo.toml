@@ -86,6 +86,7 @@ opt-level = 2
 
 [profile.release]
 lto = "thin"
+strip = "symbols"
 
 [profile.dev.package.bitvec]
 opt-level = 3

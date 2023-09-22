@@ -5,157 +5,76 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  actions: read
+  contents: write
+
 jobs:
-  create-windows-binaries:
-    runs-on: windows-latest
-    if: github.repository == 'shssoichiro/oxipng'
-
-    strategy:
-      matrix:
-        conf: [x86_64]
-# Temporarily disable i686 binaries, they are failing on linking libdeflate
-# and I don't have a Windows machine set up to experiment with fixing it.
-#        conf: [x86_64, i686]
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Install stable
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: ${{ matrix.conf }}-pc-windows-msvc
-          override: true
-
-      - name: Build oxipng
-        run: |
-          cargo build --release --target ${{ matrix.conf }}-pc-windows-msvc
-
-      - name: Get the version
-        shell: bash
-        id: tagName
-        run: |
-          VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-          echo "::set-output name=tag::$VERSION"
-
-      - name: Build package
-        id: package
-        shell: bash
-        run: |
-          ARCHIVE_TARGET="${{ matrix.conf }}-pc-windows-msvc"
-          ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
-          ARCHIVE_FILE="${ARCHIVE_NAME}.zip"
-          mv LICENSE LICENSE.txt
-          7z a ${ARCHIVE_FILE} \
-               ./target/${{ matrix.conf }}-pc-windows-msvc/release/oxipng.exe \
-               ./CHANGELOG.md ./LICENSE.txt ./README.md
-          echo "::set-output name=file::${ARCHIVE_FILE}"
-          echo "::set-output name=name::${ARCHIVE_NAME}.zip"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.package.outputs.name }}
-          path: ${{ steps.package.outputs.file }}
-
-  create-unix-binaries:
-    runs-on: ${{ matrix.os }}
-    if: github.repository == 'shssoichiro/oxipng'
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-          - os: macos-latest
-            target: x86_64-apple-darwin
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-
-      - name: Install musl
-        if: contains(matrix.target, 'linux-musl')
-        run: |
-          sudo apt-get install musl-tools
-
-      - name: Build oxipng
-        run: |
-          cargo build --release --target ${{ matrix.target }}
-
-      - name: Strip binary
-        run: |
-          strip target/${{ matrix.target }}/release/oxipng
-
-      - name: Get the version
-        id: tagName
-        run: |
-          VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-          echo "::set-output name=tag::$VERSION"
-
-      - name: Build package
-        id: package
-        run: |
-          ARCHIVE_TARGET=${{ matrix.target }}
-          ARCHIVE_NAME="oxipng-${{ steps.tagName.outputs.tag }}-$ARCHIVE_TARGET"
-          ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
-          mkdir "/tmp/${ARCHIVE_NAME}"
-          cp README.md CHANGELOG.md LICENSE \
-             target/${{ matrix.target }}/release/oxipng \
-             /tmp/${ARCHIVE_NAME}
-          tar -czf ${PWD}/${ARCHIVE_FILE} -C /tmp/ ${ARCHIVE_NAME}
-          echo ::set-output "name=file::${ARCHIVE_FILE}"
-          echo ::set-output "name=name::${ARCHIVE_NAME}.tar.gz"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.package.outputs.name }}
-          path: ${{ steps.package.outputs.file }}
-
-
   deploy:
+    name: Deploy release
+
     runs-on: ubuntu-latest
-    if: github.repository == 'shssoichiro/oxipng'
-    needs: [create-windows-binaries, create-unix-binaries]
+    timeout-minutes: 30
+
+    # Prevent job from running on forks
+    if: ${{ !github.event.repository.fork }}
+
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - x86_64-pc-windows-msvc
+          - i686-pc-windows-msvc
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-      - name: Get version and release description
-        id: tagName
+      - name: Get the Oxipng version
+        id: oxipngMeta
+        run: echo "version=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "oxipng").version')"
+          >> "$GITHUB_OUTPUT"
+
+      - name: Retrieve ${{ matrix.target }} binary
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: oxipng.yml
+          commit: ${{ env.GITHUB_SHA }}
+          name: Oxipng binary (${{ matrix.target }})
+          path: target
+
+      - name: Build archives
+        working-directory: target
         run: |
-          VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-          tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > CHANGELOG.txt
-          echo "::set-output name=tag::$VERSION"
+          ARCHIVE_NAME="oxipng-${{ steps.oxipngMeta.outputs.version }}-${{ matrix.target }}"
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./binaries
+          mkdir "$ARCHIVE_NAME"
+          cp ../CHANGELOG.md ../README.md "$ARCHIVE_NAME"
 
-      - name: Create a release
+          case '${{ matrix.target }}' in
+            *-windows-*)
+              cp ../LICENSE "$ARCHIVE_NAME/LICENSE.txt"
+              cp oxipng.exe "$ARCHIVE_NAME"
+              zip "${ARCHIVE_NAME}.zip" "$ARCHIVE_NAME"/*;;
+            *)
+              cp ../LICENSE "$ARCHIVE_NAME"
+              cp oxipng "$ARCHIVE_NAME"
+              tar -vczf "${ARCHIVE_NAME}.tar.gz" "$ARCHIVE_NAME"/*;;
+          esac
+
+      - name: Create release notes
+        run: tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > RELEASE_NOTES.txt
+
+      - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          name: v${{ steps.tagName.outputs.tag }}
-          body_path: CHANGELOG.txt
+          name: v${{ steps.oxipngMeta.outputs.version }}
+          body_path: RELEASE_NOTES.txt
           files: |
-            ./binaries/**/*.zip
-            ./binaries/**/*.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            target/*.zip
+            target/*.tar.gz

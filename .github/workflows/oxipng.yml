@@ -2,100 +2,181 @@ name: oxipng
 
 on:
   push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
+    types:
+      - opened
+      - synchronize
   workflow_dispatch:
 
 jobs:
-  test:
+  ci:
+    name: CI
+
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    # Prevent tags and in-repo PRs from triggering this workflow more than once for a commit
+    if: github.ref_type != 'tag' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork)
+
     strategy:
       fail-fast: false
       matrix:
         target:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
           - x86_64-pc-windows-msvc
+          - i686-pc-windows-msvc
           - x86_64-apple-darwin
-        toolchain:
-          # Minimum stable
-          - "1.65.0"
-          - stable
-          - beta
-          - nightly
+          - aarch64-apple-darwin
+
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-22.04
+            target-apt-arch: amd64
           - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
+            os: ubuntu-22.04
+            target-apt-arch: amd64
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04
+            target-apt-arch: arm64
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-22.04
+            target-apt-arch: arm64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+          - target: i686-pc-windows-msvc
+            os: windows-latest
           - target: x86_64-apple-darwin
-            os: macOS-latest
-        exclude:
-          - target: x86_64-pc-windows-msvc
-            toolchain: beta
-          - target: x86_64-pc-windows-msvc
-            toolchain: nightly
-          - target: x86_64-apple-darwin
-            toolchain: beta
-          - target: x86_64-apple-darwin
-            toolchain: nightly
-          - target: x86_64-unknown-linux-musl
-            toolchain: beta
-          - target: x86_64-unknown-linux-musl
-            toolchain: nightly
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+
+    env:
+      CARGO_BUILD_TARGET: ${{ matrix.target }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - name: Install musl tools
-        run: sudo apt-get install musl-tools
-        if: "contains(matrix.target, 'musl')"
-      - name: Cache cargo registry
-        uses: actions/cache@v3
+
+      - name: Set up Ubuntu multiarch
+        if: startsWith(matrix.os, 'ubuntu') && matrix.target-apt-arch != 'amd64'
+        run: |
+          readonly DISTRO_CODENAME=jammy
+          sudo dpkg --add-architecture "${{ matrix.target-apt-arch }}"
+          sudo sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
+          sudo sed -i "s/^deb mirror/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] mirror/" /etc/apt/sources.list
+          for suite in '' '-updates' '-backports' '-security'; do
+            echo "deb [arch=${{ matrix.target-apt-arch }}] http://ports.ubuntu.com/ $DISTRO_CODENAME$suite main universe multiverse" | \
+            sudo tee -a /etc/apt/sources.list >/dev/null
+          done
+
+      - name: Install musl development files
+        if: endsWith(matrix.target, '-musl')
+        run: |
+          sudo apt-get -yq update
+          sudo apt-get -yq install musl-tools musl-dev:${{ matrix.target-apt-arch }}
+
+      - name: Install QEMU and AArch64 cross compiler
+        if: startsWith(matrix.target, 'aarch64-unknown-linux')
+        run: |
+          sudo apt-get -yq update
+          # libc6 must be present to run executables dynamically linked
+          # against glibc for the target architecture
+          sudo apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
+
+      - name: Cache Cargo artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-${{ matrix.toolchain }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.toolchain }}-cargo-registry-
-      - name: Install ${{ matrix.toolchain }}
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.toolchain }}
-          override: true
+          toolchain: nightly
+          targets: ${{ env.CARGO_BUILD_TARGET }}
           components: clippy, rustfmt
+
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+
       - name: Run rustfmt
-        if: matrix.toolchain == 'stable'
-        uses: actions-rs/cargo@v1
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: cargo fmt --check
+
+      - name: Run Clippy (no default features)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: giraffate/clippy-action@v1
         with:
-          command: fmt
-          args: -- --check
-      - name: Run clippy
-        if: matrix.toolchain == 'stable'
-        uses: actions-rs/clippy-check@v1
+          clippy_flags: --no-deps --all-targets --no-default-features -- -D warnings
+          reporter: github-check
+          fail_on_error: true
+
+      - name: Run Clippy (all features)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: giraffate/clippy-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
+          clippy_flags: --no-deps --all-targets --all-features -- -D warnings
+          reporter: github-check
+          fail_on_error: true
+
+      # There aren't good user-mode ARM64 emulators we can use on x64 macOS hosts.
+      # QEMU doesn't have any plans to add such support due to a lack of kernel
+      # syscall stability guarantees: https://gitlab.com/qemu-project/qemu/-/issues/1682
       - name: Run tests
-        run: cargo test --features sanity-checks
+        if: matrix.target != 'aarch64-apple-darwin'
+        run: |
+          cargo nextest run --release --features sanity-checks
+          cargo test --doc --release --features sanity-checks
+
+      - name: Build tests (ARM64 macOS only)
+        if: matrix.target == 'aarch64-apple-darwin'
+        run: cargo test --release --features sanity-checks --no-run
+
       - name: Build benchmarks
-        if: matrix.toolchain == 'nightly'
         run: cargo bench --no-run
+
       - name: Build docs
-        run: cargo doc --no-deps
-      - name: Check no default features
-        if: matrix.toolchain == 'stable'
-        uses: actions-rs/clippy-check@v1
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: cargo doc --release --no-deps
+
+      - name: Build CLI binary
+        run: cargo build --release
+
+      - name: Upload CLI binary as artifact
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --no-default-features -- -D warnings
+          name: Oxipng binary (${{ matrix.target }})
+          path: |
+            target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng
+            target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng.exe
+
+  msrv-check:
+    name: MSRV check
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Prevent tags and in-repo PRs from triggering this workflow more than once for a commit
+    if: github.ref_type != 'tag' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork)
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Cache Cargo artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install MSRV Rust toolchain
+        uses: dtolnay/rust-toolchain@1.65.0
+
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+
+      - name: Run tests
+        run: |
+          cargo nextest run --release --features sanity-checks
+          cargo test --doc --release --features sanity-checks

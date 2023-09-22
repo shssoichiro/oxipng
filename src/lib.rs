@@ -180,7 +180,7 @@ pub struct Options {
     ///
     /// Default: `true`
     pub grayscale_reduction: bool,
-    /// Whether to perform IDAT recoding
+    /// Whether to perform recoding of IDAT and other compressed chunks
     ///
     /// If any type of reduction is performed, IDAT recoding will be performed
     /// regardless of this setting
@@ -904,23 +904,25 @@ fn postprocess_chunks(
                 None
             };
             // sRGB-like profile can be replaced with an sRGB chunk with the same rendering intent
-            // Otherwise try recompressing the profile
             if let Some(intent) = intent {
                 trace!("Replacing iCCP chunk with equivalent sRGB chunk");
                 png.aux_chunks[iccp_idx] = Chunk {
                     name: *b"sRGB",
                     data: vec![intent],
                 };
-            } else if let Ok(iccp) = construct_iccp(&icc, opts.deflate) {
-                let cur_len = png.aux_chunks[iccp_idx].data.len();
-                let new_len = iccp.data.len();
-                if new_len < cur_len {
-                    debug!(
-                        "Recompressed iCCP chunk: {} ({} bytes decrease)",
-                        new_len,
-                        cur_len - new_len
-                    );
-                    png.aux_chunks[iccp_idx] = iccp;
+            } else if opts.idat_recoding {
+                // Try recompressing the profile
+                if let Ok(iccp) = construct_iccp(&icc, opts.deflate) {
+                    let cur_len = png.aux_chunks[iccp_idx].data.len();
+                    let new_len = iccp.data.len();
+                    if new_len < cur_len {
+                        debug!(
+                            "Recompressed iCCP chunk: {} ({} bytes decrease)",
+                            new_len,
+                            cur_len - new_len
+                        );
+                        png.aux_chunks[iccp_idx] = iccp;
+                    }
                 }
             }
         }
@@ -950,7 +952,7 @@ fn postprocess_chunks(
         .iter_mut()
         .filter(|c| &c.name == b"fdAT")
         .collect();
-    if !fdat.is_empty() {
+    if opts.idat_recoding && !fdat.is_empty() {
         let buffer_size = orig_ihdr.raw_data_size();
         fdat.par_iter_mut()
             .with_max_len(1)
