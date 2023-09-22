@@ -363,10 +363,10 @@ fn collect_files(
     out_file: &OutFile,
     recursive: bool,
     include_non_png: bool,
-    allow_stdin: bool,
+    top_level: bool, //explicitly specify files
 ) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
-    let allow_stdin = allow_stdin && files.len() == 1;
+    let allow_stdin = top_level && files.len() == 1;
     for input in files {
         let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
         if !using_stdin && input.is_dir() {
@@ -403,7 +403,7 @@ fn collect_files(
         } else {
             //skip non png files if recusive flag is used.
             //(still allow the user to convert a non png file if recusive flag is not used);
-            if recursive && !include_non_png && {
+            if !top_level && recursive && !include_non_png && {
                 let extension = input.extension().map(|f| f.to_ascii_lowercase());
                 extension != Some(OsString::from("png"))
                     && extension != Some(OsString::from("apng"))
