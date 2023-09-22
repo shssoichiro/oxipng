@@ -355,7 +355,6 @@ fn collect_files(
     out_dir: &Option<PathBuf>,
     out_file: &OutFile,
     recursive: bool,
-    include_non_png: bool,
     top_level: bool, //explicitly specify files
 ) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
@@ -367,14 +366,8 @@ fn collect_files(
                 match input.read_dir() {
                     Ok(dir) => {
                         let files = dir.filter_map(|x| x.ok().map(|x| x.path())).collect();
-                        in_out_pairs.extend(collect_files(
-                            files,
-                            out_dir,
-                            out_file,
-                            recursive,
-                            include_non_png,
-                            false,
-                        ));
+                        in_out_pairs
+                            .extend(collect_files(files, out_dir, out_file, recursive, false));
                     }
                     Err(e) => {
                         warn!("{}: {}", input.display(), e);
