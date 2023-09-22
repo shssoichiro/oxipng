@@ -89,36 +89,17 @@ fn issue_29() {
 
 #[test]
 fn issue_42() {
-    let input = PathBuf::from("tests/files/issue_42.png");
-    let (output, mut opts) = get_opts(&input);
+    let input = "tests/files/issue-42.png";
+    let (output, mut opts) = get_opts(Path::new(input));
     opts.interlace = Some(Interlacing::Adam7);
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type, ColorType::GrayscaleAlpha);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    remove_file(output).ok();
+    test_it_converts(
+        input,
+        Some((output, opts)),
+        GRAYSCALE_ALPHA,
+        BitDepth::Eight,
+        GRAYSCALE_ALPHA,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
@@ -324,8 +305,14 @@ fn issue_113() {
 
 #[test]
 fn issue_129() {
-    let input = "tests/files/issue-129.png";
-    test_it_converts(input, None, RGB, BitDepth::Eight, INDEXED, BitDepth::Eight);
+    test_it_converts(
+        "tests/files/issue-129.png",
+        None,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
 }
 
 #[test]
