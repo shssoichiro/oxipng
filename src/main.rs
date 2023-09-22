@@ -71,12 +71,6 @@ fn main() {
                 .action(ArgAction::SetTrue),
         )
         .arg(
-            Arg::new("include-non-png")
-                .help("compress also files with non png extensions if --recursive flag is used")
-                .long("include-non-png")
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
             Arg::new("output_dir")
                 .help("Write output file(s) to <directory>")
                 .long("dir")
@@ -402,7 +396,7 @@ fn collect_files(
         } else {
             //skip non png files if recusive flag is used.
             //(still allow the user to convert a non png file if recusive flag is not used);
-            if !top_level && recursive && !include_non_png && {
+            if !top_level && recursive && {
                 let extension = input.extension().map(|f| f.to_ascii_lowercase());
                 extension != Some(OsString::from("png"))
                     && extension != Some(OsString::from("apng"))
