@@ -4,6 +4,7 @@ use oxipng::*;
 use std::fs::remove_file;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 const GRAYSCALE: u8 = 0;
 const RGB: u8 = 2;
@@ -30,7 +31,7 @@ fn test_it_converts(
     bit_depth_in: BitDepth,
     color_type_out: u8,
     bit_depth_out: BitDepth,
-) {
+) -> PngImage {
     let input = PathBuf::from(input);
     let (output, opts) = custom.unwrap_or_else(|| get_opts(&input));
     let png = PngData::new(&input, &opts).unwrap();
@@ -71,6 +72,7 @@ fn test_it_converts(
     }
 
     remove_file(output).ok();
+    Arc::try_unwrap(png.raw).unwrap()
 }
 
 #[test]
@@ -463,4 +465,20 @@ fn issue_426_02() {
         GRAYSCALE,
         BitDepth::One,
     );
+}
+
+#[test]
+fn issue_553() {
+    let png = test_it_converts(
+        "tests/files/issue-553.png",
+        None,
+        INDEXED,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+    match png.ihdr.color_type {
+        ColorType::Indexed { palette } => assert_eq!(palette.len(), 256),
+        _ => unreachable!(),
+    };
 }
