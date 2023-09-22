@@ -26,6 +26,7 @@ use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
 use std::ffi::OsStr;
+use std::ffi::OsString;
 use std::fs::DirBuilder;
 use std::io::Write;
 #[cfg(feature = "zopfli")]
@@ -401,8 +402,12 @@ fn collect_files(
             InFile::StdIn
         } else {
             //skip non png files if recusive flag is used.
-            //(still allow the user to convert a non png file if recusive flag is not used)
-            if Some(OsStr::new("png")) != input.extension() && recursive && !include_non_png {
+            //(still allow the user to convert a non png file if recusive flag is not used);
+            if recursive && !include_non_png && {
+                let extension = input.extension().map(|f| f.to_ascii_lowercase());
+                extension != Some(OsString::from("png"))
+                    && extension != Some(OsString::from("apng"))
+            } {
                 continue;
             }
             InFile::Path(input)
