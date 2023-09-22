@@ -25,7 +25,6 @@ use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
-use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::DirBuilder;
 use std::io::Write;
