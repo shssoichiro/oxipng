@@ -65,7 +65,7 @@ fn main() {
         )
         .arg(
             Arg::new("recursive")
-                .help("Recurse into subdirectories")
+                .help("Recurse into subdirectories and optimize all *.png/*.apng files")
                 .short('r')
                 .long("recursive")
                 .action(ArgAction::SetTrue),
