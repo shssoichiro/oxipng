@@ -386,9 +386,8 @@ fn collect_files(
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
-            //skip non png files if recusive flag is used.
-            //(still allow the user to convert a non png file if recusive flag is not used);
-            if !top_level && recursive && {
+            // Skip non png files if not given on top level
+            if !top_level && {
                 let extension = input.extension().map(|f| f.to_ascii_lowercase());
                 extension != Some(OsString::from("png"))
                     && extension != Some(OsString::from("apng"))
