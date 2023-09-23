@@ -256,7 +256,7 @@ fn main() {
         )
         .arg(
             Arg::new("timeout")
-                .help("Maximum amount of time, in seconds, to spend on optimizations")
+                .help("Maximum amount of time, in seconds, to spend on optimizations (not useful for compression algorithms which use fewer rounds as the timeout is checked inbetween rounds)")
                 .value_name("secs")
                 .long("timeout")
                 .value_parser(value_parser!(u64)),
