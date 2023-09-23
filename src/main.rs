@@ -324,7 +324,6 @@ Heuristic filter selection strategies:
         &out_dir,
         &out_file,
         matches.get_flag("recursive"),
-        matches.get_flag("include-non-png"),
         true,
     );
 
