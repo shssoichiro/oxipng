@@ -257,7 +257,7 @@ fn main() {
         )
         .arg(
             Arg::new("timeout")
-                .help("Maximum amount of time, in seconds, to spend on optimizations")
+                .help("Maximum amount of time, in seconds, to spend on optimizations (currently of limited use due to the shift away from zlib)")
                 .value_name("secs")
                 .long("timeout")
                 .value_parser(value_parser!(u64)),
