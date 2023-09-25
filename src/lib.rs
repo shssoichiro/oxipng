@@ -76,15 +76,36 @@ pub mod internal_tests {
 
 #[derive(Clone, Debug)]
 pub enum OutFile {
-    /// Path(None) means same as input
-    Path(Option<PathBuf>),
+    /// Don't actually write any output, just calculate the best results.
+    None,
+    /// Write output to a file.
+    ///
+    /// * `path`: Path to write the output file. `None` means same as input.
+    /// * `preserve_attrs`: Ensure the output file has the same permissions & timestamps as the input file.
+    Path {
+        path: Option<PathBuf>,
+        preserve_attrs: bool,
+    },
+    /// Write to standard output.
     StdOut,
 }
 
 impl OutFile {
+    /// Construct a new `OutFile` with the given path.
+    ///
+    /// This is a convenience method for `OutFile::Path { path: Some(path), preserve_attrs: false }`.
+    pub fn from_path(path: PathBuf) -> Self {
+        OutFile::Path {
+            path: Some(path),
+            preserve_attrs: false,
+        }
+    }
+
     pub fn path(&self) -> Option<&Path> {
         match *self {
-            OutFile::Path(Some(ref p)) => Some(p.as_path()),
+            OutFile::Path {
+                path: Some(ref p), ..
+            } => Some(p.as_path()),
             _ => None,
         }
     }
@@ -138,18 +159,10 @@ pub struct Options {
     ///
     /// Default: `false`
     pub check: bool,
-    /// Don't actually write any output, just calculate the best results.
-    ///
-    /// Default: `false`
-    pub pretend: bool,
     /// Write to output even if there was no improvement in compression.
     ///
     /// Default: `false`
     pub force: bool,
-    /// Ensure the output file has the same permissions as the input file.
-    ///
-    /// Default: `false`
-    pub preserve_attrs: bool,
     /// Which RowFilters to try on the file
     ///
     /// Default: `None,Sub,Entropy,Bigrams`
@@ -296,10 +309,8 @@ impl Default for Options {
         Options {
             backup: false,
             check: false,
-            pretend: false,
             fix_errors: false,
             force: false,
-            preserve_attrs: false,
             filter: indexset! {RowFilter::None, RowFilter::Sub, RowFilter::Entropy, RowFilter::Bigrams},
             interlace: Some(Interlacing::None),
             optimize_alpha: false,
@@ -416,7 +427,13 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     let opt_metadata_preserved;
     let in_data = match *input {
         InFile::Path(ref input_path) => {
-            if opts.preserve_attrs {
+            if matches!(
+                output,
+                OutFile::Path {
+                    preserve_attrs: true,
+                    ..
+                }
+            ) {
                 opt_metadata_preserved = input_path
                     .metadata()
                     .map_err(|err| {
@@ -458,8 +475,8 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
     if is_fully_optimized(in_data.len(), optimized_output.len(), opts) {
         match (output, input) {
             // if p is None, it also means same as the input path
-            (OutFile::Path(ref p), InFile::Path(ref input_path))
-                if p.as_ref().map_or(true, |p| p == input_path) =>
+            (OutFile::Path { path, .. }, InFile::Path(ref input_path))
+                if path.as_ref().map_or(true, |p| p == input_path) =>
             {
                 info!("{}: Could not optimize further, no change written", input);
                 return Ok(());
@@ -484,20 +501,18 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
         )
     };
 
-    if opts.pretend {
-        info!("{}: Running in pretend mode, no output", savings);
-        return Ok(());
-    }
-
     match (output, input) {
-        (&OutFile::StdOut, _) | (&OutFile::Path(None), &InFile::StdIn) => {
+        (OutFile::None, _) => {
+            info!("{}: Running in pretend mode, no output", savings);
+        }
+        (&OutFile::StdOut, _) | (&OutFile::Path { path: None, .. }, &InFile::StdIn) => {
             let mut buffer = BufWriter::new(stdout());
             buffer
                 .write_all(&optimized_output)
                 .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
         }
-        (OutFile::Path(ref output_path), _) => {
-            let output_path = output_path
+        (OutFile::Path { path, .. }, _) => {
+            let output_path = path
                 .as_ref()
                 .map(|p| p.as_path())
                 .unwrap_or_else(|| input.path().unwrap());
