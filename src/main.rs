@@ -57,6 +57,14 @@ fn main() {
                 .value_parser(["0", "1", "2", "3", "4", "5", "6", "max"]),
         )
         .arg(
+            Arg::new("backup")
+                .help("Back up modified files")
+                .short('b')
+                .long("backup")
+                .hide(true)
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
             Arg::new("recursive")
                 .help("Recurse into subdirectories and optimize all *.png/*.apng files")
                 .short('r')
@@ -284,6 +292,11 @@ Heuristic filter selection strategies:
     9  =>  Brute     Smallest compressed size (slow)",
         )
         .get_matches_from(std::env::args());
+
+    if matches.get_flag("backup") {
+        eprintln!("The --backup flag is no longer supported. Please use --out or --dir to preserve your existing files.");
+        exit(1)
+    }
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
