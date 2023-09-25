@@ -25,6 +25,7 @@ use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
+use std::ffi::OsString;
 use std::fs::DirBuilder;
 use std::io::Write;
 #[cfg(feature = "zopfli")]
@@ -64,7 +65,7 @@ fn main() {
         )
         .arg(
             Arg::new("recursive")
-                .help("Recurse into subdirectories")
+                .help("Recurse into subdirectories and optimize all *.png/*.apng files")
                 .short('r')
                 .long("recursive")
                 .action(ArgAction::SetTrue),
@@ -353,10 +354,10 @@ fn collect_files(
     out_dir: &Option<PathBuf>,
     out_file: &OutFile,
     recursive: bool,
-    allow_stdin: bool,
+    top_level: bool, //explicitly specify files
 ) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
-    let allow_stdin = allow_stdin && files.len() == 1;
+    let allow_stdin = top_level && files.len() == 1;
     for input in files {
         let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
         if !using_stdin && input.is_dir() {
@@ -389,6 +390,14 @@ fn collect_files(
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
+            // Skip non png files if not given on top level
+            if !top_level && {
+                let extension = input.extension().map(|f| f.to_ascii_lowercase());
+                extension != Some(OsString::from("png"))
+                    && extension != Some(OsString::from("apng"))
+            } {
+                continue;
+            }
             InFile::Path(input)
         };
         in_out_pairs.push((in_file, out_file));
