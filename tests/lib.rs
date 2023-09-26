@@ -37,7 +37,7 @@ fn optimize_from_memory_apng() {
 fn optimize() {
     let result = oxipng::optimize(
         &"tests/files/fully_optimized.png".into(),
-        &OutFile::Path(None),
+        &OutFile::None,
         &Options::default(),
     );
     assert!(result.is_ok());
@@ -47,7 +47,7 @@ fn optimize() {
 fn optimize_corrupted() {
     let result = oxipng::optimize(
         &"tests/files/corrupted_header.png".into(),
-        &OutFile::Path(None),
+        &OutFile::None,
         &Options::default(),
     );
     assert!(result.is_err());
@@ -57,7 +57,7 @@ fn optimize_corrupted() {
 fn optimize_apng() {
     let result = oxipng::optimize(
         &"tests/files/apng_file.png".into(),
-        &OutFile::Path(None),
+        &OutFile::None,
         &Options::from_preset(0),
     );
     assert!(result.is_ok());

@@ -25,6 +25,7 @@ use oxipng::RowFilter;
 use oxipng::StripChunks;
 use oxipng::{InFile, OutFile};
 use rayon::prelude::*;
+use std::ffi::OsString;
 use std::fs::DirBuilder;
 use std::io::Write;
 #[cfg(feature = "zopfli")]
@@ -60,11 +61,12 @@ fn main() {
                 .help("Back up modified files")
                 .short('b')
                 .long("backup")
+                .hide(true)
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("recursive")
-                .help("Recurse into subdirectories")
+                .help("Recurse into subdirectories and optimize all *.png/*.apng files")
                 .short('r')
                 .long("recursive")
                 .action(ArgAction::SetTrue),
@@ -100,13 +102,6 @@ fn main() {
                 .help("Preserve file attributes if possible")
                 .short('p')
                 .long("preserve")
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
-            Arg::new("check")
-                .help("Do not run any optimization passes")
-                .short('c')
-                .long("check")
                 .action(ArgAction::SetTrue),
         )
         .arg(
@@ -256,7 +251,7 @@ fn main() {
         )
         .arg(
             Arg::new("timeout")
-                .help("Maximum amount of time, in seconds, to spend on optimizations")
+                .help("Maximum amount of time, in seconds, to spend on optimizations (currently of limited use due to the shift away from zlib)")
                 .value_name("secs")
                 .long("timeout")
                 .value_parser(value_parser!(u64)),
@@ -297,6 +292,11 @@ Heuristic filter selection strategies:
     9  =>  Brute     Smallest compressed size (slow)",
         )
         .get_matches_from(std::env::args());
+
+    if matches.get_flag("backup") {
+        eprintln!("The --backup flag is no longer supported. Please use --out or --dir to preserve your existing files.");
+        exit(1)
+    }
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
@@ -353,10 +353,10 @@ fn collect_files(
     out_dir: &Option<PathBuf>,
     out_file: &OutFile,
     recursive: bool,
-    allow_stdin: bool,
+    top_level: bool, //explicitly specify files
 ) -> Vec<(InFile, OutFile)> {
     let mut in_out_pairs = Vec::new();
-    let allow_stdin = allow_stdin && files.len() == 1;
+    let allow_stdin = top_level && files.len() == 1;
     for input in files {
         let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
         if !using_stdin && input.is_dir() {
@@ -376,15 +376,27 @@ fn collect_files(
             }
             continue;
         };
-        let out_file = if let Some(ref out_dir) = *out_dir {
-            let out_path = Some(out_dir.join(input.file_name().unwrap()));
-            OutFile::Path(out_path)
-        } else {
-            (*out_file).clone()
-        };
+        let out_file =
+            if let (Some(out_dir), &OutFile::Path { preserve_attrs, .. }) = (out_dir, out_file) {
+                let path = Some(out_dir.join(input.file_name().unwrap()));
+                OutFile::Path {
+                    path,
+                    preserve_attrs,
+                }
+            } else {
+                (*out_file).clone()
+            };
         let in_file = if using_stdin {
             InFile::StdIn
         } else {
+            // Skip non png files if not given on top level
+            if !top_level && {
+                let extension = input.extension().map(|f| f.to_ascii_lowercase());
+                extension != Some(OsString::from("png"))
+                    && extension != Some(OsString::from("apng"))
+            } {
+                continue;
+            }
             InFile::Path(input)
         };
         in_out_pairs.push((in_file, out_file));
@@ -459,10 +471,15 @@ fn parse_opts_into_struct(
         None
     };
 
-    let out_file = if matches.get_flag("stdout") {
+    let out_file = if matches.get_flag("pretend") {
+        OutFile::None
+    } else if matches.get_flag("stdout") {
         OutFile::StdOut
     } else {
-        OutFile::Path(matches.get_one::<PathBuf>("output_file").cloned())
+        OutFile::Path {
+            path: matches.get_one::<PathBuf>("output_file").cloned(),
+            preserve_attrs: matches.get_flag("preserve"),
+        }
     };
 
     opts.optimize_alpha = matches.get_flag("alpha");
@@ -474,17 +491,9 @@ fn parse_opts_into_struct(
         opts.fast_evaluation = matches.get_flag("fast");
     }
 
-    opts.backup = matches.get_flag("backup");
-
     opts.force = matches.get_flag("force");
 
     opts.fix_errors = matches.get_flag("fix");
-
-    opts.check = matches.get_flag("check");
-
-    opts.pretend = matches.get_flag("pretend");
-
-    opts.preserve_attrs = matches.get_flag("preserve");
 
     opts.bit_depth_reduction = !matches.get_flag("no-bit-reduction");
 

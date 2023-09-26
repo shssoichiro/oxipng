@@ -22,10 +22,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(RowFilter::None);
     options.filter = filter;
 
-    (
-        OutFile::Path(Some(input.with_extension("out.png"))),
-        options,
-    )
+    (OutFile::from_path(input.with_extension("out.png")), options)
 }
 
 fn test_it_converts(

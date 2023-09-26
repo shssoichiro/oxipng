@@ -26,10 +26,7 @@ fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     filter.insert(RowFilter::None);
     options.filter = filter;
 
-    (
-        OutFile::Path(Some(input.with_extension("out.png"))),
-        options,
-    )
+    (OutFile::from_path(input.with_extension("out.png")), options)
 }
 
 /// Add callback to allow checks before the output file is deleted again
@@ -518,8 +515,10 @@ fn preserve_attrs() {
     #[cfg(feature = "filetime")]
     let mtime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
 
-    let (output, mut opts) = get_opts(&input);
-    opts.preserve_attrs = true;
+    let (mut output, opts) = get_opts(&input);
+    if let OutFile::Path { preserve_attrs, .. } = &mut output {
+        *preserve_attrs = true;
+    }
 
     #[cfg(feature = "filetime")]
     let callback_pre = |path_in: &Path| {
