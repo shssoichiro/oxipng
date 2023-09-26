@@ -61,6 +61,7 @@ fn main() {
                 .help("Back up modified files")
                 .short('b')
                 .long("backup")
+                .hide(true)
                 .action(ArgAction::SetTrue),
         )
         .arg(
@@ -101,13 +102,6 @@ fn main() {
                 .help("Preserve file attributes if possible")
                 .short('p')
                 .long("preserve")
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
-            Arg::new("check")
-                .help("Do not run any optimization passes")
-                .short('c')
-                .long("check")
                 .action(ArgAction::SetTrue),
         )
         .arg(
@@ -298,6 +292,11 @@ Heuristic filter selection strategies:
     9  =>  Brute     Smallest compressed size (slow)",
         )
         .get_matches_from(std::env::args());
+
+    if matches.get_flag("backup") {
+        eprintln!("The --backup flag is no longer supported. Please use --out or --dir to preserve your existing files.");
+        exit(1)
+    }
 
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
@@ -492,13 +491,9 @@ fn parse_opts_into_struct(
         opts.fast_evaluation = matches.get_flag("fast");
     }
 
-    opts.backup = matches.get_flag("backup");
-
     opts.force = matches.get_flag("force");
 
     opts.fix_errors = matches.get_flag("fix");
-
-    opts.check = matches.get_flag("check");
 
     opts.bit_depth_reduction = !matches.get_flag("no-bit-reduction");
 
