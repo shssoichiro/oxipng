@@ -7,7 +7,7 @@
 
 ## Overview
 
-Oxipng is a multithreaded lossless PNG compression optimizer. It can be used via a command-line
+Oxipng is a multithreaded lossless PNG/APNG compression optimizer. It can be used via a command-line
 interface or as a library in other Rust programs.
 
 ## Installing
@@ -41,28 +41,25 @@ Oxipng follows Semantic Versioning.
 Oxipng is a command-line utility. Basic usage looks similar to the following:
 
 ```
-oxipng -o 4 -i 1 --strip safe *.png
+oxipng -o 4 --alpha --strip safe *.png
 ```
 
 The most commonly used options are as follows:
 
-- Optimization: `-o 1` through `-o 6`, lower is faster, higher is better compression.
-  The default (`-o 2`) is sufficiently fast on a modern CPU and provides 30-50% compression
-  gains over an unoptimized PNG. `-o 4` is 6 times slower than `-o 2` but can provide 5-10%
-  extra compression over `-o 2`. Using any setting higher than `-o 4` is unlikely
-  to give any extra compression gains and is not recommended.
-- Interlacing: `-i 1` will enable [Adam7](https://en.wikipedia.org/wiki/Adam7_algorithm)
-  PNG interlacing on any images that are processed. `-i 0` will remove interlacing from all
-  processed images. Not specifying either will keep the same interlacing state as the
-  input image. Note: Interlacing can add 25-50% to the size of an optimized image. Only use
-  it if you believe the benefits outweigh the costs for your use case.
+- Optimization: `-o 0` through `-o 6` (or `-o max`), lower is faster, higher is better compression.
+  The default (`-o 2`) is quite fast and provides good compression. Higher levels can be notably
+  better but generally have increasingly diminishing returns.
+- Alpha: `--alpha` can improve compression of images with transparency, by altering the color
+  values of fully transparent pixels. This is generally recommended, unless you have a particular
+  need to preserve the original color values.
 - Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
   Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
   will never affect rendering of the image. "All" removes all metadata that is not critical
   to the image. You can also pass a comma-separated list of specific metadata chunks to remove.
   `-s` can be used as a shorthand for `--strip safe`.
 
-More advanced options can be found by running `oxipng -h`.
+More advanced options can be found by running `oxipng -h`, or viewed [here](MANUAL.txt).
+Note that all options are case-sensitive.
 
 ## Git integration via [Trunk]
 
@@ -75,7 +72,7 @@ To enable oxipng via [trunk]:
 trunk check enable oxipng
 
 # to get a specific version:
-trunk check enable oxipng@8.0.0
+trunk check enable oxipng@9.0.0
 ```
 
 or modify `.trunk/trunk.yaml` in your repo to contain:
@@ -83,7 +80,7 @@ or modify `.trunk/trunk.yaml` in your repo to contain:
 ```
 lint:
   enabled:
-    - oxipng@8.0.0
+    - oxipng@9.0.0
 ```
 
 Then just run:
@@ -111,14 +108,14 @@ other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.t
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
-[Options struct](https://docs.rs/oxipng/3.0.1/oxipng/struct.Options.html) and
+[Options struct](https://docs.rs/oxipng/latest/oxipng/struct.Options.html) and
 passing it, along with an input filename, into the
-[optimize function](https://docs.rs/oxipng/3.0.1/oxipng/fn.optimize.html).
+[optimize function](https://docs.rs/oxipng/latest/oxipng/fn.optimize.html).
 
 It is recommended to disable the "binary" feature when including oxipng as a library. Currently, there is
 no simple way to just disable one feature in Cargo, it has to be done by disabling default features
 and specifying the desired ones, for example:
-`oxipng = { version = "8.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
+`oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
 
 ## History
 
@@ -130,6 +127,7 @@ The name has been changed to avoid confusion and potential legal issues.
 The core goal of rewriting OptiPNG was to implement multithreading,
 which would be very difficult to do within the existing C codebase of OptiPNG.
 This also served as an opportunity to choose a more modern, safer language (Rust).
+Note that, while similar, oxipng is not a drop-in replacement for OptiPNG.
 
 ## Contributing
 
