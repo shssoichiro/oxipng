@@ -2,9 +2,7 @@ use crate::{PngError, PngResult};
 use std::num::NonZeroU8;
 
 pub fn deflate(data: &[u8], iterations: NonZeroU8) -> PngResult<Vec<u8>> {
-    use std::cmp::max;
-
-    let mut output = Vec::with_capacity(max(1024, data.len() / 20));
+    let mut output = Vec::with_capacity(data.len());
     let options = zopfli::Options {
         iteration_count: iterations.into(),
         ..Default::default()
