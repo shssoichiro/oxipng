@@ -38,7 +38,7 @@ Oxipng follows Semantic Versioning.
 
 ## Usage
 
-Oxipng is a command-line utility. Basic usage looks similar to the following:
+Oxipng is a command-line utility. An example suitable for web usage may be the following:
 
 ```
 oxipng -o 4 --alpha --strip safe *.png
@@ -50,8 +50,8 @@ The most commonly used options are as follows:
   The default (`-o 2`) is quite fast and provides good compression. Higher levels can be notably
   better but generally have increasingly diminishing returns.
 - Alpha: `--alpha` can improve compression of images with transparency, by altering the color
-  values of fully transparent pixels. This is generally recommended, unless you have a particular
-  need to preserve the original color values.
+  values of fully transparent pixels. This is generally recommended, but take care as this is
+  technically a lossy transformation and may be unsuitable for some specific applications.
 - Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
   Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
   will never affect rendering of the image. "All" removes all metadata that is not critical
