@@ -45,10 +45,7 @@ Options:
           Write output to stdout
 
   -p, --preserve
-          Preserve file permissions and timestamps if possible.
-          
-          Timestamps can only be preserved if oxipng was compiled with the
-          `filetime` feature.
+          Preserve file permissions and timestamps if possible
 
   -P, --pretend
           Do not write any files, only show compression results
@@ -65,6 +62,9 @@ Options:
           <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
           
           CAUTION: 'all' will convert APNGs to standard PNGs.
+          
+          Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the
+          color type or bit depth is changed, regardless of any options set.
 
       --keep <list>
           Strip all metadata except in the comma-separated list
@@ -126,28 +126,31 @@ Options:
           if you have more filters enabled than CPU cores.
 
       --zc <level>
-          zlib compression level (1-12)
+          Deflate compression level (1-12) for main compression trials. The
+          levels here are defined by the libdeflate compression library.
+          
+          The default value depends on the optimization level preset.
 
       --nb
-          No bit depth reduction
+          Do not change bit depth
 
       --nc
-          No color type reduction
+          Do not change color type
 
       --np
-          No palette reduction
+          Do not change color palette
 
       --ng
-          No grayscale reduction
+          Do not change to or from grayscale
 
       --nx
-          No reductions or deinterlacing
+          Do not perform any transformations and do not deinterlace by default.
 
       --nz
-          No recompression of IDAT unless reductions occur. Recompression of
-          other compressed chunks (such as iCCP) will also be disabled. Note
-          that the combination of '--nx' and '--nz' will fully disable all
-          optimization.
+          Do not recompress IDAT unless required due to transformations.
+          Recompression of other compressed chunks (such as iCCP) will also be
+          disabled. Note that the combination of '--nx' and '--nz' will fully
+          disable all optimization.
 
       --fix
           Do not perform checksum validation of PNG chunks. This may allow some
@@ -157,25 +160,19 @@ Options:
           Write the output even if it is larger than the input
 
   -Z, --zopfli
-          Use the slow but stronger Zopfli compressor. Recommended use is with
-          '-o max' and '--fast'.
-          
-          This option is only available if oxipng was compiled with the `zopfli`
-          feature.
+          Use the much slower but stronger Zopfli compressor for main
+          compression trials. Recommended use is with '-o max' and '--fast'.
 
       --timeout <secs>
           Maximum amount of time, in seconds, to spend on optimizations. Oxipng
-          will check the timeout before each reduction or compression trial, and
-          will stop trying to optimize the file if the timeout is exceeded. Note
-          that this does not cut short any compression trials that are already
-          in progress, so it is currently of limited effectiveness for large
-          files or high compression levels.
+          will check the timeout before each transformation or compression
+          trial, and will stop trying to optimize the file if the timeout is
+          exceeded. Note that this does not cut short any operations that are
+          already in progress, so it is currently of limited effectiveness for
+          large files with high compression levels.
 
   -t, --threads <num>
           Set number of threads to use [default: num CPU cores]
-          
-          This option is only available if oxipng was compiled with the
-          `parallel` feature.
 
   -h, --help
           Print help (see a summary with '-h')

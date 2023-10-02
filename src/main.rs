@@ -130,11 +130,6 @@ structure of the input files when used with '--recursive'.")
         .arg(
             Arg::new("preserve")
                 .help("Preserve file permissions and timestamps if possible")
-                .long_help("\
-Preserve file permissions and timestamps if possible.
-
-Timestamps can only be preserved if oxipng was compiled with the
-`filetime` feature.")
                 .short('p')
                 .long("preserve")
                 .action(ArgAction::SetTrue),
@@ -164,7 +159,10 @@ safe    =>  Strip all non-critical chunks, except for the following:
 all     =>  Strip all non-critical chunks
 <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
 
-CAUTION: 'all' will convert APNGs to standard PNGs.",
+CAUTION: 'all' will convert APNGs to standard PNGs.
+
+Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the
+color type or bit depth is changed, regardless of any options set.",
                     StripChunks::KEEP_SAFE
                         .iter()
                         .map(|c| String::from_utf8_lossy(c))
@@ -283,7 +281,12 @@ if you have more filters enabled than CPU cores.")
         )
         .arg(
             Arg::new("compression")
-                .help("zlib compression level (1-12)")
+                .help("Deflate compression level (1-12)")
+                .long_help("\
+Deflate compression level (1-12) for main compression trials. The
+levels here are defined by the libdeflate compression library.
+
+The default value depends on the optimization level preset.")
                 .long("zc")
                 .value_name("level")
                 .value_parser(1..=12)
@@ -291,42 +294,44 @@ if you have more filters enabled than CPU cores.")
         )
         .arg(
             Arg::new("no-bit-reduction")
-                .help("No bit depth reduction")
+                .help("Do not change bit depth")
                 .long("nb")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-color-reduction")
-                .help("No color type reduction")
+                .help("Do not change color type")
                 .long("nc")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-palette-reduction")
-                .help("No palette reduction")
+                .help("Do not change color palette")
                 .long("np")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-grayscale-reduction")
-                .help("No grayscale reduction")
+                .help("Do not change to or from grayscale")
                 .long("ng")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-reductions")
-                .help("No reductions or deinterlacing")
+                .help("Do not perform any transformations")
+                .long_help("\
+Do not perform any transformations and do not deinterlace by default.")
                 .long("nx")
                 .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("no-recoding")
-                .help("No recompression unless reductions occur")
+                .help("Do not recompress unless transformations occur")
                 .long_help("\
-No recompression of IDAT unless reductions occur. Recompression of
-other compressed chunks (such as iCCP) will also be disabled. Note
-that the combination of '--nx' and '--nz' will fully disable all
-optimization.")
+Do not recompress IDAT unless required due to transformations.
+Recompression of other compressed chunks (such as iCCP) will also be
+disabled. Note that the combination of '--nx' and '--nz' will fully
+disable all optimization.")
                 .long("nz")
                 .action(ArgAction::SetTrue),
         )
@@ -347,13 +352,10 @@ files with errors to be processed successfully.")
         )
         .arg(
             Arg::new("zopfli")
-                .help("Use the slow but stronger Zopfli compressor")
+                .help("Use the much slower but stronger Zopfli compressor")
                 .long_help("\
-Use the slow but stronger Zopfli compressor. Recommended use is with
-'-o max' and '--fast'.
-
-This option is only available if oxipng was compiled with the `zopfli`
-feature.")
+Use the much slower but stronger Zopfli compressor for main
+compression trials. Recommended use is with '-o max' and '--fast'.")
                 .short('Z')
                 .long("zopfli")
                 .action(ArgAction::SetTrue),
@@ -363,11 +365,11 @@ feature.")
                 .help("Maximum amount of time to spend on optimizations")
                 .long_help("\
 Maximum amount of time, in seconds, to spend on optimizations. Oxipng
-will check the timeout before each reduction or compression trial, and
-will stop trying to optimize the file if the timeout is exceeded. Note
-that this does not cut short any compression trials that are already
-in progress, so it is currently of limited effectiveness for large
-files or high compression levels.")
+will check the timeout before each transformation or compression
+trial, and will stop trying to optimize the file if the timeout is
+exceeded. Note that this does not cut short any operations that are
+already in progress, so it is currently of limited effectiveness for
+large files with high compression levels.")
                 .value_name("secs")
                 .long("timeout")
                 .value_parser(value_parser!(u64)),
@@ -375,11 +377,6 @@ files or high compression levels.")
         .arg(
             Arg::new("threads")
                 .help("Set number of threads to use [default: num CPU cores]")
-                .long_help("\
-Set number of threads to use [default: num CPU cores]
-
-This option is only available if oxipng was compiled with the
-`parallel` feature.")
                 .long("threads")
                 .short('t')
                 .value_name("num")
