@@ -35,9 +35,11 @@ use std::process::exit;
 use std::time::Duration;
 
 fn main() {
-    // Note: Long help descriptions should wrap at 70 characters (column 71)
-    // Indentation is 10 spaces, so this allows it to fit on an 80 character terminal
-    // Short help descriptions should ideally be no more than 54 characters
+    // Note: clap 'wrap_help' is enabled to automatically wrap lines according to terminal width.
+    // To keep things tidy though, short help descriptions should be no more than 54 characters,
+    // so that they can fit on a single line in an 80 character terminal.
+    // Long help descriptions are soft wrapped here at 90 characters (column 91) but this does not
+    // affect output, it simply matches what is rendered when help is output to a file.
     let matches = Command::new("oxipng")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Joshua Holmer <jholmer.in@gmail.com>")
@@ -55,10 +57,9 @@ fn main() {
             Arg::new("optimization")
                 .help("Optimization level (0-6, or max)")
                 .long_help("\
-Set the optimization level preset. The default level 2 is quite fast
-and provides good compression. Lower levels are faster, higher levels
-provide better compression, though with increasingly diminishing
-returns.
+Set the optimization level preset. The default level 2 is quite fast and provides good \
+compression. Lower levels are faster, higher levels provide better compression, though \
+with increasingly diminishing returns.
 
 0   => --zc 5 --fast               (1 trial, determined heuristically)
 1   => --zc 10 --fast              (1 trial, determined heuristically)
@@ -69,9 +70,8 @@ returns.
 6   => --zc 12 -f 0-9              (10 trials)
 max =>                             (stable alias for the max level)
 
-Manually specifying a compression option (zc, f, etc.) will override
-the optimization preset, regardless of the order you write the
-arguments.")
+Manually specifying a compression option (zc, f, etc.) will override the optimization \
+preset, regardless of the order you write the arguments.")
                 .short('o')
                 .long("opt")
                 .value_name("level")
@@ -91,8 +91,8 @@ arguments.")
             Arg::new("recursive")
                 .help("Recurse input directories, optimizing all PNG files")
                 .long_help("\
-When directories are given as input, traverse the directory trees and
-optimize all PNG files found (files with “.png” or “.apng” extension).")
+When directories are given as input, traverse the directory trees and optimize all PNG \
+files found (files with “.png” or “.apng” extension).")
                 .short('r')
                 .long("recursive")
                 .action(ArgAction::SetTrue),
@@ -101,9 +101,9 @@ optimize all PNG files found (files with “.png” or “.apng” extension).")
             Arg::new("output_dir")
                 .help("Write output file(s) to <directory>")
                 .long_help("\
-Write output file(s) to <directory>. If the directory does not exist,
-it will be created. Note that this will not preserve the directory
-structure of the input files when used with '--recursive'.")
+Write output file(s) to <directory>. If the directory does not exist, it will be created. \
+Note that this will not preserve the directory structure of the input files when used with \
+'--recursive'.")
                 .long("dir")
                 .value_name("directory")
                 .value_parser(value_parser!(PathBuf))
@@ -161,8 +161,8 @@ all     =>  Strip all non-critical chunks
 
 CAUTION: 'all' will convert APNGs to standard PNGs.
 
-Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the
-color type or bit depth is changed, regardless of any options set.",
+Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit \
+depth is changed, regardless of any options set.",
                     StripChunks::KEEP_SAFE
                         .iter()
                         .map(|c| String::from_utf8_lossy(c))
@@ -184,10 +184,9 @@ color type or bit depth is changed, regardless of any options set.",
             Arg::new("alpha")
                 .help("Perform additional alpha channel optimization")
                 .long_help("\
-Perform additional optimization on images with an alpha channel, by
-altering the color values of fully transparent pixels. This is
-generally recommended for better compression, but take care as this is
-technically a lossy transformation and may be unsuitable for some
+Perform additional optimization on images with an alpha channel, by altering the color \
+values of fully transparent pixels. This is generally recommended for better compression, \
+but take care as this is technically a lossy transformation and may be unsuitable for some \
 applications.")
                 .short('a')
                 .long("alpha")
@@ -203,9 +202,8 @@ Set the PNG interlacing type, where <type> is one of:
 1     =>  Apply Adam7 interlacing on all images that are processed
 keep  =>  Keep the existing interlacing type of each image
 
-Note that interlacing can add 25-50% to the size of an optimized
-image. Only use it if you believe the benefits outweigh the costs for
-your use case.")
+Note that interlacing can add 25-50% to the size of an optimized image. Only use it if you \
+believe the benefits outweigh the costs for your use case.")
                 .short('i')
                 .long("interlace")
                 .value_name("type")
@@ -217,9 +215,8 @@ your use case.")
             Arg::new("scale16")
                 .help("Forcibly reduce 16-bit images to 8-bit")
                 .long_help("\
-Forcibly reduce 16-bit images to 8-bit. Reduction is performed by
-scaling the values, such that e.g. 0x00FF is reduced to 0x01 rather
-than 0x00.")
+Forcibly reduce 16-bit images to 8-bit. Reduction is performed by scaling the values, such \
+that e.g. 0x00FF is reduced to 0x01 rather than 0x00.")
                 .long("scale16")
                 .action(ArgAction::SetTrue),
         )
@@ -243,9 +240,8 @@ than 0x00.")
             Arg::new("filters")
                 .help(format!("Filters to try (0-{}; see '--help' for details)", RowFilter::LAST))
                 .long_help("\
-Peform compression trials with each of the given filter types. You can
-specify a comma-separated list, or a range of values. E.g. '-f 0-3' is
-the same as '-f 0,1,2,3'.
+Peform compression trials with each of the given filter types. You can specify a \
+comma-separated list, or a range of values. E.g. '-f 0-3' is the same as '-f 0,1,2,3'.
 
 PNG delta filters (apply the same filter to every line)
     0  =>  None      (recommended to always include this filter)
@@ -273,9 +269,9 @@ The default value depends on the optimization level preset.")
             Arg::new("fast")
                 .help("Use fast filter evaluation")
                 .long_help("\
-Perform a fast compression evaluation of each enabled filter, followed
-by a single main compression trial of the best result. Recommended
-if you have more filters enabled than CPU cores.")
+Perform a fast compression evaluation of each enabled filter, followed by a single main \
+compression trial of the best result. Recommended if you have more filters enabled than \
+CPU cores.")
                 .long("fast")
                 .action(ArgAction::SetTrue),
         )
@@ -283,8 +279,8 @@ if you have more filters enabled than CPU cores.")
             Arg::new("compression")
                 .help("Deflate compression level (1-12)")
                 .long_help("\
-Deflate compression level (1-12) for main compression trials. The
-levels here are defined by the libdeflate compression library.
+Deflate compression level (1-12) for main compression trials. The levels here are defined \
+by the libdeflate compression library.
 
 The default value depends on the optimization level preset.")
                 .long("zc")
@@ -328,10 +324,9 @@ Do not perform any transformations and do not deinterlace by default.")
             Arg::new("no-recoding")
                 .help("Do not recompress unless transformations occur")
                 .long_help("\
-Do not recompress IDAT unless required due to transformations.
-Recompression of other compressed chunks (such as iCCP) will also be
-disabled. Note that the combination of '--nx' and '--nz' will fully
-disable all optimization.")
+Do not recompress IDAT unless required due to transformations. Recompression of other \
+compressed chunks (such as iCCP) will also be disabled. Note that the combination of \
+'--nx' and '--nz' will fully disable all optimization.")
                 .long("nz")
                 .action(ArgAction::SetTrue),
         )
@@ -339,8 +334,8 @@ disable all optimization.")
             Arg::new("fix")
                 .help("Disable checksum validation")
                 .long_help("\
-Do not perform checksum validation of PNG chunks. This may allow some
-files with errors to be processed successfully.")
+Do not perform checksum validation of PNG chunks. This may allow some files with errors to \
+be processed successfully.")
                 .long("fix")
                 .action(ArgAction::SetTrue),
         )
@@ -354,8 +349,8 @@ files with errors to be processed successfully.")
             Arg::new("zopfli")
                 .help("Use the much slower but stronger Zopfli compressor")
                 .long_help("\
-Use the much slower but stronger Zopfli compressor for main
-compression trials. Recommended use is with '-o max' and '--fast'.")
+Use the much slower but stronger Zopfli compressor for main compression trials. \
+Recommended use is with '-o max' and '--fast'.")
                 .short('Z')
                 .long("zopfli")
                 .action(ArgAction::SetTrue),
@@ -364,12 +359,11 @@ compression trials. Recommended use is with '-o max' and '--fast'.")
             Arg::new("timeout")
                 .help("Maximum amount of time to spend on optimizations")
                 .long_help("\
-Maximum amount of time, in seconds, to spend on optimizations. Oxipng
-will check the timeout before each transformation or compression
-trial, and will stop trying to optimize the file if the timeout is
-exceeded. Note that this does not cut short any operations that are
-already in progress, so it is currently of limited effectiveness for
-large files with high compression levels.")
+Maximum amount of time, in seconds, to spend on optimizations. Oxipng will check the \
+timeout before each transformation or compression trial, and will stop trying to optimize \
+the file if the timeout is exceeded. Note that this does not cut short any operations that \
+are already in progress, so it is currently of limited effectiveness for large files with \
+high compression levels.")
                 .value_name("secs")
                 .long("timeout")
                 .value_parser(value_parser!(u64)),

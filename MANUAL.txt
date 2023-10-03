@@ -9,10 +9,9 @@ Arguments:
 
 Options:
   -o, --opt <level>
-          Set the optimization level preset. The default level 2 is quite fast
-          and provides good compression. Lower levels are faster, higher levels
-          provide better compression, though with increasingly diminishing
-          returns.
+          Set the optimization level preset. The default level 2 is quite fast and provides good
+          compression. Lower levels are faster, higher levels provide better compression, though
+          with increasingly diminishing returns.
           
           0   => --zc 5 --fast               (1 trial, determined heuristically)
           1   => --zc 10 --fast              (1 trial, determined heuristically)
@@ -23,20 +22,19 @@ Options:
           6   => --zc 12 -f 0-9              (10 trials)
           max =>                             (stable alias for the max level)
           
-          Manually specifying a compression option (zc, f, etc.) will override
-          the optimization preset, regardless of the order you write the
-          arguments.
+          Manually specifying a compression option (zc, f, etc.) will override the optimization
+          preset, regardless of the order you write the arguments.
           
           [default: 2]
 
   -r, --recursive
-          When directories are given as input, traverse the directory trees and
-          optimize all PNG files found (files with “.png” or “.apng” extension).
+          When directories are given as input, traverse the directory trees and optimize all PNG
+          files found (files with “.png” or “.apng” extension).
 
       --dir <directory>
-          Write output file(s) to <directory>. If the directory does not exist,
-          it will be created. Note that this will not preserve the directory
-          structure of the input files when used with '--recursive'.
+          Write output file(s) to <directory>. If the directory does not exist, it will be created.
+          Note that this will not preserve the directory structure of the input files when used with
+          '--recursive'.
 
       --out <file>
           Write output file to <file>
@@ -63,17 +61,16 @@ Options:
           
           CAUTION: 'all' will convert APNGs to standard PNGs.
           
-          Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the
-          color type or bit depth is changed, regardless of any options set.
+          Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit
+          depth is changed, regardless of any options set.
 
       --keep <list>
           Strip all metadata except in the comma-separated list
 
   -a, --alpha
-          Perform additional optimization on images with an alpha channel, by
-          altering the color values of fully transparent pixels. This is
-          generally recommended for better compression, but take care as this is
-          technically a lossy transformation and may be unsuitable for some
+          Perform additional optimization on images with an alpha channel, by altering the color
+          values of fully transparent pixels. This is generally recommended for better compression,
+          but take care as this is technically a lossy transformation and may be unsuitable for some
           applications.
 
   -i, --interlace <type>
@@ -83,16 +80,14 @@ Options:
           1     =>  Apply Adam7 interlacing on all images that are processed
           keep  =>  Keep the existing interlacing type of each image
           
-          Note that interlacing can add 25-50% to the size of an optimized
-          image. Only use it if you believe the benefits outweigh the costs for
-          your use case.
+          Note that interlacing can add 25-50% to the size of an optimized image. Only use it if you
+          believe the benefits outweigh the costs for your use case.
           
           [default: 0]
 
       --scale16
-          Forcibly reduce 16-bit images to 8-bit. Reduction is performed by
-          scaling the values, such that e.g. 0x00FF is reduced to 0x01 rather
-          than 0x00.
+          Forcibly reduce 16-bit images to 8-bit. Reduction is performed by scaling the values, such
+          that e.g. 0x00FF is reduced to 0x01 rather than 0x00.
 
   -v, --verbose...
           Run in verbose mode (use twice to increase verbosity)
@@ -101,9 +96,8 @@ Options:
           Run in quiet mode
 
   -f, --filters <list>
-          Peform compression trials with each of the given filter types. You can
-          specify a comma-separated list, or a range of values. E.g. '-f 0-3' is
-          the same as '-f 0,1,2,3'.
+          Peform compression trials with each of the given filter types. You can specify a
+          comma-separated list, or a range of values. E.g. '-f 0-3' is the same as '-f 0,1,2,3'.
           
           PNG delta filters (apply the same filter to every line)
               0  =>  None      (recommended to always include this filter)
@@ -121,13 +115,13 @@ Options:
           The default value depends on the optimization level preset.
 
       --fast
-          Perform a fast compression evaluation of each enabled filter, followed
-          by a single main compression trial of the best result. Recommended
-          if you have more filters enabled than CPU cores.
+          Perform a fast compression evaluation of each enabled filter, followed by a single main
+          compression trial of the best result. Recommended if you have more filters enabled than
+          CPU cores.
 
       --zc <level>
-          Deflate compression level (1-12) for main compression trials. The
-          levels here are defined by the libdeflate compression library.
+          Deflate compression level (1-12) for main compression trials. The levels here are defined
+          by the libdeflate compression library.
           
           The default value depends on the optimization level preset.
 
@@ -147,29 +141,27 @@ Options:
           Do not perform any transformations and do not deinterlace by default.
 
       --nz
-          Do not recompress IDAT unless required due to transformations.
-          Recompression of other compressed chunks (such as iCCP) will also be
-          disabled. Note that the combination of '--nx' and '--nz' will fully
-          disable all optimization.
+          Do not recompress IDAT unless required due to transformations. Recompression of other
+          compressed chunks (such as iCCP) will also be disabled. Note that the combination of
+          '--nx' and '--nz' will fully disable all optimization.
 
       --fix
-          Do not perform checksum validation of PNG chunks. This may allow some
-          files with errors to be processed successfully.
+          Do not perform checksum validation of PNG chunks. This may allow some files with errors to
+          be processed successfully.
 
       --force
           Write the output even if it is larger than the input
 
   -Z, --zopfli
-          Use the much slower but stronger Zopfli compressor for main
-          compression trials. Recommended use is with '-o max' and '--fast'.
+          Use the much slower but stronger Zopfli compressor for main compression trials.
+          Recommended use is with '-o max' and '--fast'.
 
       --timeout <secs>
-          Maximum amount of time, in seconds, to spend on optimizations. Oxipng
-          will check the timeout before each transformation or compression
-          trial, and will stop trying to optimize the file if the timeout is
-          exceeded. Note that this does not cut short any operations that are
-          already in progress, so it is currently of limited effectiveness for
-          large files with high compression levels.
+          Maximum amount of time, in seconds, to spend on optimizations. Oxipng will check the
+          timeout before each transformation or compression trial, and will stop trying to optimize
+          the file if the timeout is exceeded. Note that this does not cut short any operations that
+          are already in progress, so it is currently of limited effectiveness for large files with
+          high compression levels.
 
   -t, --threads <num>
           Set number of threads to use [default: num CPU cores]
