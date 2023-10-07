@@ -243,6 +243,13 @@ fn main() {
                 .action(ArgAction::SetTrue),
         )
         .arg(
+            Arg::new("cache")
+                .help("Cache the history of optimized files and avoid reoptimizing optimal files")
+                .short('c')
+                .long("cache")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
             Arg::new("zopfli")
                 .help("Use the slow but stronger Zopfli compressor (recommended use is with all filters and `--fast` enabled)")
                 .short('Z')
@@ -492,6 +499,8 @@ fn parse_opts_into_struct(
     }
 
     opts.force = matches.get_flag("force");
+
+    opts.cache = matches.get_flag("cache");
 
     opts.fix_errors = matches.get_flag("fix");
 

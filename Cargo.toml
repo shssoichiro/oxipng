@@ -34,6 +34,7 @@ libdeflater = "1.19.0"
 log = "0.4.19"
 bitvec = "1.0.1"
 rustc-hash = "1.1.0"
+dirs = "5.0"
 
 [dependencies.env_logger]
 optional = true
