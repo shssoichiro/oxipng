@@ -186,8 +186,8 @@ depth is changed, regardless of any options set.",
                 .long_help("\
 Perform additional optimization on images with an alpha channel, by altering the color \
 values of fully transparent pixels. This is generally recommended for better compression, \
-but take care as this is technically a lossy transformation and may be unsuitable for some \
-applications.")
+but take care as while this is “visually lossless”, it is technically a lossy \
+transformation and may be unsuitable for some applications.")
                 .short('a')
                 .long("alpha")
                 .action(ArgAction::SetTrue),
@@ -213,10 +213,15 @@ believe the benefits outweigh the costs for your use case.")
         )
         .arg(
             Arg::new("scale16")
-                .help("Forcibly reduce 16-bit images to 8-bit")
+                .help("Forcibly reduce 16-bit images to 8-bit (lossy)")
                 .long_help("\
-Forcibly reduce 16-bit images to 8-bit. Reduction is performed by scaling the values, such \
-that e.g. 0x00FF is reduced to 0x01 rather than 0x00.")
+Forcibly reduce images with 16 bits per channel to 8 bits per channel. This is a lossy \
+operation but can provide significant savings when you have no need for higher depth. \
+Reduction is performed by scaling the values such that, e.g. 0x00FF is reduced to 0x01 \
+rather than 0x00.
+
+Without this flag, 16-bit images will only be reduced in depth if it can be done \
+losslessly.")
                 .long("scale16")
                 .action(ArgAction::SetTrue),
         )
@@ -240,7 +245,7 @@ that e.g. 0x00FF is reduced to 0x01 rather than 0x00.")
             Arg::new("filters")
                 .help(format!("Filters to try (0-{}; see '--help' for details)", RowFilter::LAST))
                 .long_help("\
-Peform compression trials with each of the given filter types. You can specify a \
+Perform compression trials with each of the given filter types. You can specify a \
 comma-separated list, or a range of values. E.g. '-f 0-3' is the same as '-f 0,1,2,3'.
 
 PNG delta filters (apply the same filter to every line)
