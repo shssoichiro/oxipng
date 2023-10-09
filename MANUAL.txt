@@ -1,0 +1,178 @@
+oxipng 9.0.0
+Losslessly improve compression of PNG files
+
+Usage: oxipng [OPTIONS] <files>...
+
+Arguments:
+  <files>...
+          File(s) to compress (use '-' for stdin)
+
+Options:
+  -o, --opt <level>
+          Set the optimization level preset. The default level 2 is quite fast and provides good
+          compression. Lower levels are faster, higher levels provide better compression, though
+          with increasingly diminishing returns.
+          
+          0   => --zc 5 --fast               (1 trial, determined heuristically)
+          1   => --zc 10 --fast              (1 trial, determined heuristically)
+          2   => --zc 11 -f 0,1,6,7 --fast   (4 fast trials, 1 main trial)
+          3   => --zc 11 -f 0,7,8,9          (4 trials)
+          4   => --zc 12 -f 0,7,8,9          (4 trials)
+          5   => --zc 12 -f 0,1,2,5,6,7,8,9  (8 trials)
+          6   => --zc 12 -f 0-9              (10 trials)
+          max =>                             (stable alias for the max level)
+          
+          Manually specifying a compression option (zc, f, etc.) will override the optimization
+          preset, regardless of the order you write the arguments.
+          
+          [default: 2]
+
+  -r, --recursive
+          When directories are given as input, traverse the directory trees and optimize all PNG
+          files found (files with “.png” or “.apng” extension).
+
+      --dir <directory>
+          Write output file(s) to <directory>. If the directory does not exist, it will be created.
+          Note that this will not preserve the directory structure of the input files when used with
+          '--recursive'.
+
+      --out <file>
+          Write output file to <file>
+
+      --stdout
+          Write output to stdout
+
+  -p, --preserve
+          Preserve file permissions and timestamps if possible
+
+  -P, --pretend
+          Do not write any files, only show compression results
+
+  -s
+          Strip safely-removable chunks, same as '--strip safe'
+
+      --strip <mode>
+          Strip metadata chunks, where <mode> is one of:
+          
+          safe    =>  Strip all non-critical chunks, except for the following:
+                          cICP, iCCP, sRGB, pHYs, acTL, fcTL, fdAT
+          all     =>  Strip all non-critical chunks
+          <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
+          
+          CAUTION: 'all' will convert APNGs to standard PNGs.
+          
+          Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit
+          depth is changed, regardless of any options set.
+
+      --keep <list>
+          Strip all metadata except in the comma-separated list
+
+  -a, --alpha
+          Perform additional optimization on images with an alpha channel, by altering the color
+          values of fully transparent pixels. This is generally recommended for better compression,
+          but take care as while this is “visually lossless”, it is technically a lossy
+          transformation and may be unsuitable for some applications.
+
+  -i, --interlace <type>
+          Set the PNG interlacing type, where <type> is one of:
+          
+          0     =>  Remove interlacing from all images that are processed
+          1     =>  Apply Adam7 interlacing on all images that are processed
+          keep  =>  Keep the existing interlacing type of each image
+          
+          Note that interlacing can add 25-50% to the size of an optimized image. Only use it if you
+          believe the benefits outweigh the costs for your use case.
+          
+          [default: 0]
+
+      --scale16
+          Forcibly reduce images with 16 bits per channel to 8 bits per channel. This is a lossy
+          operation but can provide significant savings when you have no need for higher depth.
+          Reduction is performed by scaling the values such that, e.g. 0x00FF is reduced to 0x01
+          rather than 0x00.
+          
+          Without this flag, 16-bit images will only be reduced in depth if it can be done
+          losslessly.
+
+  -v, --verbose...
+          Run in verbose mode (use twice to increase verbosity)
+
+  -q, --quiet
+          Run in quiet mode
+
+  -f, --filters <list>
+          Perform compression trials with each of the given filter types. You can specify a
+          comma-separated list, or a range of values. E.g. '-f 0-3' is the same as '-f 0,1,2,3'.
+          
+          PNG delta filters (apply the same filter to every line)
+              0  =>  None      (recommended to always include this filter)
+              1  =>  Sub
+              2  =>  Up
+              3  =>  Average
+              4  =>  Paeth
+          Heuristic strategies (try to find the best delta filter for each line)
+              5  =>  MinSum    Minimum sum of absolute differences
+              6  =>  Entropy   Highest Shannon entropy
+              7  =>  Bigrams   Lowest count of distinct bigrams
+              8  =>  BigEnt    Highest Shannon entropy of bigrams
+              9  =>  Brute     Smallest compressed size (slow)
+          
+          The default value depends on the optimization level preset.
+
+      --fast
+          Perform a fast compression evaluation of each enabled filter, followed by a single main
+          compression trial of the best result. Recommended if you have more filters enabled than
+          CPU cores.
+
+      --zc <level>
+          Deflate compression level (1-12) for main compression trials. The levels here are defined
+          by the libdeflate compression library.
+          
+          The default value depends on the optimization level preset.
+
+      --nb
+          Do not change bit depth
+
+      --nc
+          Do not change color type
+
+      --np
+          Do not change color palette
+
+      --ng
+          Do not change to or from grayscale
+
+      --nx
+          Do not perform any transformations and do not deinterlace by default.
+
+      --nz
+          Do not recompress IDAT unless required due to transformations. Recompression of other
+          compressed chunks (such as iCCP) will also be disabled. Note that the combination of
+          '--nx' and '--nz' will fully disable all optimization.
+
+      --fix
+          Do not perform checksum validation of PNG chunks. This may allow some files with errors to
+          be processed successfully.
+
+      --force
+          Write the output even if it is larger than the input
+
+  -Z, --zopfli
+          Use the much slower but stronger Zopfli compressor for main compression trials.
+          Recommended use is with '-o max' and '--fast'.
+
+      --timeout <secs>
+          Maximum amount of time, in seconds, to spend on optimizations. Oxipng will check the
+          timeout before each transformation or compression trial, and will stop trying to optimize
+          the file if the timeout is exceeded. Note that this does not cut short any operations that
+          are already in progress, so it is currently of limited effectiveness for large files with
+          high compression levels.
+
+  -t, --threads <num>
+          Set number of threads to use [default: num CPU cores]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version

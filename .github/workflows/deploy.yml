@@ -48,13 +48,16 @@ jobs:
           name: Oxipng binary (${{ matrix.target }})
           path: target
 
+      - name: Generate up to date manual
+        run: scripts/manual.sh
+
       - name: Build archives
         working-directory: target
         run: |
           ARCHIVE_NAME="oxipng-${{ steps.oxipngMeta.outputs.version }}-${{ matrix.target }}"
 
           mkdir "$ARCHIVE_NAME"
-          cp ../CHANGELOG.md ../README.md "$ARCHIVE_NAME"
+          cp ../CHANGELOG.md ../README.md ../MANUAL.txt "$ARCHIVE_NAME"
 
           case '${{ matrix.target }}' in
             *-windows-*)
