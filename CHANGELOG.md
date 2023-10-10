@@ -20,7 +20,7 @@
 - [Bugfix] Fix losing aux chunks when there's more than one of the same type.
 - [Bugfix] Fix sometimes writing output even when it was larger.
 - [Misc] Revamp CI workflow to upload artifacts and generate binaries for additional architectures.
-- [Misc] Bump minimum Rust version to 1.65.0.
+- [Misc] Bump minimum Rust version to 1.66.0.
 
 ## Version 8.0.0
 
