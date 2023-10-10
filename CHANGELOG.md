@@ -1,3 +1,27 @@
+## Version 9.0.0
+
+- [Breaking] Remove `--backup` option. Use `--out` or `--dir` to preserve existing files.
+- [Breaking] Remove `--check` option. Use `--nx --nz` to perform a non-optimizing run.
+- [Breaking] API: Replace `pretend` option with `OutFile::None`.
+- [Breaking] API: Move `preserve_attrs` into `OutFile::Path`.
+- [Breaking] Default to removing interlacing. Use `-i keep` to retain existing interlacing.
+- [Feature] Add Raw API for creating optimised PNGs from raw image data.
+- [Feature] Add basic support for APNG files.
+- [Feature] Add `--scale16` option to forcibly reduce 16-bit images to 8-bit.
+- [Improvement] Process multiple files in parallel.
+- [Improvement] Improve reductions, particularly for indexed or very small images.
+- [Improvement] Improve compression with latest version of libdeflate.
+- [Improvement] Recompress iCCP chunks.
+- [Improvement] Change recursive mode to only process .png/.apng files.
+- [Improvement] Add support for glob patterns in quotes on Windows.
+- [Improvement] Quieter default output logging, with multiple levels of verbosity.
+- [Bugfix] Fix deadlock when using oxipng within an existing Rayon thread pool.
+- [Bugfix] Fix early abort in recursive mode when a read error occurred.
+- [Bugfix] Fix losing aux chunks when there's more than one of the same type.
+- [Bugfix] Fix sometimes writing output even when it was larger.
+- [Misc] Revamp CI workflow to upload artifacts and generate binaries for additional architectures.
+- [Misc] Bump minimum Rust version to 1.66.0.
+
 ## Version 8.0.0
 
 - [Breaking] Revamp alpha optimization
