@@ -38,10 +38,10 @@ Oxipng follows Semantic Versioning.
 
 ## Usage
 
-Oxipng is a command-line utility. An example suitable for web usage may be the following:
+Oxipng is a command-line utility. An example usage, suitable for web, may be the following:
 
 ```
-oxipng -o 4 --alpha --strip safe *.png
+oxipng -o 4 --strip safe --alpha *.png
 ```
 
 The most commonly used options are as follows:
@@ -49,16 +49,20 @@ The most commonly used options are as follows:
 - Optimization: `-o 0` through `-o 6` (or `-o max`), lower is faster, higher is better compression.
   The default (`-o 2`) is quite fast and provides good compression. Higher levels can be notably
   better but generally have increasingly diminishing returns.
-- Alpha: `--alpha` can improve compression of images with transparency, by altering the color
-  values of fully transparent pixels. This is generally recommended, but take care as this is
-  technically a lossy transformation and may be unsuitable for some specific applications.
 - Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
   Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
   will never affect rendering of the image. "All" removes all metadata that is not critical
   to the image. You can also pass a comma-separated list of specific metadata chunks to remove.
   `-s` can be used as a shorthand for `--strip safe`.
+- Alpha: `--alpha` can improve compression of images with transparency, by altering the color
+  values of fully transparent pixels. This is generally recommended, but take care as this is
+  technically a lossy transformation and may be unsuitable for some specific applications.
 
-More advanced options can be found by running `oxipng -h`, or viewed [here](MANUAL.txt).
+More advanced options can be found by running `oxipng --help`, or viewed [here](MANUAL.txt).
+
+Some options have both short (`-a`) and long (`--alpha`) forms. Which form you use is just a
+matter of preference. Multiple short options can be combined together, e.g.:
+`-savvo6` is equivalent to to `--strip safe --alpha --verbose --verbose --opt 6`.
 Note that all options are case-sensitive.
 
 ## Git integration via [Trunk]
@@ -127,7 +131,9 @@ The name has been changed to avoid confusion and potential legal issues.
 The core goal of rewriting OptiPNG was to implement multithreading,
 which would be very difficult to do within the existing C codebase of OptiPNG.
 This also served as an opportunity to choose a more modern, safer language (Rust).
-Note that, while similar, oxipng is not a drop-in replacement for OptiPNG.
+
+Note that, while similar, Oxipng is not a drop-in replacement for OptiPNG.
+If you are migrating from OptiPNG, please check the [help](MANUAL.txt) before using.
 
 ## Contributing
 
