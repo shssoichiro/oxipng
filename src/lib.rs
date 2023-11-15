@@ -21,6 +21,7 @@
 
 #[cfg(feature = "parallel")]
 extern crate rayon;
+
 #[cfg(not(feature = "parallel"))]
 mod rayon;
 
@@ -980,77 +981,14 @@ fn is_fully_optimized(original_size: usize, optimized_size: usize, opts: &Option
     original_size <= optimized_size && !opts.force
 }
 
-#[cfg(not(unix))]
 fn copy_permissions(metadata_input: &Metadata, out_file: &File) -> PngResult<()> {
-    let readonly_input = metadata_input.permissions().readonly();
-
     out_file
-        .metadata()
+        .set_permissions(metadata_input.permissions())
         .map_err(|err_io| {
             PngError::new(&format!(
-                "unable to read filesystem metadata of output file: {}",
+                "unable to set permissions for output file: {}",
                 err_io
             ))
-        })
-        .and_then(|out_meta| {
-            out_meta.permissions().set_readonly(readonly_input);
-            out_file
-                .metadata()
-                .map_err(|err_io| {
-                    PngError::new(&format!(
-                        "unable to re-read filesystem metadata of output file: {}",
-                        err_io
-                    ))
-                })
-                .and_then(|out_meta_reread| {
-                    if out_meta_reread.permissions().readonly() != readonly_input {
-                        Err(PngError::new(&format!(
-                            "failed to set readonly, expected: {}, found: {}",
-                            readonly_input,
-                            out_meta_reread.permissions().readonly()
-                        )))
-                    } else {
-                        Ok(())
-                    }
-                })
-        })
-}
-
-#[cfg(unix)]
-fn copy_permissions(metadata_input: &Metadata, out_file: &File) -> PngResult<()> {
-    use std::os::unix::fs::PermissionsExt;
-
-    let permissions = metadata_input.permissions().mode();
-
-    out_file
-        .metadata()
-        .map_err(|err_io| {
-            PngError::new(&format!(
-                "unable to read filesystem metadata of output file: {}",
-                err_io
-            ))
-        })
-        .and_then(|out_meta| {
-            out_meta.permissions().set_mode(permissions);
-            out_file
-                .metadata()
-                .map_err(|err_io| {
-                    PngError::new(&format!(
-                        "unable to re-read filesystem metadata of output file: {}",
-                        err_io
-                    ))
-                })
-                .and_then(|out_meta_reread| {
-                    if out_meta_reread.permissions().mode() != permissions {
-                        Err(PngError::new(&format!(
-                            "failed to set permissions, expected: {:04o}, found: {:04o}",
-                            permissions,
-                            out_meta_reread.permissions().mode()
-                        )))
-                    } else {
-                        Ok(())
-                    }
-                })
         })
 }
 
