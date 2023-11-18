@@ -47,7 +47,7 @@ pub use crate::error::PngError;
 pub use crate::filters::RowFilter;
 pub use crate::headers::StripChunks;
 pub use crate::interlace::Interlacing;
-pub use crate::options::{Options, OutFile, InFile};
+pub use crate::options::{InFile, Options, OutFile};
 pub use indexmap::{indexset, IndexSet};
 pub use rgb::{RGB16, RGBA8};
 
@@ -419,8 +419,13 @@ fn optimize_raw(
         }
         _ => 8,
     };
-    // None and Bigrams work well together, especially for alpha reductions
-    let eval_filters = indexset! {RowFilter::None, RowFilter::Bigrams};
+    // If only one filter is selected, use this for evaluations
+    let eval_filters = if opts.filter.len() == 1 {
+        opts.filter.clone()
+    } else {
+        // None and Bigrams work well together, especially for alpha reductions
+        indexset! {RowFilter::None, RowFilter::Bigrams}
+    };
     // This will collect all versions of images and pick one that compresses best
     let eval = Evaluator::new(
         deadline.clone(),
