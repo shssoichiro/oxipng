@@ -175,6 +175,9 @@ depth is changed, regardless of any options set.",
         .arg(
             Arg::new("keep")
                 .help("Strip all metadata except in the comma-separated list")
+                .long_help("\
+Strip all metadata chunks except those in the comma-separated list. May be combined with \
+'--strip safe' to extend the list of chunks to be preserved.")
                 .long("keep")
                 .value_name("list"),
         )
@@ -622,12 +625,6 @@ fn parse_opts_into_struct(
             let names = strip
                 .split(',')
                 .map(|x| {
-                    if x == "safe" || x == "all" {
-                        return Err(
-                            "'safe' or 'all' presets for --strip should be used by themselves"
-                                .to_owned(),
-                        );
-                    }
                     let name = parse_chunk_name(x)?;
                     if FORBIDDEN_CHUNKS.contains(&name) {
                         return Err(format!("{} chunk is not allowed to be stripped", x));
@@ -642,16 +639,22 @@ fn parse_opts_into_struct(
     }
 
     if let Some(keep) = matches.get_one::<String>("keep") {
-        if matches!(opts.strip, StripChunks::Strip(_)) {
-            return Err("--strip <list> and --keep cannot be used together".to_owned());
-        }
         let mut names: IndexSet<_> = keep
             .split(',')
             .map(parse_chunk_name)
             .collect::<Result<_, _>>()?;
-        if opts.strip == StripChunks::Safe {
-            // Add the keep safe chunks to the list
-            names.extend(StripChunks::KEEP_SAFE.iter().cloned());
+        match opts.strip {
+            StripChunks::Strip(_) => {
+                return Err("The argument '--strip <list>' cannot be used with '--keep'".to_owned());
+            }
+            StripChunks::All => {
+                return Err("The argument '--strip all' cannot be used with '--keep'".to_owned());
+            }
+            StripChunks::Safe => {
+                // Add the keep safe chunks to the list
+                names.extend(StripChunks::KEEP_SAFE.iter().cloned());
+            }
+            _ => {}
         }
         opts.strip = StripChunks::Keep(names);
     }
