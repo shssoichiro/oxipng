@@ -614,10 +614,20 @@ fn parse_opts_into_struct(
     }
 
     if let Some(keep) = matches.get_one::<String>("keep") {
-        let names = keep
+        let mut keep_display = false;
+        let mut names = keep
             .split(',')
-            .map(parse_chunk_name)
-            .collect::<Result<_, _>>()?;
+            .filter_map(|x| {
+                if x == "display" {
+                    keep_display = true;
+                    return None;
+                }
+                Some(parse_chunk_name(x))
+            })
+            .collect::<Result<IndexSet<_>, _>>()?;
+        if keep_display {
+            names.extend(StripChunks::KEEP_SAFE.iter().cloned());
+        }
         opts.strip = StripChunks::Keep(names)
     }
 
