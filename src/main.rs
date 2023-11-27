@@ -176,7 +176,9 @@ depth is changed, regardless of any options set.",
             Arg::new("keep")
                 .help("Strip all metadata except in the comma-separated list")
                 .long("keep")
-                .value_name("list"),
+                .value_name("list")
+                .conflicts_with("strip")
+                .conflicts_with("strip-safe"),
         )
         .arg(
             Arg::new("alpha")
@@ -611,6 +613,14 @@ fn parse_opts_into_struct(
         };
     }
 
+    if let Some(keep) = matches.get_one::<String>("keep") {
+        let names = keep
+            .split(',')
+            .map(parse_chunk_name)
+            .collect::<Result<_, _>>()?;
+        opts.strip = StripChunks::Keep(names)
+    }
+
     if let Some(strip) = matches.get_one::<String>("strip") {
         if strip == "safe" {
             opts.strip = StripChunks::Safe;
@@ -637,23 +647,10 @@ fn parse_opts_into_struct(
                 .collect::<Result<_, _>>()?;
             opts.strip = StripChunks::Strip(names);
         }
-    } else if matches.get_flag("strip-safe") {
-        opts.strip = StripChunks::Safe;
     }
 
-    if let Some(keep) = matches.get_one::<String>("keep") {
-        if matches!(opts.strip, StripChunks::Strip(_)) {
-            return Err("--strip <list> and --keep cannot be used together".to_owned());
-        }
-        let mut names: IndexSet<_> = keep
-            .split(',')
-            .map(parse_chunk_name)
-            .collect::<Result<_, _>>()?;
-        if opts.strip == StripChunks::Safe {
-            // Add the keep safe chunks to the list
-            names.extend(StripChunks::KEEP_SAFE.iter().cloned());
-        }
-        opts.strip = StripChunks::Keep(names);
+    if matches.get_flag("strip-safe") {
+        opts.strip = StripChunks::Safe;
     }
 
     if matches.get_flag("zopfli") {
