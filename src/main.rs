@@ -175,6 +175,12 @@ depth is changed, regardless of any options set.",
         .arg(
             Arg::new("keep")
                 .help("Strip all metadata except in the comma-separated list")
+                .long_help("\
+Strip all metadata chunks except those in the comma-separated list. The special value \
+'display' includes chunks that affect the image appearance, equivalent to '--strip safe'.
+
+E.g. '--keep eXIf,display' will strip chunks, keeping only eXIf and those that affect the \
+image appearance.")
                 .long("keep")
                 .value_name("list")
                 .conflicts_with("strip")
@@ -617,12 +623,12 @@ fn parse_opts_into_struct(
         let mut keep_display = false;
         let mut names = keep
             .split(',')
-            .filter_map(|x| {
-                if x == "display" {
+            .filter_map(|name| {
+                if name == "display" {
                     keep_display = true;
                     return None;
                 }
-                Some(parse_chunk_name(x))
+                Some(parse_chunk_name(name))
             })
             .collect::<Result<IndexSet<_>, _>>()?;
         if keep_display {
