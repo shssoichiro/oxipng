@@ -163,7 +163,7 @@ CAUTION: 'all' will convert APNGs to standard PNGs.
 
 Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit \
 depth is changed, regardless of any options set.",
-                    StripChunks::KEEP_SAFE
+                    StripChunks::DISPLAY
                         .iter()
                         .map(|c| String::from_utf8_lossy(c))
                         .collect::<Vec<_>>()
@@ -632,7 +632,7 @@ fn parse_opts_into_struct(
             })
             .collect::<Result<IndexSet<_>, _>>()?;
         if keep_display {
-            names.extend(StripChunks::KEEP_SAFE.iter().cloned());
+            names.extend(StripChunks::DISPLAY.iter().cloned());
         }
         opts.strip = StripChunks::Keep(names)
     }
