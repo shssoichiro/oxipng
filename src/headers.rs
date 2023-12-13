@@ -76,7 +76,7 @@ pub enum StripChunks {
     None,
     /// Remove specific chunks
     Strip(IndexSet<[u8; 4]>),
-    /// Remove all chunks that won't affect rendering
+    /// Remove all chunks that won't affect image display
     Safe,
     /// Remove all non-critical chunks except these
     Keep(IndexSet<[u8; 4]>),
@@ -85,8 +85,8 @@ pub enum StripChunks {
 }
 
 impl StripChunks {
-    /// List of chunks that will be kept when using the `Safe` option
-    pub const KEEP_SAFE: [[u8; 4]; 7] = [
+    /// List of chunks that affect image display and will be kept when using the `Safe` option
+    pub const DISPLAY: [[u8; 4]; 7] = [
         *b"cICP", *b"iCCP", *b"sRGB", *b"pHYs", *b"acTL", *b"fcTL", *b"fdAT",
     ];
 
@@ -95,7 +95,7 @@ impl StripChunks {
             StripChunks::None => true,
             StripChunks::Keep(names) => names.contains(name),
             StripChunks::Strip(names) => !names.contains(name),
-            StripChunks::Safe => Self::KEEP_SAFE.contains(name),
+            StripChunks::Safe => Self::DISPLAY.contains(name),
             StripChunks::All => false,
         }
     }

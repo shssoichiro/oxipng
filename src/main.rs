@@ -163,7 +163,7 @@ CAUTION: 'all' will convert APNGs to standard PNGs.
 
 Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit \
 depth is changed, regardless of any options set.",
-                    StripChunks::KEEP_SAFE
+                    StripChunks::DISPLAY
                         .iter()
                         .map(|c| String::from_utf8_lossy(c))
                         .collect::<Vec<_>>()
@@ -175,8 +175,16 @@ depth is changed, regardless of any options set.",
         .arg(
             Arg::new("keep")
                 .help("Strip all metadata except in the comma-separated list")
+                .long_help("\
+Strip all metadata chunks except those in the comma-separated list. The special value \
+'display' includes chunks that affect the image appearance, equivalent to '--strip safe'.
+
+E.g. '--keep eXIf,display' will strip chunks, keeping only eXIf and those that affect the \
+image appearance.")
                 .long("keep")
-                .value_name("list"),
+                .value_name("list")
+                .conflicts_with("strip")
+                .conflicts_with("strip-safe"),
         )
         .arg(
             Arg::new("alpha")
@@ -611,6 +619,24 @@ fn parse_opts_into_struct(
         };
     }
 
+    if let Some(keep) = matches.get_one::<String>("keep") {
+        let mut keep_display = false;
+        let mut names = keep
+            .split(',')
+            .filter_map(|name| {
+                if name == "display" {
+                    keep_display = true;
+                    return None;
+                }
+                Some(parse_chunk_name(name))
+            })
+            .collect::<Result<IndexSet<_>, _>>()?;
+        if keep_display {
+            names.extend(StripChunks::DISPLAY.iter().cloned());
+        }
+        opts.strip = StripChunks::Keep(names)
+    }
+
     if let Some(strip) = matches.get_one::<String>("strip") {
         if strip == "safe" {
             opts.strip = StripChunks::Safe;
@@ -637,23 +663,10 @@ fn parse_opts_into_struct(
                 .collect::<Result<_, _>>()?;
             opts.strip = StripChunks::Strip(names);
         }
-    } else if matches.get_flag("strip-safe") {
-        opts.strip = StripChunks::Safe;
     }
 
-    if let Some(keep) = matches.get_one::<String>("keep") {
-        if matches!(opts.strip, StripChunks::Strip(_)) {
-            return Err("--strip <list> and --keep cannot be used together".to_owned());
-        }
-        let mut names: IndexSet<_> = keep
-            .split(',')
-            .map(parse_chunk_name)
-            .collect::<Result<_, _>>()?;
-        if opts.strip == StripChunks::Safe {
-            // Add the keep safe chunks to the list
-            names.extend(StripChunks::KEEP_SAFE.iter().cloned());
-        }
-        opts.strip = StripChunks::Keep(names);
+    if matches.get_flag("strip-safe") {
+        opts.strip = StripChunks::Safe;
     }
 
     if matches.get_flag("zopfli") {
