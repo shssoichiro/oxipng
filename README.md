@@ -70,10 +70,11 @@ Note that all options are case-sensitive.
 Add this to your `.pre-commit-config.yaml`
 
 ```yaml
--   repo: https://github.com/shssoichiro/oxipng
+repos:
+  - repo: https://github.com/shssoichiro/oxipng
     rev: v9.0.0
     hooks:
-    -   id: oxipng
+      - id: oxipng
         args: ["-o", "4", "--strip", "safe", "--alpha"]
 ```
 [pre-commit]: https://pre-commit.com/
