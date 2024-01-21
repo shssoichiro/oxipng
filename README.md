@@ -65,6 +65,19 @@ matter of preference. Multiple short options can be combined together, e.g.:
 `-savvo6` is equivalent to to `--strip safe --alpha --verbose --verbose --opt 6`.
 Note that all options are case-sensitive.
 
+## Git integration via [pre-commit]
+
+Add this to your `.pre-commit-config.yaml`
+
+```yaml
+-   repo: https://github.com/shssoichiro/oxipng
+    rev: v9.0.0
+    hooks:
+    -   id: oxipng
+        args: ["-o", "4", "--strip", "safe", "--alpha"]
+```
+[pre-commit]: https://pre-commit.com/
+
 ## Git integration via [Trunk]
 
 [Trunk] is an extendable superlinter which can be used to run `oxipng` to automatically optimize `png`s when committing them into a git repo, or to gate any `png`s being added to a git repo on whether they are optimized. The [trunk] oxipng integration is [here](https://github.com/trunk-io/plugins/tree/main/linters/oxipng).
