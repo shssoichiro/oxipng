@@ -67,7 +67,8 @@ Note that all options are case-sensitive.
 
 ## Git integration via [pre-commit]
 
-Add this to your `.pre-commit-config.yaml`
+Create a `.pre-commit-config.yaml` file like this, or add the lines after the `repos` map
+preamble to an already existing one:
 
 ```yaml
 repos:
