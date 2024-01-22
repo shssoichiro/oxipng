@@ -114,7 +114,7 @@ fn verbose_mode() {
     // initialise it with Some(sender) only on threads spawned within
     // our test.
     thread_local! {
-        static VERBOSE_LOGS: RefCell<Option<Sender<String>>> = RefCell::new(None);
+        static VERBOSE_LOGS: RefCell<Option<Sender<String>>> = const { RefCell::new(None) };
     }
 
     struct LogTester;
