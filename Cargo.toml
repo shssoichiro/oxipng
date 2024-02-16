@@ -5,6 +5,11 @@ description = "A lossless PNG compression optimizer"
 documentation = "https://docs.rs/oxipng"
 edition = "2021"
 exclude = [
+  ".editorconfig",
+  ".gitattributes",
+  ".github/*",
+  ".gitignore",
+  ".pre-commit-hooks.yaml",
   "Dockerfile",
   "index.html",
   "scripts/*",
