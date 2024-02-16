@@ -4,7 +4,12 @@ categories = ["command-line-utilities", "compression"]
 description = "A lossless PNG compression optimizer"
 documentation = "https://docs.rs/oxipng"
 edition = "2021"
-exclude = ["tests/*"]
+exclude = [
+  "Dockerfile",
+  "index.html",
+  "scripts/*",
+  "tests/*",
+]
 homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
 name = "oxipng"
