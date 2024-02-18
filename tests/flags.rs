@@ -686,9 +686,9 @@ fn zopfli_mode() {
         input,
         &output,
         &opts,
-        RGB,
+        INDEXED,
         BitDepth::Eight,
-        RGB,
+        INDEXED,
         BitDepth::Eight,
     );
 }
