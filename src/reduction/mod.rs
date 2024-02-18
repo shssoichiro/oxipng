@@ -114,6 +114,7 @@ pub(crate) fn perform_reductions(
     }
 
     // Attempt to reduce to indexed
+    // Keep the existing `png` var in case it is grayscale - we can test both for depth reduction later
     let mut indexed = None;
     if opts.color_type_reduction && !deadline.passed() {
         if let Some(reduced) = reduced_to_indexed(&png, opts.grayscale_reduction) {
@@ -133,7 +134,8 @@ pub(crate) fn perform_reductions(
 
     // Attempt to sort the palette using an alternative method
     if !cheap && opts.palette_reduction && !deadline.passed() {
-        if let Some(reduced) = sorted_palette_battiato(&png) {
+        // Make sure we use the `indexed` var if it exists
+        if let Some(reduced) = sorted_palette_battiato(indexed.as_ref().unwrap_or(&png)) {
             eval.try_image(Arc::new(reduced));
             evaluation_added = true;
         }
