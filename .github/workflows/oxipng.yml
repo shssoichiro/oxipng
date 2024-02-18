@@ -55,6 +55,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
+      RUSTFLAGS: -Zlocation-detail=none
 
     steps:
       - name: Checkout source
