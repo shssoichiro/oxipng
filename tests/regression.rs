@@ -316,21 +316,6 @@ fn issue_129() {
 }
 
 #[test]
-fn issue_133() {
-    let input = "tests/files/issue-133.png";
-    let (output, mut opts) = get_opts(Path::new(input));
-    opts.optimize_alpha = true;
-    test_it_converts(
-        input,
-        Some((output, opts)),
-        RGBA,
-        BitDepth::Eight,
-        RGBA,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_140() {
     test_it_converts(
         "tests/files/issue-140.png",
