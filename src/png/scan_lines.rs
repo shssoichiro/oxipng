@@ -1,5 +1,4 @@
-use crate::interlace::Interlacing;
-use crate::png::PngImage;
+use crate::{interlace::Interlacing, png::PngImage};
 
 /// An iterator over the scan lines of a PNG image
 #[derive(Debug, Clone)]

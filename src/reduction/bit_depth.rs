@@ -1,6 +1,8 @@
-use crate::colors::{BitDepth, ColorType};
-use crate::headers::IhdrData;
-use crate::png::PngImage;
+use crate::{
+    colors::{BitDepth, ColorType},
+    headers::IhdrData,
+    png::PngImage,
+};
 
 /// Attempt to reduce a 16-bit image to 8-bit, returning the reduced image if successful
 #[must_use]

@@ -1,8 +1,10 @@
 use rgb::RGB16;
 
-use crate::colors::{BitDepth, ColorType};
-use crate::headers::IhdrData;
-use crate::png::PngImage;
+use crate::{
+    colors::{BitDepth, ColorType},
+    headers::IhdrData,
+    png::PngImage,
+};
 
 /// Clean the alpha channel by setting the color of all fully transparent pixels to black
 pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {

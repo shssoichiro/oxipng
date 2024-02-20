@@ -1,5 +1,4 @@
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::SeqCst;
+use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 
 #[derive(Debug)]
 pub struct AtomicMin {

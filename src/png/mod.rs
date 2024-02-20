@@ -1,20 +1,25 @@
-use crate::colors::{BitDepth, ColorType};
-use crate::deflate;
-use crate::error::PngError;
-use crate::filters::*;
-use crate::headers::*;
-use crate::interlace::{deinterlace_image, interlace_image, Interlacing};
-use crate::Options;
+use std::{
+    fs::File,
+    io::{BufReader, Read, Write},
+    path::Path,
+    sync::Arc,
+};
+
 use bitvec::bitarr;
 use libdeflater::{CompressionLvl, Compressor};
 use log::warn;
 use rgb::ComponentSlice;
 use rustc_hash::FxHashMap;
-use std::fs::File;
-use std::io::{BufReader, Read, Write};
-use std::iter::Iterator;
-use std::path::Path;
-use std::sync::Arc;
+
+use crate::{
+    colors::{BitDepth, ColorType},
+    deflate,
+    error::PngError,
+    filters::*,
+    headers::*,
+    interlace::{deinterlace_image, interlace_image, Interlacing},
+    Options,
+};
 
 pub(crate) mod scan_lines;
 

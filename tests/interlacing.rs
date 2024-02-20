@@ -1,9 +1,9 @@
-use indexmap::IndexSet;
-use oxipng::internal_tests::*;
-use oxipng::*;
-use std::fs::remove_file;
-use std::path::Path;
-use std::path::PathBuf;
+use std::{
+    fs::remove_file,
+    path::{Path, PathBuf},
+};
+
+use oxipng::{internal_tests::*, *};
 
 const RGB: u8 = 2;
 const INDEXED: u8 = 3;

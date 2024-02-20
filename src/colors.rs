@@ -1,5 +1,6 @@
-use rgb::{RGB16, RGBA8};
 use std::{fmt, fmt::Display};
+
+use rgb::{RGB16, RGBA8};
 
 use crate::PngError;
 

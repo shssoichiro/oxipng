@@ -1,5 +1,6 @@
-use crate::{PngError, PngResult};
 use std::num::NonZeroU8;
+
+use crate::{PngError, PngResult};
 
 pub fn deflate(data: &[u8], iterations: NonZeroU8) -> PngResult<Vec<u8>> {
     let mut output = Vec::with_capacity(data.len());

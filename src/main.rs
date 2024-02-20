@@ -16,23 +16,15 @@
 #[cfg(not(feature = "parallel"))]
 mod rayon;
 
+#[cfg(feature = "zopfli")]
+use std::num::NonZeroU8;
+use std::{ffi::OsString, fs::DirBuilder, io::Write, path::PathBuf, process::exit, time::Duration};
+
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use indexmap::IndexSet;
 use log::{error, warn, Level, LevelFilter};
-use oxipng::Deflaters;
-use oxipng::Options;
-use oxipng::RowFilter;
-use oxipng::StripChunks;
-use oxipng::{InFile, OutFile};
+use oxipng::{Deflaters, InFile, Options, OutFile, RowFilter, StripChunks};
 use rayon::prelude::*;
-use std::ffi::OsString;
-use std::fs::DirBuilder;
-use std::io::Write;
-#[cfg(feature = "zopfli")]
-use std::num::NonZeroU8;
-use std::path::PathBuf;
-use std::process::exit;
-use std::time::Duration;
 
 fn main() {
     // Note: clap 'wrap_help' is enabled to automatically wrap lines according to terminal width.

@@ -3,10 +3,9 @@
 extern crate oxipng;
 extern crate test;
 
-use oxipng::internal_tests::*;
-use oxipng::*;
-use std::num::NonZeroU8;
-use std::path::PathBuf;
+use std::{num::NonZeroU8, path::PathBuf};
+
+use oxipng::{internal_tests::*, *};
 use test::Bencher;
 
 // SAFETY: trivially safe. Stopgap solution until const unwrap is stabilized.

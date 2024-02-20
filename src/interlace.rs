@@ -1,9 +1,8 @@
 use std::{fmt, fmt::Display};
 
-use crate::headers::IhdrData;
-use crate::png::PngImage;
-use crate::PngError;
 use bitvec::prelude::*;
+
+use crate::{headers::IhdrData, png::PngImage, PngError};
 
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

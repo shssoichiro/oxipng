@@ -1,13 +1,11 @@
 mod deflater;
-use crate::AtomicMin;
-use crate::{PngError, PngResult};
-pub use deflater::crc32;
-pub use deflater::deflate;
-pub use deflater::inflate;
-use std::{fmt, fmt::Display};
-
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
+use std::{fmt, fmt::Display};
+
+pub use deflater::{crc32, deflate, inflate};
+
+use crate::{AtomicMin, PngError, PngResult};
 #[cfg(feature = "zopfli")]
 mod zopfli_oxipng;
 #[cfg(feature = "zopfli")]

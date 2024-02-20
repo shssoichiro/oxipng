@@ -1,9 +1,6 @@
-use crate::evaluate::Evaluator;
-use crate::png::PngImage;
-use crate::Deadline;
-use crate::Deflaters;
-use crate::Options;
 use std::sync::Arc;
+
+use crate::{evaluate::Evaluator, png::PngImage, Deadline, Deflaters, Options};
 
 pub mod alpha;
 use crate::alpha::*;

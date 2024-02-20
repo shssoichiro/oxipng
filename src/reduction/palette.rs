@@ -1,10 +1,12 @@
-use crate::colors::{BitDepth, ColorType};
-use crate::headers::IhdrData;
-use crate::png::scan_lines::ScanLine;
-use crate::png::PngImage;
-use crate::Interlacing;
 use indexmap::IndexSet;
 use rgb::RGBA8;
+
+use crate::{
+    colors::{BitDepth, ColorType},
+    headers::IhdrData,
+    png::{scan_lines::ScanLine, PngImage},
+    Interlacing,
+};
 
 /// Attempt to reduce the number of colors in the palette, returning the reduced image if successful
 #[must_use]

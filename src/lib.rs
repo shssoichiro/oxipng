@@ -25,31 +25,39 @@ extern crate rayon;
 #[cfg(not(feature = "parallel"))]
 mod rayon;
 
-use crate::atomicmin::AtomicMin;
-use crate::evaluate::Evaluator;
-use crate::headers::*;
-use crate::png::PngData;
-use crate::png::PngImage;
-use crate::reduction::*;
+use std::{
+    borrow::Cow,
+    fs::{File, Metadata},
+    io::{stdin, stdout, BufWriter, Read, Write},
+    path::Path,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::{Duration, Instant},
+};
+
+pub use indexmap::{indexset, IndexSet};
 use log::{debug, info, trace, warn};
 use rayon::prelude::*;
-use std::borrow::Cow;
-use std::fs::{File, Metadata};
-use std::io::{stdin, stdout, BufWriter, Read, Write};
-use std::path::Path;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use std::time::{Duration, Instant};
-
-pub use crate::colors::{BitDepth, ColorType};
-pub use crate::deflate::Deflaters;
-pub use crate::error::PngError;
-pub use crate::filters::RowFilter;
-pub use crate::headers::StripChunks;
-pub use crate::interlace::Interlacing;
-pub use crate::options::{InFile, Options, OutFile};
-pub use indexmap::{indexset, IndexSet};
 pub use rgb::{RGB16, RGBA8};
+
+use crate::{
+    atomicmin::AtomicMin,
+    evaluate::Evaluator,
+    headers::*,
+    png::{PngData, PngImage},
+    reduction::*,
+};
+pub use crate::{
+    colors::{BitDepth, ColorType},
+    deflate::Deflaters,
+    error::PngError,
+    filters::RowFilter,
+    headers::StripChunks,
+    interlace::Interlacing,
+    options::{InFile, Options, OutFile},
+};
 
 mod atomicmin;
 mod colors;
@@ -68,12 +76,9 @@ mod sanity_checks;
 /// Private to oxipng; don't use outside tests and benches
 #[doc(hidden)]
 pub mod internal_tests {
-    pub use crate::atomicmin::*;
-    pub use crate::deflate::*;
-    pub use crate::png::*;
-    pub use crate::reduction::*;
     #[cfg(feature = "sanity-checks")]
     pub use crate::sanity_checks::*;
+    pub use crate::{atomicmin::*, deflate::*, png::*, reduction::*};
 }
 
 pub type PngResult<T> = Result<T, PngError>;

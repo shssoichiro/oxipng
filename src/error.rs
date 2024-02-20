@@ -1,6 +1,6 @@
+use std::{error::Error, fmt};
+
 use crate::colors::{BitDepth, ColorType};
-use std::error::Error;
-use std::fmt;
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]

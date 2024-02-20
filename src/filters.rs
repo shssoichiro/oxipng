@@ -1,5 +1,4 @@
-use std::mem::transmute;
-use std::{fmt, fmt::Display};
+use std::{fmt, fmt::Display, mem::transmute};
 
 use crate::error::PngError;
 

@@ -3,9 +3,9 @@
 extern crate oxipng;
 extern crate test;
 
-use oxipng::internal_tests::*;
-use oxipng::*;
 use std::path::PathBuf;
+
+use oxipng::{internal_tests::*, *};
 use test::Bencher;
 
 #[bench]

@@ -1,13 +1,13 @@
-use log::warn;
-use std::fmt;
-use std::path::{Path, PathBuf};
-use std::time::Duration;
+use std::{
+    fmt,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
-use crate::deflate::Deflaters;
-use crate::filters::RowFilter;
-use crate::headers::StripChunks;
-use crate::interlace::Interlacing;
 use indexmap::{indexset, IndexSet};
+use log::warn;
+
+use crate::{deflate::Deflaters, filters::RowFilter, headers::StripChunks, interlace::Interlacing};
 
 #[derive(Clone, Debug)]
 pub enum OutFile {

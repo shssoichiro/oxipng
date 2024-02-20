@@ -1,15 +1,16 @@
-use indexmap::{indexset, IndexSet};
-use oxipng::internal_tests::*;
-use oxipng::*;
 #[cfg(feature = "filetime")]
 use std::cell::RefCell;
-use std::fs::remove_file;
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 #[cfg(feature = "filetime")]
 use std::ops::Deref;
-use std::path::Path;
-use std::path::PathBuf;
+use std::{
+    fs::remove_file,
+    path::{Path, PathBuf},
+};
+
+use indexmap::indexset;
+use oxipng::{internal_tests::*, *};
 
 const GRAYSCALE: u8 = 0;
 const RGB: u8 = 2;
@@ -100,12 +101,13 @@ fn test_it_converts(
 
 #[test]
 fn verbose_mode() {
-    #[cfg(feature = "parallel")]
-    use crossbeam_channel::{unbounded, Sender};
-    use log::{set_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record};
     use std::cell::RefCell;
     #[cfg(not(feature = "parallel"))]
     use std::sync::mpsc::{channel as unbounded, Sender};
+
+    #[cfg(feature = "parallel")]
+    use crossbeam_channel::{unbounded, Sender};
+    use log::{set_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record};
 
     // Rust runs tests in parallel by default.
     // We want to make sure that we verify only logs from our test.

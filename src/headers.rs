@@ -1,13 +1,14 @@
-use crate::colors::{BitDepth, ColorType};
-use crate::deflate::{crc32, inflate};
-use crate::error::PngError;
-use crate::interlace::Interlacing;
-use crate::AtomicMin;
-use crate::Deflaters;
-use crate::PngResult;
 use indexmap::IndexSet;
 use log::warn;
 use rgb::{RGB16, RGBA8};
+
+use crate::{
+    colors::{BitDepth, ColorType},
+    deflate::{crc32, inflate},
+    error::PngError,
+    interlace::Interlacing,
+    AtomicMin, Deflaters, PngResult,
+};
 
 #[derive(Debug, Clone)]
 /// Headers from the IHDR chunk of the image

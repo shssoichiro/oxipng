@@ -1,24 +1,22 @@
 //! Check if a reduction makes file smaller, and keep best reductions.
 //! Works asynchronously when possible
 
-use crate::atomicmin::AtomicMin;
-use crate::deflate;
-use crate::filters::RowFilter;
-use crate::png::PngImage;
 #[cfg(not(feature = "parallel"))]
-use crate::rayon;
-use crate::Deadline;
-use crate::PngError;
+use std::cell::RefCell;
+use std::sync::{
+    atomic::{AtomicUsize, Ordering::*},
+    Arc,
+};
+
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use indexmap::IndexSet;
 use log::trace;
 use rayon::prelude::*;
+
 #[cfg(not(feature = "parallel"))]
-use std::cell::RefCell;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::*;
-use std::sync::Arc;
+use crate::rayon;
+use crate::{atomicmin::AtomicMin, deflate, filters::RowFilter, png::PngImage, Deadline, PngError};
 
 pub struct Candidate {
     pub image: Arc<PngImage>,

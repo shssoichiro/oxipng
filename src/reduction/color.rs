@@ -1,11 +1,14 @@
-use crate::colors::{BitDepth, ColorType};
-use crate::headers::IhdrData;
-use crate::png::PngImage;
-use indexmap::IndexSet;
-use rgb::alt::Gray;
-use rgb::{ComponentMap, ComponentSlice, FromSlice, RGB, RGBA};
-use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash};
+
+use indexmap::IndexSet;
+use rgb::{alt::Gray, ComponentMap, ComponentSlice, FromSlice, RGB, RGBA};
+use rustc_hash::FxHasher;
+
+use crate::{
+    colors::{BitDepth, ColorType},
+    headers::IhdrData,
+    png::PngImage,
+};
 
 type FxIndexSet<V> = IndexSet<V, BuildHasherDefault<FxHasher>>;
 

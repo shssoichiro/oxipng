@@ -1,7 +1,6 @@
+use std::{fs, fs::File, io::prelude::*};
+
 use oxipng::*;
-use std::fs;
-use std::fs::File;
-use std::io::prelude::*;
 
 #[test]
 fn optimize_from_memory() {
