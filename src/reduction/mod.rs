@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{evaluate::Evaluator, png::PngImage, Deadline, Deflaters, Options};
+use crate::{evaluate::Evaluator, png::PngImage, ColorType, Deadline, Deflaters, Options};
 
 pub mod alpha;
 use crate::alpha::*;
@@ -132,12 +132,41 @@ pub(crate) fn perform_reductions(
         }
     }
 
-    // Attempt to sort the palette using an alternative method
-    if !cheap && opts.palette_reduction && !deadline.passed() {
-        // Make sure we use the `indexed` var if it exists
-        if let Some(reduced) = sorted_palette_battiato(indexed.as_ref().unwrap_or(&png)) {
-            eval.try_image(Arc::new(reduced));
-            evaluation_added = true;
+    // Attempt additional palette sorting techniques
+    if !cheap && opts.palette_reduction {
+        // Collect a list of palettes so we can avoid evaluating the same one twice
+        let mut palettes = Vec::new();
+        if let ColorType::Indexed { palette } = &baseline.ihdr.color_type {
+            palettes.push(palette.clone());
+        }
+        // Make sure we use the `indexed` var as input if it exists
+        // This one doesn't need to be kept in the palette list as the sorters will fail if there's no change
+        let input = indexed.as_ref().unwrap_or(&png);
+
+        // Attempt to sort the palette using the battiato method
+        if !deadline.passed() {
+            if let Some(reduced) = sorted_palette_battiato(input) {
+                if let ColorType::Indexed { palette } = &reduced.ihdr.color_type {
+                    if !palettes.contains(palette) {
+                        palettes.push(palette.clone());
+                        eval.try_image(Arc::new(reduced));
+                        evaluation_added = true;
+                    }
+                }
+            }
+        }
+
+        // Attempt to sort the palette using the mzeng method
+        if !deadline.passed() {
+            if let Some(reduced) = sorted_palette_mzeng(input) {
+                if let ColorType::Indexed { palette } = &reduced.ihdr.color_type {
+                    if !palettes.contains(palette) {
+                        palettes.push(palette.clone());
+                        eval.try_image(Arc::new(reduced));
+                        evaluation_added = true;
+                    }
+                }
+            }
         }
     }
 
