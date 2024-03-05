@@ -78,6 +78,8 @@ features = ["png"]
 version = "0.24.6"
 
 [build-dependencies]
+clap = "4.3.8"
+clap_mangen = "0.2.20"
 rustc_version = "0.4.0"
 
 [features]
