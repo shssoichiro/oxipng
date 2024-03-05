@@ -87,6 +87,7 @@ pub enum StripChunks {
 
 impl StripChunks {
     /// List of chunks that affect image display and will be kept when using the `Safe` option
+    // NOTE: If this list is updated, the documentation in `cli` must also be updated
     pub const DISPLAY: [[u8; 4]; 7] = [
         *b"cICP", *b"iCCP", *b"sRGB", *b"pHYs", *b"acTL", *b"fcTL", *b"fdAT",
     ];
