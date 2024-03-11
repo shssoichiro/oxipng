@@ -379,7 +379,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
-                                best_line_raw = line_data.clone();
+                                best_line_raw.clone_from(&line_data);
                             }
                         }
                     }
@@ -402,7 +402,7 @@ impl PngImage {
                             if size > best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
-                                best_line_raw = line_data.clone();
+                                best_line_raw.clone_from(&line_data);
                             }
                         }
                     }
@@ -421,7 +421,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
-                                best_line_raw = line_data.clone();
+                                best_line_raw.clone_from(&line_data);
                             }
                         }
                     }
@@ -441,7 +441,7 @@ impl PngImage {
                             if size > best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
-                                best_line_raw = line_data.clone();
+                                best_line_raw.clone_from(&line_data);
                             }
                         }
                     }
@@ -466,7 +466,7 @@ impl PngImage {
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
-                                best_line_raw = line_data.clone();
+                                best_line_raw.clone_from(&line_data);
                             }
                         }
                         filtered.resize(line_start, 0);
