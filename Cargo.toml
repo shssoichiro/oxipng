@@ -100,3 +100,11 @@ opt-level = 2
 lto = "fat"
 strip = "symbols"
 panic = "abort"
+
+[package.metadata.deb]
+assets = [
+    ["target/release/oxipng", "usr/bin/", "755"],
+    ["target/assets/oxipng.1", "usr/share/man/man1/", "644"],
+    ["README.md", "usr/share/doc/oxipng/", "644"],
+    ["CHANGELOG.md", "usr/share/doc/oxipng/", "644"],
+]
