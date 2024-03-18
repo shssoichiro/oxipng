@@ -5,6 +5,7 @@ use rgb::{RGB16, RGBA8};
 use crate::{
     colors::{BitDepth, ColorType},
     deflate::{crc32, inflate},
+    display_chunks::DISPLAY_CHUNKS,
     error::PngError,
     interlace::Interlacing,
     AtomicMin, Deflaters, PngResult,
@@ -86,17 +87,12 @@ pub enum StripChunks {
 }
 
 impl StripChunks {
-    /// List of chunks that affect image display and will be kept when using the `Safe` option
-    pub const DISPLAY: [[u8; 4]; 7] = [
-        *b"cICP", *b"iCCP", *b"sRGB", *b"pHYs", *b"acTL", *b"fcTL", *b"fdAT",
-    ];
-
     pub(crate) fn keep(&self, name: &[u8; 4]) -> bool {
         match &self {
             StripChunks::None => true,
             StripChunks::Keep(names) => names.contains(name),
             StripChunks::Strip(names) => !names.contains(name),
-            StripChunks::Safe => Self::DISPLAY.contains(name),
+            StripChunks::Safe => DISPLAY_CHUNKS.contains(name),
             StripChunks::All => false,
         }
     }
