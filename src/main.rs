@@ -27,6 +27,8 @@ use log::{error, warn, Level, LevelFilter};
 use oxipng::{Deflaters, InFile, Options, OutFile, RowFilter, StripChunks};
 use rayon::prelude::*;
 
+use crate::cli::DISPLAY_CHUNKS;
+
 fn main() {
     let matches = cli::build_command()
         // Set the value parser for filters which isn't appropriate to do in the build_command function
@@ -281,7 +283,7 @@ fn parse_opts_into_struct(
             })
             .collect::<Result<IndexSet<_>, _>>()?;
         if keep_display {
-            names.extend(StripChunks::DISPLAY.iter().cloned());
+            names.extend(DISPLAY_CHUNKS.iter().cloned());
         }
         opts.strip = StripChunks::Keep(names)
     }

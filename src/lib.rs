@@ -62,6 +62,7 @@ pub use crate::{
 mod atomicmin;
 mod colors;
 mod deflate;
+mod display_chunks;
 mod error;
 mod evaluate;
 mod filters;

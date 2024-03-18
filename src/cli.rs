@@ -1,5 +1,8 @@
-use clap::{value_parser, Arg, ArgAction, Command};
 use std::path::PathBuf;
+
+use clap::{value_parser, Arg, ArgAction, Command};
+
+include!("display_chunks.rs");
 
 pub fn build_command() -> Command {
     // Note: clap 'wrap_help' is enabled to automatically wrap lines according to terminal width.
@@ -118,18 +121,23 @@ Note that this will not preserve the directory structure of the input files when
         .arg(
             Arg::new("strip")
                 .help("Strip metadata (safe, all, or comma-separated list)\nCAUTION: 'all' will convert APNGs to standard PNGs")
-                .long_help("\
+                .long_help(format!("\
 Strip metadata chunks, where <mode> is one of:
 
     safe    =>  Strip all non-critical chunks, except for the following:
-                    cICP, iCCP, sRGB, pHYs, acTL, fcTL, fdAT
+                    {}
     all     =>  Strip all non-critical chunks
     <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
 
 CAUTION: 'all' will convert APNGs to standard PNGs.
 
 Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit \
-depth is changed, regardless of any options set.")
+depth is changed, regardless of any options set.",
+                       DISPLAY_CHUNKS
+                           .iter()
+                           .map(|c| String::from_utf8_lossy(c))
+                           .collect::<Vec<_>>()
+                           .join(", ")))
                 .long("strip")
                 .value_name("mode")
                 .conflicts_with("strip-safe"),
