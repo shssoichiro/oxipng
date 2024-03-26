@@ -201,14 +201,18 @@ fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
 }
 
 // Calculate co-occurences matrix
-fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<usize>> {
-    let mut matrix = vec![vec![0; num_colors]; num_colors];
+fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
+    let mut matrix = vec![vec![0u32; num_colors]; num_colors];
     let mut prev: Option<ScanLine> = None;
+    let mut prev_val = None;
     for line in png.scan_lines(false) {
         for i in 0..line.data.len() {
             let val = line.data[i] as usize;
-            if i > 0 {
-                matrix[line.data[i - 1] as usize][val] += 1;
+            if val > num_colors {
+                continue;
+            }
+            if let Some(prev_val) = prev_val.replace(val) {
+                matrix[prev_val][val] += 1;
             }
             if let Some(prev) = &prev {
                 matrix[prev.data[i] as usize][val] += 1;
@@ -220,7 +224,7 @@ fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<usize>> {
 }
 
 // Calculate edge list sorted by weight
-fn weighted_edges(matrix: &[Vec<usize>]) -> Vec<(usize, usize)> {
+fn weighted_edges(matrix: &[Vec<u32>]) -> Vec<(usize, usize)> {
     let mut edges = Vec::new();
     for i in 0..matrix.len() {
         for j in 0..i {
