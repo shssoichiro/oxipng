@@ -183,12 +183,21 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
 
 // Find the most popular color on the image edges (the pixels neighboring the filter bytes)
 fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
-    let mut counts = vec![0; num_colors];
+    let mut counts = [0u32; 256];
     for line in png.scan_lines(false) {
-        counts[line.data[0] as usize] += 1;
-        counts[line.data[line.data.len() - 1] as usize] += 1;
+        if let &[first, .., last] = line.data {
+            counts[first as usize] += 1;
+            counts[last as usize] += 1;
+        }
     }
-    counts.iter().enumerate().max_by_key(|(_, &v)| v).unwrap().0
+    counts
+        .iter()
+        .copied()
+        .take(num_colors)
+        .enumerate()
+        .max_by_key(|&(_, v)| v)
+        .unwrap_or_default()
+        .0
 }
 
 // Calculate co-occurences matrix
