@@ -27,6 +27,8 @@ impl<'a> Iterator for ScanLines<'a> {
         let (len, pass, num_pixels) = self.iter.next()?;
         debug_assert!(self.raw_data.len() >= len);
         debug_assert!(!self.has_filter || len > 1);
+        // The data length should always be correct here but this check assures
+        // the compiler that it doesn't need to account for a potential panic
         if self.raw_data.len() < len {
             return None;
         }
