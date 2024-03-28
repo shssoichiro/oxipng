@@ -14,9 +14,8 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
-    let palette = match &png.ihdr.color_type {
-        ColorType::Indexed { palette } if palette.len() > 1 => palette,
-        _ => return None,
+    let ColorType::Indexed { palette } = &png.ihdr.color_type else {
+        return None;
     };
 
     let mut used = [false; 256];
