@@ -24,20 +24,26 @@ impl<'a> Iterator for ScanLines<'a> {
     type Item = ScanLine<'a>;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(len, pass, num_pixels)| {
-            let (data, rest) = self.raw_data.split_at(len);
-            self.raw_data = rest;
-            let (&filter, data) = if self.has_filter {
-                data.split_first().unwrap()
-            } else {
-                (&0, data)
-            };
-            ScanLine {
-                filter,
-                data,
-                pass,
-                num_pixels,
-            }
+        let (len, pass, num_pixels) = self.iter.next()?;
+        debug_assert!(self.raw_data.len() >= len);
+        debug_assert!(!self.has_filter || len > 1);
+        // The data length should always be correct here but this check assures
+        // the compiler that it doesn't need to account for a potential panic
+        if self.raw_data.len() < len {
+            return None;
+        }
+        let (data, rest) = self.raw_data.split_at(len);
+        self.raw_data = rest;
+        let (&filter, data) = if self.has_filter {
+            data.split_first().unwrap()
+        } else {
+            (&0, data)
+        };
+        Some(ScanLine {
+            filter,
+            data,
+            pass,
+            num_pixels,
         })
     }
 }

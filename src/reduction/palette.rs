@@ -14,9 +14,8 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
-    let palette = match &png.ihdr.color_type {
-        ColorType::Indexed { palette } if palette.len() > 1 => palette,
-        _ => return None,
+    let ColorType::Indexed { palette } = &png.ihdr.color_type else {
+        return None;
     };
 
     let mut used = [false; 256];
@@ -43,8 +42,9 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
     let data = if did_change {
         // Reassign data bytes to new indices
         png.data.iter().map(|b| byte_map[*b as usize]).collect()
-    } else if condensed.len() < palette.len() {
-        // Data is unchanged but palette will be truncated
+    } else if condensed.len() != palette.len() {
+        // Data is unchanged but palette is different size
+        // Note the new palette could potentially be larger if the original had a missing entry
         png.data.clone()
     } else {
         // Nothing has changed
@@ -183,23 +183,36 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
 
 // Find the most popular color on the image edges (the pixels neighboring the filter bytes)
 fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
-    let mut counts = vec![0; num_colors];
+    let mut counts = [0u32; 256];
     for line in png.scan_lines(false) {
-        counts[line.data[0] as usize] += 1;
-        counts[line.data[line.data.len() - 1] as usize] += 1;
+        if let &[first, .., last] = line.data {
+            counts[first as usize] += 1;
+            counts[last as usize] += 1;
+        }
     }
-    counts.iter().enumerate().max_by_key(|(_, &v)| v).unwrap().0
+    counts
+        .iter()
+        .copied()
+        .take(num_colors)
+        .enumerate()
+        .max_by_key(|&(_, v)| v)
+        .unwrap_or_default()
+        .0
 }
 
 // Calculate co-occurences matrix
-fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<usize>> {
-    let mut matrix = vec![vec![0; num_colors]; num_colors];
+fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
+    let mut matrix = vec![vec![0u32; num_colors]; num_colors];
     let mut prev: Option<ScanLine> = None;
+    let mut prev_val = None;
     for line in png.scan_lines(false) {
         for i in 0..line.data.len() {
             let val = line.data[i] as usize;
-            if i > 0 {
-                matrix[line.data[i - 1] as usize][val] += 1;
+            if val > num_colors {
+                continue;
+            }
+            if let Some(prev_val) = prev_val.replace(val) {
+                matrix[prev_val][val] += 1;
             }
             if let Some(prev) = &prev {
                 matrix[prev.data[i] as usize][val] += 1;
@@ -211,7 +224,7 @@ fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<usize>> {
 }
 
 // Calculate edge list sorted by weight
-fn weighted_edges(matrix: &[Vec<usize>]) -> Vec<(usize, usize)> {
+fn weighted_edges(matrix: &[Vec<u32>]) -> Vec<(usize, usize)> {
     let mut edges = Vec::new();
     for i in 0..matrix.len() {
         for j in 0..i {
