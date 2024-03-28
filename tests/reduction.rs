@@ -1050,6 +1050,43 @@ fn palette_should_be_reduced_with_both() {
 }
 
 #[test]
+fn palette_should_be_reduced_with_missing() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_missing.png");
+    let (output, opts) = get_opts(&input);
+
+    let png = PngData::new(&input, &opts).unwrap();
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 2);
+    }
+
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!("{}", x),
+    };
+    let output = output.path().unwrap();
+    assert!(output.exists());
+
+    let png = match PngData::new(output, &opts) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!("{}", x)
+        }
+    };
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Two);
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 3);
+    }
+
+    remove_file(output).ok();
+}
+
+#[test]
 fn rgba_16_reduce_alpha() {
     test_it_converts(
         "tests/files/rgba_16_reduce_alpha.png",
