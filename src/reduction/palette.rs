@@ -43,8 +43,9 @@ pub fn reduced_palette(png: &PngImage, optimize_alpha: bool) -> Option<PngImage>
     let data = if did_change {
         // Reassign data bytes to new indices
         png.data.iter().map(|b| byte_map[*b as usize]).collect()
-    } else if condensed.len() < palette.len() {
-        // Data is unchanged but palette will be truncated
+    } else if condensed.len() != palette.len() {
+        // Data is unchanged but palette is different size
+        // Note the new palette could potentially be larger if the original had a missing entry
         png.data.clone()
     } else {
         // Nothing has changed
