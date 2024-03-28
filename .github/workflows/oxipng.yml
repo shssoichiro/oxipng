@@ -49,9 +49,9 @@ jobs:
           - target: i686-pc-windows-msvc
             os: windows-latest
           - target: x86_64-apple-darwin
-            os: macos-latest
+            os: macos-12
           - target: aarch64-apple-darwin
-            os: macos-latest
+            os: macos-14 # ARM64 runner
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
@@ -122,18 +122,10 @@ jobs:
           reporter: github-check
           fail_on_error: true
 
-      # There aren't good user-mode ARM64 emulators we can use on x64 macOS hosts.
-      # QEMU doesn't have any plans to add such support due to a lack of kernel
-      # syscall stability guarantees: https://gitlab.com/qemu-project/qemu/-/issues/1682
       - name: Run tests
-        if: matrix.target != 'aarch64-apple-darwin'
         run: |
           cargo nextest run --release --features sanity-checks
           cargo test --doc --release --features sanity-checks
-
-      - name: Build tests (ARM64 macOS only)
-        if: matrix.target == 'aarch64-apple-darwin'
-        run: cargo test --release --features sanity-checks --no-run
 
       - name: Build benchmarks
         run: cargo bench --no-run
