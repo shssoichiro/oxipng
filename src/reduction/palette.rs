@@ -128,6 +128,28 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     })
 }
 
+/// Sort the colors in the palette using the mzeng technique, returning the sorted image if successful
+#[must_use]
+pub fn sorted_palette_mzeng(png: &PngImage) -> Option<PngImage> {
+    // Interlacing not currently supported
+    if png.ihdr.bit_depth != BitDepth::Eight || png.ihdr.interlaced != Interlacing::None {
+        return None;
+    }
+    let palette = match &png.ihdr.color_type {
+        // Images with only two colors will remain unchanged from previous luma sort
+        ColorType::Indexed { palette } if palette.len() > 2 => palette,
+        _ => return None,
+    };
+
+    let matrix = co_occurrence_matrix(palette.len(), png);
+    let edges = weighted_edges(&matrix);
+    let mut remapping = mzeng_reindex(palette.len(), edges, &matrix);
+
+    apply_most_popular_edge_color(png, &mut remapping);
+
+    apply_palette_reorder(png, &remapping)
+}
+
 /// Sort the colors in the palette using the battiato technique, returning the sorted image if successful
 #[must_use]
 pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
@@ -252,6 +274,67 @@ fn weighted_edges(matrix: &[Vec<u32>]) -> Vec<(usize, usize)> {
     }
     edges.sort_by(|(_, w1), (_, w2)| w2.cmp(w1));
     edges.into_iter().map(|(e, _)| e).collect()
+}
+
+// Apply a greedy index assignment using the modified version of Zeng's techinque from
+// "A note on Zeng's technique for color reindexing of palette-based images" by Pinho et al
+// https://ieeexplore.ieee.org/document/1261987
+// Based on the C implementation in libwebp
+fn mzeng_reindex(num_colors: usize, edges: Vec<(usize, usize)>, matrix: &[Vec<u32>]) -> Vec<usize> {
+    // Initialize the mapping list with the two best indices.
+    let mut remapping = vec![edges[0].0, edges[0].1];
+
+    // Initialize the sums with the first two remappings and find the best one
+    let mut sums = Vec::new();
+    let mut best_sum_pos = 0;
+    let mut best_sum = (0, 0);
+    for (i, m_row) in matrix.iter().enumerate() {
+        if i == remapping[0] || i == remapping[1] {
+            continue;
+        }
+        let sum = (i, m_row[remapping[0]] + m_row[remapping[1]]);
+        if sum.1 > best_sum.1 {
+            best_sum_pos = sums.len();
+            best_sum = sum;
+        }
+        sums.push(sum);
+    }
+
+    let mut shift = 0;
+    while !sums.is_empty() {
+        let best_index = best_sum.0;
+        // Compute delta to know if we need to prepend or append the best index.
+        let mut delta: isize = 0;
+        let n = (num_colors - sums.len()) as isize;
+        for (i, &index) in remapping.iter().enumerate() {
+            delta += (n - 1 - 2 * i as isize) * matrix[best_index][index] as isize;
+        }
+        if delta > 0 {
+            remapping.insert(0, best_index);
+            shift += 1;
+        } else {
+            remapping.push(best_index);
+        }
+        // Remove best_sum from sums.
+        sums.swap_remove(best_sum_pos);
+        if !sums.is_empty() {
+            // Update all the sums and find the best one.
+            best_sum_pos = 0;
+            best_sum = (0, 0);
+            for (i, sum) in sums.iter_mut().enumerate() {
+                sum.1 += matrix[best_index][sum.0];
+                if sum.1 > best_sum.1 {
+                    best_sum_pos = i;
+                    best_sum = *sum;
+                }
+            }
+        }
+    }
+    // Keep the original best index first
+    remapping.rotate_left(shift);
+
+    // Return the completed remapping
+    remapping
 }
 
 // Calculate an approximate solution of the Traveling Salesman Problem using the algorithm
