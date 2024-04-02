@@ -145,7 +145,7 @@ pub fn sorted_palette_mzeng(png: &PngImage) -> Option<PngImage> {
     let edges = weighted_edges(&matrix);
     let mut remapping = mzeng_reindex(palette.len(), edges, &matrix);
 
-    apply_most_popular_edge_color(png, &mut remapping);
+    apply_most_popular_color(png, &mut remapping);
 
     apply_palette_reorder(png, &remapping)
 }
@@ -167,7 +167,7 @@ pub fn sorted_palette_battiato(png: &PngImage) -> Option<PngImage> {
     let edges = weighted_edges(&matrix);
     let mut remapping = battiato_reindex(palette.len(), edges);
 
-    apply_most_popular_edge_color(png, &mut remapping);
+    apply_most_popular_color(png, &mut remapping);
 
     apply_palette_reorder(png, &remapping)
 }
@@ -222,10 +222,29 @@ fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
         .0
 }
 
-// Put the most popular edge color first, which can help slightly if the filter bytes are 0
-fn apply_most_popular_edge_color(png: &PngImage, remapping: &mut [usize]) {
-    let keep_first = most_popular_edge_color(remapping.len(), png);
-    let first_idx = remapping.iter().position(|&i| i == keep_first).unwrap();
+// Find the most popular color in the image, along with its count
+fn most_popular_color(num_colors: usize, png: &PngImage) -> (usize, u32) {
+    let mut counts = [0u32; 256];
+    for &val in &png.data {
+        counts[val as usize] += 1;
+    }
+    counts
+        .iter()
+        .copied()
+        .take(num_colors)
+        .enumerate()
+        .max_by_key(|&(_, v)| v)
+        .unwrap_or_default()
+}
+
+// Put the most popular color first
+fn apply_most_popular_color(png: &PngImage, remapping: &mut [usize]) {
+    let most_popular = most_popular_color(remapping.len(), png);
+    // If the most popular color is less than 15% of the image, don't use it
+    if most_popular.1 < png.data.len() as u32 * 3 / 20 {
+        return;
+    }
+    let first_idx = remapping.iter().position(|&i| i == most_popular.0).unwrap();
     // If the index is past halfway, reverse the order so as to minimize the change
     if first_idx >= remapping.len() / 2 {
         remapping.reverse();
