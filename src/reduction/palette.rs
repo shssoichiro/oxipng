@@ -319,7 +319,6 @@ fn mzeng_reindex(num_colors: usize, edges: Vec<(usize, usize)>, matrix: &[Vec<u3
         sums.push(sum);
     }
 
-    let mut shift = 0;
     while !sums.is_empty() {
         let best_index = best_sum.0;
         // Compute delta to know if we need to prepend or append the best index.
@@ -330,7 +329,6 @@ fn mzeng_reindex(num_colors: usize, edges: Vec<(usize, usize)>, matrix: &[Vec<u3
         }
         if delta > 0 {
             remapping.insert(0, best_index);
-            shift += 1;
         } else {
             remapping.push(best_index);
         }
@@ -349,8 +347,6 @@ fn mzeng_reindex(num_colors: usize, edges: Vec<(usize, usize)>, matrix: &[Vec<u3
             }
         }
     }
-    // Keep the original best index first
-    remapping.rotate_left(shift);
 
     // Return the completed remapping
     remapping
