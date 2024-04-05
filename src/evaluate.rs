@@ -108,6 +108,12 @@ impl Evaluator {
 
     /// Check if the image is smaller than others
     pub fn try_image(&self, image: Arc<PngImage>) {
+        let description = format!("{}", image.ihdr.color_type);
+        self.try_image_with_description(image, &description);
+    }
+
+    /// Check if the image is smaller than others, with a description for verbose mode
+    pub fn try_image_with_description(&self, image: Arc<PngImage>, description: &str) {
         let nth = self.nth.fetch_add(1, SeqCst);
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
@@ -116,6 +122,7 @@ impl Evaluator {
         let optimize_alpha = self.optimize_alpha;
         let executed = self.executed.clone();
         let best_candidate_size = self.best_candidate_size.clone();
+        let description = description.to_string();
         // sends it off asynchronously for compression,
         // but results will be collected via the message queue
         #[cfg(feature = "parallel")]
@@ -138,9 +145,9 @@ impl Evaluator {
                     let size = idat_data.len() + image.key_chunks_size();
                     best_candidate_size.set_min(size);
                     trace!(
-                        "Eval: {}-bit {:20}  {:8}   {} bytes",
+                        "Eval: {}-bit {:23} {:8}   {} bytes",
                         image.ihdr.bit_depth,
-                        image.ihdr.color_type,
+                        description,
                         filter,
                         size
                     );
@@ -166,9 +173,9 @@ impl Evaluator {
                     }
                 } else if let Err(PngError::DeflatedDataTooLong(size)) = idat_data {
                     trace!(
-                        "Eval: {}-bit {:20}  {:8}  >{} bytes",
+                        "Eval: {}-bit {:23} {:8}  >{} bytes",
                         image.ihdr.bit_depth,
-                        image.ihdr.color_type,
+                        description,
                         filter,
                         size
                     );
