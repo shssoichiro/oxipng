@@ -83,7 +83,7 @@ pub(crate) fn perform_reductions(
         }
         // If either action changed the data then enter this into the evaluator
         if !Arc::ptr_eq(&png, &baseline) {
-            eval.try_image(png.clone());
+            eval.try_image_with_description(png.clone(), "Indexed (luma sort)");
             evaluation_added = true;
         }
     }
@@ -123,7 +123,7 @@ pub(crate) fn perform_reductions(
             // For relatively small differences, enter this into the evaluator
             // Otherwise we're confident enough for it to become the baseline
             if png.data.len() - new.data.len() <= INDEXED_MAX_DIFF {
-                eval.try_image(new.clone());
+                eval.try_image_with_description(new.clone(), "Indexed (luma sort)");
                 evaluation_added = true;
             } else {
                 baseline = new.clone();
@@ -149,7 +149,10 @@ pub(crate) fn perform_reductions(
                 if let ColorType::Indexed { palette } = &reduced.ihdr.color_type {
                     if !palettes.contains(palette) {
                         palettes.push(palette.clone());
-                        eval.try_image(Arc::new(reduced));
+                        eval.try_image_with_description(
+                            Arc::new(reduced),
+                            "Indexed (battiato sort)",
+                        );
                         evaluation_added = true;
                     }
                 }
@@ -162,7 +165,7 @@ pub(crate) fn perform_reductions(
                 if let ColorType::Indexed { palette } = &reduced.ihdr.color_type {
                     if !palettes.contains(palette) {
                         palettes.push(palette.clone());
-                        eval.try_image(Arc::new(reduced));
+                        eval.try_image_with_description(Arc::new(reduced), "Indexed (mzeng sort)");
                         evaluation_added = true;
                     }
                 }
