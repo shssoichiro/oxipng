@@ -449,7 +449,7 @@ fn optimize_raw(
         || png.ihdr.interlaced != image.ihdr.interlaced;
 
     if reduction_occurred {
-        report_format("Reducing image to ", &png);
+        report_format("Transformed image to ", &png);
     }
 
     if opts.idat_recoding || reduction_occurred {
