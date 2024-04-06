@@ -76,6 +76,39 @@ jobs:
               tar -vczf "${ARCHIVE_NAME}.tar.gz" "$ARCHIVE_NAME"/*;;
           esac
 
+      - name: Set up Ubuntu multiarch
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          readonly DISTRO_CODENAME=jammy
+          sudo dpkg --add-architecture arm64
+          sudo sed -i "s/^deb http/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] http/" /etc/apt/sources.list
+          sudo sed -i "s/^deb mirror/deb [arch=$(dpkg-architecture -q DEB_HOST_ARCH)] mirror/" /etc/apt/sources.list
+          for suite in '' '-updates' '-backports' '-security'; do
+            echo "deb [arch=arm64] http://ports.ubuntu.com/ $DISTRO_CODENAME$suite main universe multiverse" | \
+            sudo tee -a /etc/apt/sources.list >/dev/null
+          done
+
+      - name: Install QEMU and AArch64 cross compiler
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get -yq update
+          # libc6 must be present to run executables dynamically linked
+          # against glibc for the target architecture
+          sudo apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
+
+      - name: Install Rust toolchain
+        if: endsWith(matrix.target, '-linux-gnu')
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
+          targets: ${{ matrix.target }}
+
+      - name: Build deb archives
+        if: endsWith(matrix.target, '-linux-gnu')
+        run: |
+          cargo install --locked cargo-deb
+          cargo deb --target "${{ matrix.target }}"
+
       - name: Create release notes
         run: tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > RELEASE_NOTES.txt
 
@@ -87,3 +120,4 @@ jobs:
           files: |
             target/*.zip
             target/*.tar.gz
+            target/${{ matrix.target }}/debian/*.deb
