@@ -96,18 +96,13 @@ jobs:
           # against glibc for the target architecture
           sudo apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
 
-      - name: Install Rust toolchain
-        if: endsWith(matrix.target, '-linux-gnu')
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: nightly
-          targets: ${{ matrix.target }}
-
       - name: Build deb archives
         if: endsWith(matrix.target, '-linux-gnu')
         run: |
+          mkdir -p "target/${{ matrix.target }}/release"
+          mv target/oxipng "target/${{ matrix.target }}/release"
           cargo install --locked cargo-deb
-          cargo deb --target "${{ matrix.target }}"
+          cargo deb --target "${{ matrix.target }}" --no-build --no-strip
 
       - name: Create release notes
         run: tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > RELEASE_NOTES.txt
