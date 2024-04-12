@@ -178,11 +178,14 @@ fn parse_opts_into_struct(
     env_logger::builder()
         .filter_module(module_path!(), log_level)
         .format(|buf, record| {
-            let style = match record.level() {
-                Level::Error | Level::Warn => buf.default_level_style(record.level()),
-                _ => buf.style(), // Leave info, debug and trace unstyled
-            };
-            writeln!(buf, "{}", style.value(record.args()))
+            match record.level() {
+                Level::Error | Level::Warn => {
+                    let style = buf.default_level_style(record.level());
+                    writeln!(buf, "{style}{}{style:#}", record.args())
+                }
+                // Leave info, debug and trace unstyled
+                _ => writeln!(buf, "{}", record.args()),
+            }
         })
         .init();
 
