@@ -1,3 +1,16 @@
+## Version 9.1.0
+
+- [Improvement] Add `--keep display` equivalent to `--strip safe`.
+- [Improvement] Add modified zeng palette sorting method, improving optimization of indexed images.
+- [Improvement] If only one filter is specified, guarantee to only use this one.
+- [Improvement] Evaluate low-depth indexed even if low-depth grayscale was already achieved.
+- [Bugfix] Fix battiato palette sorting method not being used if the input was not already indexed.
+- [Bugfix] Fix rare crash caused by a truncated palette.
+- [Build] Reduce size of binaries.
+- [Build] Add man page generation.
+- [Build] Publish deb archives for Linux.
+- [Misc] Bump minimum Rust version to 1.74.0.
+
 ## Version 9.0.0
 
 - [Breaking] Remove `--backup` option. Use `--out` or `--dir` to preserve existing files.
