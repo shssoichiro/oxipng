@@ -1,4 +1,4 @@
-oxipng 9.0.0
+oxipng 9.1.0
 Losslessly improve compression of PNG files
 
 Usage: oxipng [OPTIONS] <files>...
@@ -13,14 +13,14 @@ Options:
           compression. Lower levels are faster, higher levels provide better compression, though
           with increasingly diminishing returns.
           
-          0   => --zc 5 --fast               (1 trial, determined heuristically)
-          1   => --zc 10 --fast              (1 trial, determined heuristically)
-          2   => --zc 11 -f 0,1,6,7 --fast   (4 fast trials, 1 main trial)
-          3   => --zc 11 -f 0,7,8,9          (4 trials)
-          4   => --zc 12 -f 0,7,8,9          (4 trials)
-          5   => --zc 12 -f 0,1,2,5,6,7,8,9  (8 trials)
-          6   => --zc 12 -f 0-9              (10 trials)
-          max =>                             (stable alias for the max level)
+              0   => --zc 5 --fast               (1 trial, determined heuristically)
+              1   => --zc 10 --fast              (1 trial, determined heuristically)
+              2   => --zc 11 -f 0,1,6,7 --fast   (4 fast trials, 1 main trial)
+              3   => --zc 11 -f 0,7,8,9          (4 trials)
+              4   => --zc 12 -f 0,7,8,9          (4 trials)
+              5   => --zc 12 -f 0,1,2,5,6,7,8,9  (8 trials)
+              6   => --zc 12 -f 0-9              (10 trials)
+              max =>                             (stable alias for the max level)
           
           Manually specifying a compression option (zc, f, etc.) will override the optimization
           preset, regardless of the order you write the arguments.
@@ -54,18 +54,24 @@ Options:
       --strip <mode>
           Strip metadata chunks, where <mode> is one of:
           
-          safe    =>  Strip all non-critical chunks, except for the following:
-                          cICP, iCCP, sRGB, pHYs, acTL, fcTL, fdAT
-          all     =>  Strip all non-critical chunks
-          <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
+              safe    =>  Strip all non-critical chunks, except for the following:
+                              cICP, iCCP, sRGB, pHYs, acTL, fcTL, fdAT
+              all     =>  Strip all non-critical chunks
+              <list>  =>  Strip chunks in the comma-separated list, e.g. 'bKGD,cHRM'
           
           CAUTION: 'all' will convert APNGs to standard PNGs.
           
           Note that 'bKGD', 'sBIT' and 'hIST' will be forcibly stripped if the color type or bit
           depth is changed, regardless of any options set.
+          
+          The default when --strip is not passed is to keep all metadata.
 
       --keep <list>
-          Strip all metadata except in the comma-separated list
+          Strip all metadata chunks except those in the comma-separated list. The special value
+          'display' includes chunks that affect the image appearance, equivalent to '--strip safe'.
+          
+          E.g. '--keep eXIf,display' will strip chunks, keeping only eXIf and those that affect the
+          image appearance.
 
   -a, --alpha
           Perform additional optimization on images with an alpha channel, by altering the color
@@ -76,9 +82,9 @@ Options:
   -i, --interlace <type>
           Set the PNG interlacing type, where <type> is one of:
           
-          0     =>  Remove interlacing from all images that are processed
-          1     =>  Apply Adam7 interlacing on all images that are processed
-          keep  =>  Keep the existing interlacing type of each image
+              0     =>  Remove interlacing from all images that are processed
+              1     =>  Apply Adam7 interlacing on all images that are processed
+              keep  =>  Keep the existing interlacing type of each image
           
           Note that interlacing can add 25-50% to the size of an optimized image. Only use it if you
           believe the benefits outweigh the costs for your use case.
@@ -110,6 +116,7 @@ Options:
               2  =>  Up
               3  =>  Average
               4  =>  Paeth
+          
           Heuristic strategies (try to find the best delta filter for each line)
               5  =>  MinSum    Minimum sum of absolute differences
               6  =>  Entropy   Highest Shannon entropy
