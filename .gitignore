@@ -4,4 +4,3 @@ target
 *.out.png
 /.idea
 /node_modules
-/generated
