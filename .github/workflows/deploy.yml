@@ -95,7 +95,7 @@ jobs:
           cargo deb --target "${{ matrix.target }}" --no-build --no-strip
 
       - name: Create release notes
-        run: tail -n +2 CHANGELOG.md | sed -e '/^$/,$d' > RELEASE_NOTES.txt
+        run: tail -n +3 CHANGELOG.md | sed -e '/^$/,$d' > RELEASE_NOTES.txt
 
       - name: Create release
         uses: softprops/action-gh-release@v2
