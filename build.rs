@@ -24,8 +24,15 @@ fn main() -> Result<(), Error> {
     println!("cargo:rerun-if-changed=src/cli.rs");
     println!("cargo:rerun-if-changed=src/display_chunks.rs");
 
-    // Create `generated/assets/` folder.
-    let path = env::current_dir()?.join("generated").join("assets");
+    // Create `target/generated/assets/` folder.
+    let path = Path::new(
+        env::var("CARGO_MANIFEST_DIR")
+            .expect("CARGO_MANIFEST_DIR not set, build environment is broken")
+            .as_str(),
+    )
+    .join("target")
+    .join("generated")
+    .join("assets");
     std::fs::create_dir_all(&path).unwrap();
 
     build_manpages(&path)?;
