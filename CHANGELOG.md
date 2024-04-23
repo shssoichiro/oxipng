@@ -1,3 +1,7 @@
+## Version 9.1.1
+
+- [Build] Change man page generation path to resolve issue with cargo publish.
+
 ## Version 9.1.0
 
 - [Improvement] Add `--keep display` equivalent to `--strip safe`.
