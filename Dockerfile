@@ -2,7 +2,7 @@ FROM rust:alpine as base
 
 COPY . /src
 
-RUN rustup update 1.64 && rustup default 1.64
+RUN rustup update 1.74 && rustup default 1.74
 
 RUN apk update \
     && apk add \
