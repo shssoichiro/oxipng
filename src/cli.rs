@@ -171,8 +171,9 @@ transformation and may be unsuitable for some applications.")
                 .action(ArgAction::SetTrue),
         )
         .arg(
+            // Note: The default value is not explicitly set here, as it is dependant on the `--nx` flag.
             Arg::new("interlace")
-                .help("Set PNG interlacing type (0, 1, keep)")
+                .help("Set PNG interlacing type (0, 1, keep) [default: 0]")
                 .long_help("\
 Set the PNG interlacing type, where <type> is one of:
 
@@ -181,11 +182,12 @@ Set the PNG interlacing type, where <type> is one of:
     keep  =>  Keep the existing interlacing type of each image
 
 Note that interlacing can add 25-50% to the size of an optimized image. Only use it if you \
-believe the benefits outweigh the costs for your use case.")
+believe the benefits outweigh the costs for your use case.
+
+[default: 0]")
                 .short('i')
                 .long("interlace")
                 .value_name("type")
-                .default_value("0")
                 .value_parser(["0", "1", "keep"])
                 .hide_possible_values(true),
         )
