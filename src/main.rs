@@ -157,7 +157,8 @@ fn collect_files(
 fn apply_glob_pattern(path: PathBuf) -> Vec<PathBuf> {
     let matches = path
         .to_str()
-        .and_then(|pattern| glob::glob(pattern).ok())
+        // Use MatchOptions::default() to disable case-sensitivity
+        .and_then(|pattern| glob::glob_with(pattern, glob::MatchOptions::default()).ok())
         .map(|paths| paths.flatten().collect::<Vec<_>>());
 
     match matches {
