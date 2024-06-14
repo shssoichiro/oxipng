@@ -52,7 +52,7 @@ for filepath in "$@"; do
 	
 	# no -a here 'cause this is technically an editing file to fully-transparent pixel colours could have meaning
 	#shellcheck disable=SC2086
-	find "${temp_dir}" -iname '*.png' -print0 | xargs -0 oxipng ${FLAGS} -somax;
+	find "${temp_dir}" -iname '*.png' -print0 | xargs -0 oxipng ${FLAGS} -omax;
 	
 	filepath_target="${filepath%.*}-small.${filepath##*.}";
 	filepath_target="$(realpath "${filepath_target}")";
