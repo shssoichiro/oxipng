@@ -186,9 +186,11 @@ impl PngData {
         // Ancillary chunks - split into those that come before IDAT and those that come after
         let mut aux_split = self.aux_chunks.split(|c| &c.name == b"IDAT");
         let aux_pre = aux_split.next().unwrap();
+        // Many chunks need to be before PLTE, so write all except those that explicitly need to be after
+        // Note: fcTL does not strictly need to be after PLTE but some software may expect it
         for chunk in aux_pre
             .iter()
-            .filter(|c| !(&c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS"))
+            .filter(|c| !matches!(&c.name, b"bKGD" | b"hIST" | b"tRNS" | b"fcTL"))
         {
             write_png_block(&chunk.name, &chunk.data, &mut output);
         }
@@ -223,7 +225,7 @@ impl PngData {
         // Special ancillary chunks that need to come after PLTE but before IDAT
         for chunk in aux_pre
             .iter()
-            .filter(|c| &c.name == b"bKGD" || &c.name == b"hIST" || &c.name == b"tRNS")
+            .filter(|c| matches!(&c.name, b"bKGD" | b"hIST" | b"tRNS" | b"fcTL"))
         {
             write_png_block(&chunk.name, &chunk.data, &mut output);
         }
