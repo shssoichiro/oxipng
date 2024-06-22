@@ -187,7 +187,8 @@ impl PngData {
         let mut aux_split = self.aux_chunks.split(|c| &c.name == b"IDAT");
         let aux_pre = aux_split.next().unwrap();
         // Many chunks need to be before PLTE, so write all except those that explicitly need to be after
-        // Note: fcTL does not strictly need to be after PLTE but some software may expect it
+        // Note: the PNG spec does not say that fcTL needs to be after PLTE, but some decoders expect
+        //       that (see issue #625)
         for chunk in aux_pre
             .iter()
             .filter(|c| !matches!(&c.name, b"bKGD" | b"hIST" | b"tRNS" | b"fcTL"))
