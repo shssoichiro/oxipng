@@ -24,14 +24,14 @@ Oxipng is known to be packaged for the environments listed below.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/oxipng.svg?exclude_unsupported=1&columns=3&exclude_sources=modules,site)](https://repology.org/project/oxipng/versions)
 
-Alternatively, oxipng can be installed from Cargo, via the following command:
+Alternatively, Oxipng can be installed from Cargo, via the following command:
 
 ```
 cargo install oxipng
 ```
 
 Oxipng can also be built from source using the latest stable or nightly Rust.
-This is primarily useful for developing on oxipng.
+This is primarily useful for developing on Oxipng.
 
 ```
 git clone https://github.com/shssoichiro/oxipng.git
@@ -95,9 +95,9 @@ repos:
 
 ## Git integration via [Trunk]
 
-[Trunk] is an extendable superlinter which can be used to run `oxipng` to automatically optimize `png`s when committing them into a git repo, or to gate any `png`s being added to a git repo on whether they are optimized. The [trunk] oxipng integration is [here](https://github.com/trunk-io/plugins/tree/main/linters/oxipng).
+[Trunk] is an extendable superlinter which can be used to run `oxipng` to automatically optimize `png`s when committing them into a git repo, or to gate any `png`s being added to a git repo on whether they are optimized. The [trunk] Oxipng integration is [here](https://github.com/trunk-io/plugins/tree/main/linters/oxipng).
 
-To enable oxipng via [trunk]:
+To enable Oxipng via [trunk]:
 
 ```bash
 # to get the latest version:
@@ -145,8 +145,8 @@ docker run --rm -v $(pwd):/work ghcr.io/shssoichiro/oxipng -o 4 /work/file.png
 
 ## Library Usage
 
-Although originally intended to be used as an executable, oxipng can also be used as a library in
-other Rust projects. To do so, simply add oxipng as a dependency in your Cargo.toml,
+Although originally intended to be used as an executable, Oxipng can also be used as a library in
+other Rust projects. To do so, simply add Oxipng as a dependency in your Cargo.toml,
 then `extern crate oxipng` in your project. You should then have access to all of the library
 functions [documented here](https://docs.rs/oxipng). The simplest
 method of usage involves creating an
@@ -154,7 +154,7 @@ method of usage involves creating an
 passing it, along with an input filename, into the
 [optimize function](https://docs.rs/oxipng/latest/oxipng/fn.optimize.html).
 
-It is recommended to disable the "binary" feature when including oxipng as a library. Currently, there is
+It is recommended to disable the "binary" feature when including Oxipng as a library. Currently, there is
 no simple way to just disable one feature in Cargo, it has to be done by disabling default features
 and specifying the desired ones, for example:
 `oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
@@ -187,7 +187,7 @@ Oxipng is open-source software, distributed under the MIT license.
 
 ## Benchmarks
 
-Tested OxiPNG 9.0.0 (commit `c16519b38b0519988db625913be919d4f0e42f5d`, compiled
+Tested Oxipng 9.0.0 (commit `c16519b38b0519988db625913be919d4f0e42f5d`, compiled
 on `rustc 1.74.0-nightly (7b4d9e155 2023-09-28)`) against OptiPNG version 0.7.7,
 as packaged by Debian unstable, on a Linux 6.5.0-2-amd64 kernel, Intel Core
 i7-12700 CPU (8 performance cores, 4 efficiency cores, 20 threads), DDR5-5200
@@ -224,7 +224,7 @@ Summary
 <details>
 <summary>Older benchmark</summary>
 
-Tested oxipng 5.0.0 (compiled on rustc 1.55.0-nightly (7a16cfcff 2021-07-11)) against OptiPNG version 0.7.7 on AMD Ryzen 7 4800H with Radeon Graphics with 16 logical cores
+Tested Oxipng 5.0.0 (compiled on rustc 1.55.0-nightly (7a16cfcff 2021-07-11)) against OptiPNG version 0.7.7 on AMD Ryzen 7 4800H with Radeon Graphics with 16 logical cores
 
 ```
 
