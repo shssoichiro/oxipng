@@ -165,7 +165,7 @@ fn verbose_mode() {
         );
     };
 
-    #[cfg(feature = "rayon")]
+    #[cfg(feature = "parallel")]
     rayon::ThreadPoolBuilder::new()
         .start_handler(move |_| thread_init())
         .num_threads(rayon::current_num_threads() + 1)
@@ -173,7 +173,7 @@ fn verbose_mode() {
         .unwrap()
         .install(move || rayon::spawn(thread_exec));
 
-    #[cfg(not(feature = "rayon"))]
+    #[cfg(not(feature = "parallel"))]
     std::thread::spawn(move || {
         thread_init();
         thread_exec();
