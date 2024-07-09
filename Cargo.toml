@@ -37,7 +37,7 @@ required-features = ["zopfli"]
 
 [dependencies]
 zopfli = { version = "0.8.0", optional = true, default-features = false, features = ["std", "zlib"] }
-rgb = "0.8.37"
+rgb = "0.8.43"
 indexmap = "2.2.6"
 libdeflater = "1.20.0"
 log = "0.4.21"
