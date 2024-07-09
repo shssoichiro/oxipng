@@ -83,11 +83,13 @@ clap_mangen = "0.2.20"
 rustc_version = "0.4.0"
 
 [features]
-binary = ["clap", "glob", "env_logger"]
-default = ["binary", "filetime", "parallel", "zopfli"]
-parallel = ["rayon", "indexmap/rayon", "crossbeam-channel"]
+binary = ["dep:clap", "dep:glob", "dep:env_logger"]
+default = ["binary", "parallel", "zopfli", "filetime"]
+parallel = ["dep:rayon", "indexmap/rayon", "dep:crossbeam-channel"]
 freestanding = ["libdeflater/freestanding"]
-sanity-checks = ["image"]
+sanity-checks = ["dep:image"]
+zopfli = ["dep:zopfli"]
+filetime = ["dep:filetime"]
 
 [lib]
 name = "oxipng"
