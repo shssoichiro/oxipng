@@ -2,6 +2,9 @@ use image::{codecs::png::PngDecoder, *};
 use log::{error, warn};
 use std::io::Cursor;
 
+#[cfg(not(feature = "parallel"))]
+use crate::rayon;
+
 /// Validate that the output png data still matches the original image
 pub fn validate_output(output: &[u8], original_data: &[u8]) -> bool {
     let (old_frames, new_frames) = rayon::join(
