@@ -329,10 +329,10 @@ fn parse_opts_into_struct(
         if let Some(iterations) = NonZeroU8::new(15) {
             opts.deflate = Deflaters::Zopfli { iterations };
         }
-    } else if let Deflaters::Libdeflater { compression } = &mut opts.deflate {
-        if let Some(x) = matches.get_one::<i64>("compression") {
-            *compression = *x as u8;
-        }
+    } else if let (Deflaters::Libdeflater { compression }, Some(x)) =
+        (&mut opts.deflate, matches.get_one::<i64>("compression"))
+    {
+        *compression = *x as u8;
     }
 
     #[cfg(feature = "parallel")]

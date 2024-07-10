@@ -102,25 +102,33 @@ jobs:
       - name: Install nextest
         uses: taiki-e/install-action@nextest
 
+      - name: Install cargo-hack
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: taiki-e/install-action@cargo-hack
+
+      - name: Install clippy-sarif
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: clippy-sarif
+
+      - name: Install sarif-fmt
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: sarif-fmt
+
       - name: Run rustfmt
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: cargo fmt --check
 
-      - name: Run Clippy (no default features)
+      - name: Run Clippy for all feature combinations
         if: matrix.target == 'x86_64-unknown-linux-gnu'
-        uses: giraffate/clippy-action@v1
-        with:
-          clippy_flags: --no-deps --all-targets --no-default-features -- -D warnings
-          reporter: github-check
-          fail_on_error: true
-
-      - name: Run Clippy (all features)
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
-        uses: giraffate/clippy-action@v1
-        with:
-          clippy_flags: --no-deps --all-targets --all-features -- -D warnings
-          reporter: github-check
-          fail_on_error: true
+        run: >
+          cargo hack clippy --no-deps --all-targets --feature-powerset --exclude-features sanity-checks --message-format=json -- -D warnings
+          | clippy-sarif
+          | tee clippy-results.sarif
+          | sarif-fmt
 
       - name: Run tests
         run: |
@@ -144,6 +152,13 @@ jobs:
           path: |
             target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng
             target/${{ env.CARGO_BUILD_TARGET }}/release/oxipng.exe
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && matrix.target == 'x86_64-unknown-linux-gnu'
+        with:
+          sarif_file: clippy-results.sarif
+          category: clippy
 
   msrv-check:
     name: MSRV check
