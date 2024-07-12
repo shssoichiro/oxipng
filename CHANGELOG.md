@@ -1,3 +1,11 @@
+## Version 9.1.2
+
+- [Bugfix] Fix `--nx` still applying deinterlacing by default.
+- [Bugfix] Fix wildcard matching being case-sensitive on Windows.
+- [Bugfix] Fix optimized APNGs not being compatible with some programs.
+- [Build] Fix feature `sanity-checks` not working without `parallel`.
+- [Misc] Resolve ambiguity between optional dependencies and crate features.
+
 ## Version 9.1.1
 
 - [Build] Change man page generation path to resolve issue with cargo publish.
