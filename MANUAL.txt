@@ -1,4 +1,4 @@
-oxipng 9.1.1
+oxipng 9.1.2
 Losslessly improve compression of PNG files
 
 Usage: oxipng [OPTIONS] <files>...
