@@ -51,7 +51,7 @@ The most commonly used options are as follows:
 
 - Optimization: `-o 0` through `-o 6` (or `-o max`), lower is faster, higher is better compression.
   The default (`-o 2`) is quite fast and provides good compression. Higher levels can be notably
-  better but generally have increasingly diminishing returns.
+  better* but generally have increasingly diminishing returns.
 - Strip: Used to remove metadata info from processed images. Used via `--strip [safe,all]`.
   Can save a few kilobytes if you don't need the metadata. "Safe" removes only metadata that
   will never affect rendering of the image. "All" removes all metadata that is not critical
@@ -66,7 +66,12 @@ More advanced options can be found by running `oxipng --help`, or viewed [here](
 Some options have both short (`-a`) and long (`--alpha`) forms. Which form you use is just a
 matter of preference. Multiple short options can be combined together, e.g.:
 `-savvo6` is equivalent to to `--strip safe --alpha --verbose --verbose --opt 6`.
-Note that all options are case-sensitive.
+All options are case-sensitive.
+
+\* Note that oxipng is not a brute-force optimizer. This means that while higher optimization levels
+are almost always better or equal to lower levels, this is not guaranteed and it is possible in
+rare circumstances that a lower level may give a marginally smaller output. Similarly, using Zopfli
+compression (`-Z`) is not guaranteed to always be better than without.
 
 ## Git integration via [pre-commit]
 
