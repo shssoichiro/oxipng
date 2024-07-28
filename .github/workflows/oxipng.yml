@@ -125,6 +125,7 @@ jobs:
       - name: Run Clippy for all feature combinations
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: >
+          set -o pipefail;
           cargo hack clippy --no-deps --all-targets --feature-powerset --exclude-features sanity-checks --message-format=json -- -D warnings
           | clippy-sarif
           | tee clippy-results.sarif
