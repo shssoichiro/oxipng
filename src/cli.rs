@@ -338,6 +338,17 @@ Recommended use is with '-o max' and '--fast'.")
                 .action(ArgAction::SetTrue),
         )
         .arg(
+            Arg::new("iterations")
+                .help("Number of Zopfli iterations")
+                .long_help("\
+Set the number of iterations to use for Zopfli compression. Using fewer iterations may \
+speed up compression for large files. This option requires '--zopfli' to be set.")
+                .long("zi")
+                .default_value("15")
+                .value_parser(1..=255)
+                .requires("zopfli"),
+        )
+        .arg(
             Arg::new("timeout")
                 .help("Maximum amount of time to spend on optimizations")
                 .long_help("\
