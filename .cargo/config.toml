@@ -16,4 +16,9 @@ linker = "aarch64-linux-musl-gcc"
 # user-visible impacts on the final executables. See:
 # https://github.com/rust-lang/rust/issues/46651
 # https://github.com/rust-lang/compiler-builtins/issues/201
+# https://github.com/rust-lang/rust/issues/128401 (the issue most relevant to
+# our observed failures)
+# Note that these flags are not enforced on CI because CI overrides them through
+# the RUSTFLAG environment variable. Check out the CI workflow definition file at
+# .github/workflows/oxipng.yml for more info
 rustflags = ["-Clink-args=-lgcc"]

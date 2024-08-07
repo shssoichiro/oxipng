@@ -55,7 +55,9 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
-      RUSTFLAGS: -Zlocation-detail=none
+      # Hopefully temporary workaround for https://github.com/rust-lang/rust/issues/128401
+      # See the comments for similar rustflag settings at .cargo/config.toml for more context
+      RUSTFLAGS: ${{ matrix.target == 'aarch64-unknown-linux-musl' && '-Zlocation-detail=none -Clink-args=-lgcc' || '-Zlocation-detail=none' }}
 
     steps:
       - name: Checkout source
