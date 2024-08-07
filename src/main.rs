@@ -324,12 +324,14 @@ fn parse_opts_into_struct(
         opts.strip = StripChunks::Safe;
     }
 
+    #[cfg(feature = "zopfli")]
     if matches.get_flag("zopfli") {
-        #[cfg(feature = "zopfli")]
-        if let Some(iterations) = NonZeroU8::new(15) {
-            opts.deflate = Deflaters::Zopfli { iterations };
-        }
-    } else if let (Deflaters::Libdeflater { compression }, Some(x)) =
+        let iterations = *matches.get_one::<i64>("iterations").unwrap();
+        opts.deflate = Deflaters::Zopfli {
+            iterations: NonZeroU8::new(iterations as u8).unwrap(),
+        };
+    }
+    if let (Deflaters::Libdeflater { compression }, Some(x)) =
         (&mut opts.deflate, matches.get_one::<i64>("compression"))
     {
         *compression = *x as u8;
