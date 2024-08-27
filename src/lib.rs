@@ -413,7 +413,7 @@ fn optimize_raw(
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
 ) -> Option<PngData> {
-    // Libdeflate has four algorithms: 1-4 = 'greedy', 5-7 = 'lazy', 8-9 = 'lazy2', 10-12 = 'near-optimal'
+    // Libdeflate has four algorithms: 0 = 'uncompressed', 1-4 = 'greedy', 5-7 = 'lazy', 8-9 = 'lazy2', 10-12 = 'near-optimal'
     // 5 is the minimumm required for a decent evaluation result
     // 7 is not noticeably slower than 5 and improves evaluation of filters in 'fast' mode (o2 and lower)
     // 8 is a little slower but not noticeably when used only for reductions (o3 and higher)

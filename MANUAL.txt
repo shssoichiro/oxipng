@@ -132,7 +132,7 @@ Options:
           CPU cores.
 
       --zc <level>
-          Deflate compression level (1-12) for main compression trials. The levels here are defined
+          Deflate compression level (0-12) for main compression trials. The levels here are defined
           by the libdeflate compression library.
           
           The default value depends on the optimization level preset.
