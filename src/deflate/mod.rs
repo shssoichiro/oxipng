@@ -16,7 +16,7 @@ pub use zopfli_oxipng::deflate as zopfli_deflate;
 pub enum Deflaters {
     /// Use libdeflater.
     Libdeflater {
-        /// Which compression level to use on the file (1-12)
+        /// Which compression level to use on the file (0-12)
         compression: u8,
     },
     #[cfg(feature = "zopfli")]

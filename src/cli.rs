@@ -259,15 +259,15 @@ CPU cores.")
         )
         .arg(
             Arg::new("compression")
-                .help("Deflate compression level (1-12)")
+                .help("Deflate compression level (0-12)")
                 .long_help("\
-Deflate compression level (1-12) for main compression trials. The levels here are defined \
+Deflate compression level (0-12) for main compression trials. The levels here are defined \
 by the libdeflate compression library.
 
 The default value depends on the optimization level preset.")
                 .long("zc")
                 .value_name("level")
-                .value_parser(1..=12)
+                .value_parser(0..=12)
                 .conflicts_with("zopfli"),
         )
         .arg(
