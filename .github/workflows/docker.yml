@@ -62,6 +62,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           labels: |
             org.opencontainers.image.title=Oxipng
+          annotations: |
+            org.opencontainers.image.title=Oxipng
 
       # Build and push Docker image with Buildx (don't push on PR)
       # Cache isn't used for tags and on workflow_dispatch if specified
