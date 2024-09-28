@@ -1,6 +1,7 @@
+use std::io::Cursor;
+
 use image::{codecs::png::PngDecoder, *};
 use log::{error, warn};
-use std::io::Cursor;
 
 #[cfg(not(feature = "parallel"))]
 use crate::rayon;
