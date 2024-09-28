@@ -1,0 +1,4 @@
+scripts
+.github
+.editorconfig
+.pre-commit-hooks.yaml
