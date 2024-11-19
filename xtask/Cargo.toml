@@ -1,0 +1,9 @@
+[package]
+name = "xtask"
+description = "xtasks for the Oxipng project: https://github.com/matklad/cargo-xtask"
+edition = "2021"
+publish = false
+
+[dependencies]
+clap = "4.5.21"
+clap_mangen = "0.2.24"

@@ -90,7 +90,7 @@ jobs:
         run: |
           mkdir -p "target/${{ matrix.target }}/release"
           mv target/oxipng "target/${{ matrix.target }}/release"
-          mv target/debug/assets "target/${{ matrix.target }}/release"
+          mv target/xtask/mangen/manpages "target/${{ matrix.target }}/release"
           cargo install --locked cargo-deb
           cargo deb --target "${{ matrix.target }}" --no-build --no-strip
 

@@ -13,6 +13,7 @@ exclude = [
   "Dockerfile",
   "scripts/*",
   "tests/*",
+  "xtask/*",
 ]
 homepage = "https://github.com/shssoichiro/oxipng"
 license = "MIT"
@@ -77,10 +78,6 @@ default-features = false
 features = ["png"]
 version = "0.25.5"
 
-[build-dependencies]
-clap = "4.5.21"
-clap_mangen = "0.2.24"
-
 [features]
 binary = ["dep:clap", "dep:glob", "dep:env_logger"]
 default = ["binary", "parallel", "zopfli", "filetime"]
@@ -105,7 +102,7 @@ panic = "abort"
 [package.metadata.deb]
 assets = [
     ["target/release/oxipng", "usr/bin/", "755"],
-    ["target/release/assets/oxipng.1", "usr/share/man/man1/", "644"],
+    ["target/release/manpages/oxipng.1", "usr/share/man/man1/", "644"],
     ["README.md", "usr/share/doc/oxipng/", "644"],
     ["CHANGELOG.md", "usr/share/doc/oxipng/", "644"],
 ]
