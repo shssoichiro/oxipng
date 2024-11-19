@@ -12,10 +12,15 @@ interface or as a library in other Rust programs.
 
 ## Installing
 
-Oxipng for Windows can be downloaded from the [Releases](https://github.com/shssoichiro/oxipng/releases) link on the GitHub page.
+Oxipng for Windows can be downloaded via the
+[Releases](https://github.com/shssoichiro/oxipng/releases) section on its GitHub page. Recently,
+however, Oxipng has also been made available through package managers. Check the list below for
+up-to-date options.
 
-For MacOS or Linux, it is recommended to install from your distro's package
-repository, if possible. Oxipng is known to be packaged for the environments listed below.
+For MacOS or Linux, it is recommended to install from your distro's package repository, provided
+Oxipng is available there in a not too outdated version for your use case.
+
+Oxipng is known to be packaged for the environments listed below.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/oxipng.svg?exclude_unsupported=1&columns=3&exclude_sources=modules,site)](https://repology.org/project/oxipng/versions)
 
@@ -25,7 +30,7 @@ Alternatively, oxipng can be installed from Cargo, via the following command:
 cargo install oxipng
 ```
 
-Oxipng can be built from source using the latest stable or nightly Rust.
+Oxipng can also be built from source using the latest stable or nightly Rust.
 This is primarily useful for developing on oxipng.
 
 ```
