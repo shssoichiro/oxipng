@@ -107,7 +107,7 @@ fn collect_files(
     let mut in_out_pairs = Vec::new();
     let allow_stdin = top_level && files.len() == 1;
     for input in files {
-        let using_stdin = allow_stdin && input.to_str().map_or(false, |p| p == "-");
+        let using_stdin = allow_stdin && input.to_str() == Some("-");
         if !using_stdin && input.is_dir() {
             if recursive {
                 match input.read_dir() {
