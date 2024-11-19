@@ -36,27 +36,27 @@ name = "zopfli"
 required-features = ["zopfli"]
 
 [dependencies]
-zopfli = { version = "0.8.0", optional = true, default-features = false, features = ["std", "zlib"] }
-rgb = "0.8.43"
-indexmap = "2.2.6"
-libdeflater = "1.20.0"
-log = "0.4.21"
+zopfli = { version = "0.8.1", optional = true, default-features = false, features = ["std", "zlib"] }
+rgb = "0.8.50"
+indexmap = "2.6.0"
+libdeflater = "1.22.0"
+log = "0.4.22"
 bitvec = "1.0.1"
-rustc-hash = "1.1.0"
+rustc-hash = "2.0.0"
 
 [dependencies.env_logger]
 optional = true
 default-features = false
 features = ["auto-color"]
-version = "0.11.3"
+version = "0.11.5"
 
 [dependencies.crossbeam-channel]
 optional = true
-version = "0.5.12"
+version = "0.5.13"
 
 [dependencies.filetime]
 optional = true
-version = "0.2.23"
+version = "0.2.25"
 
 [dependencies.rayon]
 optional = true
@@ -64,7 +64,7 @@ version = "1.10.0"
 
 [dependencies.clap]
 optional = true
-version = "4.5.4"
+version = "4.5.21"
 features = ["wrap_help"]
 
 [target.'cfg(windows)'.dependencies.glob]
@@ -75,11 +75,11 @@ version = "0.3.1"
 optional = true
 default-features = false
 features = ["png"]
-version = "0.25.1"
+version = "0.25.5"
 
 [build-dependencies]
-clap = "4.5.4"
-clap_mangen = "0.2.20"
+clap = "4.5.21"
+clap_mangen = "0.2.24"
 
 [features]
 binary = ["dep:clap", "dep:glob", "dep:env_logger"]
