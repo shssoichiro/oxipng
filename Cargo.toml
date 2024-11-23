@@ -102,7 +102,7 @@ panic = "abort"
 [package.metadata.deb]
 assets = [
     ["target/release/oxipng", "usr/bin/", "755"],
-    ["target/release/manpages/oxipng.1", "usr/share/man/man1/", "644"],
+    ["target/xtask/mangen/manpages/oxipng.1", "usr/share/man/man1/", "644"],
     ["README.md", "usr/share/doc/oxipng/", "644"],
     ["CHANGELOG.md", "usr/share/doc/oxipng/", "644"],
 ]
