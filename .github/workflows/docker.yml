@@ -19,7 +19,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # ghrc.io/OWNER/REPO
+  # ghcr.io/OWNER/REPO
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
