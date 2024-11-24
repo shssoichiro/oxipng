@@ -1,3 +1,6 @@
+[alias]
+xtask = "run --manifest-path xtask/Cargo.toml --"
+
 [target.'cfg(all(target_os = "linux", target_arch = "aarch64"))']
 runner = "qemu-aarch64" # May need to remove this if targeting AArch64 from an AArch64 Linux box
 
