@@ -133,6 +133,16 @@ trunk actions enable trunk-fmt-pre-commit
 
 [trunk]: https://docs.trunk.io
 
+## Docker
+
+A Docker image is availlable at `ghcr.io/shssoichiro/oxipng` for `linux/amd64` and `linux/arm64`.
+
+You can use it the following way:
+
+```bash
+docker run --rm -v $(pwd):/work ghcr.io/shssoichiro/oxipng -o 4 /work/file.png
+```
+
 ## Library Usage
 
 Although originally intended to be used as an executable, oxipng can also be used as a library in
