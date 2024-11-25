@@ -106,13 +106,11 @@ docker run --rm -v $(pwd):/work ghcr.io/shssoichiro/oxipng -o 4 /work/file.png
 ## Library Usage
 
 Although originally intended to be used as an executable, Oxipng can also be used as a library in
-other Rust projects. To do so, simply add Oxipng as a dependency in your Cargo.toml,
-then `extern crate oxipng` in your project. You should then have access to all of the library
-functions [documented here](https://docs.rs/oxipng). The simplest
-method of usage involves creating an
-[Options struct](https://docs.rs/oxipng/latest/oxipng/struct.Options.html) and
-passing it, along with an input filename, into the
-[optimize function](https://docs.rs/oxipng/latest/oxipng/fn.optimize.html).
+other Rust projects. To do so, simply add Oxipng as a dependency in your Cargo.toml. You should then
+have access to all of the library functions [documented here](https://docs.rs/oxipng). The simplest
+method of usage involves creating an [Options
+struct](https://docs.rs/oxipng/latest/oxipng/struct.Options.html) and passing it, along with an
+input filename, into the [optimize function](https://docs.rs/oxipng/latest/oxipng/fn.optimize.html).
 
 It is recommended to disable the "binary" feature when including Oxipng as a library. Currently, there is
 no simple way to just disable one feature in Cargo, it has to be done by disabling default features
