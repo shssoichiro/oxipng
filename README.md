@@ -93,46 +93,6 @@ repos:
 ```
 [pre-commit]: https://pre-commit.com/
 
-## Git integration via [Trunk]
-
-[Trunk] is an extendable superlinter which can be used to run `oxipng` to automatically optimize `png`s when committing them into a git repo, or to gate any `png`s being added to a git repo on whether they are optimized. The [trunk] Oxipng integration is [here](https://github.com/trunk-io/plugins/tree/main/linters/oxipng).
-
-To enable Oxipng via [trunk]:
-
-```bash
-# to get the latest version:
-trunk check enable oxipng
-
-# to get a specific version:
-trunk check enable oxipng@9.0.0
-```
-
-or modify `.trunk/trunk.yaml` in your repo to contain:
-
-```
-lint:
-  enabled:
-    - oxipng@9.0.0
-```
-
-Then just run:
-
-```bash
-# to optimize a png:
-trunk fmt <file>
-
-# to check if a png is already optimized:
-trunk check <file>
-```
-
-You can setup [trunk] to [manage your git hooks](https://docs.trunk.io/docs/actions-git-hooks) and automatically optimize any `png`s you commit to git, _when_ you `git commit`. To enable this, run:
-
-```bash
-trunk actions enable trunk-fmt-pre-commit
-```
-
-[trunk]: https://docs.trunk.io
-
 ## Docker
 
 A Docker image is availlable at `ghcr.io/shssoichiro/oxipng` for `linux/amd64` and `linux/arm64`.
@@ -158,6 +118,16 @@ It is recommended to disable the "binary" feature when including Oxipng as a lib
 no simple way to just disable one feature in Cargo, it has to be done by disabling default features
 and specifying the desired ones, for example:
 `oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }`
+
+## Software using Oxipng
+
+- [ImageOptim](https://imageoptim.com): Mac app and web service for optimizing images
+- [Squoosh](https://squoosh.app): Web app for optimizing images
+- [FileOptimizer](https://nikkhokkho.sourceforge.io/?page=FileOptimizer): Windows app for optimizing files
+- [Curtial](https://github.com/Huluti/Curtail): Linux app for optimizing images
+- [pyoxipng](https://pypi.org/project/pyoxipng/): Python wrapper for Oxipng
+- [jSquash](https://github.com/jamsinclair/jSquash): Collection of WebAssembly image codecs
+- [Trunk](https://trunk.io): Developer experience toolkit for managing code
 
 ## History
 
@@ -220,39 +190,3 @@ Summary
     5.01 ± 0.25 times faster than optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
 ```
-
-<details>
-<summary>Older benchmark</summary>
-
-Tested Oxipng 5.0.0 (compiled on rustc 1.55.0-nightly (7a16cfcff 2021-07-11)) against OptiPNG version 0.7.7 on AMD Ryzen 7 4800H with Radeon Graphics with 16 logical cores
-
-```
-
-Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     128.8 ms ±  14.2 ms    [User: 296.0 ms, System: 14.3 ms]
-  Range (min … max):    98.8 ms … 152.3 ms    21 runs
-
-Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     254.2 ms ±  16.0 ms    [User: 252.8 ms, System: 1.2 ms]
-  Range (min … max):   208.4 ms … 263.8 ms    14 runs
-
-Summary
-  './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    1.97 ± 0.25 times faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
-
-
-
-Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     141.4 ms ±  14.9 ms    [User: 611.7 ms, System: 21.1 ms]
-  Range (min … max):   100.2 ms … 160.4 ms    23 runs
-
-Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     730.0 ms ±  25.9 ms    [User: 728.0 ms, System: 1.2 ms]
-  Range (min … max):   713.3 ms … 768.2 ms    10 runs
-
-Summary
-  './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    5.16 ± 0.58 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
-
-```
-</details>
