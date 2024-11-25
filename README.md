@@ -93,46 +93,6 @@ repos:
 ```
 [pre-commit]: https://pre-commit.com/
 
-## Git integration via [Trunk]
-
-[Trunk] is an extendable superlinter which can be used to run `oxipng` to automatically optimize `png`s when committing them into a git repo, or to gate any `png`s being added to a git repo on whether they are optimized. The [trunk] Oxipng integration is [here](https://github.com/trunk-io/plugins/tree/main/linters/oxipng).
-
-To enable Oxipng via [trunk]:
-
-```bash
-# to get the latest version:
-trunk check enable oxipng
-
-# to get a specific version:
-trunk check enable oxipng@9.0.0
-```
-
-or modify `.trunk/trunk.yaml` in your repo to contain:
-
-```
-lint:
-  enabled:
-    - oxipng@9.0.0
-```
-
-Then just run:
-
-```bash
-# to optimize a png:
-trunk fmt <file>
-
-# to check if a png is already optimized:
-trunk check <file>
-```
-
-You can setup [trunk] to [manage your git hooks](https://docs.trunk.io/docs/actions-git-hooks) and automatically optimize any `png`s you commit to git, _when_ you `git commit`. To enable this, run:
-
-```bash
-trunk actions enable trunk-fmt-pre-commit
-```
-
-[trunk]: https://docs.trunk.io
-
 ## Docker
 
 A Docker image is availlable at `ghcr.io/shssoichiro/oxipng` for `linux/amd64` and `linux/arm64`.
