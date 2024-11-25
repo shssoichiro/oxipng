@@ -190,39 +190,3 @@ Summary
     5.01 ± 0.25 times faster than optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
 
 ```
-
-<details>
-<summary>Older benchmark</summary>
-
-Tested Oxipng 5.0.0 (compiled on rustc 1.55.0-nightly (7a16cfcff 2021-07-11)) against OptiPNG version 0.7.7 on AMD Ryzen 7 4800H with Radeon Graphics with 16 logical cores
-
-```
-
-Benchmark #1: ./target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     128.8 ms ±  14.2 ms    [User: 296.0 ms, System: 14.3 ms]
-  Range (min … max):    98.8 ms … 152.3 ms    21 runs
-
-Benchmark #2: optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     254.2 ms ±  16.0 ms    [User: 252.8 ms, System: 1.2 ms]
-  Range (min … max):   208.4 ms … 263.8 ms    14 runs
-
-Summary
-  './target/release/oxipng -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    1.97 ± 0.25 times faster than 'optipng -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
-
-
-
-Benchmark #1: ./target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     141.4 ms ±  14.9 ms    [User: 611.7 ms, System: 21.1 ms]
-  Range (min … max):   100.2 ms … 160.4 ms    23 runs
-
-Benchmark #2: optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png
-  Time (mean ± σ):     730.0 ms ±  25.9 ms    [User: 728.0 ms, System: 1.2 ms]
-  Range (min … max):   713.3 ms … 768.2 ms    10 runs
-
-Summary
-  './target/release/oxipng -o4 -P ./tests/files/rgb_16_should_be_grayscale_8.png' ran
-    5.16 ± 0.58 times faster than 'optipng -o 4 -simulate ./tests/files/rgb_16_should_be_grayscale_8.png'
-
-```
-</details>
