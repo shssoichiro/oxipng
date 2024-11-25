@@ -49,7 +49,7 @@ jobs:
           - target: i686-pc-windows-msvc
             os: windows-latest
           - target: x86_64-apple-darwin
-            os: macos-12
+            os: macos-13 # x86_64 runner
           - target: aarch64-apple-darwin
             os: macos-14 # ARM64 runner
 
