@@ -1,3 +1,9 @@
+## Version 9.1.3
+
+- [Feature] Add `--zi` option to control the number of Zopfli iterations.
+- [Improvement] Allow setting compression level to 0.
+- [Build] Move man page generation to an xtask.
+
 ## Version 9.1.2
 
 - [Bugfix] Fix `--nx` still applying deinterlacing by default.
