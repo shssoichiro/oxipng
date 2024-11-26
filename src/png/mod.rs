@@ -345,9 +345,10 @@ impl PngImage {
         for line in self.scan_lines(false) {
             if prev_pass != line.pass || line.data.len() != prev_line.len() {
                 prev_line = vec![0; line.data.len()];
-                // Calculate the best possible entropy for this pass
+                // Calculate the best possible result for this pass
                 best_possible = match filter {
                     RowFilter::Entropy => ilog2i(line.data.len() as u32 + 1) as i32,
+                    RowFilter::Bigrams => 1,
                     RowFilter::BigEnt => ilog2i(line.data.len() as u32) as i32,
                     _ => 0,
                 }
@@ -379,18 +380,18 @@ impl PngImage {
                     RowFilter::MinSum => {
                         // MSAD algorithm mentioned in libpng reference docs
                         // http://www.libpng.org/pub/png/book/chapter09.html
-                        let mut best_size = usize::MAX;
+                        let mut best_size = i32::MAX;
                         for f in try_filters {
                             f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let size = f_buf.iter().fold(0, |acc, &x| {
                                 let signed = x as i8;
-                                acc + signed.unsigned_abs() as usize
+                                acc + signed.unsigned_abs() as i32
                             });
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
-                                if size == 0 {
+                                if size == best_possible {
                                     // Best possible result
                                     break;
                                 }
@@ -427,7 +428,7 @@ impl PngImage {
                     RowFilter::Bigrams => {
                         // Count distinct bigrams, from pngwolf
                         // https://bjoern.hoehrmann.de/pngwolf/
-                        let mut best_size = usize::MAX;
+                        let mut best_size = i32::MAX;
                         for f in try_filters {
                             f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let mut set = bitarr![0; 0x10000];
@@ -435,12 +436,12 @@ impl PngImage {
                                 let bigram = (pair[0] as usize) << 8 | pair[1] as usize;
                                 set.set(bigram, true);
                             }
-                            let size = set.count_ones();
+                            let size = set.count_ones() as i32;
                             if size < best_size {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
-                                if size == 1 {
+                                if size == best_possible {
                                     // Best possible result
                                     break;
                                 }
