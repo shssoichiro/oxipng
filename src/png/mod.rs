@@ -341,9 +341,16 @@ impl PngImage {
         let mut prev_line = Vec::new();
         let mut prev_pass: Option<u8> = None;
         let mut f_buf = Vec::new();
+        let mut best_possible = 0;
         for line in self.scan_lines(false) {
             if prev_pass != line.pass || line.data.len() != prev_line.len() {
                 prev_line = vec![0; line.data.len()];
+                // Calculate the best possible entropy for this pass
+                best_possible = match filter {
+                    RowFilter::Entropy => ilog2i(line.data.len() as u32 + 1) as i32,
+                    RowFilter::BigEnt => ilog2i(line.data.len() as u32) as i32,
+                    _ => 0,
+                }
             }
             // Alpha optimisation may alter the line data, so we need a mutable copy of it
             let mut line_data = line.data.to_vec();
@@ -383,6 +390,10 @@ impl PngImage {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
+                                if size == 0 {
+                                    // Best possible result
+                                    break;
+                                }
                             }
                         }
                     }
@@ -406,6 +417,10 @@ impl PngImage {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
+                                if size == best_possible {
+                                    // Best possible result
+                                    break;
+                                }
                             }
                         }
                     }
@@ -425,6 +440,10 @@ impl PngImage {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
+                                if size == 1 {
+                                    // Best possible result
+                                    break;
+                                }
                             }
                         }
                     }
@@ -445,6 +464,10 @@ impl PngImage {
                                 best_size = size;
                                 std::mem::swap(&mut best_line, &mut f_buf);
                                 best_line_raw.clone_from(&line_data);
+                                if size == best_possible {
+                                    // Best possible result
+                                    break;
+                                }
                             }
                         }
                     }
