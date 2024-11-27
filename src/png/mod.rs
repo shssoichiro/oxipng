@@ -360,6 +360,15 @@ impl PngImage {
                 prev_line = line_data;
             } else {
                 // Heuristic filter selection strategies
+
+                if line_data.iter().all(|&x| x == 0) {
+                    // Assume None if the line is all zeros
+                    filtered.push(RowFilter::None as u8);
+                    filtered.extend_from_slice(&line_data);
+                    prev_line = line_data;
+                    continue;
+                }
+
                 let mut best_line = Vec::new();
                 let mut best_line_raw = Vec::new();
                 // Avoid vertical filtering on first line of each interlacing pass
