@@ -2,6 +2,7 @@
 authors = ["Joshua Holmer <jholmer.in@gmail.com>"]
 categories = ["command-line-utilities", "compression"]
 description = "A lossless PNG compression optimizer"
+keywords = ["png", "image-compression", "optimization", "multi-threading", "lossless"]
 documentation = "https://docs.rs/oxipng"
 edition = "2021"
 exclude = [
