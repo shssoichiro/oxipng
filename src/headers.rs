@@ -71,8 +71,8 @@ pub struct Chunk {
     pub data: Vec<u8>,
 }
 
+/// [`Options`][crate::Options] to use when stripping chunks (metadata)
 #[derive(Debug, PartialEq, Eq, Clone)]
-/// Options to use when stripping chunks
 pub enum StripChunks {
     /// None
     None,

@@ -4,10 +4,13 @@ use bitvec::prelude::*;
 
 use crate::{headers::IhdrData, png::PngImage, PngError};
 
+/// Whether to enable progressive rendering. See [`Options`][crate::Options])
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Interlacing {
+    /// Makes images load top to bottom.
     None,
+    /// Makes it possible to render partially-loaded images at lower resolution. Usually increases file sizes.
     Adam7,
 }
 
