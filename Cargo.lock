@@ -398,7 +398,7 @@ checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
 name = "oxipng"
-version = "9.1.2"
+version = "9.1.3"
 dependencies = [
  "bitvec",
  "clap",
