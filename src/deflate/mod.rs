@@ -11,8 +11,8 @@ mod zopfli_oxipng;
 #[cfg(feature = "zopfli")]
 pub use zopfli_oxipng::deflate as zopfli_deflate;
 
+/// DEFLATE algorithms supported by oxipng (for use in [`Options`][crate::Options])
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-/// DEFLATE algorithms supported by oxipng
 pub enum Deflaters {
     /// Use libdeflater.
     Libdeflater {

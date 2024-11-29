@@ -9,6 +9,8 @@ use log::warn;
 
 use crate::{deflate::Deflaters, filters::RowFilter, headers::StripChunks, interlace::Interlacing};
 
+/// Write destination for [`optimize`][crate::optimize].
+/// You can use [`optimize_from_memory`](crate::optimize_from_memory) to avoid external I/O.
 #[derive(Clone, Debug)]
 pub enum OutFile {
     /// Don't actually write any output, just calculate the best results.
@@ -46,7 +48,8 @@ impl OutFile {
     }
 }
 
-/// Where to read images from
+/// Where to read images from in [`optimize`][crate::optimize].
+/// You can use [`optimize_from_memory`](crate::optimize_from_memory) to avoid external I/O.
 #[derive(Clone, Debug)]
 pub enum InFile {
     Path(PathBuf),
@@ -133,7 +136,8 @@ pub struct Options {
     ///
     /// Default: `None`
     pub strip: StripChunks,
-    /// Which DEFLATE algorithm to use
+    /// Which DEFLATE (zlib) algorithm to use
+    #[cfg_attr(feature = "zopfli", doc = "(e.g. Zopfli)")]
     ///
     /// Default: `Libdeflater`
     pub deflate: Deflaters,

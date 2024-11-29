@@ -2,6 +2,7 @@ use std::{fmt, fmt::Display, mem::transmute};
 
 use crate::error::PngError;
 
+/// Filtering strategy for use in [`Options`][crate::Options]
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 pub enum RowFilter {
