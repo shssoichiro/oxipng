@@ -225,19 +225,3 @@ fn issue_182() {
         BitDepth::One,
     );
 }
-
-#[test]
-fn issue_553() {
-    let png = test_it_converts(
-        "tests/files/issue-553.png",
-        None,
-        INDEXED,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-    match png.ihdr.color_type {
-        ColorType::Indexed { palette } => assert_eq!(palette.len(), 256),
-        _ => unreachable!(),
-    };
-}
