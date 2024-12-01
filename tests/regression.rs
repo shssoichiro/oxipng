@@ -7,7 +7,6 @@ use std::{
 use oxipng::{internal_tests::*, *};
 
 const GRAYSCALE: u8 = 0;
-const RGB: u8 = 2;
 const INDEXED: u8 = 3;
 const GRAYSCALE_ALPHA: u8 = 4;
 const RGBA: u8 = 6;
@@ -146,18 +145,6 @@ fn issue_89() {
         RGBA,
         BitDepth::Eight,
         GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_129() {
-    test_it_converts(
-        "tests/files/issue-129.png",
-        None,
-        RGB,
-        BitDepth::Eight,
-        INDEXED,
         BitDepth::Eight,
     );
 }

@@ -387,6 +387,18 @@ fn rgb_8_should_be_palette_8() {
 }
 
 #[test]
+fn rgb_trns_8_should_be_palette_8() {
+    test_it_converts(
+        "tests/files/rgb_trns_8_should_be_palette_8.png",
+        false,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn rgb_16_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_4.png",
