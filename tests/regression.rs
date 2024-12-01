@@ -162,18 +162,6 @@ fn issue_140() {
 }
 
 #[test]
-fn issue_159() {
-    test_it_converts(
-        "tests/files/issue-159.png",
-        None,
-        INDEXED,
-        BitDepth::One,
-        INDEXED,
-        BitDepth::One,
-    );
-}
-
-#[test]
 fn issue_171() {
     test_it_converts(
         "tests/files/issue-171.png",

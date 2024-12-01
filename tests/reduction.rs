@@ -1049,6 +1049,45 @@ fn palette_should_be_reduced_with_unused() {
 }
 
 #[test]
+fn palette_should_be_reduced_with_bkgd() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_bkgd.png");
+    let (output, opts) = get_opts(&input);
+
+    let png = PngData::new(&input, &opts).unwrap();
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
+    assert_eq!(&png.aux_chunks[0].name, b"bKGD");
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 3);
+    }
+
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!("{}", x),
+    };
+    let output = output.path().unwrap();
+    assert!(output.exists());
+
+    let png = match PngData::new(output, &opts) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!("{}", x)
+        }
+    };
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
+    assert_ne!(&png.aux_chunks[0].name, b"bKGD");
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 2);
+    }
+
+    remove_file(output).ok();
+}
+
+#[test]
 fn palette_should_be_reduced_with_both() {
     let input = PathBuf::from("tests/files/palette_should_be_reduced_with_both.png");
     let (output, opts) = get_opts(&input);
