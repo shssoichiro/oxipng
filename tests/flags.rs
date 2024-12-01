@@ -12,10 +12,8 @@ use std::{
 use indexmap::indexset;
 use oxipng::{internal_tests::*, *};
 
-const GRAYSCALE: u8 = 0;
 const RGB: u8 = 2;
 const INDEXED: u8 = 3;
-const RGBA: u8 = 6;
 
 fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
     let mut options = oxipng::Options {
@@ -582,7 +580,7 @@ fn fix_errors() {
 
     let png = PngData::new(&input, &opts).unwrap();
 
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGBA);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     match oxipng::optimize(&InFile::Path(input), &output, &opts) {
@@ -600,7 +598,7 @@ fn fix_errors() {
         }
     };
 
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), GRAYSCALE);
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
 
     // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
