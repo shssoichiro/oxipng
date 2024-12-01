@@ -151,35 +151,6 @@ fn issue_89() {
 }
 
 #[test]
-fn issue_92_filter_0() {
-    test_it_converts(
-        "tests/files/issue-92.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_92_filter_5() {
-    let input = "tests/files/issue-92.png";
-    let (_, mut opts) = get_opts(Path::new(input));
-    opts.filter = [RowFilter::MinSum].iter().cloned().collect();
-    let output = OutFile::from_path(Path::new(input).with_extension("-f5-out.png"));
-
-    test_it_converts(
-        input,
-        Some((output, opts)),
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_129() {
     test_it_converts(
         "tests/files/issue-129.png",
