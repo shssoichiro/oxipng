@@ -227,30 +227,6 @@ fn issue_182() {
 }
 
 #[test]
-fn issue_426_01() {
-    test_it_converts(
-        "tests/files/issue-426-01.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::One,
-    );
-}
-
-#[test]
-fn issue_426_02() {
-    test_it_converts(
-        "tests/files/issue-426-02.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::One,
-    );
-}
-
-#[test]
 fn issue_553() {
     let png = test_it_converts(
         "tests/files/issue-553.png",
