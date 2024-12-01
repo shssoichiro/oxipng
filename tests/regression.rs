@@ -227,18 +227,6 @@ fn issue_182() {
 }
 
 #[test]
-fn issue_195() {
-    test_it_converts(
-        "tests/files/issue-195.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_426_01() {
     test_it_converts(
         "tests/files/issue-426-01.png",

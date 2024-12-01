@@ -723,6 +723,18 @@ fn grayscale_alpha_8_should_be_grayscale_8() {
 }
 
 #[test]
+fn grayscale_alpha_8_should_be_palette_8() {
+    test_it_converts(
+        "tests/files/grayscale_alpha_8_should_be_palette_8.png",
+        false,
+        GRAYSCALE_ALPHA,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn grayscale_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/grayscale_16_should_be_grayscale_16.png",
