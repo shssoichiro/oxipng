@@ -344,6 +344,7 @@ Recommended use is with '-o max' and '--fast'.")
 Set the number of iterations to use for Zopfli compression. Using fewer iterations may \
 speed up compression for large files. This option requires '--zopfli' to be set.")
                 .long("zi")
+                .value_name("iterations")
                 .default_value("15")
                 .value_parser(1..=255)
                 .requires("zopfli"),
