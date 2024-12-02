@@ -7,7 +7,6 @@ use std::{
 use oxipng::{internal_tests::*, *};
 
 const GRAYSCALE: u8 = 0;
-const RGB: u8 = 2;
 const INDEXED: u8 = 3;
 const GRAYSCALE_ALPHA: u8 = 4;
 const RGBA: u8 = 6;
@@ -76,18 +75,6 @@ fn test_it_converts(
 }
 
 #[test]
-fn issue_29() {
-    test_it_converts(
-        "tests/files/issue-29.png",
-        None,
-        RGB,
-        BitDepth::Eight,
-        RGB,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_42() {
     let input = "tests/files/issue-42.png";
     let (output, mut opts) = get_opts(Path::new(input));
@@ -98,78 +85,6 @@ fn issue_42() {
         GRAYSCALE_ALPHA,
         BitDepth::Eight,
         GRAYSCALE_ALPHA,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_01() {
-    test_it_converts(
-        "tests/files/issue-52-01.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_02() {
-    test_it_converts(
-        "tests/files/issue-52-02.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGBA,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_03() {
-    test_it_converts(
-        "tests/files/issue-52-03.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGBA,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_04() {
-    test_it_converts(
-        "tests/files/issue-52-04.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGB,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_05() {
-    test_it_converts(
-        "tests/files/issue-52-05.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGB,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_52_06() {
-    test_it_converts(
-        "tests/files/issue-52-06.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGBA,
         BitDepth::Eight,
     );
 }
@@ -223,30 +138,6 @@ fn issue_60() {
 }
 
 #[test]
-fn issue_80() {
-    test_it_converts(
-        "tests/files/issue-80.png",
-        None,
-        INDEXED,
-        BitDepth::Two,
-        INDEXED,
-        BitDepth::One,
-    );
-}
-
-#[test]
-fn issue_82() {
-    test_it_converts(
-        "tests/files/issue-82.png",
-        None,
-        INDEXED,
-        BitDepth::Four,
-        INDEXED,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
 fn issue_89() {
     test_it_converts(
         "tests/files/issue-89.png",
@@ -254,63 +145,6 @@ fn issue_89() {
         RGBA,
         BitDepth::Eight,
         GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_92_filter_0() {
-    test_it_converts(
-        "tests/files/issue-92.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_92_filter_5() {
-    let input = "tests/files/issue-92.png";
-    let (_, mut opts) = get_opts(Path::new(input));
-    opts.filter = [RowFilter::MinSum].iter().cloned().collect();
-    let output = OutFile::from_path(Path::new(input).with_extension("-f5-out.png"));
-
-    test_it_converts(
-        input,
-        Some((output, opts)),
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_113() {
-    let input = "tests/files/issue-113.png";
-    let (output, mut opts) = get_opts(Path::new(input));
-    opts.interlace = Some(Interlacing::Adam7);
-    opts.optimize_alpha = true;
-    test_it_converts(
-        input,
-        Some((output, opts)),
-        RGBA,
-        BitDepth::Eight,
-        GRAYSCALE_ALPHA,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_129() {
-    test_it_converts(
-        "tests/files/issue-129.png",
-        None,
-        RGB,
-        BitDepth::Eight,
-        INDEXED,
         BitDepth::Eight,
     );
 }
@@ -324,42 +158,6 @@ fn issue_140() {
         BitDepth::Two,
         GRAYSCALE,
         BitDepth::Two,
-    );
-}
-
-#[test]
-fn issue_141() {
-    test_it_converts(
-        "tests/files/issue-141.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        RGB,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_153() {
-    test_it_converts(
-        "tests/files/issue-153.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_159() {
-    test_it_converts(
-        "tests/files/issue-159.png",
-        None,
-        INDEXED,
-        BitDepth::One,
-        INDEXED,
-        BitDepth::One,
     );
 }
 
@@ -401,56 +199,4 @@ fn issue_182() {
         GRAYSCALE,
         BitDepth::One,
     );
-}
-
-#[test]
-fn issue_195() {
-    test_it_converts(
-        "tests/files/issue-195.png",
-        None,
-        RGBA,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-}
-
-#[test]
-fn issue_426_01() {
-    test_it_converts(
-        "tests/files/issue-426-01.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::One,
-    );
-}
-
-#[test]
-fn issue_426_02() {
-    test_it_converts(
-        "tests/files/issue-426-02.png",
-        None,
-        GRAYSCALE,
-        BitDepth::Eight,
-        GRAYSCALE,
-        BitDepth::One,
-    );
-}
-
-#[test]
-fn issue_553() {
-    let png = test_it_converts(
-        "tests/files/issue-553.png",
-        None,
-        INDEXED,
-        BitDepth::Eight,
-        INDEXED,
-        BitDepth::Eight,
-    );
-    match png.ihdr.color_type {
-        ColorType::Indexed { palette } => assert_eq!(palette.len(), 256),
-        _ => unreachable!(),
-    };
 }

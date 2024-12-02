@@ -667,6 +667,17 @@ fn interlaced_small_files() {
 }
 
 #[test]
+fn interlaced_vertical_filters() {
+    test_it_converts(
+        "tests/files/interlaced_vertical_filters.png",
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn interlaced_odd_width() {
     test_it_converts(
         "tests/files/interlaced_odd_width.png",

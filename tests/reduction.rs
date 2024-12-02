@@ -387,6 +387,18 @@ fn rgb_8_should_be_palette_8() {
 }
 
 #[test]
+fn rgb_trns_8_should_be_palette_8() {
+    test_it_converts(
+        "tests/files/rgb_trns_8_should_be_palette_8.png",
+        false,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn rgb_16_should_be_palette_4() {
     test_it_converts(
         "tests/files/rgb_16_should_be_palette_4.png",
@@ -723,6 +735,18 @@ fn grayscale_alpha_8_should_be_grayscale_8() {
 }
 
 #[test]
+fn grayscale_alpha_8_should_be_palette_8() {
+    test_it_converts(
+        "tests/files/grayscale_alpha_8_should_be_palette_8.png",
+        false,
+        GRAYSCALE_ALPHA,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+    );
+}
+
+#[test]
 fn grayscale_16_should_be_grayscale_16() {
     test_it_converts(
         "tests/files/grayscale_16_should_be_grayscale_16.png",
@@ -927,6 +951,18 @@ fn grayscale_alpha_8_should_be_grayscale_trns_1() {
 }
 
 #[test]
+fn grayscale_trns_8_should_be_grayscale_1() {
+    test_it_converts(
+        "tests/files/grayscale_trns_8_should_be_grayscale_1.png",
+        true,
+        GRAYSCALE,
+        BitDepth::Eight,
+        GRAYSCALE,
+        BitDepth::One,
+    );
+}
+
+#[test]
 fn small_files() {
     test_it_converts(
         "tests/files/small_files.png",
@@ -1007,6 +1043,45 @@ fn palette_should_be_reduced_with_unused() {
     assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
     if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
         assert_eq!(palette.len(), 33);
+    }
+
+    remove_file(output).ok();
+}
+
+#[test]
+fn palette_should_be_reduced_with_bkgd() {
+    let input = PathBuf::from("tests/files/palette_should_be_reduced_with_bkgd.png");
+    let (output, opts) = get_opts(&input);
+
+    let png = PngData::new(&input, &opts).unwrap();
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
+    assert_eq!(&png.aux_chunks[0].name, b"bKGD");
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 3);
+    }
+
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!("{}", x),
+    };
+    let output = output.path().unwrap();
+    assert!(output.exists());
+
+    let png = match PngData::new(output, &opts) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!("{}", x)
+        }
+    };
+
+    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
+    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::One);
+    assert_ne!(&png.aux_chunks[0].name, b"bKGD");
+    if let ColorType::Indexed { palette } = &png.raw.ihdr.color_type {
+        assert_eq!(palette.len(), 2);
     }
 
     remove_file(output).ok();
