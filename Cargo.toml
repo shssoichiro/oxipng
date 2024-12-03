@@ -87,6 +87,7 @@ freestanding = ["libdeflater/freestanding"]
 sanity-checks = ["dep:image"]
 zopfli = ["dep:zopfli"]
 filetime = ["dep:filetime"]
+system-libdeflate = ["libdeflater/dynamic"]
 
 [lib]
 name = "oxipng"
