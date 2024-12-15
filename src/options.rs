@@ -97,13 +97,16 @@ pub struct Options {
     pub filter: IndexSet<RowFilter>,
     /// Whether to change the interlacing type of the file.
     ///
-    /// `None` will not change the current interlacing type.
-    ///
-    /// `Some(x)` will change the file to interlacing mode `x`.
+    /// These are the interlacing types avaliable:
+    /// - `None` will not change the current interlacing type.
+    /// - `Some(x)` will change the file to interlacing mode `x`.
+    ///   See [`Interlacing`] for the possible interlacing types.
     ///
     /// Default: `Some(Interlacing::None)`
     pub interlace: Option<Interlacing>,
     /// Whether to allow transparent pixels to be altered to improve compression.
+    ///
+    /// Default: `false`
     pub optimize_alpha: bool,
     /// Whether to attempt bit depth reduction
     ///
@@ -145,9 +148,10 @@ pub struct Options {
     ///
     /// Default: `true`
     pub fast_evaluation: bool,
-
     /// Maximum amount of time to spend on optimizations.
     /// Further potential optimizations are skipped if the timeout is exceeded.
+    ///
+    /// Default: `None`
     pub timeout: Option<Duration>,
 }
 
