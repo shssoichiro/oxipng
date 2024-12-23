@@ -14,6 +14,7 @@ pub enum PngError {
     ChunkMissing(&'static str),
     InvalidDepthForType(BitDepth, ColorType),
     IncorrectDataLength(usize, usize),
+    C2PAMetadataPreventsChanges,
     Other(Box<str>),
 }
 
@@ -40,6 +41,9 @@ impl fmt::Display for PngError {
                 f,
                 "Data length {} does not match the expected length {}",
                 l1, l2
+            ),
+            PngError::C2PAMetadataPreventsChanges => f.write_str(
+                "The image contains C2PA manifest that would be invalidated by any file changes",
             ),
             PngError::Other(ref s) => f.write_str(s),
         }
