@@ -43,6 +43,19 @@ fn optimize() {
 }
 
 #[test]
+fn skip_c2pa() {
+    let result = oxipng::optimize(
+        &"tests/files/c2pa-signed.png".into(),
+        &OutFile::None,
+        &Options {
+            strip: StripChunks::Keep(indexset! {*b"caBX"}),
+            ..Options::default()
+        },
+    );
+    assert!(matches!(result, Err(PngError::C2PAMetadataPreventsChanges)));
+}
+
+#[test]
 fn optimize_corrupted() {
     let result = oxipng::optimize(
         &"tests/files/corrupted_header.png".into(),

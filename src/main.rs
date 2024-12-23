@@ -25,7 +25,7 @@ use clap::ArgMatches;
 mod cli;
 use indexmap::IndexSet;
 use log::{error, warn, Level, LevelFilter};
-use oxipng::{Deflaters, InFile, Options, OutFile, RowFilter, StripChunks};
+use oxipng::{Deflaters, InFile, Options, OutFile, PngError, RowFilter, StripChunks};
 use rayon::prelude::*;
 
 use crate::cli::DISPLAY_CHUNKS;
@@ -88,6 +88,10 @@ fn main() -> ExitCode {
                 // PNG files, and return an error for them.
                 // We don't really want to return an error code for those files.
                 Ok(_) => OptimizationResult::Ok,
+                Err(e @ PngError::C2PAMetadataPreventsChanges) => {
+                    warn!("{input}: {e}");
+                    OptimizationResult::Skipped
+                }
                 Err(e) => {
                     error!("{input}: {e}");
                     OptimizationResult::Failed

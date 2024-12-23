@@ -114,6 +114,15 @@ impl PngData {
                 }
                 _ => {
                     if opts.strip.keep(&chunk.name) {
+                        if chunk.is_c2pa() {
+                            // StripChunks::None is the default value, so to keep optimizing by default,
+                            // interpret it as stripping the C2PA metadata.
+                            // The C2PA metadata is invalidated if the file changes, so it shouldn't be kept.
+                            if opts.strip == StripChunks::None {
+                                continue;
+                            }
+                            return Err(PngError::C2PAMetadataPreventsChanges);
+                        }
                         aux_chunks.push(Chunk {
                             name: chunk.name,
                             data: chunk.data.to_owned(),

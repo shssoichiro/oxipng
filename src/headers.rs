@@ -75,6 +75,8 @@ pub struct Chunk {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum StripChunks {
     /// None
+    ///
+    /// ...except caBX chunk if it contains a C2PA.org signature.
     None,
     /// Remove specific chunks
     Strip(IndexSet<[u8; 4]>),
@@ -109,6 +111,36 @@ pub fn file_header_is_valid(bytes: &[u8]) -> bool {
 pub struct RawChunk<'a> {
     pub name: [u8; 4],
     pub data: &'a [u8],
+}
+
+impl RawChunk<'_> {
+    // Is it a chunk for C2PA/CAI JUMBF metadata
+    pub(crate) fn is_c2pa(&self) -> bool {
+        if self.name == *b"caBX" {
+            if let Some((b"jumb", data)) = parse_jumbf_box(self.data) {
+                if let Some((b"jumd", data)) = parse_jumbf_box(data) {
+                    if data.get(..4) == Some(b"c2pa") {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+}
+
+fn parse_jumbf_box(data: &[u8]) -> Option<(&[u8], &[u8])> {
+    if data.len() < 8 {
+        return None;
+    }
+    let (len, rest) = data.split_at(4);
+    let len = u32::from_be_bytes(len.try_into().unwrap()) as usize;
+    if len < 8 || len > data.len() {
+        return None;
+    }
+    let (box_name, data) = rest.split_at(4);
+    let data = data.get(..len - 8)?;
+    Some((box_name, data))
 }
 
 pub fn parse_next_chunk<'a>(
