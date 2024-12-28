@@ -43,11 +43,6 @@ fn main() -> ExitCode {
         .after_long_help("")
         .get_matches_from(std::env::args());
 
-    if matches.get_flag("backup") {
-        error!("The --backup flag is no longer supported. Please use --out or --dir to preserve your existing files.");
-        return ExitCode::FAILURE;
-    }
-
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
         Err(x) => {

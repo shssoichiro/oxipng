@@ -50,14 +50,6 @@ preset, regardless of the order you write the arguments.")
                 .hide_possible_values(true),
         )
         .arg(
-            Arg::new("backup")
-                .help("Back up modified files")
-                .short('b')
-                .long("backup")
-                .hide(true)
-                .action(ArgAction::SetTrue),
-        )
-        .arg(
             Arg::new("recursive")
                 .help("Recurse input directories, optimizing all PNG files")
                 .long_help("\
