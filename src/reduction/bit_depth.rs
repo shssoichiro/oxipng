@@ -22,7 +22,7 @@ pub fn reduced_bit_depth_16_to_8(png: &PngImage, force_scale: bool) -> Option<Pn
     }
 
     Some(PngImage {
-        data: png.data.iter().step_by(2).cloned().collect(),
+        data: png.data.iter().step_by(2).copied().collect(),
         ihdr: IhdrData {
             color_type: png.ihdr.color_type.clone(),
             bit_depth: BitDepth::Eight,
@@ -48,8 +48,8 @@ pub fn scaled_bit_depth_16_to_8(png: &PngImage) -> Option<PngImage> {
             }
             // See: http://www.libpng.org/pub/png/spec/1.2/PNG-Decoders.html#D.Sample-depth-rescaling
             // This allows values such as 0x00FF to be rounded to 0x01 rather than truncated to 0x00
-            let val = u16::from_be_bytes([pair[0], pair[1]]) as f64;
-            (val * 255.0 / 65535.0).round() as u8
+            let val = f32::from(u16::from_be_bytes([pair[0], pair[1]]));
+            (val * (255.0 / 65535.0)).round() as u8
         })
         .collect();
 
@@ -138,7 +138,7 @@ pub fn reduced_bit_depth_8_or_less(png: &PngImage) -> Option<PngImage> {
         let mut check = reduced_trans;
         let mut bits = minimum_bits;
         while bits < 8 {
-            check = check << bits | check;
+            check = (check << bits) | check;
             bits <<= 1;
         }
         // If the transparency doesn't fit the new bit depth it is therefore unused - set it to None
@@ -188,7 +188,7 @@ pub fn expanded_bit_depth_to_8(png: &PngImage) -> Option<PngImage> {
                     // Expand gray by repeating the bits
                     let mut bits = bit_depth;
                     while bits < 8 {
-                        val = val << bits | val;
+                        val = (val << bits) | val;
                         bits <<= 1;
                     }
                 }
@@ -207,7 +207,7 @@ pub fn expanded_bit_depth_to_8(png: &PngImage) -> Option<PngImage> {
     {
         let mut bits = bit_depth;
         while bits < 8 {
-            trans = trans << bits | trans;
+            trans = (trans << bits) | trans;
             bits <<= 1;
         }
         ColorType::Grayscale {

@@ -18,7 +18,7 @@ use rayon::prelude::*;
 use crate::rayon;
 use crate::{atomicmin::AtomicMin, deflate, filters::RowFilter, png::PngImage, Deadline, PngError};
 
-pub struct Candidate {
+pub(crate) struct Candidate {
     pub image: Arc<PngImage>,
     pub idat_data: Vec<u8>,
     pub filtered: Vec<u8>,

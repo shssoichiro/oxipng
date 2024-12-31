@@ -30,7 +30,7 @@ impl IhdrData {
     /// Bits per pixel
     #[must_use]
     #[inline]
-    pub fn bpp(&self) -> usize {
+    pub const fn bpp(&self) -> usize {
         self.bit_depth as usize * self.color_type.channels_per_pixel() as usize
     }
 
@@ -91,11 +91,11 @@ pub enum StripChunks {
 impl StripChunks {
     pub(crate) fn keep(&self, name: &[u8; 4]) -> bool {
         match &self {
-            StripChunks::None => true,
-            StripChunks::Keep(names) => names.contains(name),
-            StripChunks::Strip(names) => !names.contains(name),
-            StripChunks::Safe => DISPLAY_CHUNKS.contains(name),
-            StripChunks::All => false,
+            Self::None => true,
+            Self::Keep(names) => names.contains(name),
+            Self::Strip(names) => !names.contains(name),
+            Self::Safe => DISPLAY_CHUNKS.contains(name),
+            Self::All => false,
         }
     }
 }

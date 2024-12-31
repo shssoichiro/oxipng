@@ -49,7 +49,7 @@ pub fn reduced_to_indexed(png: &PngImage, allow_grayscale: bool) -> Option<PngIm
     let mut raw_data = Vec::with_capacity(png.data.len() / png.channels_per_pixel());
     let palette: Vec<_> = match png.ihdr.color_type {
         ColorType::Grayscale { transparent_shade } => {
-            let pmap = build_palette(png.data.as_gray().iter().cloned(), &mut raw_data)?;
+            let pmap = build_palette(png.data.as_gray().iter().copied(), &mut raw_data)?;
             // Convert the Gray16 transparency to Gray8
             let transparency_pixel = transparent_shade.map(|t| Gray::from(t as u8));
             pmap.into_iter()
@@ -63,7 +63,7 @@ pub fn reduced_to_indexed(png: &PngImage, allow_grayscale: bool) -> Option<PngIm
                 .collect()
         }
         ColorType::RGB { transparent_color } => {
-            let pmap = build_palette(png.data.as_rgb().iter().cloned(), &mut raw_data)?;
+            let pmap = build_palette(png.data.as_rgb().iter().copied(), &mut raw_data)?;
             // Convert the RGB16 transparency to RGB8
             let transparency_pixel = transparent_color.map(|t| t.map(|c| c as u8));
             pmap.into_iter()
@@ -77,11 +77,11 @@ pub fn reduced_to_indexed(png: &PngImage, allow_grayscale: bool) -> Option<PngIm
                 .collect()
         }
         ColorType::GrayscaleAlpha => {
-            let pmap = build_palette(png.data.as_gray_alpha().iter().cloned(), &mut raw_data)?;
+            let pmap = build_palette(png.data.as_gray_alpha().iter().copied(), &mut raw_data)?;
             pmap.into_iter().map(RGBA::from).collect()
         }
         ColorType::RGBA => {
-            let pmap = build_palette(png.data.as_rgba().iter().cloned(), &mut raw_data)?;
+            let pmap = build_palette(png.data.as_rgba().iter().copied(), &mut raw_data)?;
             pmap.into_iter().collect()
         }
         _ => return None,

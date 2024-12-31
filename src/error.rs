@@ -33,14 +33,13 @@ impl fmt::Display for PngError {
                 f.write_str("Missing data in the file; the file is truncated")
             }
             PngError::APNGNotSupported => f.write_str("APNG files are not (yet) supported"),
-            PngError::ChunkMissing(s) => write!(f, "Chunk {} missing or empty", s),
+            PngError::ChunkMissing(s) => write!(f, "Chunk {s} missing or empty"),
             PngError::InvalidDepthForType(d, ref c) => {
-                write!(f, "Invalid bit depth {} for color type {}", d, c)
+                write!(f, "Invalid bit depth {d} for color type {c}")
             }
             PngError::IncorrectDataLength(l1, l2) => write!(
                 f,
-                "Data length {} does not match the expected length {}",
-                l1, l2
+                "Data length {l1} does not match the expected length {l2}"
             ),
             PngError::C2PAMetadataPreventsChanges => f.write_str(
                 "The image contains C2PA manifest that would be invalidated by any file changes",
@@ -52,6 +51,7 @@ impl fmt::Display for PngError {
 
 impl PngError {
     #[cold]
+    #[must_use]
     pub fn new(description: &str) -> PngError {
         PngError::Other(description.into())
     }
