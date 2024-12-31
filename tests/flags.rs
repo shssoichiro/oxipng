@@ -2,8 +2,6 @@
 use std::cell::RefCell;
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
-#[cfg(feature = "filetime")]
-use std::ops::Deref;
 use std::{
     fs::remove_file,
     path::{Path, PathBuf},
@@ -94,7 +92,7 @@ fn test_it_converts(
         bit_depth_out,
         |_| {},
         |_| {},
-    )
+    );
 }
 
 #[test]
@@ -194,10 +192,7 @@ fn verbose_mode() {
         let expected_prefix = expected_prefixes[i];
         assert!(
             log.starts_with(expected_prefix),
-            "logs[{}] = {:?} doesn't start with {:?}",
-            i,
-            log,
-            expected_prefix
+            "logs[{i}] = {log:?} doesn't start with {expected_prefix:?}"
         );
     }
 }
@@ -540,8 +535,8 @@ fn preserve_attrs() {
 
         let cellref_atime_canon = atime_canon.borrow();
         let cellref_mtime_canon = mtime_canon.borrow();
-        let ref_atime_canon: &filetime::FileTime = cellref_atime_canon.deref();
-        let ref_mtime_canon: &filetime::FileTime = cellref_mtime_canon.deref();
+        let ref_atime_canon: &filetime::FileTime = &cellref_atime_canon;
+        let ref_mtime_canon: &filetime::FileTime = &cellref_mtime_canon;
 
         assert_eq!(
             ref_atime_canon,

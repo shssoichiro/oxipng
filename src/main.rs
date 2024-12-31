@@ -228,8 +228,8 @@ fn parse_opts_into_struct(
     let out_dir = if let Some(path) = matches.get_one::<PathBuf>("output_dir") {
         if !path.exists() {
             match DirBuilder::new().recursive(true).create(path) {
-                Ok(_) => (),
-                Err(x) => return Err(format!("Could not create output directory {}", x)),
+                Ok(()) => (),
+                Err(x) => return Err(format!("Could not create output directory {x}")),
             };
         } else if !path.is_dir() {
             return Err(format!(
@@ -305,9 +305,9 @@ fn parse_opts_into_struct(
             })
             .collect::<Result<IndexSet<_>, _>>()?;
         if keep_display {
-            names.extend(DISPLAY_CHUNKS.iter().cloned());
+            names.extend(DISPLAY_CHUNKS.iter().copied());
         }
-        opts.strip = StripChunks::Keep(names)
+        opts.strip = StripChunks::Keep(names);
     }
 
     if let Some(strip) = matches.get_one::<String>("strip") {
@@ -329,7 +329,7 @@ fn parse_opts_into_struct(
                     }
                     let name = parse_chunk_name(x)?;
                     if FORBIDDEN_CHUNKS.contains(&name) {
-                        return Err(format!("{} chunk is not allowed to be stripped", x));
+                        return Err(format!("{x} chunk is not allowed to be stripped"));
                     }
                     Ok(name)
                 })
@@ -370,7 +370,7 @@ fn parse_chunk_name(name: &str) -> Result<[u8; 4], String> {
     name.trim()
         .as_bytes()
         .try_into()
-        .map_err(|_| format!("Invalid chunk name {}", name))
+        .map_err(|_| format!("Invalid chunk name {name}"))
 }
 
 fn parse_numeric_range_opts(

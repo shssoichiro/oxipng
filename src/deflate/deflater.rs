@@ -30,6 +30,7 @@ pub fn inflate(data: &[u8], out_size: usize) -> PngResult<Vec<u8>> {
     Ok(dest)
 }
 
+#[must_use]
 pub fn crc32(data: &[u8]) -> u32 {
     let mut crc = Crc::new();
     crc.update(data);

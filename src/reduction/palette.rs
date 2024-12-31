@@ -278,7 +278,7 @@ fn co_occurrence_matrix(num_colors: usize, png: &PngImage) -> Vec<Vec<u32>> {
                 matrix[val][prev_val] += 1;
             }
         }
-        prev = Some(line)
+        prev = Some(line);
     }
     matrix
 }

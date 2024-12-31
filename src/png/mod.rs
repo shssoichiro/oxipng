@@ -105,7 +105,7 @@ impl PngData {
                         aux_chunks.push(Chunk {
                             name: chunk.name,
                             data: Vec::new(),
-                        })
+                        });
                     }
                     idat_data.extend_from_slice(chunk.data);
                 }
@@ -126,7 +126,7 @@ impl PngData {
                         aux_chunks.push(Chunk {
                             name: chunk.name,
                             data: chunk.data.to_owned(),
-                        })
+                        });
                     } else if chunk.name == *b"acTL" {
                         warn!(
                             "Stripping animation data from APNG - image will become standard PNG"
@@ -170,11 +170,13 @@ impl PngData {
     }
 
     /// Return an estimate of the output size which can help with evaluation of very small data
+    #[must_use]
     pub fn estimated_output_size(&self) -> usize {
         self.idat_data.len() + self.raw.key_chunks_size()
     }
 
     /// Format the `PngData` struct into a valid PNG bytestream
+    #[must_use]
     pub fn output(&self) -> Vec<u8> {
         // PNG header
         let mut output = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
@@ -227,7 +229,7 @@ impl PngData {
                 transparent_color: Some(trns),
             } => {
                 // Transparency pixel - 6 byte RGB16
-                let trns_data: Vec<_> = trns.iter().flat_map(|c| c.to_be_bytes()).collect();
+                let trns_data: Vec<_> = trns.iter().flat_map(u16::to_be_bytes).collect();
                 write_png_block(b"tRNS", &trns_data, &mut output);
             }
             _ => {}
@@ -261,7 +263,7 @@ impl PngImage {
     /// Assumes that the data has already been de-filtered
     #[inline]
     #[must_use]
-    pub fn change_interlacing(&self, interlace: Interlacing) -> Option<PngImage> {
+    pub fn change_interlacing(&self, interlace: Interlacing) -> Option<Self> {
         if interlace == self.ihdr.interlaced {
             return None;
         }
@@ -277,13 +279,15 @@ impl PngImage {
 
     /// Return the number of channels in the image, based on color type
     #[inline]
-    pub fn channels_per_pixel(&self) -> usize {
+    #[must_use]
+    pub const fn channels_per_pixel(&self) -> usize {
         self.ihdr.color_type.channels_per_pixel() as usize
     }
 
     /// Return the number of bytes per channel in the image
     #[inline]
-    pub fn bytes_per_channel(&self) -> usize {
+    #[must_use]
+    pub const fn bytes_per_channel(&self) -> usize {
         match self.ihdr.bit_depth {
             BitDepth::Sixteen => 2,
             // Depths lower than 8 will round up to 1 byte
@@ -292,6 +296,7 @@ impl PngImage {
     }
 
     /// Calculate the size of the PLTE and tRNS chunks
+    #[must_use]
     pub fn key_chunks_size(&self) -> usize {
         match &self.ihdr.color_type {
             ColorType::Indexed { palette } => {
@@ -310,6 +315,7 @@ impl PngImage {
 
     /// Return an iterator over the scanlines of the image
     #[inline]
+    #[must_use]
     pub fn scan_lines(&self, has_filter: bool) -> ScanLines<'_> {
         ScanLines::new(self, has_filter)
     }
@@ -337,6 +343,7 @@ impl PngImage {
     }
 
     /// Apply the specified filter type to all rows in the image
+    #[must_use]
     pub fn filter_image(&self, filter: RowFilter, optimize_alpha: bool) -> Vec<u8> {
         let mut filtered = Vec::with_capacity(self.data.len());
         let bpp = self.bytes_per_channel() * self.channels_per_pixel();
@@ -411,7 +418,7 @@ impl PngImage {
                         for f in try_filters {
                             f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let mut counts = vec![0; 0x100];
-                            for &i in f_buf.iter() {
+                            for &i in &f_buf {
                                 counts[i as usize] += 1;
                             }
                             let size = counts.into_iter().fold(0, |acc, x| {
@@ -435,7 +442,7 @@ impl PngImage {
                             f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             let mut set = bitarr![0; 0x10000];
                             for pair in f_buf.windows(2) {
-                                let bigram = (pair[0] as usize) << 8 | pair[1] as usize;
+                                let bigram = ((pair[0] as usize) << 8) | pair[1] as usize;
                                 set.set(bigram, true);
                             }
                             let size = set.count_ones();
@@ -455,7 +462,7 @@ impl PngImage {
                             f.filter_line(bpp, &mut line_data, &prev_line, &mut f_buf, alpha_bytes);
                             counts.clear();
                             for pair in f_buf.windows(2) {
-                                let bigram = (pair[0] as u16) << 8 | pair[1] as u16;
+                                let bigram = (u16::from(pair[0]) << 8) | u16::from(pair[1]);
                                 counts.entry(bigram).and_modify(|e| *e += 1).or_insert(1);
                             }
                             let size = counts.values().fold(0, |acc, &x| acc + ilog2i(x)) as i32;
@@ -516,7 +523,7 @@ fn write_png_block(key: &[u8], chunk: &[u8], output: &mut Vec<u8>) {
 }
 
 // Integer approximation for i * log2(i) - much faster than float calculations
-fn ilog2i(i: u32) -> u32 {
+const fn ilog2i(i: u32) -> u32 {
     let log = 32 - i.leading_zeros() - 1;
     i * log + ((i - (1 << log)) << 1)
 }

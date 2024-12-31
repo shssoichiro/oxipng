@@ -7,6 +7,7 @@ use crate::{
 };
 
 /// Clean the alpha channel by setting the color of all fully transparent pixels to black
+#[must_use]
 pub fn cleaned_alpha_channel(png: &PngImage) -> Option<PngImage> {
     if !png.ihdr.color_type.has_alpha() {
         return None;
@@ -85,8 +86,8 @@ pub fn reduced_alpha_channel(png: &PngImage, optimize_alpha: bool) -> Option<Png
 
     // Construct the color type with appropriate transparency data
     let transparent = transparency_pixel.map(|trns| match png.ihdr.bit_depth {
-        BitDepth::Sixteen => (trns as u16) << 8 | trns as u16,
-        _ => trns as u16,
+        BitDepth::Sixteen => (u16::from(trns) << 8) | u16::from(trns),
+        _ => u16::from(trns),
     });
     let target_color_type = match png.ihdr.color_type {
         ColorType::GrayscaleAlpha => ColorType::Grayscale {

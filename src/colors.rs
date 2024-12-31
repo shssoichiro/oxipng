@@ -32,13 +32,13 @@ impl Display for ColorType {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ColorType::Grayscale { .. } => Display::fmt("Grayscale", f),
-            ColorType::RGB { .. } => Display::fmt("RGB", f),
-            ColorType::Indexed { palette } => {
+            Self::Grayscale { .. } => Display::fmt("Grayscale", f),
+            Self::RGB { .. } => Display::fmt("RGB", f),
+            Self::Indexed { palette } => {
                 Display::fmt(&format!("Indexed ({} colors)", palette.len()), f)
             }
-            ColorType::GrayscaleAlpha => Display::fmt("Grayscale + Alpha", f),
-            ColorType::RGBA => Display::fmt("RGB + Alpha", f),
+            Self::GrayscaleAlpha => Display::fmt("Grayscale + Alpha", f),
+            Self::RGBA => Display::fmt("RGB + Alpha", f),
         }
     }
 }
@@ -46,49 +46,47 @@ impl Display for ColorType {
 impl ColorType {
     /// Get the code used by the PNG specification to denote this color type
     #[inline]
-    pub fn png_header_code(&self) -> u8 {
+    #[must_use]
+    pub const fn png_header_code(&self) -> u8 {
         match self {
-            ColorType::Grayscale { .. } => 0,
-            ColorType::RGB { .. } => 2,
-            ColorType::Indexed { .. } => 3,
-            ColorType::GrayscaleAlpha => 4,
-            ColorType::RGBA => 6,
+            Self::Grayscale { .. } => 0,
+            Self::RGB { .. } => 2,
+            Self::Indexed { .. } => 3,
+            Self::GrayscaleAlpha => 4,
+            Self::RGBA => 6,
         }
     }
 
     #[inline]
-    pub(crate) fn channels_per_pixel(&self) -> u8 {
+    pub(crate) const fn channels_per_pixel(&self) -> u8 {
         match self {
-            ColorType::Grayscale { .. } | ColorType::Indexed { .. } => 1,
-            ColorType::GrayscaleAlpha => 2,
-            ColorType::RGB { .. } => 3,
-            ColorType::RGBA => 4,
+            Self::Grayscale { .. } | Self::Indexed { .. } => 1,
+            Self::GrayscaleAlpha => 2,
+            Self::RGB { .. } => 3,
+            Self::RGBA => 4,
         }
     }
 
     #[inline]
-    pub(crate) fn is_rgb(&self) -> bool {
-        matches!(self, ColorType::RGB { .. } | ColorType::RGBA)
+    pub(crate) const fn is_rgb(&self) -> bool {
+        matches!(self, Self::RGB { .. } | Self::RGBA)
     }
 
     #[inline]
-    pub(crate) fn is_gray(&self) -> bool {
-        matches!(
-            self,
-            ColorType::Grayscale { .. } | ColorType::GrayscaleAlpha
-        )
+    pub(crate) const fn is_gray(&self) -> bool {
+        matches!(self, Self::Grayscale { .. } | Self::GrayscaleAlpha)
     }
 
     #[inline]
-    pub(crate) fn has_alpha(&self) -> bool {
-        matches!(self, ColorType::GrayscaleAlpha | ColorType::RGBA)
+    pub(crate) const fn has_alpha(&self) -> bool {
+        matches!(self, Self::GrayscaleAlpha | Self::RGBA)
     }
 
     #[inline]
-    pub(crate) fn has_trns(&self) -> bool {
+    pub(crate) const fn has_trns(&self) -> bool {
         match self {
-            ColorType::Grayscale { transparent_shade } => transparent_shade.is_some(),
-            ColorType::RGB { transparent_color } => transparent_color.is_some(),
+            Self::Grayscale { transparent_shade } => transparent_shade.is_some(),
+            Self::RGB { transparent_color } => transparent_color.is_some(),
             _ => false,
         }
     }

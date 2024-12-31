@@ -195,8 +195,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                     .map_err(|err| {
                         // Fail if metadata cannot be preserved
                         PngError::new(&format!(
-                            "Unable to read metadata from input file {:?}: {}",
-                            input_path, err
+                            "Unable to read metadata from input file {input_path:?}: {err}"
                         ))
                     })
                     .map(Some)?;
@@ -211,7 +210,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             let mut data = Vec::new();
             stdin()
                 .read_to_end(&mut data)
-                .map_err(|e| PngError::new(&format!("Error reading stdin: {}", e)))?;
+                .map_err(|e| PngError::new(&format!("Error reading stdin: {e}")))?;
             data
         }
     };
@@ -260,7 +259,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             let mut buffer = BufWriter::new(stdout());
             buffer
                 .write_all(&optimized_output)
-                .map_err(|e| PngError::new(&format!("Unable to write to stdout: {}", e)))?;
+                .map_err(|e| PngError::new(&format!("Unable to write to stdout: {e}")))?;
         }
         (OutFile::Path { path, .. }, _) => {
             let output_path = path
@@ -460,7 +459,7 @@ fn optimize_raw(
 
             if eval_result.is_some() {
                 // Some filters have already been evaluated, we don't need to try them again
-                filters = filters.difference(&eval_filters).cloned().collect();
+                filters = filters.difference(&eval_filters).copied().collect();
             }
 
             if !filters.is_empty() {
@@ -609,6 +608,7 @@ pub struct Deadline {
 }
 
 impl Deadline {
+    #[must_use]
     pub fn new(timeout: Option<Duration>) -> Self {
         Self {
             imp: timeout.map(|timeout| DeadlineImp {
@@ -742,7 +742,7 @@ fn postprocess_chunks(
                     c.data.truncate(4);
                     c.data.append(&mut data);
                 }
-            })
+            });
     }
 }
 
@@ -756,8 +756,7 @@ fn copy_permissions(metadata_input: &Metadata, out_file: &File) -> PngResult<()>
         .set_permissions(metadata_input.permissions())
         .map_err(|err_io| {
             PngError::new(&format!(
-                "unable to set permissions for output file: {}",
-                err_io
+                "unable to set permissions for output file: {err_io}"
             ))
         })
 }
@@ -778,8 +777,7 @@ fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
     );
     filetime::set_file_times(out_path, atime, mtime).map_err(|err_io| {
         PngError::new(&format!(
-            "unable to set file times on {:?}: {}",
-            out_path, err_io
+            "unable to set file times on {out_path:?}: {err_io}"
         ))
     })
 }
