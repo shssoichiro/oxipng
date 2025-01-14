@@ -9,6 +9,7 @@ pub enum PngError {
     TimedOut,
     NotPNG,
     APNGNotSupported,
+    APNGOutOfOrder,
     InvalidData,
     TruncatedData,
     ChunkMissing(&'static str),
@@ -33,6 +34,7 @@ impl fmt::Display for PngError {
                 f.write_str("Missing data in the file; the file is truncated")
             }
             PngError::APNGNotSupported => f.write_str("APNG files are not (yet) supported"),
+            PngError::APNGOutOfOrder => f.write_str("APNG chunks are out of order"),
             PngError::ChunkMissing(s) => write!(f, "Chunk {s} missing or empty"),
             PngError::InvalidDepthForType(d, ref c) => {
                 write!(f, "Invalid bit depth {d} for color type {c}")

@@ -12,6 +12,7 @@ use rgb::ComponentSlice;
 use rustc_hash::FxHashMap;
 
 use crate::{
+    apng::*,
     colors::{BitDepth, ColorType},
     deflate,
     error::PngError,
@@ -47,6 +48,8 @@ pub struct PngData {
     pub idat_data: Vec<u8>,
     /// All non-critical chunks from the PNG are stored here
     pub aux_chunks: Vec<Chunk>,
+    /// APNG frames
+    pub frames: Vec<Frame>,
 }
 
 impl PngData {
@@ -97,6 +100,8 @@ impl PngData {
         let mut idat_data: Vec<u8> = Vec::new();
         let mut key_chunks: FxHashMap<[u8; 4], Vec<u8>> = FxHashMap::default();
         let mut aux_chunks: Vec<Chunk> = Vec::new();
+        let mut frames: Vec<Frame> = Vec::new();
+        let mut sequence_number = 0;
         while let Some(chunk) = parse_next_chunk(byte_data, &mut byte_offset, opts.fix_errors)? {
             match &chunk.name {
                 b"IDAT" => {
@@ -112,27 +117,46 @@ impl PngData {
                 b"IHDR" | b"PLTE" | b"tRNS" => {
                     key_chunks.insert(chunk.name, chunk.data.to_owned());
                 }
-                _ => {
-                    if opts.strip.keep(&chunk.name) {
-                        if chunk.is_c2pa() {
-                            // StripChunks::None is the default value, so to keep optimizing by default,
-                            // interpret it as stripping the C2PA metadata.
-                            // The C2PA metadata is invalidated if the file changes, so it shouldn't be kept.
-                            if opts.strip == StripChunks::None {
-                                continue;
-                            }
-                            return Err(PngError::C2PAMetadataPreventsChanges);
+                _ if opts.strip.keep(&chunk.name) => {
+                    if chunk.is_c2pa() {
+                        // StripChunks::None is the default value, so to keep optimizing by default,
+                        // interpret it as stripping the C2PA metadata.
+                        // The C2PA metadata is invalidated if the file changes, so it shouldn't be kept.
+                        if opts.strip == StripChunks::None {
+                            continue;
                         }
-                        aux_chunks.push(Chunk {
-                            name: chunk.name,
-                            data: chunk.data.to_owned(),
-                        });
-                    } else if chunk.name == *b"acTL" {
-                        warn!(
-                            "Stripping animation data from APNG - image will become standard PNG"
-                        );
+                        return Err(PngError::C2PAMetadataPreventsChanges);
                     }
+                    if chunk.name == *b"fcTL" || chunk.name == *b"fdAT" {
+                        // Validate the sequence number
+                        if read_be_u32(&chunk.data[0..4]) != sequence_number {
+                            return Err(PngError::APNGOutOfOrder);
+                        }
+                        sequence_number += 1;
+                        if chunk.name == *b"fcTL" && !idat_data.is_empty() {
+                            // Only create a Frame if it's after the IDAT (else store it as an aux chunk)
+                            frames.push(Frame::from_fctl_data(chunk.data)?);
+                            continue;
+                        } else if chunk.name == *b"fdAT" {
+                            // Append the data to the last frame
+                            frames
+                                .last_mut()
+                                .ok_or(PngError::APNGOutOfOrder)?
+                                .data
+                                .extend_from_slice(&chunk.data[4..]);
+                            continue;
+                        }
+                    }
+                    // Regular ancillary chunk
+                    aux_chunks.push(Chunk {
+                        name: chunk.name,
+                        data: chunk.data.to_owned(),
+                    });
                 }
+                b"acTL" => {
+                    warn!("Stripping animation data from APNG - image will become standard PNG")
+                }
+                _ => (),
             }
         }
 
@@ -166,6 +190,7 @@ impl PngData {
             idat_data,
             raw: Arc::new(raw),
             aux_chunks,
+            frames,
         })
     }
 
@@ -235,14 +260,24 @@ impl PngData {
             _ => {}
         }
         // Special ancillary chunks that need to come after PLTE but before IDAT
+        let mut sequence_number = 0;
         for chunk in aux_pre
             .iter()
             .filter(|c| matches!(&c.name, b"bKGD" | b"hIST" | b"tRNS" | b"fcTL"))
         {
             write_png_block(&chunk.name, &chunk.data, &mut output);
+            if &chunk.name == b"fcTL" {
+                sequence_number += 1;
+            }
         }
         // IDAT data
         write_png_block(b"IDAT", &self.idat_data, &mut output);
+        // APNG frames
+        for frame in self.frames.iter() {
+            write_png_block(b"fcTL", &frame.fctl_data(sequence_number), &mut output);
+            write_png_block(b"fdAT", &frame.fdat_data(sequence_number + 1), &mut output);
+            sequence_number += 2;
+        }
         // Ancillary chunks that come after IDAT
         for aux_post in aux_split {
             for chunk in aux_post {
