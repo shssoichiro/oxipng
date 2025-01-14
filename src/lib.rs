@@ -59,6 +59,7 @@ pub use crate::{
     options::{InFile, Options, OutFile},
 };
 
+mod apng;
 mod atomicmin;
 mod colors;
 mod deflate;
@@ -530,6 +531,7 @@ fn optimize_raw(
                 raw: png,
                 idat_data,
                 aux_chunks: Vec::new(),
+                frames: Vec::new(),
             };
             if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
                 debug!("Found better combination:");
@@ -549,6 +551,7 @@ fn optimize_raw(
             raw: result.image,
             idat_data: result.idat_data,
             aux_chunks: Vec::new(),
+            frames: Vec::new(),
         };
         if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
             debug!("Found better combination:");
