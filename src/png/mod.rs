@@ -50,6 +50,8 @@ pub struct PngData {
     pub aux_chunks: Vec<Chunk>,
     /// APNG frames
     pub frames: Vec<Frame>,
+    /// The filter strategy applied to the idat_data (initially unknown)
+    pub filter: Option<RowFilter>,
 }
 
 impl PngData {
@@ -173,24 +175,16 @@ impl PngData {
             key_chunks.remove(b"PLTE"),
             key_chunks.remove(b"tRNS"),
         )?;
-        let raw_data = deflate::inflate(idat_data.as_ref(), ihdr.raw_data_size())?;
 
-        // Reject files with incorrect width/height or truncated data
-        if raw_data.len() != ihdr.raw_data_size() {
-            return Err(PngError::TruncatedData);
-        }
+        let raw = PngImage::new(ihdr, &idat_data)?;
 
-        let mut raw = PngImage {
-            ihdr,
-            data: raw_data,
-        };
-        raw.data = raw.unfilter_image()?;
         // Return the PngData
         Ok(Self {
             idat_data,
             raw: Arc::new(raw),
             aux_chunks,
             frames,
+            filter: None,
         })
     }
 
@@ -292,6 +286,22 @@ impl PngData {
 }
 
 impl PngImage {
+    pub fn new(ihdr: IhdrData, compressed_data: &[u8]) -> Result<Self, PngError> {
+        let raw_data = deflate::inflate(compressed_data, ihdr.raw_data_size())?;
+
+        // Reject files with incorrect width/height or truncated data
+        if raw_data.len() != ihdr.raw_data_size() {
+            return Err(PngError::TruncatedData);
+        }
+
+        let mut image = Self {
+            ihdr,
+            data: raw_data,
+        };
+        image.data = image.unfilter_image()?;
+        Ok(image)
+    }
+
     /// Convert the image to the specified interlacing type
     /// Returns true if the interlacing was changed, false otherwise
     /// The `interlace` parameter specifies the *new* interlacing mode
