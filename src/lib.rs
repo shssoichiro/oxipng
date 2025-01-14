@@ -167,7 +167,7 @@ impl RawImage {
             .filter(|c| opts.strip.keep(&c.name))
             .cloned()
             .collect();
-        postprocess_chunks(&mut png, opts, deadline, &self.png.ihdr);
+        postprocess_chunks(&mut png, opts, &self.png.ihdr);
 
         Ok(png.output())
     }
@@ -367,7 +367,8 @@ fn optimize_png(
         png.idat_data = new_png.idat_data;
     }
 
-    postprocess_chunks(png, &opts, deadline, &raw.ihdr);
+    postprocess_chunks(png, &opts, &raw.ihdr);
+    recompress_frames(png, &opts, deadline);
 
     let output = png.output();
 
@@ -659,12 +660,7 @@ fn report_format(prefix: &str, png: &PngImage) {
 }
 
 /// Perform cleanup of certain chunks from the `PngData` object, after optimization has been completed
-fn postprocess_chunks(
-    png: &mut PngData,
-    opts: &Options,
-    deadline: Arc<Deadline>,
-    orig_ihdr: &IhdrData,
-) {
+fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
     if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
         // See if we can replace an iCCP chunk with an sRGB chunk
         let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
@@ -719,38 +715,35 @@ fn postprocess_chunks(
             !invalid
         });
     }
+}
 
-    // Find fdAT chunks and attempt to recompress them
-    // Note if there are multiple fdATs per frame then decompression will fail and nothing will change
-    let mut fdat: Vec<_> = png
-        .aux_chunks
-        .iter_mut()
-        .filter(|c| &c.name == b"fdAT")
-        .collect();
-    if opts.idat_recoding && !fdat.is_empty() {
-        let buffer_size = orig_ihdr.raw_data_size();
-        fdat.par_iter_mut()
-            .with_max_len(1)
-            .enumerate()
-            .for_each(|(i, c)| {
-                if deadline.passed() || c.data.len() <= 4 {
-                    return;
-                }
-                if let Ok(mut data) = deflate::inflate(&c.data[4..], buffer_size).and_then(|data| {
-                    let max_size = AtomicMin::new(Some(c.data.len() - 5));
-                    opts.deflate.deflate(&data, &max_size)
-                }) {
-                    debug!(
-                        "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
-                        i,
-                        c.data.len(),
-                        c.data.len() - 4 - data.len()
-                    );
-                    c.data.truncate(4);
-                    c.data.append(&mut data);
-                }
-            });
+/// Recompress the additional frames of an APNG
+fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>) {
+    if !opts.idat_recoding || png.frames.is_empty() {
+        return;
     }
+    let buffer_size = png.raw.ihdr.raw_data_size();
+    png.frames
+        .par_iter_mut()
+        .with_max_len(1)
+        .enumerate()
+        .for_each(|(i, frame)| {
+            if deadline.passed() {
+                return;
+            }
+            if let Ok(data) = deflate::inflate(&frame.data, buffer_size).and_then(|data| {
+                let max_size = AtomicMin::new(Some(frame.data.len() - 1));
+                opts.deflate.deflate(&data, &max_size)
+            }) {
+                debug!(
+                    "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
+                    i,
+                    data.len(),
+                    frame.data.len() - data.len()
+                );
+                frame.data = data;
+            }
+        });
 }
 
 /// Check if an image was already optimized prior to oxipng's operations
