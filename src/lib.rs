@@ -725,7 +725,11 @@ fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>)
     if !opts.idat_recoding || png.frames.is_empty() {
         return;
     }
-    let buffer_size = png.raw.ihdr.raw_data_size();
+    // Use the same filter chosen for the main image
+    // No filter means we failed to optimise the main image and we shouldn't bother trying here
+    let Some(filter) = png.filter else {
+        return;
+    };
     png.frames
         .par_iter_mut()
         .with_max_len(1)
@@ -734,9 +738,13 @@ fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>)
             if deadline.passed() {
                 return;
             }
-            if let Ok(data) = deflate::inflate(&frame.data, buffer_size).and_then(|data| {
+            let mut ihdr = png.raw.ihdr.clone();
+            ihdr.width = frame.width;
+            ihdr.height = frame.height;
+            if let Ok(data) = PngImage::new(ihdr, &frame.data).and_then(|image| {
+                let filtered = image.filter_image(filter, opts.optimize_alpha);
                 let max_size = AtomicMin::new(Some(frame.data.len() - 1));
-                opts.deflate.deflate(&data, &max_size)
+                opts.deflate.deflate(&filtered, &max_size)
             }) {
                 debug!(
                     "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
