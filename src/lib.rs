@@ -365,6 +365,7 @@ fn optimize_png(
     if let Some(new_png) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_size) {
         png.raw = new_png.raw;
         png.idat_data = new_png.idat_data;
+        png.filter = new_png.filter;
     }
 
     postprocess_chunks(png, &opts, &raw.ihdr);
@@ -533,6 +534,7 @@ fn optimize_raw(
                 idat_data,
                 aux_chunks: Vec::new(),
                 frames: Vec::new(),
+                filter: Some(filter),
             };
             if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
                 debug!("Found better combination:");
@@ -553,6 +555,7 @@ fn optimize_raw(
             idat_data: result.idat_data,
             aux_chunks: Vec::new(),
             frames: Vec::new(),
+            filter: Some(result.filter),
         };
         if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
             debug!("Found better combination:");
