@@ -134,7 +134,7 @@ fn parse_jumbf_box(data: &[u8]) -> Option<(&[u8], &[u8])> {
         return None;
     }
     let (len, rest) = data.split_at(4);
-    let len = u32::from_be_bytes(len.try_into().unwrap()) as usize;
+    let len = read_be_u32(len) as usize;
     if len < 8 || len > data.len() {
         return None;
     }
@@ -153,32 +153,25 @@ pub fn parse_next_chunk<'a>(
             .get(*byte_offset..*byte_offset + 4)
             .ok_or(PngError::TruncatedData)?,
     );
+    if byte_data.len() < *byte_offset + 12 + length as usize {
+        return Err(PngError::TruncatedData);
+    }
     *byte_offset += 4;
 
     let chunk_start = *byte_offset;
-    let chunk_name = byte_data
-        .get(chunk_start..chunk_start + 4)
-        .ok_or(PngError::TruncatedData)?;
+    let chunk_name = &byte_data[chunk_start..chunk_start + 4];
     if chunk_name == b"IEND" {
         // End of data
         return Ok(None);
     }
     *byte_offset += 4;
 
-    let data = byte_data
-        .get(*byte_offset..*byte_offset + length as usize)
-        .ok_or(PngError::TruncatedData)?;
+    let data = &byte_data[*byte_offset..*byte_offset + length as usize];
     *byte_offset += length as usize;
-    let crc = read_be_u32(
-        byte_data
-            .get(*byte_offset..*byte_offset + 4)
-            .ok_or(PngError::TruncatedData)?,
-    );
+    let crc = read_be_u32(&byte_data[*byte_offset..*byte_offset + 4]);
     *byte_offset += 4;
 
-    let chunk_bytes = byte_data
-        .get(chunk_start..chunk_start + 4 + length as usize)
-        .ok_or(PngError::TruncatedData)?;
+    let chunk_bytes = &byte_data[chunk_start..chunk_start + 4 + length as usize];
     if !fix_errors && crc32(chunk_bytes) != crc {
         return Err(PngError::new(&format!(
             "CRC Mismatch in {} chunk; May be recoverable by using --fix",
@@ -202,13 +195,13 @@ pub fn parse_ihdr_chunk(
             0 => ColorType::Grayscale {
                 transparent_shade: trns_data
                     .filter(|t| t.len() >= 2)
-                    .map(|t| u16::from_be_bytes([t[0], t[1]])),
+                    .map(|t| read_be_u16(&t[0..2])),
             },
             2 => ColorType::RGB {
                 transparent_color: trns_data.filter(|t| t.len() >= 6).map(|t| RGB16 {
-                    r: u16::from_be_bytes([t[0], t[1]]),
-                    g: u16::from_be_bytes([t[2], t[3]]),
-                    b: u16::from_be_bytes([t[4], t[5]]),
+                    r: read_be_u16(&t[0..2]),
+                    g: read_be_u16(&t[2..4]),
+                    b: read_be_u16(&t[4..6]),
                 }),
             },
             3 => ColorType::Indexed {
@@ -245,7 +238,12 @@ fn palette_to_rgba(
 }
 
 #[inline]
-fn read_be_u32(bytes: &[u8]) -> u32 {
+pub fn read_be_u16(bytes: &[u8]) -> u16 {
+    u16::from_be_bytes(bytes.try_into().unwrap())
+}
+
+#[inline]
+pub fn read_be_u32(bytes: &[u8]) -> u32 {
     u32::from_be_bytes(bytes.try_into().unwrap())
 }
 
