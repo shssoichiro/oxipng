@@ -399,6 +399,10 @@ fn optimize_png(
         );
     }
 
+    if opts.interlace == Some(Interlacing::Adam7) && png.raw.ihdr.interlaced != Interlacing::Adam7 {
+        warn!("Interlacing was not enabled as it would result in a larger file. To override this, use `--force`.");
+    }
+
     #[cfg(feature = "sanity-checks")]
     assert!(sanity_checks::validate_output(&output, original_data));
 
