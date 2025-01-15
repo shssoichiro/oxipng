@@ -44,7 +44,7 @@ pub use rgb::{RGB16, RGBA8};
 
 use crate::{
     atomicmin::AtomicMin,
-    evaluate::Evaluator,
+    evaluate::{Candidate, Evaluator},
     headers::*,
     png::{PngData, PngImage},
     reduction::*,
@@ -425,12 +425,13 @@ fn optimize_raw(
     // 8 is a little slower but not noticeably when used only for reductions (o3 and higher)
     // 9 is not appreciably better than 8
     // 10 and higher are quite slow - good for filters but only good for reductions if matching the main zc level
-    let eval_compression = match opts.deflate {
+    let compression = match opts.deflate {
         Deflaters::Libdeflater { compression } => {
             if opts.fast_evaluation { 7 } else { 8 }.min(compression)
         }
         _ => 8,
     };
+    let eval_deflater = Deflaters::Libdeflater { compression };
     // If only one filter is selected, use this for evaluations
     let eval_filters = if opts.filter.len() == 1 {
         opts.filter.clone()
@@ -439,137 +440,139 @@ fn optimize_raw(
         indexset! {RowFilter::None, RowFilter::Bigrams}
     };
     // This will collect all versions of images and pick one that compresses best
-    let eval = Evaluator::new(
-        deadline.clone(),
-        eval_filters.clone(),
-        eval_compression,
-        false,
-    );
-    let mut png = perform_reductions(image.clone(), opts, &deadline, &eval);
-    let mut eval_result = eval.get_best_candidate();
+    let eval = Evaluator::new(deadline.clone(), eval_filters.clone(), eval_deflater, false);
+    let mut new_image = perform_reductions(image.clone(), opts, &deadline, &eval);
+    let eval_result = eval.get_best_candidate();
     if let Some(ref result) = eval_result {
-        png = result.image.clone();
+        new_image = result.image.clone();
     }
-    let reduction_occurred = png.ihdr.color_type != image.ihdr.color_type
-        || png.ihdr.bit_depth != image.ihdr.bit_depth
-        || png.ihdr.interlaced != image.ihdr.interlaced;
+    let reduction_occurred = new_image.ihdr.color_type != image.ihdr.color_type
+        || new_image.ihdr.bit_depth != image.ihdr.bit_depth
+        || new_image.ihdr.interlaced != image.ihdr.interlaced;
 
     if reduction_occurred {
-        report_format("Transformed image to ", &png);
+        report_format("Transformed image to ", &new_image);
     }
 
-    if opts.idat_recoding || reduction_occurred {
-        let mut filters = opts.filter.clone();
-        let fast_eval = opts.fast_evaluation && (filters.len() > 1 || eval_result.is_some());
-        let best: Option<TrialResult> = if fast_eval {
-            // Perform a fast evaluation of selected filters followed by a single main compression trial
-
-            if eval_result.is_some() {
-                // Some filters have already been evaluated, we don't need to try them again
-                filters = filters.difference(&eval_filters).copied().collect();
-            }
-
-            if !filters.is_empty() {
-                trace!("Evaluating: {} filters", filters.len());
-                let eval = Evaluator::new(deadline, filters, eval_compression, opts.optimize_alpha);
-                if let Some(ref result) = eval_result {
-                    eval.set_best_size(result.idat_data.len());
-                }
-                eval.try_image(png.clone());
-                if let Some(result) = eval.get_best_candidate() {
-                    eval_result = Some(result);
-                }
-            }
-            // We should have a result here - fail if not (e.g. deadline passed)
-            let result = eval_result?;
-
-            match opts.deflate {
-                Deflaters::Libdeflater { compression } if compression <= eval_compression => {
-                    // No further compression required
-                    Some((result.filter, result.idat_data))
-                }
-                _ => {
-                    debug!("Trying: {}", result.filter);
-                    let best_size = AtomicMin::new(max_size);
-                    perform_trial(&result.filtered, opts, result.filter, &best_size)
-                }
-            }
-        } else {
-            // Perform full compression trials of selected filters and determine the best
-
-            if filters.is_empty() {
-                // Pick a filter automatically
-                if png.ihdr.bit_depth as u8 >= 8 {
-                    // Bigrams is the best all-rounder when there's at least one byte per pixel
-                    filters.insert(RowFilter::Bigrams);
-                } else {
-                    // Otherwise delta filters generally don't work well, so just stick with None
-                    filters.insert(RowFilter::None);
-                }
-            }
-
-            debug!("Trying: {} filters", filters.len());
-
-            let best_size = AtomicMin::new(max_size);
-            let results_iter = filters.into_par_iter().with_max_len(1);
-            let best = results_iter.filter_map(|filter| {
-                if deadline.passed() {
-                    return None;
-                }
-                let filtered = &png.filter_image(filter, opts.optimize_alpha);
-                perform_trial(filtered, opts, filter, &best_size)
-            });
-            best.reduce_with(|i, j| {
-                if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
-                    i
-                } else {
-                    j
-                }
-            })
-        };
-
-        if let Some((filter, idat_data)) = best {
-            let image = PngData {
-                raw: png,
-                idat_data,
-                aux_chunks: Vec::new(),
-                frames: Vec::new(),
-                filter: Some(filter),
-            };
-            if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
-                debug!("Found better combination:");
-                debug!(
-                    "    zc = {}  f = {:8}  {} bytes",
-                    opts.deflate,
-                    filter,
-                    image.idat_data.len()
-                );
-                return Some(image);
-            }
-        }
-    } else if let Some(result) = eval_result {
+    let mut deflater = opts.deflate;
+    let mut png = if opts.idat_recoding || reduction_occurred {
+        perform_trials(
+            new_image.clone(),
+            opts,
+            deadline.clone(),
+            max_size,
+            eval_result,
+            eval_filters,
+            eval_deflater,
+        )
+        .map(|(filter, idat_data)| PngData {
+            raw: new_image,
+            idat_data,
+            aux_chunks: Vec::new(),
+            frames: Vec::new(),
+            filter: Some(filter),
+        })
+    } else {
         // If idat_recoding is off and reductions were attempted but ended up choosing the baseline,
         // we should still check if the evaluator compressed the baseline smaller than the original.
-        let image = PngData {
+        deflater = eval_deflater;
+        eval_result.map(|result| PngData {
             raw: result.image,
             idat_data: result.idat_data,
             aux_chunks: Vec::new(),
             frames: Vec::new(),
             filter: Some(result.filter),
+        })
+    };
+
+    png = png.filter(|png| png.estimated_output_size() < max_size.unwrap_or(usize::MAX));
+    if let Some(png) = &png {
+        debug!("Found better result:");
+        debug!(
+            "    zc = {}  f = {:8}  {} bytes",
+            deflater,
+            png.filter.unwrap(),
+            png.idat_data.len()
+        );
+    }
+    png
+}
+
+/// Perform compression trials
+fn perform_trials(
+    image: Arc<PngImage>,
+    opts: &Options,
+    deadline: Arc<Deadline>,
+    max_size: Option<usize>,
+    mut eval_result: Option<Candidate>,
+    eval_filters: IndexSet<RowFilter>,
+    eval_deflater: Deflaters,
+) -> Option<TrialResult> {
+    let mut filters = opts.filter.clone();
+    let fast_eval = opts.fast_evaluation && (filters.len() > 1 || eval_result.is_some());
+    if fast_eval {
+        // Perform a fast evaluation of selected filters followed by a single main compression trial
+
+        if eval_result.is_some() {
+            // Some filters have already been evaluated, we don't need to try them again
+            filters = filters.difference(&eval_filters).copied().collect();
+        }
+
+        if !filters.is_empty() {
+            trace!("Evaluating: {} filters", filters.len());
+            let eval = Evaluator::new(deadline, filters, eval_deflater, opts.optimize_alpha);
+            if let Some(ref result) = eval_result {
+                eval.set_best_size(result.idat_data.len());
+            }
+            eval.try_image(image.clone());
+            if let Some(result) = eval.get_best_candidate() {
+                eval_result = Some(result);
+            }
+        }
+        // We should have a result here - fail if not (e.g. deadline passed)
+        let result = eval_result?;
+
+        return if opts.deflate == eval_deflater {
+            // No further compression required
+            Some((result.filter, result.idat_data))
+        } else {
+            debug!("Trying: {}", result.filter);
+            let best_size = AtomicMin::new(max_size);
+            perform_trial(&result.filtered, opts, result.filter, &best_size)
         };
-        if image.estimated_output_size() < max_size.unwrap_or(usize::MAX) {
-            debug!("Found better combination:");
-            debug!(
-                "    zc = {}  f = {:8}  {} bytes",
-                eval_compression,
-                result.filter,
-                image.idat_data.len()
-            );
-            return Some(image);
+    }
+
+    // Perform full compression trials of selected filters and determine the best
+
+    if filters.is_empty() {
+        // Pick a filter automatically
+        if image.ihdr.bit_depth as u8 >= 8 {
+            // Bigrams is the best all-rounder when there's at least one byte per pixel
+            filters.insert(RowFilter::Bigrams);
+        } else {
+            // Otherwise delta filters generally don't work well, so just stick with None
+            filters.insert(RowFilter::None);
         }
     }
 
-    None
+    debug!("Trying: {} filters", filters.len());
+
+    let best_size = AtomicMin::new(max_size);
+    let results_iter = filters.into_par_iter().with_max_len(1);
+    let best = results_iter.filter_map(|filter| {
+        if deadline.passed() {
+            return None;
+        }
+        let filtered = &image.filter_image(filter, opts.optimize_alpha);
+        perform_trial(filtered, opts, filter, &best_size)
+    });
+    best.reduce_with(|i, j| {
+        if i.1.len() < j.1.len() || (i.1.len() == j.1.len() && i.0 < j.0) {
+            i
+        } else {
+            j
+        }
+    })
 }
 
 /// Execute a compression trial

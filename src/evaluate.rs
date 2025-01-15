@@ -10,6 +10,7 @@ use std::sync::{
 
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
+use deflate::Deflaters;
 use indexmap::IndexSet;
 use log::trace;
 use rayon::prelude::*;
@@ -43,7 +44,7 @@ impl Candidate {
 pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
     filters: IndexSet<RowFilter>,
-    compression: u8,
+    deflater: Deflaters,
     optimize_alpha: bool,
     nth: AtomicUsize,
     executed: Arc<AtomicUsize>,
@@ -60,7 +61,7 @@ impl Evaluator {
     pub fn new(
         deadline: Arc<Deadline>,
         filters: IndexSet<RowFilter>,
-        compression: u8,
+        deflater: Deflaters,
         optimize_alpha: bool,
     ) -> Self {
         #[cfg(feature = "parallel")]
@@ -68,7 +69,7 @@ impl Evaluator {
         Self {
             deadline,
             filters,
-            compression,
+            deflater,
             optimize_alpha,
             nth: AtomicUsize::new(0),
             executed: Arc::new(AtomicUsize::new(0)),
@@ -118,7 +119,7 @@ impl Evaluator {
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
         let filters = self.filters.clone();
-        let compression = self.compression;
+        let deflater = self.deflater;
         let optimize_alpha = self.optimize_alpha;
         let executed = self.executed.clone();
         let best_candidate_size = self.best_candidate_size.clone();
@@ -140,7 +141,7 @@ impl Evaluator {
                     return;
                 }
                 let filtered = image.filter_image(filter, optimize_alpha);
-                let idat_data = deflate::deflate(&filtered, compression, &best_candidate_size);
+                let idat_data = deflater.deflate(&filtered, &best_candidate_size);
                 if let Ok(idat_data) = idat_data {
                     let size = idat_data.len() + image.key_chunks_size();
                     best_candidate_size.set_min(size);

@@ -182,7 +182,7 @@ fn verbose_mode() {
         "    IDAT size = 113794 bytes",
         "    File size = 114708 bytes",
         "Trying: 1 filters",
-        "Found better combination:",
+        "Found better result:",
         "    zc = 11  f = None ",
         "    IDAT size = ",
         "    file size = ",
