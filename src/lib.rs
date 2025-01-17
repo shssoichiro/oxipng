@@ -369,7 +369,7 @@ fn optimize_png(
     }
 
     postprocess_chunks(png, &opts, &raw.ihdr);
-    recompress_frames(png, &opts, deadline);
+    recompress_frames(png, &opts, deadline)?;
 
     let output = png.output();
 
@@ -721,31 +721,30 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
 }
 
 /// Recompress the additional frames of an APNG
-fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>) {
+fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>) -> PngResult<()> {
     if !opts.idat_recoding || png.frames.is_empty() {
-        return;
+        return Ok(());
     }
     // Use the same filter chosen for the main image
     // No filter means we failed to optimise the main image and we shouldn't bother trying here
     let Some(filter) = png.filter else {
-        return;
+        return Ok(());
     };
     png.frames
         .par_iter_mut()
         .with_max_len(1)
         .enumerate()
-        .for_each(|(i, frame)| {
+        .try_for_each(|(i, frame)| {
             if deadline.passed() {
-                return;
+                return Ok(());
             }
             let mut ihdr = png.raw.ihdr.clone();
             ihdr.width = frame.width;
             ihdr.height = frame.height;
-            if let Ok(data) = PngImage::new(ihdr, &frame.data).and_then(|image| {
-                let filtered = image.filter_image(filter, opts.optimize_alpha);
-                let max_size = AtomicMin::new(Some(frame.data.len() - 1));
-                opts.deflate.deflate(&filtered, &max_size)
-            }) {
+            let image = PngImage::new(ihdr, &frame.data)?;
+            let filtered = image.filter_image(filter, opts.optimize_alpha);
+            let max_size = AtomicMin::new(Some(frame.data.len() - 1));
+            if let Ok(data) = opts.deflate.deflate(&filtered, &max_size) {
                 debug!(
                     "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
                     i,
@@ -754,7 +753,8 @@ fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>)
                 );
                 frame.data = data;
             }
-        });
+            Ok(())
+        })
 }
 
 /// Check if an image was already optimized prior to oxipng's operations
