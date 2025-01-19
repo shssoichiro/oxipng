@@ -29,9 +29,15 @@ pub(crate) struct Candidate {
 }
 
 impl Candidate {
+    /// Return an estimate of the output size which can help with evaluation of very small data
+    #[must_use]
+    pub fn estimated_output_size(&self) -> usize {
+        self.idat_data.len() + self.image.key_chunks_size()
+    }
+
     fn cmp_key(&self) -> impl Ord {
         (
-            self.idat_data.len() + self.image.key_chunks_size(),
+            self.estimated_output_size(),
             self.image.data.len(),
             self.filter,
             // Prefer the later image added (e.g. baseline, which is always added last)
@@ -143,7 +149,14 @@ impl Evaluator {
                 let filtered = image.filter_image(filter, optimize_alpha);
                 let idat_data = deflater.deflate(&filtered, &best_candidate_size);
                 if let Ok(idat_data) = idat_data {
-                    let size = idat_data.len() + image.key_chunks_size();
+                    let new = Candidate {
+                        image: image.clone(),
+                        idat_data,
+                        filtered,
+                        filter,
+                        nth,
+                    };
+                    let size = new.estimated_output_size();
                     best_candidate_size.set_min(size);
                     trace!(
                         "Eval: {}-bit {:23} {:8}   {} bytes",
@@ -152,13 +165,6 @@ impl Evaluator {
                         filter,
                         size
                     );
-                    let new = Candidate {
-                        image: image.clone(),
-                        idat_data,
-                        filtered,
-                        filter,
-                        nth,
-                    };
 
                     #[cfg(feature = "parallel")]
                     {
