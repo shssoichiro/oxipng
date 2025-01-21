@@ -147,7 +147,7 @@ impl Evaluator {
                     return;
                 }
                 let filtered = image.filter_image(filter, optimize_alpha);
-                let idat_data = deflater.deflate(&filtered, &best_candidate_size);
+                let idat_data = deflater.deflate(&filtered, best_candidate_size.get());
                 if let Ok(idat_data) = idat_data {
                     let new = Candidate {
                         image: image.clone(),

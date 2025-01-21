@@ -5,7 +5,7 @@ use std::{fmt, fmt::Display};
 
 pub use deflater::{crc32, deflate, inflate};
 
-use crate::{AtomicMin, PngError, PngResult};
+use crate::{PngError, PngResult};
 #[cfg(feature = "zopfli")]
 mod zopfli_oxipng;
 #[cfg(feature = "zopfli")]
@@ -30,13 +30,13 @@ pub enum Deflaters {
 }
 
 impl Deflaters {
-    pub(crate) fn deflate(self, data: &[u8], max_size: &AtomicMin) -> PngResult<Vec<u8>> {
+    pub(crate) fn deflate(self, data: &[u8], max_size: Option<usize>) -> PngResult<Vec<u8>> {
         let compressed = match self {
             Self::Libdeflater { compression } => deflate(data, compression, max_size)?,
             #[cfg(feature = "zopfli")]
             Self::Zopfli { iterations } => zopfli_deflate(data, iterations)?,
         };
-        if let Some(max) = max_size.get() {
+        if let Some(max) = max_size {
             if compressed.len() > max {
                 return Err(PngError::DeflatedDataTooLong(max));
             }

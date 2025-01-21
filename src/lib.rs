@@ -42,13 +42,6 @@ use log::{debug, info, trace, warn};
 use rayon::prelude::*;
 pub use rgb::{RGB16, RGBA8};
 
-use crate::{
-    atomicmin::AtomicMin,
-    evaluate::{Candidate, Evaluator},
-    headers::*,
-    png::{PngData, PngImage},
-    reduction::*,
-};
 pub use crate::{
     colors::{BitDepth, ColorType},
     deflate::Deflaters,
@@ -57,6 +50,12 @@ pub use crate::{
     headers::StripChunks,
     interlace::Interlacing,
     options::{InFile, Options, OutFile},
+};
+use crate::{
+    evaluate::{Candidate, Evaluator},
+    headers::*,
+    png::{PngData, PngImage},
+    reduction::*,
 };
 
 mod apng;
@@ -80,7 +79,7 @@ mod sanity_checks;
 pub mod internal_tests {
     #[cfg(feature = "sanity-checks")]
     pub use crate::sanity_checks::*;
-    pub use crate::{atomicmin::*, deflate::*, png::*, reduction::*};
+    pub use crate::{deflate::*, png::*, reduction::*};
 }
 
 pub type PngResult<T> = Result<T, PngError>;
@@ -149,7 +148,7 @@ impl RawImage {
     pub fn add_icc_profile(&mut self, data: &[u8]) {
         // Compress with fastest compression level - will be recompressed during optimization
         let deflater = Deflaters::Libdeflater { compression: 1 };
-        if let Ok(iccp) = construct_iccp(data, deflater) {
+        if let Ok(iccp) = make_iccp(data, deflater, None) {
             self.aux_chunks.push(iccp);
         }
     }
@@ -529,10 +528,7 @@ fn perform_trials(
 
         // Recompress with the main deflater
         debug!("Trying filter {}, zc = {}", result.filter, opts.deflate);
-        match opts
-            .deflate
-            .deflate(&result.filtered, &AtomicMin::new(max_size))
-        {
+        match opts.deflate.deflate(&result.filtered, max_size) {
             Ok(idat_data) => {
                 result.idat_data = idat_data;
                 trace!("{} bytes", result.estimated_output_size());
@@ -649,17 +645,14 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
                 };
             } else if opts.idat_recoding {
                 // Try recompressing the profile
-                if let Ok(iccp) = construct_iccp(&icc, opts.deflate) {
-                    let cur_len = png.aux_chunks[iccp_idx].data.len();
-                    let new_len = iccp.data.len();
-                    if new_len < cur_len {
-                        debug!(
-                            "Recompressed iCCP chunk: {} ({} bytes decrease)",
-                            new_len,
-                            cur_len - new_len
-                        );
-                        png.aux_chunks[iccp_idx] = iccp;
-                    }
+                let cur_len = png.aux_chunks[iccp_idx].data.len();
+                if let Ok(iccp) = make_iccp(&icc, opts.deflate, Some(cur_len - 1)) {
+                    debug!(
+                        "Recompressed iCCP chunk: {} ({} bytes decrease)",
+                        iccp.data.len(),
+                        cur_len - iccp.data.len()
+                    );
+                    png.aux_chunks[iccp_idx] = iccp;
                 }
             }
         }
@@ -706,8 +699,8 @@ fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>)
             ihdr.height = frame.height;
             let image = PngImage::new(ihdr, &frame.data)?;
             let filtered = image.filter_image(filter, opts.optimize_alpha);
-            let max_size = AtomicMin::new(Some(frame.data.len() - 1));
-            if let Ok(data) = opts.deflate.deflate(&filtered, &max_size) {
+            let max_size = Some(frame.data.len() - 1);
+            if let Ok(data) = opts.deflate.deflate(&filtered, max_size) {
                 debug!(
                     "Recompressed fdAT #{:<2}: {} ({} bytes decrease)",
                     i,
