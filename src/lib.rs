@@ -156,16 +156,21 @@ impl RawImage {
     /// Create an optimized png from the raw image data using the options provided
     pub fn create_optimized_png(&self, opts: &Options) -> PngResult<Vec<u8>> {
         let deadline = Arc::new(Deadline::new(opts.timeout));
-        let mut png = optimize_raw(self.png.clone(), opts, deadline.clone(), None)
-            .ok_or_else(|| PngError::new("Failed to optimize input data"))?;
+        let Some(result) = optimize_raw(self.png.clone(), opts, deadline, None) else {
+            return Err(PngError::new("Failed to optimize input data"));
+        };
 
-        // Process aux chunks
-        png.aux_chunks = self
-            .aux_chunks
-            .iter()
-            .filter(|c| opts.strip.keep(&c.name))
-            .cloned()
-            .collect();
+        let mut png = PngData {
+            raw: result.image,
+            idat_data: result.idat_data,
+            aux_chunks: self
+                .aux_chunks
+                .iter()
+                .filter(|c| opts.strip.keep(&c.name))
+                .cloned()
+                .collect(),
+            frames: Vec::new(),
+        };
         postprocess_chunks(&mut png, opts, &self.png.ihdr);
 
         Ok(png.output())
@@ -359,14 +364,13 @@ fn optimize_png(
     } else {
         Some(png.estimated_output_size())
     };
-    if let Some(new_png) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_size) {
-        png.raw = new_png.raw;
-        png.idat_data = new_png.idat_data;
-        png.filter = new_png.filter;
+    if let Some(result) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_size) {
+        png.raw = result.image;
+        png.idat_data = result.idat_data;
+        recompress_frames(png, &opts, deadline, result.filter)?;
     }
 
     postprocess_chunks(png, &opts, &raw.ihdr);
-    recompress_frames(png, &opts, deadline)?;
 
     let output = png.output();
 
@@ -415,7 +419,7 @@ fn optimize_raw(
     opts: &Options,
     deadline: Arc<Deadline>,
     max_size: Option<usize>,
-) -> Option<PngData> {
+) -> Option<Candidate> {
     // Libdeflate has four algorithms: 0 = 'uncompressed', 1-4 = 'greedy', 5-7 = 'lazy', 8-9 = 'lazy2', 10-12 = 'near-optimal'
     // 5 is the minimumm required for a decent evaluation result
     // 7 is not noticeably slower than 5 and improves evaluation of filters in 'fast' mode (o2 and lower)
@@ -471,13 +475,7 @@ fn optimize_raw(
     if max_size.map_or(true, |max_size| result.estimated_output_size() < max_size) {
         debug!("Found better result:");
         debug!("    zc = {}  f = {}", deflater, result.filter);
-        return Some(PngData {
-            raw: result.image,
-            idat_data: result.idat_data,
-            aux_chunks: Vec::new(),
-            frames: Vec::new(),
-            filter: Some(result.filter),
-        });
+        return Some(result);
     }
     None
 }
@@ -677,15 +675,15 @@ fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
 }
 
 /// Recompress the additional frames of an APNG
-fn recompress_frames(png: &mut PngData, opts: &Options, deadline: Arc<Deadline>) -> PngResult<()> {
+fn recompress_frames(
+    png: &mut PngData,
+    opts: &Options,
+    deadline: Arc<Deadline>,
+    filter: RowFilter,
+) -> PngResult<()> {
     if !opts.idat_recoding || png.frames.is_empty() {
         return Ok(());
     }
-    // Use the same filter chosen for the main image
-    // No filter means we failed to optimise the main image and we shouldn't bother trying here
-    let Some(filter) = png.filter else {
-        return Ok(());
-    };
     png.frames
         .par_iter_mut()
         .with_max_len(1)
