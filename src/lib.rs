@@ -474,7 +474,7 @@ fn optimize_raw(
 
     if max_size.map_or(true, |max_size| result.estimated_output_size() < max_size) {
         debug!("Found better result:");
-        debug!("    zc = {}  f = {}", deflater, result.filter);
+        debug!("    {}, f = {}", deflater, result.filter);
         return Some(result);
     }
     None
@@ -525,7 +525,7 @@ fn perform_trials(
         let mut result = eval_result?;
 
         // Recompress with the main deflater
-        debug!("Trying filter {}, zc = {}", result.filter, opts.deflate);
+        debug!("Trying filter {} with {}", result.filter, opts.deflate);
         match opts.deflate.deflate(&result.filtered, max_size) {
             Ok(idat_data) => {
                 result.idat_data = idat_data;
@@ -552,7 +552,7 @@ fn perform_trials(
         }
     }
 
-    debug!("Trying {} filters, zc = {}", filters.len(), opts.deflate);
+    debug!("Trying {} filters with {}", filters.len(), opts.deflate);
     let eval = Evaluator::new(deadline, filters, opts.deflate, opts.optimize_alpha);
     if let Some(max_size) = max_size {
         eval.set_best_size(max_size);
