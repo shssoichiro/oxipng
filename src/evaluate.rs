@@ -23,7 +23,7 @@ pub(crate) struct Candidate {
     pub idat_data: Vec<u8>,
     pub filtered: Vec<u8>,
     pub filter: RowFilter,
-    // first wins tie-breaker
+    // For determining tie-breaker
     nth: usize,
 }
 
@@ -32,9 +32,9 @@ impl Candidate {
         (
             self.idat_data.len() + self.image.key_chunks_size(),
             self.image.data.len(),
-            self.image.ihdr.bit_depth,
             self.filter,
-            self.nth,
+            // Prefer the later image added (e.g. baseline, which is always added last)
+            usize::MAX - self.nth,
         )
     }
 }
