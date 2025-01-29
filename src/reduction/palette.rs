@@ -87,7 +87,7 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
     let mut enumerated: Vec<_> = palette.iter().enumerate().collect();
     // Put the most popular edge color first, which can help slightly if the filter bytes are 0
     let keep_first = most_popular_edge_color(palette.len(), png);
-    let first = enumerated.remove(keep_first);
+    let first = keep_first.map(|f| enumerated.remove(f));
 
     // Sort the palette
     enumerated.sort_by(|a, b| {
@@ -104,7 +104,9 @@ pub fn sorted_palette(png: &PngImage) -> Option<PngImage> {
         };
         color_val(a.1).cmp(&color_val(b.1))
     });
-    enumerated.insert(0, first);
+    if let Some(first) = first {
+        enumerated.insert(0, first);
+    }
 
     // Extract the new palette and determine if anything changed
     let (remapping, palette): (Vec<_>, Vec<RGBA8>) = enumerated.into_iter().unzip();
@@ -204,7 +206,7 @@ fn apply_palette_reorder(png: &PngImage, remapping: &[usize]) -> Option<PngImage
 }
 
 // Find the most popular color on the image edges (the pixels neighboring the filter bytes)
-fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
+fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> Option<usize> {
     let mut counts = [0u32; 256];
     for line in png.scan_lines(false) {
         if let &[first, .., last] = line.data {
@@ -212,14 +214,18 @@ fn most_popular_edge_color(num_colors: usize, png: &PngImage) -> usize {
             counts[last as usize] += 1;
         }
     }
-    counts
+    let max = counts
         .iter()
-        .copied()
         .take(num_colors)
         .enumerate()
         .max_by_key(|&(_, v)| v)
-        .unwrap_or_default()
-        .0
+        .unwrap();
+    // Ensure there's a clear winner - return None if multiple colors are tied
+    let max_equal = counts.iter().filter(|&v| v == max.1).count();
+    if max_equal > 1 {
+        return None;
+    }
+    Some(max.0)
 }
 
 // Find the most popular color in the image, along with its count
