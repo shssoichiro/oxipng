@@ -106,7 +106,9 @@ pub(crate) fn perform_reductions(
     // Attempt to convert from indexed to channels
     // This may give a better result due to dropping the PLTE chunk
     if !cheap && opts.color_type_reduction && !deadline.passed() {
-        if let Some(reduced) = indexed_to_channels(&png, opts.grayscale_reduction) {
+        if let Some(reduced) =
+            indexed_to_channels(&png, opts.grayscale_reduction, opts.optimize_alpha)
+        {
             // This result should not be passed on to subsequent reductions
             eval.try_image(Arc::new(reduced));
             evaluation_added = true;
