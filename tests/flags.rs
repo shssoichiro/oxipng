@@ -181,9 +181,9 @@ fn verbose_mode() {
         "    8-bit RGB, non-interlaced",
         "    IDAT size = 113794 bytes",
         "    File size = 114708 bytes",
-        "Trying: 1 filters",
-        "Found better combination:",
-        "    zc = 11  f = None ",
+        "Trying 1 filters with zc = ",
+        "Found better result:",
+        "    zc = 11, f = None",
         "    IDAT size = ",
         "    file size = ",
     ];

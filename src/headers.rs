@@ -8,7 +8,7 @@ use crate::{
     display_chunks::DISPLAY_CHUNKS,
     error::PngError,
     interlace::Interlacing,
-    AtomicMin, Deflaters, PngResult,
+    Deflaters, PngResult,
 };
 
 #[derive(Debug, Clone)]
@@ -275,9 +275,9 @@ pub fn extract_icc(iccp: &Chunk) -> Option<Vec<u8>> {
     }
 }
 
-/// Construct an iCCP chunk by compressing the ICC profile
-pub fn construct_iccp(icc: &[u8], deflater: Deflaters) -> PngResult<Chunk> {
-    let mut compressed = deflater.deflate(icc, &AtomicMin::new(None))?;
+/// Make an iCCP chunk by compressing the ICC profile
+pub fn make_iccp(icc: &[u8], deflater: Deflaters, max_size: Option<usize>) -> PngResult<Chunk> {
+    let mut compressed = deflater.deflate(icc, max_size)?;
     let mut data = Vec::with_capacity(compressed.len() + 5);
     data.extend(b"icc"); // Profile name - generally unused, can be anything
     data.extend([0, 0]); // Null separator, zlib compression method

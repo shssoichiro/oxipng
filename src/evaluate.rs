@@ -10,6 +10,7 @@ use std::sync::{
 
 #[cfg(feature = "parallel")]
 use crossbeam_channel::{unbounded, Receiver, Sender};
+use deflate::Deflaters;
 use indexmap::IndexSet;
 use log::trace;
 use rayon::prelude::*;
@@ -28,9 +29,15 @@ pub(crate) struct Candidate {
 }
 
 impl Candidate {
+    /// Return an estimate of the output size which can help with evaluation of very small data
+    #[must_use]
+    pub fn estimated_output_size(&self) -> usize {
+        self.idat_data.len() + self.image.key_chunks_size()
+    }
+
     fn cmp_key(&self) -> impl Ord {
         (
-            self.idat_data.len() + self.image.key_chunks_size(),
+            self.estimated_output_size(),
             self.image.data.len(),
             self.filter,
             // Prefer the later image added (e.g. baseline, which is always added last)
@@ -43,7 +50,7 @@ impl Candidate {
 pub(crate) struct Evaluator {
     deadline: Arc<Deadline>,
     filters: IndexSet<RowFilter>,
-    compression: u8,
+    deflater: Deflaters,
     optimize_alpha: bool,
     nth: AtomicUsize,
     executed: Arc<AtomicUsize>,
@@ -60,7 +67,7 @@ impl Evaluator {
     pub fn new(
         deadline: Arc<Deadline>,
         filters: IndexSet<RowFilter>,
-        compression: u8,
+        deflater: Deflaters,
         optimize_alpha: bool,
     ) -> Self {
         #[cfg(feature = "parallel")]
@@ -68,7 +75,7 @@ impl Evaluator {
         Self {
             deadline,
             filters,
-            compression,
+            deflater,
             optimize_alpha,
             nth: AtomicUsize::new(0),
             executed: Arc::new(AtomicUsize::new(0)),
@@ -118,7 +125,7 @@ impl Evaluator {
         // These clones are only cheap refcounts
         let deadline = self.deadline.clone();
         let filters = self.filters.clone();
-        let compression = self.compression;
+        let deflater = self.deflater;
         let optimize_alpha = self.optimize_alpha;
         let executed = self.executed.clone();
         let best_candidate_size = self.best_candidate_size.clone();
@@ -140,9 +147,16 @@ impl Evaluator {
                     return;
                 }
                 let filtered = image.filter_image(filter, optimize_alpha);
-                let idat_data = deflate::deflate(&filtered, compression, &best_candidate_size);
+                let idat_data = deflater.deflate(&filtered, best_candidate_size.get());
                 if let Ok(idat_data) = idat_data {
-                    let size = idat_data.len() + image.key_chunks_size();
+                    let new = Candidate {
+                        image: image.clone(),
+                        idat_data,
+                        filtered,
+                        filter,
+                        nth,
+                    };
+                    let size = new.estimated_output_size();
                     best_candidate_size.set_min(size);
                     trace!(
                         "Eval: {}-bit {:23} {:8}   {} bytes",
@@ -151,13 +165,6 @@ impl Evaluator {
                         filter,
                         size
                     );
-                    let new = Candidate {
-                        image: image.clone(),
-                        idat_data,
-                        filtered,
-                        filter,
-                        nth,
-                    };
 
                     #[cfg(feature = "parallel")]
                     {

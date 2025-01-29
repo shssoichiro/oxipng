@@ -50,8 +50,6 @@ pub struct PngData {
     pub aux_chunks: Vec<Chunk>,
     /// APNG frames
     pub frames: Vec<Frame>,
-    /// The filter strategy applied to the idat_data (initially unknown)
-    pub filter: Option<RowFilter>,
 }
 
 impl PngData {
@@ -184,7 +182,6 @@ impl PngData {
             raw: Arc::new(raw),
             aux_chunks,
             frames,
-            filter: None,
         })
     }
 
