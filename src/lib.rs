@@ -509,7 +509,7 @@ fn perform_trials(
                 opts.optimize_alpha,
             );
             if let Some(result) = &eval_result {
-                eval.set_best_size(result.idat_data.len());
+                eval.set_best_size(result.estimated_output_size());
             }
             eval.try_image(image.clone());
             if let Some(result) = eval.get_best_candidate() {
