@@ -49,9 +49,9 @@ impl Display for Deflaters {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Libdeflater { compression } => Display::fmt(&format!("zc = {}", compression), f),
+            Self::Libdeflater { compression } => write!(f, "zc = {compression}"),
             #[cfg(feature = "zopfli")]
-            Self::Zopfli { iterations } => Display::fmt(&format!("zopfli, zi = {}", iterations), f),
+            Self::Zopfli { iterations } => write!(f, "zopfli, zi = {iterations}"),
         }
     }
 }

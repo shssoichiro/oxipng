@@ -32,13 +32,11 @@ impl Display for ColorType {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Grayscale { .. } => Display::fmt("Grayscale", f),
-            Self::RGB { .. } => Display::fmt("RGB", f),
-            Self::Indexed { palette } => {
-                Display::fmt(&format!("Indexed ({} colors)", palette.len()), f)
-            }
-            Self::GrayscaleAlpha => Display::fmt("Grayscale + Alpha", f),
-            Self::RGBA => Display::fmt("RGB + Alpha", f),
+            Self::Grayscale { .. } => write!(f, "Grayscale"),
+            Self::RGB { .. } => write!(f, "RGB"),
+            Self::Indexed { palette } => write!(f, "Indexed ({} colors)", palette.len()),
+            Self::GrayscaleAlpha => write!(f, "Grayscale + Alpha"),
+            Self::RGBA => write!(f, "RGB + Alpha"),
         }
     }
 }
