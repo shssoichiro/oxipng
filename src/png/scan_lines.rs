@@ -157,7 +157,7 @@ impl Iterator for ScanLineRanges {
             (self.width, None)
         };
         let bits_per_line = pixels_per_line as usize * self.bits_per_pixel;
-        let mut len = (bits_per_line + 7) / 8;
+        let mut len = bits_per_line.div_ceil(8);
         if self.has_filter {
             len += 1;
         }

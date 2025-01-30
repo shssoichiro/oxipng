@@ -118,7 +118,7 @@ impl RawImage {
 
         // Validate data length
         let bpp = bit_depth as usize * color_type.channels_per_pixel() as usize;
-        let row_bytes = (bpp * width as usize + 7) / 8;
+        let row_bytes = (bpp * width as usize).div_ceil(8);
         let expected_len = row_bytes * height as usize;
         if data.len() != expected_len {
             return Err(PngError::IncorrectDataLength(data.len(), expected_len));

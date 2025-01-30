@@ -5,8 +5,7 @@ extern crate test;
 
 use std::path::PathBuf;
 
-use oxipng::internal_tests::*;
-use oxipng::*;
+use oxipng::{internal_tests::*, *};
 use test::Bencher;
 
 #[bench]

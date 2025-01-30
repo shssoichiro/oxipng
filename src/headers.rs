@@ -42,7 +42,7 @@ impl IhdrData {
         let bpp = self.bpp();
 
         fn bitmap_size(bpp: usize, w: usize, h: usize) -> usize {
-            ((w * bpp + 7) / 8) * h
+            (w * bpp).div_ceil(8) * h
         }
 
         if self.interlaced == Interlacing::None {

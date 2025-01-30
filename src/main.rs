@@ -18,8 +18,9 @@ mod rayon;
 
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
-use std::process::ExitCode;
-use std::{ffi::OsString, fs::DirBuilder, io::Write, path::PathBuf, time::Duration};
+use std::{
+    ffi::OsString, fs::DirBuilder, io::Write, path::PathBuf, process::ExitCode, time::Duration,
+};
 
 use clap::ArgMatches;
 mod cli;
