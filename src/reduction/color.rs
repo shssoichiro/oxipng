@@ -138,14 +138,29 @@ pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
 
 /// Attempt to convert indexed to a different color type, returning the resulting image if successful
 #[must_use]
-pub fn indexed_to_channels(png: &PngImage, allow_grayscale: bool) -> Option<PngImage> {
+pub fn indexed_to_channels(
+    png: &PngImage,
+    allow_grayscale: bool,
+    optimize_alpha: bool,
+) -> Option<PngImage> {
     if png.ihdr.bit_depth != BitDepth::Eight {
         return None;
     }
-    let palette = match &png.ihdr.color_type {
-        ColorType::Indexed { palette } => palette,
+    let mut palette = match &png.ihdr.color_type {
+        ColorType::Indexed { palette } => palette.clone(),
         _ => return None,
     };
+
+    // Ensure fully transparent colors are black, which can help with grayscale conversion
+    if optimize_alpha {
+        for color in &mut palette {
+            if color.a == 0 {
+                color.r = 0;
+                color.g = 0;
+                color.b = 0;
+            }
+        }
+    }
 
     // Determine which channels are required
     let is_gray = if allow_grayscale {

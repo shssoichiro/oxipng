@@ -257,7 +257,7 @@ fn reductions_palette_8_to_grayscale_8(b: &mut Bencher) {
     ));
     let png = PngData::new(&input, &Options::default()).unwrap();
 
-    b.iter(|| color::indexed_to_channels(&png.raw, true));
+    b.iter(|| color::indexed_to_channels(&png.raw, true, false));
 }
 
 #[bench]
