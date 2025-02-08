@@ -106,7 +106,7 @@ pub fn reduced_rgb_to_grayscale(png: &PngImage) -> Option<PngImage> {
     let byte_depth = png.bytes_per_channel();
     let bpp = png.channels_per_pixel() * byte_depth;
     let last_color = 2 * byte_depth;
-    for pixel in png.data.chunks(bpp) {
+    for pixel in png.data.chunks_exact(bpp) {
         if byte_depth == 1 {
             if pixel[0] != pixel[1] || pixel[1] != pixel[2] {
                 return None;

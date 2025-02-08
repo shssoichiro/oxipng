@@ -225,7 +225,7 @@ fn palette_to_rgba(
 ) -> Result<Vec<RGBA8>, PngError> {
     let palette_data = palette_data.ok_or_else(|| PngError::new("no palette in indexed image"))?;
     let mut palette: Vec<_> = palette_data
-        .chunks(3)
+        .chunks_exact(3)
         .map(|color| RGBA8::new(color[0], color[1], color[2], 255))
         .collect();
 
