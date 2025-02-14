@@ -1,3 +1,10 @@
+## Version 9.1.4
+
+- [Improvement] Improve optimization of APNG files (reductions still not supported yet).
+- [Improvement] Improve reductions for small images and ensure consistent results for repeat runs.
+- [Build] Add feature `system-libdeflate` to use the system-installed version of libdeflate.
+- [Misc] Strip C2PA metadata by default.
+
 ## Version 9.1.3
 
 - [Feature] Add `--zi` option to control the number of Zopfli iterations.
