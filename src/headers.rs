@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use log::warn;
+use log::{debug, trace, warn};
 use rgb::{RGB16, RGBA8};
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
     display_chunks::DISPLAY_CHUNKS,
     error::PngError,
     interlace::Interlacing,
-    Deflaters, PngResult,
+    Deflaters, Options, PngResult,
 };
 
 #[derive(Debug, Clone)]
@@ -312,5 +312,99 @@ pub fn srgb_rendering_intent(icc_data: &[u8]) -> Option<u8> {
             }
         }
         _ => None,
+    }
+}
+
+/// Process aux chunks and potentially adjust options before optimizing
+pub fn preprocess_chunks(aux_chunks: &mut Vec<Chunk>, opts: &mut Options) {
+    let has_srgb = aux_chunks.iter().any(|c| &c.name == b"sRGB");
+    // Grayscale conversion should not be performed if the image is not in the sRGB colorspace
+    // An sRGB profile would need to be stripped on conversion, so disallow if stripping is disabled
+    let mut allow_grayscale = !has_srgb || opts.strip != StripChunks::None;
+
+    if let Some(iccp_idx) = aux_chunks.iter().position(|c| &c.name == b"iCCP") {
+        allow_grayscale = false;
+        // See if we can replace an iCCP chunk with an sRGB chunk
+        let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
+        if may_replace_iccp && has_srgb {
+            // Files aren't supposed to have both chunks, so we chose to honor sRGB
+            trace!("Removing iCCP chunk due to conflict with sRGB chunk");
+            aux_chunks.remove(iccp_idx);
+            allow_grayscale = true;
+        } else if let Some(icc) = extract_icc(&aux_chunks[iccp_idx]) {
+            let intent = if may_replace_iccp {
+                srgb_rendering_intent(&icc)
+            } else {
+                None
+            };
+            // sRGB-like profile can be replaced with an sRGB chunk with the same rendering intent
+            if let Some(intent) = intent {
+                trace!("Replacing iCCP chunk with equivalent sRGB chunk");
+                aux_chunks[iccp_idx] = Chunk {
+                    name: *b"sRGB",
+                    data: vec![intent],
+                };
+                allow_grayscale = true;
+            } else if opts.idat_recoding {
+                // Try recompressing the profile
+                let cur_len = aux_chunks[iccp_idx].data.len();
+                if let Ok(iccp) = make_iccp(&icc, opts.deflate, Some(cur_len - 1)) {
+                    debug!(
+                        "Recompressed iCCP chunk: {} ({} bytes decrease)",
+                        iccp.data.len(),
+                        cur_len - iccp.data.len()
+                    );
+                    aux_chunks[iccp_idx] = iccp;
+                }
+            }
+        }
+    }
+
+    if !allow_grayscale && opts.grayscale_reduction {
+        debug!("Disabling grayscale reduction due to presence of sRGB or iCCP chunk");
+        opts.grayscale_reduction = false;
+    }
+
+    // Check for APNG by presence of acTL chunk
+    if aux_chunks.iter().any(|c| &c.name == b"acTL") {
+        warn!("APNG detected, disabling all reductions");
+        opts.interlace = None;
+        opts.bit_depth_reduction = false;
+        opts.color_type_reduction = false;
+        opts.palette_reduction = false;
+        opts.grayscale_reduction = false;
+    }
+}
+
+/// Perform cleanup of certain aux chunks after optimization has been completed
+pub fn postprocess_chunks(aux_chunks: &mut Vec<Chunk>, ihdr: &IhdrData, orig_ihdr: &IhdrData) {
+    // If the depth/color type has changed, some chunks may be invalid and should be dropped
+    // While these could potentially be converted, they have no known use case today and are
+    // generally more trouble than they're worth
+    if orig_ihdr.bit_depth != ihdr.bit_depth || orig_ihdr.color_type != ihdr.color_type {
+        aux_chunks.retain(|c| {
+            let invalid = &c.name == b"bKGD" || &c.name == b"sBIT" || &c.name == b"hIST";
+            if invalid {
+                warn!(
+                    "Removing {} chunk as it no longer matches the image data",
+                    std::str::from_utf8(&c.name).unwrap()
+                );
+            }
+            !invalid
+        });
+    }
+
+    // Remove any sRGB or iCCP chunks if the image was converted to or from grayscale
+    if orig_ihdr.color_type.is_gray() != ihdr.color_type.is_gray() {
+        aux_chunks.retain(|c| {
+            let invalid = &c.name == b"sRGB" || &c.name == b"iCCP";
+            if invalid {
+                trace!(
+                    "Removing {} chunk as it no longer matches the color type",
+                    std::str::from_utf8(&c.name).unwrap()
+                );
+            }
+            !invalid
+        });
     }
 }
