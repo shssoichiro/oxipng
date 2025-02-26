@@ -26,7 +26,6 @@ extern crate rayon;
 mod rayon;
 
 use std::{
-    borrow::Cow,
     fs::{File, Metadata},
     io::{stdin, stdout, BufWriter, Read, Write},
     path::Path,
@@ -155,23 +154,27 @@ impl RawImage {
 
     /// Create an optimized png from the raw image data using the options provided
     pub fn create_optimized_png(&self, opts: &Options) -> PngResult<Vec<u8>> {
+        let mut opts = opts.to_owned();
+        let mut aux_chunks: Vec<_> = self
+            .aux_chunks
+            .iter()
+            .filter(|c| opts.strip.keep(&c.name))
+            .cloned()
+            .collect();
+        preprocess_chunks(&mut aux_chunks, &mut opts);
+
         let deadline = Arc::new(Deadline::new(opts.timeout));
-        let Some(result) = optimize_raw(self.png.clone(), opts, deadline, None) else {
+        let Some(result) = optimize_raw(self.png.clone(), &opts, deadline, None) else {
             return Err(PngError::new("Failed to optimize input data"));
         };
 
         let mut png = PngData {
             raw: result.image,
             idat_data: result.idat_data,
-            aux_chunks: self
-                .aux_chunks
-                .iter()
-                .filter(|c| opts.strip.keep(&c.name))
-                .cloned()
-                .collect(),
+            aux_chunks,
             frames: Vec::new(),
         };
-        postprocess_chunks(&mut png, opts, &self.png.ihdr);
+        postprocess_chunks(&mut png.aux_chunks, &png.raw.ihdr, &self.png.ihdr);
 
         Ok(png.output())
     }
@@ -346,19 +349,9 @@ fn optimize_png(
     debug!("    IDAT size = {} bytes", idat_original_size);
     debug!("    File size = {} bytes", file_original_size);
 
-    // Check for APNG by presence of acTL chunk
-    let opts = if png.aux_chunks.iter().any(|c| &c.name == b"acTL") {
-        warn!("APNG detected, disabling all reductions");
-        let mut opts = opts.to_owned();
-        opts.interlace = None;
-        opts.bit_depth_reduction = false;
-        opts.color_type_reduction = false;
-        opts.palette_reduction = false;
-        opts.grayscale_reduction = false;
-        Cow::Owned(opts)
-    } else {
-        Cow::Borrowed(opts)
-    };
+    let mut opts = opts.to_owned();
+    preprocess_chunks(&mut png.aux_chunks, &mut opts);
+
     let max_size = if opts.force {
         None
     } else {
@@ -368,9 +361,8 @@ fn optimize_png(
         png.raw = result.image;
         png.idat_data = result.idat_data;
         recompress_frames(png, &opts, deadline, result.filter)?;
+        postprocess_chunks(&mut png.aux_chunks, &png.raw.ihdr, &raw.ihdr);
     }
-
-    postprocess_chunks(png, &opts, &raw.ihdr);
 
     let output = png.output();
 
@@ -617,61 +609,6 @@ fn report_format(prefix: &str, png: &PngImage) {
         "{}{}-bit {}, {}",
         prefix, png.ihdr.bit_depth, png.ihdr.color_type, png.ihdr.interlaced
     );
-}
-
-/// Perform cleanup of certain chunks from the `PngData` object, after optimization has been completed
-fn postprocess_chunks(png: &mut PngData, opts: &Options, orig_ihdr: &IhdrData) {
-    if let Some(iccp_idx) = png.aux_chunks.iter().position(|c| &c.name == b"iCCP") {
-        // See if we can replace an iCCP chunk with an sRGB chunk
-        let may_replace_iccp = opts.strip != StripChunks::None && opts.strip.keep(b"sRGB");
-        if may_replace_iccp && png.aux_chunks.iter().any(|c| &c.name == b"sRGB") {
-            // Files aren't supposed to have both chunks, so we chose to honor sRGB
-            trace!("Removing iCCP chunk due to conflict with sRGB chunk");
-            png.aux_chunks.remove(iccp_idx);
-        } else if let Some(icc) = extract_icc(&png.aux_chunks[iccp_idx]) {
-            let intent = if may_replace_iccp {
-                srgb_rendering_intent(&icc)
-            } else {
-                None
-            };
-            // sRGB-like profile can be replaced with an sRGB chunk with the same rendering intent
-            if let Some(intent) = intent {
-                trace!("Replacing iCCP chunk with equivalent sRGB chunk");
-                png.aux_chunks[iccp_idx] = Chunk {
-                    name: *b"sRGB",
-                    data: vec![intent],
-                };
-            } else if opts.idat_recoding {
-                // Try recompressing the profile
-                let cur_len = png.aux_chunks[iccp_idx].data.len();
-                if let Ok(iccp) = make_iccp(&icc, opts.deflate, Some(cur_len - 1)) {
-                    debug!(
-                        "Recompressed iCCP chunk: {} ({} bytes decrease)",
-                        iccp.data.len(),
-                        cur_len - iccp.data.len()
-                    );
-                    png.aux_chunks[iccp_idx] = iccp;
-                }
-            }
-        }
-    }
-
-    // If the depth/color type has changed, some chunks may be invalid and should be dropped
-    // While these could potentially be converted, they have no known use case today and are
-    // generally more trouble than they're worth
-    let ihdr = &png.raw.ihdr;
-    if orig_ihdr.bit_depth != ihdr.bit_depth || orig_ihdr.color_type != ihdr.color_type {
-        png.aux_chunks.retain(|c| {
-            let invalid = &c.name == b"bKGD" || &c.name == b"sBIT" || &c.name == b"hIST";
-            if invalid {
-                warn!(
-                    "Removing {} chunk as it no longer matches the image data",
-                    std::str::from_utf8(&c.name).unwrap()
-                );
-            }
-            !invalid
-        });
-    }
 }
 
 /// Recompress the additional frames of an APNG

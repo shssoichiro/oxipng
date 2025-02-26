@@ -1,5 +1,3 @@
-#[cfg(feature = "filetime")]
-use std::cell::RefCell;
 #[cfg(feature = "zopfli")]
 use std::num::NonZeroU8;
 use std::{
@@ -10,19 +8,17 @@ use std::{
 use indexmap::indexset;
 use oxipng::{internal_tests::*, *};
 
+const GRAY: u8 = 0;
 const RGB: u8 = 2;
 const INDEXED: u8 = 3;
 
-fn get_opts(input: &Path) -> (OutFile, oxipng::Options) {
-    let mut options = oxipng::Options {
+fn get_opts(input: &Path) -> (OutFile, Options) {
+    let options = Options {
         force: true,
         fast_evaluation: false,
+        filter: indexset! {RowFilter::None},
         ..Default::default()
     };
-    let mut filter = IndexSet::new();
-    filter.insert(RowFilter::None);
-    options.filter = filter;
-
     (OutFile::from_path(input.with_extension("out.png")), options)
 }
 
@@ -39,15 +35,19 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     mut callback_pre: CBPRE,
     mut callback_post: CBPOST,
 ) where
-    CBPOST: FnMut(&Path),
-    CBPRE: FnMut(&Path),
+    CBPOST: FnMut(&PngData),
+    CBPRE: FnMut(&PngData),
 {
-    let png = PngData::new(&input, opts).unwrap();
+    let parse_opts = Options {
+        fix_errors: true,
+        ..Default::default()
+    };
+    let png = PngData::new(&input, &parse_opts).unwrap();
 
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_in);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_in);
 
-    callback_pre(&input);
+    callback_pre(&png);
 
     match oxipng::optimize(&InFile::Path(input), output, opts) {
         Ok(_) => (),
@@ -56,8 +56,6 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
     let output = output.path().unwrap();
     assert!(output.exists());
 
-    callback_post(output);
-
     let png = match PngData::new(output, opts) {
         Ok(x) => x,
         Err(x) => {
@@ -65,6 +63,8 @@ fn test_it_converts_callbacks<CBPRE, CBPOST>(
             panic!("{}", x)
         }
     };
+
+    callback_post(&png);
 
     assert_eq!(png.raw.ihdr.color_type.png_header_code(), color_type_out);
     assert_eq!(png.raw.ihdr.bit_depth, bit_depth_out);
@@ -205,352 +205,10 @@ fn count_chunk(png: &PngData, name: &[u8; 4]) -> usize {
 }
 
 #[test]
-fn strip_headers_list() {
-    let input = PathBuf::from("tests/files/strip_headers_list.png");
+fn strip_chunks_list() {
+    let input = PathBuf::from("tests/files/strip_chunks_list.png");
     let (output, mut opts) = get_opts(&input);
     opts.strip = StripChunks::Strip(indexset![*b"iCCP", *b"tEXt"]);
-
-    let png = PngData::new(&input, &Options::default()).unwrap();
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 3);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 1);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 0);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 0);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn strip_headers_safe() {
-    let input = PathBuf::from("tests/files/strip_headers_safe.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.strip = StripChunks::Safe;
-
-    let png = PngData::new(&input, &Options::default()).unwrap();
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 3);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 1);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 0);
-    assert_eq!(count_chunk(&png, b"iTXt"), 0);
-    assert_eq!(count_chunk(&png, b"sRGB"), 1);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn strip_headers_all() {
-    let input = PathBuf::from("tests/files/strip_headers_all.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.strip = StripChunks::All;
-
-    let png = PngData::new(&input, &Options::default()).unwrap();
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 3);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 1);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 0);
-    assert_eq!(count_chunk(&png, b"iTXt"), 0);
-    assert_eq!(count_chunk(&png, b"iCCP"), 0);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn strip_headers_none() {
-    let input = PathBuf::from("tests/files/strip_headers_none.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.strip = StripChunks::None;
-
-    let png = PngData::new(&input, &Options::default()).unwrap();
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 3);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 1);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(count_chunk(&png, b"tEXt"), 3);
-    assert_eq!(count_chunk(&png, b"iTXt"), 1);
-    assert_eq!(count_chunk(&png, b"iCCP"), 1);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn interlacing_0_to_1() {
-    let input = PathBuf::from("tests/files/interlacing_0_to_1.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(Interlacing::Adam7);
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn interlacing_1_to_0() {
-    let input = PathBuf::from("tests/files/interlacing_1_to_0.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(Interlacing::None);
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn interlacing_0_to_1_small_files() {
-    let input = PathBuf::from("tests/files/interlacing_0_to_1_small_files.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(Interlacing::Adam7);
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGB);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn interlacing_1_to_0_small_files() {
-    let input = PathBuf::from("tests/files/interlacing_1_to_0_small_files.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(Interlacing::None);
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), RGB);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn interlaced_0_to_1_other_filter_mode() {
-    let input = PathBuf::from("tests/files/interlaced_0_to_1_other_filter_mode.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.interlace = Some(Interlacing::Adam7);
-    let mut filter = IndexSet::new();
-    filter.insert(RowFilter::Paeth);
-    opts.filter = filter;
-
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &opts) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
-
-    remove_file(output).ok();
-}
-
-#[test]
-fn preserve_attrs() {
-    let input = PathBuf::from("tests/files/preserve_attrs.png");
-
-    #[cfg(feature = "filetime")]
-    let atime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
-    #[cfg(feature = "filetime")]
-    let mtime_canon = RefCell::new(filetime::FileTime::from_unix_time(0, 0));
-
-    let (mut output, opts) = get_opts(&input);
-    if let OutFile::Path { preserve_attrs, .. } = &mut output {
-        *preserve_attrs = true;
-    }
-
-    #[cfg(feature = "filetime")]
-    let callback_pre = |path_in: &Path| {
-        let meta_input = path_in
-            .metadata()
-            .expect("unable to get file metadata for output file");
-
-        atime_canon.replace(filetime::FileTime::from_last_access_time(&meta_input));
-        mtime_canon.replace(filetime::FileTime::from_last_modification_time(&meta_input));
-    };
-    #[cfg(not(feature = "filetime"))]
-    let callback_pre = |_: &Path| {};
-
-    #[cfg(feature = "filetime")]
-    let callback_post = |path_out: &Path| {
-        let meta_output = path_out
-            .metadata()
-            .expect("unable to get file metadata for output file");
-
-        let cellref_atime_canon = atime_canon.borrow();
-        let cellref_mtime_canon = mtime_canon.borrow();
-        let ref_atime_canon: &filetime::FileTime = &cellref_atime_canon;
-        let ref_mtime_canon: &filetime::FileTime = &cellref_mtime_canon;
-
-        assert_eq!(
-            ref_atime_canon,
-            &filetime::FileTime::from_last_access_time(&meta_output),
-            "expected access time to be identical to that of input",
-        );
-        assert_eq!(
-            ref_mtime_canon,
-            &filetime::FileTime::from_last_modification_time(&meta_output),
-            "expected modification time to be identical to that of input",
-        );
-    };
-    #[cfg(not(feature = "filetime"))]
-    let callback_post = |_: &Path| {};
 
     test_it_converts_callbacks(
         input,
@@ -560,9 +218,267 @@ fn preserve_attrs() {
         BitDepth::Eight,
         RGB,
         BitDepth::Eight,
-        callback_pre,
-        callback_post,
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 3);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 0);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 0);
+        },
     );
+}
+
+#[test]
+fn strip_chunks_safe() {
+    let input = PathBuf::from("tests/files/strip_chunks_safe.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::Safe;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 3);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 0);
+            assert_eq!(count_chunk(png, b"iTXt"), 0);
+            assert_eq!(count_chunk(png, b"iCCP"), 0);
+        },
+    );
+}
+
+#[test]
+fn strip_chunks_all() {
+    let input = PathBuf::from("tests/files/strip_chunks_all.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::All;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 3);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 0);
+            assert_eq!(count_chunk(png, b"iTXt"), 0);
+            assert_eq!(count_chunk(png, b"iCCP"), 0);
+        },
+    );
+}
+
+#[test]
+fn strip_chunks_none() {
+    let input = PathBuf::from("tests/files/strip_chunks_none.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::None;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 3);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"tEXt"), 3);
+            assert_eq!(count_chunk(png, b"iTXt"), 1);
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+    );
+}
+
+#[test]
+fn interlacing_0_to_1() {
+    let input = PathBuf::from("tests/files/interlacing_0_to_1.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.interlace = Some(Interlacing::Adam7);
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
+        },
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
+        },
+    );
+}
+
+#[test]
+fn interlacing_1_to_0() {
+    let input = PathBuf::from("tests/files/interlacing_1_to_0.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.interlace = Some(Interlacing::None);
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
+        },
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
+        },
+    );
+}
+
+#[test]
+fn interlacing_0_to_1_small_files() {
+    let input = PathBuf::from("tests/files/interlacing_0_to_1_small_files.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.interlace = Some(Interlacing::Adam7);
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        INDEXED,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
+        },
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
+        },
+    );
+}
+
+#[test]
+fn interlacing_1_to_0_small_files() {
+    let input = PathBuf::from("tests/files/interlacing_1_to_0_small_files.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.interlace = Some(Interlacing::None);
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        INDEXED,
+        BitDepth::Eight,
+        RGB,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
+        },
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
+        },
+    );
+}
+
+#[test]
+fn interlaced_0_to_1_other_filter_mode() {
+    let input = PathBuf::from("tests/files/interlaced_0_to_1_other_filter_mode.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.interlace = Some(Interlacing::Adam7);
+    opts.filter = indexset! {RowFilter::Paeth};
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Sixteen,
+        GRAY,
+        BitDepth::Sixteen,
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::None);
+        },
+        |png| {
+            assert_eq!(png.raw.ihdr.interlaced, Interlacing::Adam7);
+        },
+    );
+}
+
+#[test]
+fn preserve_attrs() {
+    let input = PathBuf::from("tests/files/preserve_attrs.png");
+
+    #[cfg(feature = "filetime")]
+    let meta_input = input
+        .metadata()
+        .expect("unable to get file metadata for output file");
+    #[cfg(feature = "filetime")]
+    let atime_canon = filetime::FileTime::from_last_access_time(&meta_input);
+    #[cfg(feature = "filetime")]
+    let mtime_canon = filetime::FileTime::from_last_modification_time(&meta_input);
+
+    let (mut output, opts) = get_opts(&input);
+    if let OutFile::Path { preserve_attrs, .. } = &mut output {
+        *preserve_attrs = true;
+    }
+
+    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
+        Ok(_) => (),
+        Err(x) => panic!("{}", x),
+    };
+    let output = output.path().unwrap();
+    assert!(output.exists());
+
+    #[cfg(feature = "filetime")]
+    let meta_output = output
+        .metadata()
+        .expect("unable to get file metadata for output file");
+    #[cfg(feature = "filetime")]
+    assert_eq!(
+        &atime_canon,
+        &filetime::FileTime::from_last_access_time(&meta_output),
+        "expected access time to be identical to that of input",
+    );
+    #[cfg(feature = "filetime")]
+    assert_eq!(
+        &mtime_canon,
+        &filetime::FileTime::from_last_modification_time(&meta_output),
+        "expected modification time to be identical to that of input",
+    );
+
+    match PngData::new(output, &opts) {
+        Ok(x) => x,
+        Err(x) => {
+            remove_file(output).ok();
+            panic!("{}", x)
+        }
+    };
+
+    remove_file(output).ok();
 
     // TODO: Actually check permissions
 }
@@ -573,39 +489,6 @@ fn fix_errors() {
     let (output, mut opts) = get_opts(&input);
     opts.fix_errors = true;
 
-    let png = PngData::new(&input, &opts).unwrap();
-
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    match oxipng::optimize(&InFile::Path(input), &output, &opts) {
-        Ok(_) => (),
-        Err(x) => panic!("{}", x),
-    };
-    let output = output.path().unwrap();
-    assert!(output.exists());
-
-    let png = match PngData::new(output, &Options::default()) {
-        Ok(x) => x,
-        Err(x) => {
-            remove_file(output).ok();
-            panic!("{}", x)
-        }
-    };
-
-    assert_eq!(png.raw.ihdr.color_type.png_header_code(), INDEXED);
-    assert_eq!(png.raw.ihdr.bit_depth, BitDepth::Eight);
-
-    // Cannot check if pixels are equal because image crate cannot read corrupt (input) PNGs
-    remove_file(output).ok();
-}
-
-#[test]
-fn no_color_type_change() {
-    let input = PathBuf::from("tests/files/palette_8_should_be_rgb.png");
-    let (output, mut opts) = get_opts(&input);
-    opts.color_type_reduction = false;
-
     test_it_converts(
         input,
         &output,
@@ -613,7 +496,7 @@ fn no_color_type_change() {
         INDEXED,
         BitDepth::Eight,
         INDEXED,
-        BitDepth::One,
+        BitDepth::Eight,
     );
 }
 
@@ -631,6 +514,99 @@ fn no_grayscale_change() {
         BitDepth::Eight,
         INDEXED,
         BitDepth::Eight,
+    );
+}
+
+#[test]
+fn profile_adobe_rgb_disallow_gray() {
+    let input = PathBuf::from("tests/files/profile_adobe_rgb_disallow_gray.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::Safe;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+    );
+}
+
+#[test]
+fn profile_srgb_allow_gray() {
+    let input = PathBuf::from("tests/files/profile_srgb_allow_gray.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::Safe;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        GRAY,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 0);
+            assert_eq!(count_chunk(png, b"sRGB"), 0);
+        },
+    );
+}
+
+#[test]
+fn profile_srgb_no_strip_disallow_gray() {
+    let input = PathBuf::from("tests/files/profile_srgb_no_strip_disallow_gray.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::None;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        RGB,
+        BitDepth::Eight,
+        INDEXED,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+    );
+}
+
+#[test]
+fn profile_gray_disallow_color() {
+    let input = PathBuf::from("tests/files/profile_gray_disallow_color.png");
+    let (output, mut opts) = get_opts(&input);
+    opts.strip = StripChunks::Safe;
+
+    test_it_converts_callbacks(
+        input,
+        &output,
+        &opts,
+        GRAY,
+        BitDepth::Eight,
+        GRAY,
+        BitDepth::Eight,
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
+        |png| {
+            assert_eq!(count_chunk(png, b"iCCP"), 1);
+        },
     );
 }
 
