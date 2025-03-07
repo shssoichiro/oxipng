@@ -22,6 +22,7 @@ use crate::{atomicmin::AtomicMin, deflate, filters::RowFilter, png::PngImage, De
 pub(crate) struct Candidate {
     pub image: Arc<PngImage>,
     pub idat_data: Vec<u8>,
+    pub estimated_output_size: usize,
     pub filtered: Vec<u8>,
     pub filter: RowFilter,
     // For determining tie-breaker
@@ -29,15 +30,9 @@ pub(crate) struct Candidate {
 }
 
 impl Candidate {
-    /// Return an estimate of the output size which can help with evaluation of very small data
-    #[must_use]
-    pub fn estimated_output_size(&self) -> usize {
-        self.idat_data.len() + self.image.key_chunks_size()
-    }
-
     fn cmp_key(&self) -> impl Ord {
         (
-            self.estimated_output_size(),
+            self.estimated_output_size,
             self.image.data.len(),
             self.filter,
             // Prefer the later image added (e.g. baseline, which is always added last)
@@ -52,6 +47,7 @@ pub(crate) struct Evaluator {
     filters: IndexSet<RowFilter>,
     deflater: Deflaters,
     optimize_alpha: bool,
+    final_round: bool,
     nth: AtomicUsize,
     executed: Arc<AtomicUsize>,
     best_candidate_size: Arc<AtomicMin>,
@@ -69,6 +65,7 @@ impl Evaluator {
         filters: IndexSet<RowFilter>,
         deflater: Deflaters,
         optimize_alpha: bool,
+        final_round: bool,
     ) -> Self {
         #[cfg(feature = "parallel")]
         let eval_channel = unbounded();
@@ -77,6 +74,7 @@ impl Evaluator {
             filters,
             deflater,
             optimize_alpha,
+            final_round,
             nth: AtomicUsize::new(0),
             executed: Arc::new(AtomicUsize::new(0)),
             best_candidate_size: Arc::new(AtomicMin::new(None)),
@@ -127,6 +125,7 @@ impl Evaluator {
         let filters = self.filters.clone();
         let deflater = self.deflater;
         let optimize_alpha = self.optimize_alpha;
+        let final_round = self.final_round;
         let executed = self.executed.clone();
         let best_candidate_size = self.best_candidate_size.clone();
         let description = description.to_string();
@@ -149,21 +148,24 @@ impl Evaluator {
                 let filtered = image.filter_image(filter, optimize_alpha);
                 let idat_data = deflater.deflate(&filtered, best_candidate_size.get());
                 if let Ok(idat_data) = idat_data {
+                    let estimated_output_size = image.estimated_output_size(&idat_data);
+                    // In the final round, we need the IDAT data but not the filtered data
+                    // Otherwise, we want to keep the filtered data for the next round
                     let new = Candidate {
                         image: image.clone(),
-                        idat_data,
-                        filtered,
+                        idat_data: if final_round { idat_data } else { vec![] },
+                        estimated_output_size,
+                        filtered: if final_round { vec![] } else { filtered },
                         filter,
                         nth,
                     };
-                    let size = new.estimated_output_size();
-                    best_candidate_size.set_min(size);
+                    best_candidate_size.set_min(estimated_output_size);
                     trace!(
                         "Eval: {}-bit {:23} {:8}   {} bytes",
                         image.ihdr.bit_depth,
                         description,
                         filter,
-                        size
+                        estimated_output_size
                     );
 
                     #[cfg(feature = "parallel")]
