@@ -170,7 +170,7 @@ impl RawImage {
 
         let mut png = PngData {
             raw: result.image,
-            idat_data: result.idat_data,
+            idat_data: result.data,
             aux_chunks,
             frames: Vec::new(),
         };
@@ -355,11 +355,11 @@ fn optimize_png(
     let max_size = if opts.force {
         None
     } else {
-        Some(png.estimated_output_size())
+        Some(png.raw.estimated_output_size(&png.idat_data))
     };
     if let Some(result) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_size) {
         png.raw = result.image;
-        png.idat_data = result.idat_data;
+        png.idat_data = result.data;
         recompress_frames(png, &opts, deadline, result.filter)?;
         postprocess_chunks(&mut png.aux_chunks, &png.raw.ihdr, &raw.ihdr);
     }
@@ -433,7 +433,13 @@ fn optimize_raw(
         indexset! {RowFilter::None, RowFilter::Bigrams}
     };
     // This will collect all versions of images and pick one that compresses best
-    let eval = Evaluator::new(deadline.clone(), eval_filters.clone(), eval_deflater, false);
+    let eval = Evaluator::new(
+        deadline.clone(),
+        eval_filters.clone(),
+        eval_deflater,
+        false,
+        opts.deflate == eval_deflater,
+    );
     let mut new_image = perform_reductions(image.clone(), opts, &deadline, &eval);
     let eval_result = eval.get_best_candidate();
     if let Some(ref result) = eval_result {
@@ -464,7 +470,9 @@ fn optimize_raw(
         (eval_result?, eval_deflater)
     };
 
-    if max_size.map_or(true, |max_size| result.estimated_output_size() < max_size) {
+    if result.data_is_compressed
+        && max_size.map_or(true, |max_size| result.estimated_output_size < max_size)
+    {
         debug!("Found better result:");
         debug!("    {}, f = {}", deflater, result.filter);
         return Some(result);
@@ -499,35 +507,36 @@ fn perform_trials(
                 filters,
                 eval_deflater,
                 opts.optimize_alpha,
+                opts.deflate == eval_deflater,
             );
             if let Some(result) = &eval_result {
-                eval.set_best_size(result.estimated_output_size());
+                eval.set_best_size(result.estimated_output_size);
             }
             eval.try_image(image.clone());
             if let Some(result) = eval.get_best_candidate() {
                 eval_result = Some(result);
             }
         }
-        if opts.deflate == eval_deflater {
-            // No further compression required
-            return eval_result;
-        }
 
         // We should have a result here - fail if not (e.g. deadline passed)
         let mut result = eval_result?;
 
-        // Recompress with the main deflater
-        debug!("Trying filter {} with {}", result.filter, opts.deflate);
-        match opts.deflate.deflate(&result.filtered, max_size) {
-            Ok(idat_data) => {
-                result.idat_data = idat_data;
-                trace!("{} bytes", result.estimated_output_size());
-            }
-            Err(PngError::DeflatedDataTooLong(bytes)) => {
-                trace!(">{bytes} bytes");
-            }
-            Err(_) => (),
-        };
+        if !result.data_is_compressed {
+            // Compress with the main deflater
+            debug!("Trying filter {} with {}", result.filter, opts.deflate);
+            match opts.deflate.deflate(&result.data, max_size) {
+                Ok(idat_data) => {
+                    result.estimated_output_size = result.image.estimated_output_size(&idat_data);
+                    result.data = idat_data;
+                    result.data_is_compressed = true;
+                    trace!("{} bytes", result.estimated_output_size);
+                }
+                Err(PngError::DeflatedDataTooLong(bytes)) => {
+                    trace!(">{bytes} bytes");
+                }
+                Err(_) => (),
+            };
+        }
         return Some(result);
     }
 
@@ -545,7 +554,7 @@ fn perform_trials(
     }
 
     debug!("Trying {} filters with {}", filters.len(), opts.deflate);
-    let eval = Evaluator::new(deadline, filters, opts.deflate, opts.optimize_alpha);
+    let eval = Evaluator::new(deadline, filters, opts.deflate, opts.optimize_alpha, true);
     if let Some(max_size) = max_size {
         eval.set_best_size(max_size);
     }

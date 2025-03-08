@@ -185,12 +185,6 @@ impl PngData {
         })
     }
 
-    /// Return an estimate of the output size which can help with evaluation of very small data
-    #[must_use]
-    pub fn estimated_output_size(&self) -> usize {
-        self.idat_data.len() + self.raw.key_chunks_size()
-    }
-
     /// Format the `PngData` struct into a valid PNG bytestream
     #[must_use]
     pub fn output(&self) -> Vec<u8> {
@@ -353,6 +347,12 @@ impl PngImage {
             ColorType::RGB { transparent_color } if transparent_color.is_some() => 12 + 6,
             _ => 0,
         }
+    }
+
+    /// Return an estimate of the output size which can help with evaluation of very small data
+    #[must_use]
+    pub fn estimated_output_size(&self, idat_data: &[u8]) -> usize {
+        idat_data.len() + self.key_chunks_size()
     }
 
     /// Return an iterator over the scanlines of the image
