@@ -170,7 +170,7 @@ impl RawImage {
 
         let mut png = PngData {
             raw: result.image,
-            idat_data: result.idat_data,
+            idat_data: result.data,
             aux_chunks,
             frames: Vec::new(),
         };
@@ -359,7 +359,7 @@ fn optimize_png(
     };
     if let Some(result) = optimize_raw(raw.clone(), &opts, deadline.clone(), max_size) {
         png.raw = result.image;
-        png.idat_data = result.idat_data;
+        png.idat_data = result.data;
         recompress_frames(png, &opts, deadline, result.filter)?;
         postprocess_chunks(&mut png.aux_chunks, &png.raw.ihdr, &raw.ihdr);
     }
@@ -470,7 +470,7 @@ fn optimize_raw(
         (eval_result?, eval_deflater)
     };
 
-    if !result.idat_data.is_empty()
+    if result.data_is_compressed
         && max_size.map_or(true, |max_size| result.estimated_output_size < max_size)
     {
         debug!("Found better result:");
@@ -517,27 +517,26 @@ fn perform_trials(
                 eval_result = Some(result);
             }
         }
-        if opts.deflate == eval_deflater {
-            // No further compression required
-            return eval_result;
-        }
 
         // We should have a result here - fail if not (e.g. deadline passed)
         let mut result = eval_result?;
 
-        // Recompress with the main deflater
-        debug!("Trying filter {} with {}", result.filter, opts.deflate);
-        match opts.deflate.deflate(&result.filtered, max_size) {
-            Ok(idat_data) => {
-                result.estimated_output_size = result.image.estimated_output_size(&idat_data);
-                result.idat_data = idat_data;
-                trace!("{} bytes", result.estimated_output_size);
-            }
-            Err(PngError::DeflatedDataTooLong(bytes)) => {
-                trace!(">{bytes} bytes");
-            }
-            Err(_) => (),
-        };
+        if !result.data_is_compressed {
+            // Compress with the main deflater
+            debug!("Trying filter {} with {}", result.filter, opts.deflate);
+            match opts.deflate.deflate(&result.data, max_size) {
+                Ok(idat_data) => {
+                    result.estimated_output_size = result.image.estimated_output_size(&idat_data);
+                    result.data = idat_data;
+                    result.data_is_compressed = true;
+                    trace!("{} bytes", result.estimated_output_size);
+                }
+                Err(PngError::DeflatedDataTooLong(bytes)) => {
+                    trace!(">{bytes} bytes");
+                }
+                Err(_) => (),
+            };
+        }
         return Some(result);
     }
 

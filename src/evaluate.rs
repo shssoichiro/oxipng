@@ -21,9 +21,9 @@ use crate::{atomicmin::AtomicMin, deflate, filters::RowFilter, png::PngImage, De
 
 pub(crate) struct Candidate {
     pub image: Arc<PngImage>,
-    pub idat_data: Vec<u8>,
+    pub data: Vec<u8>,
+    pub data_is_compressed: bool,
     pub estimated_output_size: usize,
-    pub filtered: Vec<u8>,
     pub filter: RowFilter,
     // For determining tie-breaker
     nth: usize,
@@ -149,13 +149,12 @@ impl Evaluator {
                 let idat_data = deflater.deflate(&filtered, best_candidate_size.get());
                 if let Ok(idat_data) = idat_data {
                     let estimated_output_size = image.estimated_output_size(&idat_data);
-                    // In the final round, we need the IDAT data but not the filtered data
-                    // Otherwise, we want to keep the filtered data for the next round
+                    // For the final round we need the IDAT data, otherwise the filtered data
                     let new = Candidate {
                         image: image.clone(),
-                        idat_data: if final_round { idat_data } else { vec![] },
+                        data: if final_round { idat_data } else { filtered },
+                        data_is_compressed: final_round,
                         estimated_output_size,
-                        filtered: if final_round { vec![] } else { filtered },
                         filter,
                         nth,
                     };
