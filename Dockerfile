@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cargo/git/db \
     xx-verify /src/target/$(xx-cargo --print-target-triple)/release/oxipng && \
     cp /src/target/$(xx-cargo --print-target-triple)/release/oxipng /src/target/oxipng
 
-FROM alpine AS tool
+FROM scratch AS tool
 
 LABEL org.opencontainers.image.title="Oxipng"
 LABEL org.opencontainers.image.description="Multithreaded PNG optimizer written in Rust"
@@ -39,7 +39,7 @@ LABEL org.opencontainers.image.authors="Joshua Holmer <jholmer.in@gmail.com>"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/shssoichiro/oxipng"
 
-COPY --from=base /src/target/oxipng /usr/local/bin
+COPY --from=base /src/target/oxipng /usr/local/bin/oxipng
 
 WORKDIR /work
 ENTRYPOINT [ "oxipng" ]
