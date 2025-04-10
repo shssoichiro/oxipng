@@ -54,7 +54,7 @@ version = "0.11.5"
 
 [dependencies.crossbeam-channel]
 optional = true
-version = "0.5.13"
+version = "0.5.15"
 
 [dependencies.filetime]
 optional = true
