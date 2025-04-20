@@ -350,16 +350,31 @@ timeout before each transformation or compression trial, and will stop trying to
 the file if the timeout is exceeded. Note that this does not cut short any operations that \
 are already in progress, so it is currently of limited effectiveness for large files with \
 high compression levels.")
-                .value_name("secs")
                 .long("timeout")
+                .value_name("secs")
                 .value_parser(value_parser!(u64)),
         )
         .arg(
             Arg::new("threads")
-                .help("Set number of threads to use [default: num CPU cores]")
-                .long("threads")
+                .help("Number of threads to use [default: num logical CPUs]")
+                .long_help("\
+Set the maximum number of threads to use. Oxipng uses multithreading to evaluate multiple \
+optimizations on the same file in parallel as well as process multiple files in parallel. \
+You can set this to a lower value if you need to limit memory or CPU usage.
+
+[default: num logical CPUs]")
                 .short('t')
+                .long("threads")
                 .value_name("num")
                 .value_parser(value_parser!(usize)),
+        )
+        .arg(
+            Arg::new("parallel-files")
+                .help("Process multiple files sequentially")
+                .long_help("\
+Process multiple files sequentially rather than in parallel. Use this if you need \
+determinism in the processing order. Note this is not necessary if using '--threads 1'.")
+                .long("sequential")
+                .action(ArgAction::SetFalse),
         )
 }
