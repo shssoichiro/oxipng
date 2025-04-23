@@ -72,32 +72,20 @@ fn main() -> ExitCode {
         true,
     );
 
-    let summary = files
-        .into_par_iter()
-        .map(|(input, output)| {
-            match oxipng::optimize(&input, &output, &opts) {
-                // For optimizing single files, this will return the correct exit code always.
-                // For recursive optimization, the correct choice is a bit subjective.
-                // We're choosing to return a 0 exit code if ANY file in the set
-                // runs correctly.
-                // The reason for this is that recursion may pick up files that are not
-                // PNG files, and return an error for them.
-                // We don't really want to return an error code for those files.
-                Ok(_) => OptimizationResult::Ok,
-                Err(e @ PngError::C2PAMetadataPreventsChanges) => {
-                    warn!("{input}: {e}");
-                    OptimizationResult::Skipped
-                }
-                Err(e) => {
-                    error!("{input}: {e}");
-                    OptimizationResult::Failed
-                }
-            }
-        })
-        .min()
-        .unwrap_or(OptimizationResult::Skipped);
+    let parallel_files = matches.get_flag("parallel-files");
+    let summary = if parallel_files {
+        files
+            .into_par_iter()
+            .map(|(input, output)| process_file(&input, &output, &opts))
+            .min()
+    } else {
+        files
+            .into_iter()
+            .map(|(input, output)| process_file(&input, &output, &opts))
+            .min()
+    };
 
-    match summary {
+    match summary.unwrap_or(OptimizationResult::Skipped) {
         OptimizationResult::Ok => ExitCode::SUCCESS,
         OptimizationResult::Failed => ExitCode::FAILURE,
         OptimizationResult::Skipped => ExitCode::from(3),
@@ -420,4 +408,25 @@ fn parse_numeric_range_opts(
     }
 
     Err(ERROR_MESSAGE.to_owned())
+}
+
+fn process_file(input: &InFile, output: &OutFile, opts: &Options) -> OptimizationResult {
+    match oxipng::optimize(input, output, opts) {
+        // For optimizing single files, this will return the correct exit code always.
+        // For recursive optimization, the correct choice is a bit subjective.
+        // We're choosing to return a 0 exit code if ANY file in the set
+        // runs correctly.
+        // The reason for this is that recursion may pick up files that are not
+        // PNG files, and return an error for them.
+        // We don't really want to return an error code for those files.
+        Ok(_) => OptimizationResult::Ok,
+        Err(e @ PngError::C2PAMetadataPreventsChanges) => {
+            warn!("{input}: {e}");
+            OptimizationResult::Skipped
+        }
+        Err(e) => {
+            error!("{input}: {e}");
+            OptimizationResult::Failed
+        }
+    }
 }
