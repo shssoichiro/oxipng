@@ -47,7 +47,7 @@ fn main() -> ExitCode {
     let (out_file, out_dir, opts) = match parse_opts_into_struct(&matches) {
         Ok(x) => x,
         Err(x) => {
-            error!("{}", x);
+            error!("{x}");
             return ExitCode::FAILURE;
         }
     };
