@@ -1,4 +1,4 @@
-oxipng 9.1.4
+oxipng 9.1.5
 Losslessly improve compression of PNG files
 
 Usage: oxipng [OPTIONS] <files>...
@@ -182,7 +182,15 @@ Options:
           high compression levels.
 
   -t, --threads <num>
-          Set number of threads to use [default: num CPU cores]
+          Set the maximum number of threads to use. Oxipng uses multithreading to evaluate multiple
+          optimizations on the same file in parallel as well as process multiple files in parallel.
+          You can set this to a lower value if you need to limit memory or CPU usage.
+          
+          [default: num logical CPUs]
+
+      --sequential
+          Process multiple files sequentially rather than in parallel. Use this if you need
+          determinism in the processing order. Note this is not necessary if using '--threads 1'.
 
   -h, --help
           Print help (see a summary with '-h')
