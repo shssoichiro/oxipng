@@ -1,3 +1,10 @@
+## Version 9.1.5
+
+- [Feature] Add `--sequential` option to process files sequentially rather than in parallel.
+- [Performance] Update to latest Zopfli with greatly improved performance.
+- [Improvement] Reduce memory usage.
+- [Bugfix] Correct handling of grayscale conversion when ICC profile is present.
+
 ## Version 9.1.4
 
 - [Improvement] Improve optimization of APNG files (reductions still not supported yet).

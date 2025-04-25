@@ -183,7 +183,7 @@ impl RawImage {
 /// Perform optimization on the input file using the options provided
 pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<()> {
     // Read in the file and try to decode as PNG.
-    info!("Processing: {}", input);
+    info!("Processing: {input}");
 
     let deadline = Arc::new(Deadline::new(opts.timeout));
 
@@ -207,7 +207,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
                         ))
                     })
                     .map(Some)?;
-                trace!("preserving metadata: {:?}", opt_metadata_preserved);
+                trace!("preserving metadata: {opt_metadata_preserved:?}");
             } else {
                 opt_metadata_preserved = None;
             }
@@ -236,7 +236,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
             (OutFile::Path { path, .. }, InFile::Path(ref input_path))
                 if path.as_ref().map_or(true, |p| p == input_path) =>
             {
-                info!("{}: Could not optimize further, no change written", input);
+                info!("{input}: Could not optimize further, no change written");
                 return Ok(());
             }
             _ => {
@@ -261,7 +261,7 @@ pub fn optimize(input: &InFile, output: &OutFile, opts: &Options) -> PngResult<(
 
     match (output, input) {
         (OutFile::None, _) => {
-            info!("{}: Running in pretend mode, no output", savings);
+            info!("{savings}: Running in pretend mode, no output");
         }
         (&OutFile::StdOut, _) | (&OutFile::Path { path: None, .. }, &InFile::StdIn) => {
             let mut buffer = BufWriter::new(stdout());
@@ -346,8 +346,8 @@ fn optimize_png(
         raw.ihdr.width, raw.ihdr.height
     );
     report_format("    ", &raw);
-    debug!("    IDAT size = {} bytes", idat_original_size);
-    debug!("    File size = {} bytes", file_original_size);
+    debug!("    IDAT size = {idat_original_size} bytes");
+    debug!("    File size = {file_original_size} bytes");
 
     let mut opts = opts.to_owned();
     preprocess_chunks(&mut png.aux_chunks, &mut opts);
@@ -681,11 +681,7 @@ fn copy_times(_: &Metadata, _: &Path) -> PngResult<()> {
 fn copy_times(input_path_meta: &Metadata, out_path: &Path) -> PngResult<()> {
     let atime = filetime::FileTime::from_last_access_time(input_path_meta);
     let mtime = filetime::FileTime::from_last_modification_time(input_path_meta);
-    trace!(
-        "attempting to set file times: atime: {:?}, mtime: {:?}",
-        atime,
-        mtime
-    );
+    trace!("attempting to set file times: atime: {atime:?}, mtime: {mtime:?}");
     filetime::set_file_times(out_path, atime, mtime).map_err(|err_io| {
         PngError::new(&format!(
             "unable to set file times on {out_path:?}: {err_io}"

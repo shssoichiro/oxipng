@@ -269,7 +269,7 @@ pub fn extract_icc(iccp: &Chunk) -> Option<Vec<u8>> {
         Ok(icc) => Some(icc),
         Err(e) => {
             // Log the error so we can know if the buffer size needs to be adjusted
-            warn!("Failed to decompress icc: {}", e);
+            warn!("Failed to decompress icc: {e}");
             None
         }
     }
