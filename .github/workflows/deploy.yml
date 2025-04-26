@@ -20,6 +20,10 @@ jobs:
     if: ${{ !github.event.repository.fork }}
 
     strategy:
+      # Execute one job at a time to avoid potential race conditions in the
+      # GitHub release management APIs. See:
+      # https://github.com/softprops/action-gh-release/issues/445#issuecomment-2407940052
+      max-parallel: 1
       matrix:
         target:
           - x86_64-unknown-linux-gnu
