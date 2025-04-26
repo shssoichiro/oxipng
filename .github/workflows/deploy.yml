@@ -39,6 +39,19 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          cache-bin: false
+          cache-shared-key: cache
+
+      - name: Install cargo-deb
+        if: endsWith(matrix.target, '-linux-gnu')
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deb
+
       - name: Get the Oxipng version
         id: oxipngMeta
         run:
@@ -95,7 +108,6 @@ jobs:
         run: |
           mkdir -p "target/${{ matrix.target }}/release"
           mv target/oxipng "target/${{ matrix.target }}/release"
-          cargo install --locked cargo-deb
           cargo deb --target "${{ matrix.target }}" --no-build --no-strip
 
       - name: Create release notes

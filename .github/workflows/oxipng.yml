@@ -91,15 +91,14 @@ jobs:
           # against glibc for the target architecture
           sudo apt-get -yq install qemu-user gcc-aarch64-linux-gnu libc6:arm64
 
-      - name: Cache Cargo artifacts
-        uses: Swatinem/rust-cache@v2
-
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
-          targets: ${{ env.CARGO_BUILD_TARGET }}
+          target: ${{ env.CARGO_BUILD_TARGET }}
           components: clippy, rustfmt
+          cache-bin: false
+          cache-shared-key: cache
 
       - name: Install nextest
         uses: taiki-e/install-action@nextest
@@ -181,11 +180,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Cache Cargo artifacts
-        uses: Swatinem/rust-cache@v2
-
       - name: Install MSRV Rust toolchain
-        uses: dtolnay/rust-toolchain@1.74.0
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: 1.74.0
+          cache-bin: false
+          cache-shared-key: cache
 
       - name: Install nextest
         uses: taiki-e/install-action@nextest
