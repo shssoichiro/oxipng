@@ -3,7 +3,7 @@ name: deploy
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 permissions:
   actions: read
@@ -37,7 +37,8 @@ jobs:
 
       - name: Get the Oxipng version
         id: oxipngMeta
-        run: echo "version=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "oxipng").version')"
+        run:
+          echo "version=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "oxipng").version')"
           >> "$GITHUB_OUTPUT"
 
       - name: Retrieve ${{ matrix.target }} binary
@@ -76,7 +77,7 @@ jobs:
               tar -vczf "${ARCHIVE_NAME}.tar.gz" "$ARCHIVE_NAME"/*;;
           esac
 
-      - name: Install QEMU and AArch64 cross compiler
+      - name: Install AArch64 libc components
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
           sudo apt-get -yq update
