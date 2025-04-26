@@ -103,8 +103,17 @@ jobs:
           # properly
           sudo apt-get -yq install libc6-arm64-cross libgcc-s1-arm64-cross
 
-      - name: Build deb archives
+      - name: Build Debian packages
         if: endsWith(matrix.target, '-linux-gnu')
+        env:
+          # The *-arm64-cross packages above install AArch64 libraries in
+          # /usr/<arch>/lib instead of /usr/lib/<arch>, as expected by
+          # cargo-deb and dpkg-shlibdeps to find such shared libraries.
+          # Make both of them visible to such commands by adding that directory
+          # to the dynamic linker's library search path. See:
+          # - <https://man7.org/linux/man-pages/man1/dpkg-shlibdeps.1.html> ("Errors" section)
+          # - <https://github.com/kornelski/cargo-deb/issues/21>
+          LD_LIBRARY_PATH: /usr/aarch64-linux-gnu/lib
         run: |
           mkdir -p "target/${{ matrix.target }}/release"
           mv target/oxipng "target/${{ matrix.target }}/release"
