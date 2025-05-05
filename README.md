@@ -122,7 +122,7 @@ and specifying the desired ones, for example:
 - [ImageOptim](https://imageoptim.com): Mac app and web service for optimizing images
 - [Squoosh](https://squoosh.app): Web app for optimizing images
 - [FileOptimizer](https://nikkhokkho.sourceforge.io/?page=FileOptimizer): Windows app for optimizing files
-- [Curtial](https://github.com/Huluti/Curtail): Linux app for optimizing images
+- [Curtail](https://github.com/Huluti/Curtail): Linux app for optimizing images
 - [pyoxipng](https://pypi.org/project/pyoxipng/): Python wrapper for Oxipng
 - [jSquash](https://github.com/jamsinclair/jSquash): Collection of WebAssembly image codecs
 - [Trunk](https://trunk.io): Developer experience toolkit for managing code
