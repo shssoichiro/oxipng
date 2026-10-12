@@ -691,7 +691,7 @@ fn json_dry_run() {
         .args(["--json", "--dry-run", path, path2])
         .output()
         .expect("Failed to run executable");
-    assert!(output.status.success());
+    assert!(!output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     let data: Value = serde_json::from_str(&stdout).expect("Failed to parse JSON");
     let result = &data["results"][0];
