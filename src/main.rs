@@ -159,17 +159,10 @@ fn main() -> ExitCode {
         }
     }
 
-    // For optimizing single files, this will return the correct exit code always.
-    // For recursive optimization, the correct choice is a bit subjective.
-    // We're choosing to return a 0 exit code if ANY file in the set
-    // runs correctly.
-    // The reason for this is that recursion may pick up files that are not
-    // PNG files, and return an error for them.
-    // We don't really want to return an error code for those files.
-    if num_succeeded > 0 {
-        ExitCode::SUCCESS
-    } else if num_failed > 0 {
+    if num_failed > 0 {
         ExitCode::FAILURE
+    } else if num_succeeded > 0 {
+        ExitCode::SUCCESS
     } else {
         ExitCode::from(3)
     }
