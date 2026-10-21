@@ -135,6 +135,7 @@ and specifying the desired ones, for example:
 - [pyoxipng](https://pypi.org/project/pyoxipng/): Python wrapper for Oxipng
 - [jSquash](https://github.com/jamsinclair/jSquash): Collection of WebAssembly image codecs
 - [Trunk](https://trunk.io): Developer experience toolkit for managing code
+- [One Million Tools PNG Optimizer](https://onemilliontools.com/image/png-optimizer): Web app that runs Oxipng in the browser via WebAssembly
 
 ## History
 
